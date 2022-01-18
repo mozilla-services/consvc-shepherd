@@ -1,0 +1,8 @@
+__pycache__
+.env
+dist
+.venv
+db.sqlite3
+Dockerfile
+LICENSE
+README
