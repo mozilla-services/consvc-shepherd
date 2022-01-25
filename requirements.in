@@ -1,0 +1,16 @@
+django
+django-polymorphic
+
+# Choose one of the two below. After changing run `pip-compile` and `pip-sync`
+# from `pip-tools`.
+#
+# 1. Use a snapshot on github for merino-suggestion-providers
+https://github.com/mozilla-services/merino/archive/32c344712f.zip#subdirectory=merino-shepherd/merino-suggestion-providers
+# 2. Use a local checkout of Merino
+# file:../merino/merino-shepherd/merino-suggestion-providers
+
+black
+django-stubs
+flake8
+mypy
+django-environ
