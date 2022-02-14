@@ -10,7 +10,7 @@ black==21.12b0
     # via -r requirements.in
 click==8.0.3
     # via black
-django==4.0.1
+django==4.0.2
     # via
     #   -r requirements.in
     #   django-polymorphic
