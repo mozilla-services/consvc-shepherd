@@ -65,3 +65,5 @@ typing-extensions==4.0.1
     #   black
     #   django-stubs
     #   mypy
+django-storages[google]==1.12.3
+django-countries==7.3.1
