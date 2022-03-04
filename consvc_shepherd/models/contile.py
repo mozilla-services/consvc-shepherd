@@ -1,7 +1,7 @@
 from django.db import models
 from django_countries.fields import CountryField
 
-
+MATCHING_CHOICES = ((True, "exact"), (False, "prefix"),)
 class Advertiser(models.Model):
     name = models.CharField(max_length=128)
 
@@ -21,8 +21,7 @@ class AdvertiserUrl(models.Model):
     geo = CountryField()
     domain = models.URLField()
     path = models.CharField(max_length=128)
-    exact = models.BooleanField(default=False)
-    prefix = models.BooleanField(default=False)
+    matching = models.BooleanField(choices=MATCHING_CHOICES, default=False)
 
     # TODO validation goes here
     def clean(self) -> None:

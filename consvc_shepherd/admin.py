@@ -1,6 +1,7 @@
 from consvc_shepherd.models import Advertiser, AdvertiserUrl, SettingsSnapshot
 from consvc_shepherd.storage import send_to_storage
 from django.contrib import admin, messages
+from django import forms
 import json
 
 
@@ -31,9 +32,19 @@ class ModelAdmin(admin.ModelAdmin):
         super(ModelAdmin, self).save_model(request, obj, form, change)
 
 
+class AdUrlInlineForm(forms.ModelForm):
+    class Meta:
+        model = AdvertiserUrl
+        widgets = {"matching": forms.RadioSelect}
+        fields = "__all__"
+
+
 class AdUrlInline(admin.TabularInline):
     extra = 1
     model = AdvertiserUrl
+    form = AdUrlInlineForm
+
+
 
 
 @admin.register(Advertiser)
