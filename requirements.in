@@ -14,3 +14,5 @@ django-stubs
 flake8
 mypy
 django-environ
+django-storages[google]
+django-countries
