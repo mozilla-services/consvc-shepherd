@@ -47,3 +47,15 @@ $ ./manage.py runserver
 This will start a development server that reloads on changes to the files. You
 can access the configuration part of the site at
 [localhost:8000/admin][http://localhost:8000/admin].
+
+### Docker set up
+
+Start with building and get it up with:
+```
+docker compose build
+docker compose up
+```
+To create a user, shell into the container and run
+``` 
+./manage.py createsuperuser
+```
