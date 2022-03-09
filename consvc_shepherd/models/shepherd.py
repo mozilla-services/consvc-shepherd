@@ -12,3 +12,6 @@ class SettingsSnapshot(models.Model):
                                     related_name="launched_by",
                                     on_delete=models.CASCADE, blank=True,
                                     null=True)
+
+    def __str__(self):
+        return f"{self.name}: {self.created_on}"

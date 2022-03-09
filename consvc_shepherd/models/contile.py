@@ -9,6 +9,8 @@ class Advertiser(models.Model):
     def to_dict(self):
         return {}
 
+    def __str__(self):
+        return self.name
 
 class AdvertiserUrl(models.Model):
     advertiser = models.ForeignKey(Advertiser,
