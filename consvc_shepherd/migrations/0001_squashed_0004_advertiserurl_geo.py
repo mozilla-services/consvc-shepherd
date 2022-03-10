@@ -8,7 +8,15 @@ import django_countries.fields
 
 class Migration(migrations.Migration):
 
-    replaces = [('consvc_shepherd', '0001_initial'), ('consvc_shepherd', '0002_advertiser_remove_settingssnapshot_json_and_more'), ('consvc_shepherd', '0003_rename_url_advertiserurl_domain_advertiserurl_exact_and_more'), ('consvc_shepherd', '0004_advertiserurl_geo')]
+    replaces = [
+        ("consvc_shepherd", "0001_initial"),
+        ("consvc_shepherd", "0002_advertiser_remove_settingssnapshot_json_and_more"),
+        (
+            "consvc_shepherd",
+            "0003_rename_url_advertiserurl_domain_advertiserurl_exact_and_more",
+        ),
+        ("consvc_shepherd", "0004_advertiserurl_geo"),
+    ]
 
     initial = True
 
@@ -18,33 +26,84 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Advertiser',
+            name="Advertiser",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=128)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=128)),
             ],
         ),
         migrations.CreateModel(
-            name='SettingsSnapshot',
+            name="SettingsSnapshot",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(blank=True, max_length=5)),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('launched_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='launched_by', to=settings.AUTH_USER_MODEL)),
-                ('json_settings', models.JSONField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(blank=True, max_length=5)),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "launched_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="launched_by",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                ("json_settings", models.JSONField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='AdvertiserUrl',
+            name="AdvertiserUrl",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('domain', models.URLField()),
-                ('advertiser', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='ad_urls', to='consvc_shepherd.advertiser')),
-                ('exact', models.BooleanField(default=False)),
-                ('path', models.CharField(default=False, max_length=128)),
-                ('prefix', models.BooleanField(default=False)),
-                ('geo', django_countries.fields.CountryField(default=None, max_length=2)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("domain", models.URLField()),
+                (
+                    "advertiser",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="ad_urls",
+                        to="consvc_shepherd.advertiser",
+                    ),
+                ),
+                ("exact", models.BooleanField(default=False)),
+                ("path", models.CharField(default=False, max_length=128)),
+                ("prefix", models.BooleanField(default=False)),
+                (
+                    "geo",
+                    django_countries.fields.CountryField(default=None, max_length=2),
+                ),
             ],
         ),
     ]
