@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 
 
 class SettingsSnapshot(models.Model):
-    name = models.CharField(max_length=5, blank=True)
+    name = models.CharField(max_length=128)
     json_settings = models.JSONField(blank=True, null=True)
     created_by = models.ForeignKey(get_user_model(), on_delete=models.CASCADE,
                                    blank=True, null=True)
@@ -12,6 +12,7 @@ class SettingsSnapshot(models.Model):
                                     related_name="launched_by",
                                     on_delete=models.CASCADE, blank=True,
                                     null=True)
+    launched_date = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.name}: {self.created_on}"

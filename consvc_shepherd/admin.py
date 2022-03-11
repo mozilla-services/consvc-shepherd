@@ -2,6 +2,7 @@ from consvc_shepherd.models import Advertiser, AdvertiserUrl, SettingsSnapshot
 from consvc_shepherd.storage import send_to_storage
 from django.contrib import admin, messages
 from django import forms
+from django.utils import timezone
 import json
 
 
@@ -15,7 +16,8 @@ def publish_snapshot(modeladmin, request, queryset):
     else:
         snapshot = queryset[0]
         snapshot.launched_by = request.user
-        content = json.dumps(snapshot.json(), indent=2)
+        snapshot.launched_date = timezone.now()
+        content = json.dumps(snapshot.json_settings, indent=2)
         send_to_storage(snapshot.name, content)
         snapshot.save()
         messages.info(request, 'Snapshot has been published')
@@ -23,8 +25,8 @@ def publish_snapshot(modeladmin, request, queryset):
 
 @admin.register(SettingsSnapshot)
 class ModelAdmin(admin.ModelAdmin):
-    list_display = ("name", "created_by", "launched_by")
-    readonly_fields = ["created_by", "launched_by"]
+    list_display = ("name", "created_by", "launched_by", "launched_date")
+    readonly_fields = ["created_by", "launched_by", "launched_date"]
     actions = [publish_snapshot]
 
     def save_model(self, request, obj, form, change) -> None:
