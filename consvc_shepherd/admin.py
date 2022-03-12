@@ -3,16 +3,15 @@ from consvc_shepherd.storage import send_to_storage
 from django.contrib import admin, messages
 from django import forms
 from django.utils import timezone
+from django.contrib.postgres.forms import SimpleArrayField
 import json
 
 
-@admin.action(description='Publish Settings Snapshot')
+@admin.action(description="Publish Settings Snapshot")
 def publish_snapshot(modeladmin, request, queryset):
-
     # TODO this doesn't intake advertisers at the moment
     if len(queryset) > 1:
-        messages.error(request,
-                       "Only 1 snapshot can be published at the same time")
+        messages.error(request, "Only 1 snapshot can be published at the same time")
     else:
         snapshot = queryset[0]
         snapshot.launched_by = request.user
@@ -20,7 +19,7 @@ def publish_snapshot(modeladmin, request, queryset):
         content = json.dumps(snapshot.json_settings, indent=2)
         send_to_storage(snapshot.name, content)
         snapshot.save()
-        messages.info(request, 'Snapshot has been published')
+        messages.info(request, "Snapshot has been published")
 
 
 @admin.register(SettingsSnapshot)
@@ -35,18 +34,23 @@ class ModelAdmin(admin.ModelAdmin):
 
 
 class AdUrlInlineForm(forms.ModelForm):
+    click_hosts = SimpleArrayField(
+        forms.CharField(), label="Click Hosts (list by separated commas)"
+    )
+    impression_hosts = SimpleArrayField(
+        forms.CharField(), label="Impression Hosts (list by separated commas)"
+    )
+
     class Meta:
         model = AdvertiserUrl
         widgets = {"matching": forms.RadioSelect}
         fields = "__all__"
 
 
-class AdUrlInline(admin.TabularInline):
+class AdUrlInline(admin.StackedInline):
     extra = 1
     model = AdvertiserUrl
     form = AdUrlInlineForm
-
-
 
 
 @admin.register(Advertiser)
