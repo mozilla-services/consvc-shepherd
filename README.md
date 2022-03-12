@@ -9,7 +9,8 @@ reducing the need for deployments of the services that use it.
 To use consvc-shepherd, you'll need a Python 3.10 development environment.
 
 You'll need to specify some minimal configuration. Create a file `.env` and put
-in it at least:
+in it at least, if using the docker workflow, you may want to use `.env.example` 
+and rename it to `env`:
 
 ```shell
 DEBUG=true
@@ -47,3 +48,15 @@ $ ./manage.py runserver
 This will start a development server that reloads on changes to the files. You
 can access the configuration part of the site at
 [localhost:8000/admin][http://localhost:8000/admin].
+
+### Docker set up
+
+Start with building and get it up with:
+```
+docker compose build
+docker compose up
+```
+To create a user, shell into the container and run
+``` 
+./manage.py createsuperuser
+```

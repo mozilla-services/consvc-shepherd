@@ -16,3 +16,4 @@ mypy
 django-environ
 django-storages[google]
 django-countries
+psycopg2
