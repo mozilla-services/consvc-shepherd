@@ -1,7 +1,12 @@
 from django.db import models
 from django_countries.fields import CountryField
 
-MATCHING_CHOICES = ((True, "exact"), (False, "prefix"),)
+MATCHING_CHOICES = (
+    (True, "exact"),
+    (False, "prefix"),
+)
+
+
 class Advertiser(models.Model):
     name = models.CharField(max_length=128)
 
@@ -12,12 +17,15 @@ class Advertiser(models.Model):
     def __str__(self):
         return self.name
 
+
 class AdvertiserUrl(models.Model):
-    advertiser = models.ForeignKey(Advertiser,
-                                   blank=False,
-                                   null=False,
-                                   related_name="ad_urls",
-                                   on_delete=models.CASCADE, )
+    advertiser = models.ForeignKey(
+        Advertiser,
+        blank=False,
+        null=False,
+        related_name="ad_urls",
+        on_delete=models.CASCADE,
+    )
 
     # TODO might want to consider whether we want a subset of countries
     geo = CountryField()

@@ -1,18 +1,19 @@
-from consvc_shepherd.models import Advertiser, AdvertiserUrl, SettingsSnapshot
-from consvc_shepherd.storage import send_to_storage
-from django.contrib import admin, messages
-from django import forms
-from django.utils import timezone
 import json
 
+from django import forms
+from django.contrib import admin, messages
+from django.utils import timezone
 
-@admin.action(description='Publish Settings Snapshot')
+from consvc_shepherd.models import Advertiser, AdvertiserUrl, SettingsSnapshot
+from consvc_shepherd.storage import send_to_storage
+
+
+@admin.action(description="Publish Settings Snapshot")
 def publish_snapshot(modeladmin, request, queryset):
 
     # TODO this doesn't intake advertisers at the moment
     if len(queryset) > 1:
-        messages.error(request,
-                       "Only 1 snapshot can be published at the same time")
+        messages.error(request, "Only 1 snapshot can be published at the same time")
     else:
         snapshot = queryset[0]
         snapshot.launched_by = request.user
@@ -20,7 +21,7 @@ def publish_snapshot(modeladmin, request, queryset):
         content = json.dumps(snapshot.json_settings, indent=2)
         send_to_storage(snapshot.name, content)
         snapshot.save()
-        messages.info(request, 'Snapshot has been published')
+        messages.info(request, "Snapshot has been published")
 
 
 @admin.register(SettingsSnapshot)
@@ -45,8 +46,6 @@ class AdUrlInline(admin.TabularInline):
     extra = 1
     model = AdvertiserUrl
     form = AdUrlInlineForm
-
-
 
 
 @admin.register(Advertiser)

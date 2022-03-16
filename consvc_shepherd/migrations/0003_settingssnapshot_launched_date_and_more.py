@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [ 
+    dependencies = [
         ("consvc_shepherd", "0002_remove_advertiserurl_exact_and_more"),
     ]
 
