@@ -34,7 +34,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_countries",
-
 ]
 
 MIDDLEWARE = [
@@ -96,7 +95,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_BUCKET_NAME = env("STATIC_BUCKET_NAME", default="")
-STATIC_URL = "static/" if DEBUG is True else f"https://storage.googleapis.com/{STATIC_BUCKET_NAME}/static"
+STATIC_URL = (
+    "static/"
+    if DEBUG is True
+    else f"https://storage.googleapis.com/{STATIC_BUCKET_NAME}/static"
+)
 STATIC_ROOT = "static"
 
 # Default primary key field type
@@ -106,4 +109,3 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
 GS_BUCKET_NAME = env("GS_BUCKET_NAME", default="")
-

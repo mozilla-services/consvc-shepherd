@@ -1,4 +1,10 @@
-from consvc_shepherd.models import Advertiser, AdvertiserUrl, SettingsSnapshot
+from consvc_shepherd.models import (
+    Advertiser,
+    AdvertiserUrl,
+    Partner,
+    PartnerAdUrl,
+    SettingsSnapshot,
+)
 from consvc_shepherd.storage import send_to_storage
 from django.contrib import admin, messages
 from django import forms
@@ -34,26 +40,52 @@ class ModelAdmin(admin.ModelAdmin):
 
 
 class AdUrlInlineForm(forms.ModelForm):
-    click_hosts = SimpleArrayField(
-        forms.CharField(), label="Click Hosts (list by separated commas)"
-    )
-    impression_hosts = SimpleArrayField(
-        forms.CharField(), label="Impression Hosts (list by separated commas)"
-    )
-
     class Meta:
         model = AdvertiserUrl
         widgets = {"matching": forms.RadioSelect}
         fields = "__all__"
 
 
-class AdUrlInline(admin.StackedInline):
+class PartnerForm(forms.ModelForm):
+    click_hosts = SimpleArrayField(
+        forms.CharField(),
+        label="Click Hosts (list by separated commas)",
+        required=False,
+    )
+    impression_hosts = SimpleArrayField(
+        forms.CharField(),
+        label="Impression Hosts (list by separated commas)",
+        required=False,
+    )
+
+
+class PartnerAdUrlInlineForm(forms.ModelForm):
+    class Meta:
+        model = PartnerAdUrl
+        widgets = {"matching": forms.RadioSelect}
+        fields = "__all__"
+
+
+class AdUrlInline(admin.TabularInline):
     extra = 1
     model = AdvertiserUrl
     form = AdUrlInlineForm
+
+
+class PartnerAdUrlInline(admin.TabularInline):
+    extra = 1
+    model = PartnerAdUrl
+    form = PartnerAdUrlInlineForm
 
 
 @admin.register(Advertiser)
 class AdvertiserListAdmin(admin.ModelAdmin):
     model = Advertiser
     inlines = [AdUrlInline]
+
+
+@admin.register(Partner)
+class PartnerListAdmin(admin.ModelAdmin):
+    model = Partner
+    inlines = [PartnerAdUrlInline]
+    form = PartnerForm
