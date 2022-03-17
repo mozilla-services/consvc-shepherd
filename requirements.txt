@@ -82,7 +82,7 @@ protobuf==3.19.4
     #   google-api-core
     #   google-cloud-storage
     #   googleapis-common-protos
-psycopg2==2.9.3
+psycopg2-binary==2.9.3
     # via -r requirements.in
 pyasn1==0.4.8
     # via
