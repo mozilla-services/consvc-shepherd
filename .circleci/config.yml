@@ -25,6 +25,10 @@ jobs:
       - image: circleci/postgres:14.0
         environment:
           POSTGRES_HOST_AUTH_METHOD: trust
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
+
     # Checkout the code as the first step. This is a dedicated CircleCI step.
     # The python orb's install-packages step will install the dependencies from a Pipfile via Pipenv by default.
     # Here we're making sure we use just use the system-wide pip. By default it uses the project root's requirements.txt.
