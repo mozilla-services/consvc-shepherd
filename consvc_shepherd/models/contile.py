@@ -24,7 +24,9 @@ class Partner(models.Model):
 
     def is_valid_host_list(self, hostname_list):
         for hostname in hostname_list:
-            if "." not in hostname or any([not h.isalnum() for h in hostname.split(".")]):
+            if "." not in hostname or any(
+                [not h.isalnum() for h in hostname.split(".")]
+            ):
                 raise ValidationError(
                     f"{hostname} is not a valid hostname, hostnames should only contain alpha numeric characters and '.'"
                 )
