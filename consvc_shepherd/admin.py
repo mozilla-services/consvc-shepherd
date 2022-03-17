@@ -1,15 +1,12 @@
-from consvc_shepherd.models import (
-    Advertiser,
-    AdvertiserUrl,
-    Partner,
-    SettingsSnapshot,
-)
-from consvc_shepherd.storage import send_to_storage
-from django.contrib import admin, messages
-from django import forms
-from django.utils import timezone
-from django.contrib.postgres.forms import SimpleArrayField
 import json
+
+from django import forms
+from django.contrib import admin, messages
+from django.contrib.postgres.forms import SimpleArrayField
+from django.utils import timezone
+
+from consvc_shepherd.models import Advertiser, AdvertiserUrl, Partner, SettingsSnapshot
+from consvc_shepherd.storage import send_to_storage
 
 
 @admin.action(description="Publish Settings Snapshot")
@@ -62,7 +59,6 @@ class AdUrlInline(admin.TabularInline):
     extra = 1
     model = AdvertiserUrl
     form = AdUrlInlineForm
-
 
 
 @admin.register(Advertiser)

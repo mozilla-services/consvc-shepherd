@@ -95,11 +95,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_BUCKET_NAME = env("STATIC_BUCKET_NAME", default="")
-STATIC_URL = (
-    "static/"
-    if DEBUG is True
-    else f"https://storage.googleapis.com/{STATIC_BUCKET_NAME}/static"
-)
+STATIC_URL = "static/"
 STATIC_ROOT = "static"
 
 # Default primary key field type

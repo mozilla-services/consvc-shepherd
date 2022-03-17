@@ -1,7 +1,7 @@
+from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.db import models
 from django_countries.fields import CountryField
-from django.contrib.postgres.fields import ArrayField
 
 MATCHING_CHOICES = (
     (True, "exact"),
@@ -25,7 +25,9 @@ class Partner(models.Model):
     def is_valid_host_list(self, hostname_list):
         for hostname in hostname_list:
             if "." not in hostname or any([not h.isalnum() for h in hostname.split(".")]):
-                raise ValidationError(f"{hostname} is not a valid hostname, hostnames should only contain alpha numeric characters and '.'")
+                raise ValidationError(
+                    f"{hostname} is not a valid hostname, hostnames should only contain alpha numeric characters and '.'"
+                )
 
     def clean(self):
         super().clean()
@@ -72,7 +74,6 @@ class AdvertiserUrl(models.Model):
     path = models.CharField(max_length=128)
     matching = models.BooleanField(choices=MATCHING_CHOICES, default=False)
     position = models.IntegerField(blank=True, null=True)
-
 
     # TODO validation goes here
     def clean(self) -> None:

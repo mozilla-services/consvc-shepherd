@@ -1,7 +1,7 @@
 import logging
 
-from django.core.files.storage import default_storage
 from django.conf import settings
+from django.core.files.storage import default_storage
 
 
 def send_to_storage(content_name, content):
