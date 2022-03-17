@@ -70,7 +70,14 @@ WSGI_APPLICATION = "consvc_shepherd.wsgi.application"
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
-    "default": env.db(default=f"sqlite:////{BASE_DIR}/db.sqlite3"),
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": env("DB_NAME"),
+        "USER": env("DB_USER"),
+        "PASSWORD": env("DB_PASS"),
+        "HOST": env("DB_HOST"),
+        "PORT": "5432",
+    }
 }
 
 # Internationalization
