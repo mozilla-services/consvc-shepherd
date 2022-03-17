@@ -3,5 +3,4 @@ from consvc_shepherd.models.contile import (
     Advertiser,
     AdvertiserUrl,
     Partner,
-    PartnerAdUrl,
 )

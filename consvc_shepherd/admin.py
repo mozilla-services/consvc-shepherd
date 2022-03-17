@@ -2,7 +2,6 @@ from consvc_shepherd.models import (
     Advertiser,
     AdvertiserUrl,
     Partner,
-    PartnerAdUrl,
     SettingsSnapshot,
 )
 from consvc_shepherd.storage import send_to_storage
@@ -59,23 +58,11 @@ class PartnerForm(forms.ModelForm):
     )
 
 
-class PartnerAdUrlInlineForm(forms.ModelForm):
-    class Meta:
-        model = PartnerAdUrl
-        widgets = {"matching": forms.RadioSelect}
-        fields = "__all__"
-
-
 class AdUrlInline(admin.TabularInline):
     extra = 1
     model = AdvertiserUrl
     form = AdUrlInlineForm
 
-
-class PartnerAdUrlInline(admin.TabularInline):
-    extra = 1
-    model = PartnerAdUrl
-    form = PartnerAdUrlInlineForm
 
 
 @admin.register(Advertiser)
@@ -87,5 +74,4 @@ class AdvertiserListAdmin(admin.ModelAdmin):
 @admin.register(Partner)
 class PartnerListAdmin(admin.ModelAdmin):
     model = Partner
-    inlines = [PartnerAdUrlInline]
     form = PartnerForm
