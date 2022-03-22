@@ -39,35 +39,35 @@ class TestPartnerModel(TestCase):
         advertiser2 = Advertiser.objects.create(name="Firefox", partner=partner)
         AdvertiserUrl.objects.create(
             advertiser=advertiser1,
+            path="/hello/",
+            matching=False,
+            domain="example.com",
+            geo="Canada",
+        )
+        AdvertiserUrl.objects.create(
+            advertiser=advertiser1,
             path="/",
-            matching=False,
-            domain="example.com",
-            geo="Canada",
-        )
-        AdvertiserUrl.objects.create(
-            advertiser=advertiser1,
-            path="/hello",
-            matching=False,
-            domain="example.com",
-            geo="Canada",
-        )
-        AdvertiserUrl.objects.create(
-            advertiser=advertiser1,
-            path="/read",
             matching=True,
+            domain="example.com",
+            geo="Canada",
+        )
+        AdvertiserUrl.objects.create(
+            advertiser=advertiser1,
+            path="/read/",
+            matching=False,
             domain="1.example.com",
             geo="Canada",
         )
         AdvertiserUrl.objects.create(
             advertiser=advertiser1,
-            path="/read",
+            path="/read/",
             matching=False,
             domain="example.com",
             geo="Germany",
         )
         AdvertiserUrl.objects.create(
             advertiser=advertiser2,
-            path="/read",
+            path="/read/",
             matching=False,
             domain="example.com",
             geo="Germany",
@@ -82,7 +82,7 @@ class TestPartnerModel(TestCase):
                 "DE": [
                     {
                         "host": "example.com",
-                        "paths": [{"matching": "prefix", "value": "/read"}],
+                        "paths": [{"matching": "prefix", "value": "/read/"}],
                     }
                 ]
             },
@@ -90,20 +90,20 @@ class TestPartnerModel(TestCase):
                 "CA": [
                     {
                         "host": "1.example.com",
-                        "paths": [{"matching": "exact", "value": "/read"}],
+                        "paths": [{"matching": "prefix", "value": "/read/"}],
                     },
                     {
                         "host": "example.com",
                         "paths": [
-                            {"matching": "prefix", "value": "/"},
-                            {"matching": "prefix", "value": "/hello"},
+                            {"matching": "exact", "value": "/"},
+                            {"matching": "prefix", "value": "/hello/"},
                         ],
                     },
                 ],
                 "DE": [
                     {
                         "host": "example.com",
-                        "paths": [{"matching": "prefix", "value": "/read"}],
+                        "paths": [{"matching": "prefix", "value": "/read/"}],
                     }
                 ],
             },
@@ -119,17 +119,31 @@ class TestAdvertiserUrlModel(TestCase):
             name="Advertiser Name", partner=self.partner
         )
 
-    def test_ad_url_invalid_for_prefix_with_path_ending_slash_only(self):
+    def test_ad_url_invalid_domain_structure(self):
         with self.assertRaises(ValidationError) as e:
             AdvertiserUrl.objects.create(
                 geo="Canada",
-                domain="example.com",
-                path="/",
+                domain="example.",
+                path="/hello/",
                 matching=False,
                 advertiser=self.advertiser,
             )
         self.assertIn(
-            "Prefix paths should end with '/' and can't be just '/'",
+            "hostnames should have the structure <leaf-domain>.<second-level-domain>.<top-domain> and <second-level-domain>.<top-domain>",
+            str(e.exception),
+        )
+
+    def test_ad_url_invalid_domain_structure_double_dots(self):
+        with self.assertRaises(ValidationError) as e:
+            AdvertiserUrl.objects.create(
+                geo="Canada",
+                domain="example..com",
+                path="/hello/",
+                matching=False,
+                advertiser=self.advertiser,
+            )
+        self.assertIn(
+            "hostnames should have the structure <leaf-domain>.<second-level-domain>.<top-domain> and <second-level-domain>.<top-domain>",
             str(e.exception),
         )
 
@@ -143,21 +157,21 @@ class TestAdvertiserUrlModel(TestCase):
                 advertiser=self.advertiser,
             )
         self.assertIn(
-            "Prefix paths should end with '/' and can't be just '/'",
+            "Prefix paths can't be just '/'",
             str(e.exception),
         )
 
-    def test_ad_url_invalid_prefix_with_ending_slash(self):
+    def test_ad_url_invalid_prefix_without_ending_slash(self):
         with self.assertRaises(ValidationError) as e:
             AdvertiserUrl.objects.create(
                 geo="Canada",
                 domain="example.com",
-                path="/hello/",
+                path="/hello",
                 matching=False,
                 advertiser=self.advertiser,
             )
         self.assertIn(
-            "Prefix paths should end with '/' and can't be just '/'",
+            "All paths need to start and end with '/'",
             str(e.exception),
         )
 
@@ -165,7 +179,7 @@ class TestAdvertiserUrlModel(TestCase):
         AdvertiserUrl.objects.create(
             geo="France",
             domain="example.com",
-            path="/prefix",
+            path="/prefix/",
             matching=False,
             advertiser=self.advertiser,
         )
@@ -173,7 +187,7 @@ class TestAdvertiserUrlModel(TestCase):
             AdvertiserUrl.objects.filter(
                 geo="France",
                 domain="example.com",
-                path="/prefix",
+                path="/prefix/",
                 matching=False,
                 advertiser=self.advertiser,
             ).count(),

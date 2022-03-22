@@ -7,8 +7,8 @@ MATCHING_CHOICES = (
     (True, "exact"),
     (False, "prefix"),
 )
-INVALID_PREFIX_PATH_ERROR = "Prefix paths should end with '/' and can't be just '/'"
-INVALID_PATH_ERROR = "All paths need to start with '/'"
+INVALID_PREFIX_PATH_ERROR = "Prefix paths can't be just '/'"
+INVALID_PATH_ERROR = "All paths need to start and end with '/'"
 
 
 class Partner(models.Model):
@@ -107,7 +107,7 @@ class AdvertiserUrl(models.Model):
     )
 
     geo = CountryField()
-    domain = models.CharField(max_length=80)
+    domain = models.CharField(max_length=253)
     path = models.CharField(max_length=128)
     matching = models.BooleanField(choices=MATCHING_CHOICES, default=False)
     position = models.IntegerField(blank=True, null=True)
@@ -116,12 +116,11 @@ class AdvertiserUrl(models.Model):
         return f"{self.geo.code}: {self.domain}{self.path}"
 
     def clean(self) -> None:
-        self.validate_unique()
         is_valid_host(self.domain)
-        if not self.path.startswith("/"):
+        if not (self.path.startswith("/") and self.path.endswith("/")):
             raise ValidationError(INVALID_PATH_ERROR)
 
-        if self.get_matching_display() == "prefix" and self.path.endswith("/"):
+        if self.get_matching_display() == "prefix" and self.path == "/":
             raise ValidationError(INVALID_PREFIX_PATH_ERROR)
 
     def save(self, *args, **kwargs):
@@ -131,7 +130,11 @@ class AdvertiserUrl(models.Model):
 
 def is_valid_host(host):
 
-    if not all([h.isalnum() or h in [".", "-"] for h in host]) or "." not in host:
+    if not all([h.isalnum() or h in [".", "-"] for h in host]):
         raise ValidationError(
             f"{host}: hostnames should only contain alpha numeric characters '-' and '.'"
+        )
+    if not 2 <= len(host.split(".")) <= 3 or "" in host.split("."):
+        raise ValidationError(
+            f"{host}: hostnames should have the structure <leaf-domain>.<second-level-domain>.<top-domain> and <second-level-domain>.<top-domain>"
         )
