@@ -46,6 +46,9 @@ jobs:
       - run:
           name: Black Lint
           command: black . --check --diff
+      - run:
+          name: Imports Sort
+          command: isort . --profile black --check
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
