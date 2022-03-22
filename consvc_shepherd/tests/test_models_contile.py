@@ -1,25 +1,33 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from consvc_shepherd.models import Partner, Advertiser, AdvertiserUrl
+from consvc_shepherd.models import Advertiser, AdvertiserUrl, Partner
 
 
 class TestPartnerModel(TestCase):
     def test_hostname_for_invalid_impressions_hosts(self):
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError) as e:
             Partner.objects.create(
                 name="Partner Advertiser",
                 impression_hosts=["example.com", "ex@@@@m@@@ple.com"],
                 click_hosts=["example.com"],
             )
+        self.assertIn(
+            "hostnames should only contain alpha numeric characters '-' and '.'",
+            str(e.exception),
+        )
 
     def test_hostname_for_invalid_click_hosts(self):
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError) as e:
             Partner.objects.create(
                 name="Partner Advertiser",
                 impression_hosts=["example.com", "test.example.com"],
                 click_hosts=["example.com", "ex@&!mple.com"],
             )
+        self.assertIn(
+            "hostnames should only contain alpha numeric characters '-' and '.'",
+            str(e.exception),
+        )
 
     def test_to_dict_produces_correctly(self):
         partner = Partner.objects.create(
@@ -102,3 +110,91 @@ class TestPartnerModel(TestCase):
         }
 
         self.assertEqual(partner.to_dict(), expected_result)
+
+
+class TestAdvertiserUrlModel(TestCase):
+    def setUp(self):
+        self.partner = Partner.objects.create(name="Partner Advertiser")
+        self.advertiser = Advertiser.objects.create(
+            name="Advertiser Name", partner=self.partner
+        )
+
+    def test_ad_url_invalid_for_prefix_with_path_ending_slash_only(self):
+        with self.assertRaises(ValidationError) as e:
+            AdvertiserUrl.objects.create(
+                geo="Canada",
+                domain="example.com",
+                path="/",
+                matching=False,
+                advertiser=self.advertiser,
+            )
+        self.assertIn(
+            "Prefix paths should end with '/' and can't be just '/'",
+            str(e.exception),
+        )
+
+    def test_ad_url_invalid_prefix_value_with_singular_slash(self):
+        with self.assertRaises(ValidationError) as e:
+            AdvertiserUrl.objects.create(
+                geo="Canada",
+                domain="example.com",
+                path="/",
+                matching=False,
+                advertiser=self.advertiser,
+            )
+        self.assertIn(
+            "Prefix paths should end with '/' and can't be just '/'",
+            str(e.exception),
+        )
+
+    def test_ad_url_invalid_prefix_with_ending_slash(self):
+        with self.assertRaises(ValidationError) as e:
+            AdvertiserUrl.objects.create(
+                geo="Canada",
+                domain="example.com",
+                path="/hello/",
+                matching=False,
+                advertiser=self.advertiser,
+            )
+        self.assertIn(
+            "Prefix paths should end with '/' and can't be just '/'",
+            str(e.exception),
+        )
+
+    def test_ad_url_with_valid_prefix_saves_correctly(self):
+        AdvertiserUrl.objects.create(
+            geo="France",
+            domain="example.com",
+            path="/prefix",
+            matching=False,
+            advertiser=self.advertiser,
+        )
+        self.assertEqual(
+            AdvertiserUrl.objects.filter(
+                geo="France",
+                domain="example.com",
+                path="/prefix",
+                matching=False,
+                advertiser=self.advertiser,
+            ).count(),
+            1,
+        )
+
+    def test_ad_url_with_valid_exact_saves_correctly(self):
+        AdvertiserUrl.objects.create(
+            geo="Brazil",
+            domain="example.com",
+            path="/exact/",
+            matching=True,
+            advertiser=self.advertiser,
+        )
+        self.assertEqual(
+            AdvertiserUrl.objects.filter(
+                geo="Brazil",
+                domain="example.com",
+                path="/exact/",
+                matching=True,
+                advertiser=self.advertiser,
+            ).count(),
+            1,
+        )
