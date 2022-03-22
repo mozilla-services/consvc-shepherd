@@ -61,6 +61,8 @@ googleapis-common-protos==1.55.0
     # via google-api-core
 idna==3.3
     # via requests
+isort==5.10.1
+    # via -r requirements.in
 mccabe==0.6.1
     # via flake8
 merino-suggestion-providers @ https://github.com/mozilla-services/merino/archive/32c344712f.zip#subdirectory=merino-shepherd/merino-suggestion-providers

@@ -12,6 +12,7 @@ https://github.com/mozilla-services/merino/archive/32c344712f.zip#subdirectory=m
 black
 django-stubs
 flake8
+isort
 mypy
 django-environ
 django-storages[google]
