@@ -212,6 +212,7 @@ class TestAdvertiserUrlModel(TestCase):
             ).count(),
             1,
         )
+
     def test_ad_url_with_valid_leaf_domain_saves_correctly(self):
         AdvertiserUrl.objects.create(
             geo="Brazil",
