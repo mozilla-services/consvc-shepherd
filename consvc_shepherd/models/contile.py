@@ -7,6 +7,8 @@ MATCHING_CHOICES = (
     (True, "exact"),
     (False, "prefix"),
 )
+INVALID_PREFIX_PATH_ERROR = "Prefix paths can't be just '/'"
+INVALID_PATH_ERROR = "All paths need to start and end with '/'"
 
 
 class Partner(models.Model):
@@ -44,9 +46,10 @@ class Partner(models.Model):
         return partner_dict
 
     def clean(self):
-        super().clean()
-        self.is_valid_host_list(self.click_hosts)
-        self.is_valid_host_list(self.impression_hosts)
+        for c_host in self.click_hosts:
+            is_valid_host(c_host)
+        for i_host in self.impression_hosts:
+            is_valid_host(i_host)
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -104,14 +107,34 @@ class AdvertiserUrl(models.Model):
     )
 
     geo = CountryField()
-    domain = models.URLField()
+    domain = models.CharField(max_length=255)
     path = models.CharField(max_length=128)
     matching = models.BooleanField(choices=MATCHING_CHOICES, default=False)
     position = models.IntegerField(blank=True, null=True)
 
-    # TODO validation goes here
-    def clean(self) -> None:
-        pass
-
     def __str__(self):
-        return f"{self.geo}{self.domain}{self.path}"
+        return f"{self.geo.code}: {self.domain}{self.path}"
+
+    def clean(self) -> None:
+        is_valid_host(self.domain)
+        if not (self.path.startswith("/") and self.path.endswith("/")):
+            raise ValidationError(INVALID_PATH_ERROR)
+
+        if self.get_matching_display() == "prefix" and self.path == "/":
+            raise ValidationError(INVALID_PREFIX_PATH_ERROR)
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super(AdvertiserUrl, self).save(*args, **kwargs)
+
+
+def is_valid_host(host):
+
+    if not all([h.isalnum() or h in [".", "-"] for h in host]):
+        raise ValidationError(
+            f"{host}: hostnames should only contain alpha numeric characters '-' and '.'"
+        )
+    if not 2 <= len(host.split(".")) <= 3 or "" in host.split("."):
+        raise ValidationError(
+            f"{host}: hostnames should have the structure <leaf-domain>.<second-level-domain>.<top-domain> or <second-level-domain>.<top-domain>"
+        )
