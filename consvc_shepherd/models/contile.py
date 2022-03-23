@@ -107,7 +107,7 @@ class AdvertiserUrl(models.Model):
     )
 
     geo = CountryField()
-    domain = models.CharField(max_length=253)
+    domain = models.CharField(max_length=255)
     path = models.CharField(max_length=128)
     matching = models.BooleanField(choices=MATCHING_CHOICES, default=False)
     position = models.IntegerField(blank=True, null=True)
@@ -136,5 +136,5 @@ def is_valid_host(host):
         )
     if not 2 <= len(host.split(".")) <= 3 or "" in host.split("."):
         raise ValidationError(
-            f"{host}: hostnames should have the structure <leaf-domain>.<second-level-domain>.<top-domain> and <second-level-domain>.<top-domain>"
+            f"{host}: hostnames should have the structure <leaf-domain>.<second-level-domain>.<top-domain> or <second-level-domain>.<top-domain>"
         )

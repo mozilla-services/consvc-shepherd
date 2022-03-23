@@ -129,7 +129,7 @@ class TestAdvertiserUrlModel(TestCase):
                 advertiser=self.advertiser,
             )
         self.assertIn(
-            "hostnames should have the structure <leaf-domain>.<second-level-domain>.<top-domain> and <second-level-domain>.<top-domain>",
+            "hostnames should have the structure <leaf-domain>.<second-level-domain>.<top-domain> or <second-level-domain>.<top-domain>",
             str(e.exception),
         )
 
@@ -143,7 +143,7 @@ class TestAdvertiserUrlModel(TestCase):
                 advertiser=self.advertiser,
             )
         self.assertIn(
-            "hostnames should have the structure <leaf-domain>.<second-level-domain>.<top-domain> and <second-level-domain>.<top-domain>",
+            "hostnames should have the structure <leaf-domain>.<second-level-domain>.<top-domain> or <second-level-domain>.<top-domain>",
             str(e.exception),
         )
 
@@ -206,6 +206,24 @@ class TestAdvertiserUrlModel(TestCase):
             AdvertiserUrl.objects.filter(
                 geo="Brazil",
                 domain="example.com",
+                path="/exact/",
+                matching=True,
+                advertiser=self.advertiser,
+            ).count(),
+            1,
+        )
+    def test_ad_url_with_valid_leaf_domain_saves_correctly(self):
+        AdvertiserUrl.objects.create(
+            geo="Brazil",
+            domain="www.example.com",
+            path="/exact/",
+            matching=True,
+            advertiser=self.advertiser,
+        )
+        self.assertEqual(
+            AdvertiserUrl.objects.filter(
+                geo="Brazil",
+                domain="www.example.com",
                 path="/exact/",
                 matching=True,
                 advertiser=self.advertiser,
