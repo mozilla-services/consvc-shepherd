@@ -11,7 +11,6 @@ from consvc_shepherd.storage import send_to_storage
 
 @admin.action(description="Publish Settings Snapshot")
 def publish_snapshot(modeladmin, request, queryset):
-    # TODO this doesn't intake advertisers at the moment
     if len(queryset) > 1:
         messages.error(request, "Only 1 snapshot can be published at the same time")
     else:
@@ -27,12 +26,19 @@ def publish_snapshot(modeladmin, request, queryset):
 @admin.register(SettingsSnapshot)
 class ModelAdmin(admin.ModelAdmin):
     list_display = ("name", "created_by", "launched_by", "launched_date")
-    readonly_fields = ["created_by", "launched_by", "launched_date"]
+    readonly_fields = ["json_settings", "created_by", "launched_by", "launched_date"]
     actions = [publish_snapshot]
 
     def save_model(self, request, obj, form, change) -> None:
+        json_settings = obj.settings_type.to_dict()
+        obj.json_settings = json_settings
         obj.created_by = request.user
         super(ModelAdmin, self).save_model(request, obj, form, change)
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ["name", "settings_type"] + self.readonly_fields
+        return self.readonly_fields
 
 
 class AdUrlInlineForm(forms.ModelForm):

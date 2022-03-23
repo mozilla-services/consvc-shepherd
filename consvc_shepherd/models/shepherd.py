@@ -1,9 +1,12 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
+from consvc_shepherd.models import Partner
+
 
 class SettingsSnapshot(models.Model):
     name = models.CharField(max_length=128)
+    settings_type = models.ForeignKey(Partner, on_delete=models.SET_NULL, null=True)
     json_settings = models.JSONField(blank=True, null=True)
     created_by = models.ForeignKey(
         get_user_model(), on_delete=models.CASCADE, blank=True, null=True
