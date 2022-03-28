@@ -18,7 +18,7 @@ class MyAdminTest(TestCase):
 
     def test_get_read_only_fields_when_obj_exists(self):
         obj = SettingsSnapshot.objects.create(
-            name="Snpashot", settings_type=self.partner
+            name="Snapshot", settings_type=self.partner
         )
         fields = self.admin.get_readonly_fields(self.request, obj)
         self.assertEqual(
