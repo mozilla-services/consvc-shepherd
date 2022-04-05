@@ -1,7 +1,7 @@
+
+from contile.models import Partner
 from django.contrib.auth import get_user_model
 from django.db import models
-
-from consvc_shepherd.models import Partner
 
 
 class SettingsSnapshot(models.Model):

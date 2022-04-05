@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from consvc_shepherd.models import Advertiser, AdvertiserUrl, Partner
+from contile.models import Advertiser, AdvertiserUrl, Partner
 
 
 class TestPartnerModel(TestCase):
