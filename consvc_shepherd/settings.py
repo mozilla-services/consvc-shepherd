@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "polymorphic",
     "merino_suggestion_providers",
     "consvc_shepherd",
+    "contile",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
