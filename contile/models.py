@@ -30,7 +30,7 @@ class Partner(models.Model):
                 [not h.isalnum() for h in hostname.split(".")]
             ):
                 raise ValidationError(
-                    f"{hostname} is not a valid hostname, hostnames should only contain alpha numeric characters and '.'"
+                    f"{hostname} is not a valid hostnameasfasfsa hostnames should only contain alpha numeric characters and '.'"
                 )
 
     def to_dict(self):
