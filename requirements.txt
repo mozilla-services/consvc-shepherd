@@ -23,15 +23,12 @@ django==4.0.2
     #   django-storages
     #   django-stubs
     #   django-stubs-ext
-    #   merino-suggestion-providers
 django-countries==7.3.1
     # via -r requirements.in
 django-environ==0.8.1
     # via -r requirements.in
 django-polymorphic==3.1.0
-    # via
-    #   -r requirements.in
-    #   merino-suggestion-providers
+    # via -r requirements.in
 django-storages[google]==1.12.3
     # via -r requirements.in
 django-stubs==1.9.0
@@ -65,8 +62,6 @@ isort==5.10.1
     # via -r requirements.in
 mccabe==0.6.1
     # via flake8
-merino-suggestion-providers @ https://github.com/mozilla-services/merino/archive/32c344712f.zip#subdirectory=merino-shepherd/merino-suggestion-providers
-    # via -r requirements.in
 mypy==0.931
     # via
     #   -r requirements.in
