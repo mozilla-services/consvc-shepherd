@@ -6,6 +6,8 @@
 #
 asgiref==3.4.1
     # via django
+attrs==21.4.0
+    # via pytest
 black==21.12b0
     # via -r requirements.in
 cachetools==5.0.0
@@ -16,6 +18,10 @@ charset-normalizer==2.0.12
     # via requests
 click==8.0.3
     # via black
+coverage[toml]==6.3.2
+    # via
+    #   -r requirements.in
+    #   pytest-cov
 django==4.0.2
     # via
     #   -r requirements.in
@@ -35,6 +41,10 @@ django-stubs==1.9.0
     # via -r requirements.in
 django-stubs-ext==0.3.1
     # via django-stubs
+factory-boy==3.2.1
+    # via -r requirements.in
+faker==13.3.4
+    # via factory-boy
 flake8==4.0.1
     # via -r requirements.in
 google-api-core==2.7.0
@@ -58,6 +68,8 @@ googleapis-common-protos==1.55.0
     # via google-api-core
 idna==3.3
     # via requests
+iniconfig==1.1.1
+    # via pytest
 isort==5.10.1
     # via -r requirements.in
 mccabe==0.6.1
@@ -70,10 +82,14 @@ mypy-extensions==0.4.3
     # via
     #   black
     #   mypy
+packaging==21.3
+    # via pytest
 pathspec==0.9.0
     # via black
 platformdirs==2.4.1
     # via black
+pluggy==1.0.0
+    # via pytest
 protobuf==3.19.4
     # via
     #   google-api-core
@@ -81,6 +97,8 @@ protobuf==3.19.4
     #   googleapis-common-protos
 psycopg2==2.9.3
     # via -r requirements.in
+py==1.11.0
+    # via pytest
 pyasn1==0.4.8
     # via
     #   pyasn1-modules
@@ -91,6 +109,19 @@ pycodestyle==2.8.0
     # via flake8
 pyflakes==2.4.0
     # via flake8
+pyparsing==3.0.8
+    # via packaging
+pytest==7.1.1
+    # via
+    #   -r requirements.in
+    #   pytest-cov
+    #   pytest-django
+pytest-cov==3.0.0
+    # via -r requirements.in
+pytest-django==4.5.2
+    # via -r requirements.in
+python-dateutil==2.8.2
+    # via faker
 requests==2.27.1
     # via
     #   google-api-core
@@ -98,7 +129,9 @@ requests==2.27.1
 rsa==4.8
     # via google-auth
 six==1.16.0
-    # via google-auth
+    # via
+    #   google-auth
+    #   python-dateutil
 sqlparse==0.4.2
     # via django
 toml==0.10.2
@@ -106,7 +139,9 @@ toml==0.10.2
 tomli==1.2.3
     # via
     #   black
+    #   coverage
     #   mypy
+    #   pytest
 types-pytz==2021.3.4
     # via django-stubs
 types-pyyaml==6.0.3

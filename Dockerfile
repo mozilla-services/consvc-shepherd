@@ -11,6 +11,7 @@ COPY ./requirements.txt /app/requirements.txt
 RUN pip install -r /app/requirements.txt
 
 COPY ./consvc_shepherd/ /app/consvc_shepherd/
+COPY ./contile/ /app/contile/
 COPY ./manage.py /app/
 
 EXPOSE 8000
