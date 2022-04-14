@@ -24,15 +24,6 @@ class Partner(models.Model):
         blank=True,
     )
 
-    def is_valid_host_list(self, hostname_list):
-        for hostname in hostname_list:
-            if "." not in hostname or any(
-                [not h.isalnum() for h in hostname.split(".")]
-            ):
-                raise ValidationError(
-                    f"{hostname} is not a valid hostname, hostnames should only contain alpha numeric characters and '.'"
-                )
-
     def to_dict(self):
         partner_dict = {
             "DEFAULT": {
@@ -46,6 +37,7 @@ class Partner(models.Model):
         return partner_dict
 
     def clean(self):
+
         for c_host in self.click_hosts:
             is_valid_host(c_host)
         for i_host in self.impression_hosts:
@@ -113,7 +105,7 @@ class AdvertiserUrl(models.Model):
     position = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.geo.code}: {self.domain}{self.path}"
+        return f"{self.geo.code}: {self.domain} {self.path}"
 
     def clean(self) -> None:
         is_valid_host(self.domain)
