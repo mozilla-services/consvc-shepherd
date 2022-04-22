@@ -5,11 +5,13 @@ django-polymorphic
 # from `pip-tools`.
 
 black
+coverage
+django-environ
+django-storages[google]
+django-countries
 django-stubs
 flake8
 isort
 mypy
-django-environ
-django-storages[google]
-django-countries
+mock
 psycopg2
