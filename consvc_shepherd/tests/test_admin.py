@@ -1,6 +1,7 @@
 import mock
 from django.contrib.admin.sites import AdminSite
 from django.test import RequestFactory, TestCase
+from django.utils import timezone
 
 from consvc_shepherd.admin import ModelAdmin, publish_snapshot
 from consvc_shepherd.models import Partner, SettingsSnapshot
@@ -90,3 +91,21 @@ class MyAdminTest(TestCase):
             launched_date=None, launched_by=None
         )
         self.assertEqual(len(snapshots), 2)
+
+    def test_publish_snapshot_does_not_launch_already_launch_snapshot(self):
+        request = mock.Mock()
+        request.user = UserFactory()
+        timestamp = timezone.datetime(2022, 1, 11, 1, 15, 12)
+        SettingsSnapshot.objects.create(
+            name="Settings Snapshot",
+            settings_type=self.partner,
+            created_by=request.user,
+            launched_date=timestamp,
+            launched_by=request.user,
+        )
+        publish_snapshot(None, request, SettingsSnapshot.objects.all())
+        snapshots = SettingsSnapshot.objects.filter(
+            launched_date=timezone.now(),
+            launched_by=request.user,
+        )
+        self.assertEqual(len(snapshots), 0)

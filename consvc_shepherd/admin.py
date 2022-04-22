@@ -11,6 +11,11 @@ from consvc_shepherd.storage import send_to_storage
 def publish_snapshot(modeladmin, request, queryset):
     if len(queryset) > 1:
         messages.error(request, "Only 1 snapshot can be published at the same time")
+    elif queryset[0].launched_date is not None:
+        messages.error(
+            request,
+            "Snapshot has already been launched, create a new snapshot to launch",
+        )
     else:
         snapshot = queryset[0]
         snapshot.launched_by = request.user
