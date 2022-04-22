@@ -6,14 +6,15 @@ django-polymorphic
 
 black
 coverage
+django-environ
+django-storages[google]
+django-countries
 django-stubs
 factory_boy
 flake8
 isort
 mypy
-django-environ
-django-storages[google]
-django-countries
+mock
 psycopg2
 pytest
 pytest-django
