@@ -10,8 +10,12 @@ django-environ
 django-storages[google]
 django-countries
 django-stubs
+factory_boy
 flake8
 isort
 mypy
 mock
 psycopg2
+pytest
+pytest-django
+pytest-cov

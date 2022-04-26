@@ -22,6 +22,15 @@ jobs:
     # Change the version below to your required version of python
     docker:
       - image: cimg/python:3.10.2
+        environment:
+          DJANGO_SETTINGS_MODULE: consvc_shepherd.settings
+      - image: cimg/postgres:14.2
+        environment:
+         POSTGRES_HOST_AUTH_METHOD: trust
+        auth:
+          username: $DOCKER_USER_TEMP
+          password: $DOCKER_PASS_TEMP
+
     # Checkout the code as the first step. This is a dedicated CircleCI step.
     # The python orb's install-packages step will install the dependencies from a Pipfile via Pipenv by default.
     # Here we're making sure we use just use the system-wide pip. By default it uses the project root's requirements.txt.
@@ -33,10 +42,18 @@ jobs:
           pkg-manager: pip
           # app-dir: ~/project/package-directory/  # If you're requirements.txt isn't in the root directory.
           # pip-dependency-file: test-requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements.
-      #- run:
-      #    name: Run tests
+      - run:
+          name: Login to Dockerhub
+          command: |
+            if [ "${DOCKER_USER_TEMP}" == "" ] || [ "${DOCKER_PASS_TEMP}" == "" ]; then
+              echo "Skipping Login to Dockerhub, credentials not available."
+            else
+              echo "${DOCKER_PASS_TEMP}" | docker login -u="${DOCKER_USER_TEMP}" --password-stdin
+            fi
+      - run:
+          name: Run tests
           # This assumes pytest is installed via the install-package step above
-      #    command: pytest
+          command: pytest --cov --cov-report=term-missing --cov-fail-under=95
       - run:
           name: Check Migrations
           command: python manage.py makemigrations --check --dry-run --noinput 
