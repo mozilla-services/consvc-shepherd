@@ -25,7 +25,8 @@ def approve_partner_settings(modeladmin, request, queryset):
             messages.info(request, f"Partner: {partner.name} has been approved")
         else:
             messages.error(
-                request, "Approver is the same user that updated the partner"
+                request,
+                "This change can't be approved by the same editor, please get another reviewer for approval",
             )
 
 

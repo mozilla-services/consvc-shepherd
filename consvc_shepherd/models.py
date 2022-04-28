@@ -27,7 +27,7 @@ class SettingsSnapshot(models.Model):
 
     def clean(self):
         if (
-            self.settings_type.is_active is False
+            not self.settings_type.is_active
             or self.settings_type.last_approved_by is None
         ):
             raise ValidationError("Partner Selected is not approved")
