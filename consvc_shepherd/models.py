@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from contile.models import Partner
@@ -23,3 +24,14 @@ class SettingsSnapshot(models.Model):
 
     def __str__(self):
         return f"{self.name}: {self.created_on}"
+
+    def clean(self):
+        if (
+            self.settings_type.is_active is False
+            or self.settings_type.last_approved_by is None
+        ):
+            raise ValidationError("Partner Selected is not approved")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super(SettingsSnapshot, self).save(*args, **kwargs)

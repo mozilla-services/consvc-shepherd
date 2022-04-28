@@ -7,7 +7,7 @@ from consvc_shepherd.models import Partner, SettingsSnapshot
 from consvc_shepherd.tests.factories import UserFactory
 
 
-class MyAdminTest(TestCase):
+class SettingsSnapshotAdminTest(TestCase):
     def setUp(self):
         request_factory = RequestFactory()
         self.request = request_factory.get("/admin")
@@ -15,7 +15,9 @@ class MyAdminTest(TestCase):
 
         site = AdminSite()
         self.admin = ModelAdmin(SettingsSnapshot, site)
-        self.partner = Partner.objects.create(name="Partner1")
+        self.partner = Partner.objects.create(
+            name="Partner1", is_active=True, last_approved_by=self.request.user
+        )
 
         self.mock_storage = mock.patch(
             "django.core.files.storage.default_storage." "open"
@@ -51,7 +53,10 @@ class MyAdminTest(TestCase):
 
         expected_json = self.partner.to_dict()
         self.admin.save_model(
-            self.request, SettingsSnapshot(settings_type=self.partner), None, {}
+            self.request,
+            SettingsSnapshot(name="dev", settings_type=self.partner),
+            None,
+            {},
         )
 
         self.assertEqual(SettingsSnapshot.objects.all().count(), 1)
