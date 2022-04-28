@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -23,6 +24,21 @@ class Partner(models.Model):
         default=list,
         blank=True,
     )
+    is_active = models.BooleanField(default=False)
+    last_updated_by = models.ForeignKey(
+        get_user_model(),
+        related_name="updated_by",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
+    last_approved_by = models.ForeignKey(
+        get_user_model(),
+        related_name="approved_by",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
 
     def to_dict(self):
         partner_dict = {
@@ -37,7 +53,6 @@ class Partner(models.Model):
         return partner_dict
 
     def clean(self):
-
         for c_host in self.click_hosts:
             is_valid_host(c_host)
         for i_host in self.impression_hosts:
