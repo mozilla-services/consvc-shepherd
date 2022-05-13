@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_countries",
+    "dockerflow.django",
 ]
 
 MIDDLEWARE = [
@@ -44,6 +45,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "dockerflow.django.middleware.DockerflowMiddleware",
 ]
 
 ROOT_URLCONF = "consvc_shepherd.urls"
@@ -105,3 +107,26 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
 GS_BUCKET_NAME = env("GS_BUCKET_NAME", default="")
+
+LOGGING = {
+    'version': 1,
+    'formatters': {
+        'json': {
+            '()': 'dockerflow.logging.JsonLogFormatter',
+            'logger_name': 'shepher'
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'json'
+        },
+    },
+    'loggers': {
+        'request.summary': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    }
+}
