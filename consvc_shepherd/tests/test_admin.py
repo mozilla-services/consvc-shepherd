@@ -114,3 +114,25 @@ class SettingsSnapshotAdminTest(TestCase):
             launched_by=request.user,
         )
         self.assertEqual(len(snapshots), 0)
+
+    def test_snapshot_cannot_be_deleted_when_launched(self):
+        request = mock.Mock()
+        request.user = UserFactory()
+        snapshot = SettingsSnapshot.objects.create(
+            name="Settings Snapshot",
+            settings_type=self.partner,
+            created_by=request.user,
+            launched_date=timezone.now(),
+            launched_by=request.user,
+        )
+        self.assertFalse(self.admin.has_delete_permission(request, snapshot))
+
+    def test_snapshot_can_be_deleted_when_unlaunched(self):
+        request = mock.Mock()
+        request.user = UserFactory()
+        snapshot = SettingsSnapshot.objects.create(
+            name="Settings Snapshot",
+            settings_type=self.partner,
+            created_by=request.user,
+        )
+        self.assertTrue(self.admin.has_delete_permission(request, snapshot))

@@ -46,3 +46,6 @@ class ModelAdmin(admin.ModelAdmin):
         if obj:
             return ["name", "settings_type"] + self.readonly_fields
         return self.readonly_fields
+
+    def has_delete_permission(self, request, obj=None):
+        return not (obj and obj.launched_by and obj.launched_date)
