@@ -117,7 +117,6 @@ class AdvertiserUrl(models.Model):
     domain = models.CharField(max_length=255)
     path = models.CharField(max_length=128)
     matching = models.BooleanField(choices=MATCHING_CHOICES, default=True)
-    position = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.geo.code}: {self.domain} {self.path}"
