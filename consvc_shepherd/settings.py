@@ -18,14 +18,14 @@ SECRET_KEY: str = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG", default=False)
-
+DEV_USER_EMAIL = "dev@example.com"
+OPENIDC_EMAIL_HEADER = None
 ALLOWED_HOSTS: List[str] = ["*"]
 
 # Application definition
 
 INSTALLED_APPS = [
     "polymorphic",
-    "merino_suggestion_providers",
     "consvc_shepherd",
     "contile",
     "django.contrib.admin",
@@ -42,9 +42,9 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "openidc.middleware.OpenIDCAuthMiddleware",
 ]
 
 ROOT_URLCONF = "consvc_shepherd.urls"
