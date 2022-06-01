@@ -28,8 +28,8 @@ jobs:
         environment:
          POSTGRES_HOST_AUTH_METHOD: trust
         auth:
-          username: $DOCKER_USER_TEMP
-          password: $DOCKER_PASS_TEMP
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
 
     # Checkout the code as the first step. This is a dedicated CircleCI step.
     # The python orb's install-packages step will install the dependencies from a Pipfile via Pipenv by default.
@@ -45,10 +45,10 @@ jobs:
       - run:
           name: Login to Dockerhub
           command: |
-            if [ "${DOCKER_USER_TEMP}" == "" ] || [ "${DOCKER_PASS_TEMP}" == "" ]; then
+            if [ "${DOCKER_USER}" == "" ] || [ "${DOCKER_PASS}" == "" ]; then
               echo "Skipping Login to Dockerhub, credentials not available."
             else
-              echo "${DOCKER_PASS_TEMP}" | docker login -u="${DOCKER_USER_TEMP}" --password-stdin
+              echo "${DOCKER_PASS}" | docker login -u="${DOCKER_USER}" --password-stdin
             fi
       - run:
           name: Run tests
