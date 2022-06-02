@@ -1,18 +1,25 @@
 version: "3"
 
 services:
+  nginx:
+    build: ./nginx
+    env_file: .env
+    links:
+      - app
+    ports:
+      - "443:443"
   db:
+    tty: true
     restart: always
     image: postgres:14.0
     volumes:
-      - db_volume:/var/lib/postgresql
+      - db_volume:/var/lib/postgresql/
     environment:
-      POSTGRES_DB: consvc_shepherd
+      POSTGRES_PASSWORD: postgres
       POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5432:5432"
-    networks:
-      - private_nw
+
 
   app:
     tty: true
@@ -21,25 +28,17 @@ services:
     build:
       context: ./
       dockerfile: ./Dockerfile
-    command: bash -c "python /app/manage.py migrate && python /app/manage.py runserver 0:8000"
+    command: bash -c "/app/bin/wait-for-it.sh db:5432 -- python /app/manage.py migrate && python /app/manage.py runserver 0.0.0.0:7001 "
     links:
       - db
-    networks:
-      - public_nw
-      - private_nw
+
     volumes:
       - .:/app
     ports:
-      - "8000:8000"
+      - "7001:7001"
     depends_on:
       - db
 
 volumes:
   db_volume:
-  node_modules_volume:
-  ssl_volume:
 
-networks:
-  private_nw:
-    internal: true
-  public_nw:
