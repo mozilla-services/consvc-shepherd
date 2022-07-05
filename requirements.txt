@@ -22,7 +22,7 @@ coverage[toml]==6.3.2
     # via
     #   -r requirements.in
     #   pytest-cov
-django==4.0.4
+django==4.0.6
     # via
     #   -r requirements.in
     #   django-polymorphic
