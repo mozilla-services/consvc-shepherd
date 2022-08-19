@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_countries",
+    "dockerflow.django",
 ]
 
 MIDDLEWARE = [
@@ -44,6 +45,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "dockerflow.django.middleware.DockerflowMiddleware",
 ]
 
 ROOT_URLCONF = "consvc_shepherd.urls"
@@ -96,7 +98,7 @@ USE_TZ = True
 
 STATIC_BUCKET_NAME = env("STATIC_BUCKET_NAME", default="")
 STATIC_URL = "static/"
-STATIC_ROOT = "static"
+STATIC_ROOT = "./static"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
@@ -105,3 +107,23 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
 GS_BUCKET_NAME = env("GS_BUCKET_NAME", default="")
+
+LOGGING = {
+    "version": 1,
+    "formatters": {
+        "json": {"()": "dockerflow.logging.JsonLogFormatter", "logger_name": "shepherd"}
+    },
+    "handlers": {
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "json",
+        },
+    },
+    "loggers": {
+        "request.summary": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+        },
+    },
+}
