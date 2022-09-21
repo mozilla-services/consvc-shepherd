@@ -115,7 +115,7 @@ LOGGING = {
     },
     "handlers": {
         "console": {
-            "level": "DEBUG",
+            "level": env("SHEPHERD_ENV", default="DEBUG"),
             "class": "logging.StreamHandler",
             "formatter": "json",
         },
@@ -123,7 +123,7 @@ LOGGING = {
     "loggers": {
         "request.summary": {
             "handlers": ["console"],
-            "level": "DEBUG",
+            "level": env("SHEPHERD_ENV", default="DEBUG"),
         },
     },
 }
