@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -23,15 +24,21 @@ class Partner(models.Model):
         default=list,
         blank=True,
     )
-
-    def is_valid_host_list(self, hostname_list):
-        for hostname in hostname_list:
-            if "." not in hostname or any(
-                [not h.isalnum() for h in hostname.split(".")]
-            ):
-                raise ValidationError(
-                    f"{hostname} is not a valid hostname, hostnames should only contain alpha numeric characters and '.'"
-                )
+    is_active = models.BooleanField(default=False)
+    last_updated_by = models.ForeignKey(
+        get_user_model(),
+        related_name="updated_by",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
+    last_approved_by = models.ForeignKey(
+        get_user_model(),
+        related_name="approved_by",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
 
     def to_dict(self):
         partner_dict = {
@@ -109,11 +116,10 @@ class AdvertiserUrl(models.Model):
     geo = CountryField()
     domain = models.CharField(max_length=255)
     path = models.CharField(max_length=128)
-    matching = models.BooleanField(choices=MATCHING_CHOICES, default=False)
-    position = models.IntegerField(blank=True, null=True)
+    matching = models.BooleanField(choices=MATCHING_CHOICES, default=True)
 
     def __str__(self):
-        return f"{self.geo.code}: {self.domain}{self.path}"
+        return f"{self.geo.code}: {self.domain} {self.path}"
 
     def clean(self) -> None:
         is_valid_host(self.domain)

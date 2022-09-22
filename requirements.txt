@@ -4,9 +4,11 @@
 #
 #    pip-compile
 #
-asgiref==3.4.1
+asgiref==3.5.0
     # via django
-black==21.12b0
+attrs==21.4.0
+    # via pytest
+black==22.3.0
     # via -r requirements.in
 cachetools==5.0.0
     # via google-auth
@@ -14,60 +16,69 @@ certifi==2021.10.8
     # via requests
 charset-normalizer==2.0.12
     # via requests
-click==8.0.3
+click==8.1.2
     # via black
-django==4.0.2
+coverage[toml]==6.3.2
+    # via
+    #   -r requirements.in
+    #   pytest-cov
+django==4.0.7
     # via
     #   -r requirements.in
     #   django-polymorphic
     #   django-storages
     #   django-stubs
     #   django-stubs-ext
-    #   merino-suggestion-providers
-django-countries==7.3.1
+django-countries==7.3.2
     # via -r requirements.in
 django-environ==0.8.1
     # via -r requirements.in
 django-polymorphic==3.1.0
-    # via
-    #   -r requirements.in
-    #   merino-suggestion-providers
+    # via -r requirements.in
 django-storages[google]==1.12.3
     # via -r requirements.in
-django-stubs==1.9.0
+django-stubs==1.10.1
     # via -r requirements.in
-django-stubs-ext==0.3.1
+django-stubs-ext==0.4.0
     # via django-stubs
+dockerflow==2022.7.0
+    # via -r requirements.in
+factory-boy==3.2.1
+    # via -r requirements.in
+faker==13.4.0
+    # via factory-boy
 flake8==4.0.1
     # via -r requirements.in
-google-api-core==2.7.0
+google-api-core==2.7.2
     # via
     #   google-cloud-core
     #   google-cloud-storage
-google-auth==2.6.0
+google-auth==2.6.6
     # via
     #   google-api-core
     #   google-cloud-core
     #   google-cloud-storage
-google-cloud-core==2.2.3
+google-cloud-core==2.3.0
     # via google-cloud-storage
-google-cloud-storage==2.1.0
+google-cloud-storage==2.3.0
     # via django-storages
 google-crc32c==1.3.0
     # via google-resumable-media
 google-resumable-media==2.3.2
     # via google-cloud-storage
-googleapis-common-protos==1.55.0
+googleapis-common-protos==1.56.0
     # via google-api-core
 idna==3.3
     # via requests
+iniconfig==1.1.1
+    # via pytest
 isort==5.10.1
     # via -r requirements.in
 mccabe==0.6.1
     # via flake8
-merino-suggestion-providers @ https://github.com/mozilla-services/merino/archive/32c344712f.zip#subdirectory=merino-shepherd/merino-suggestion-providers
+mock==4.0.3
     # via -r requirements.in
-mypy==0.931
+mypy==0.942
     # via
     #   -r requirements.in
     #   django-stubs
@@ -75,17 +86,23 @@ mypy-extensions==0.4.3
     # via
     #   black
     #   mypy
+packaging==21.3
+    # via pytest
 pathspec==0.9.0
     # via black
-platformdirs==2.4.1
+platformdirs==2.5.2
     # via black
-protobuf==3.19.4
+pluggy==1.0.0
+    # via pytest
+protobuf==3.20.1
     # via
     #   google-api-core
     #   google-cloud-storage
     #   googleapis-common-protos
 psycopg2==2.9.3
     # via -r requirements.in
+py==1.11.0
+    # via pytest
 pyasn1==0.4.8
     # via
     #   pyasn1-modules
@@ -96,6 +113,19 @@ pycodestyle==2.8.0
     # via flake8
 pyflakes==2.4.0
     # via flake8
+pyparsing==3.0.8
+    # via packaging
+pytest==7.1.2
+    # via
+    #   -r requirements.in
+    #   pytest-cov
+    #   pytest-django
+pytest-cov==3.0.0
+    # via -r requirements.in
+pytest-django==4.5.2
+    # via -r requirements.in
+python-dateutil==2.8.2
+    # via faker
 requests==2.27.1
     # via
     #   google-api-core
@@ -103,25 +133,27 @@ requests==2.27.1
 rsa==4.8
     # via google-auth
 six==1.16.0
-    # via google-auth
+    # via
+    #   google-auth
+    #   python-dateutil
 sqlparse==0.4.2
     # via django
-toml==0.10.2
-    # via django-stubs
-tomli==1.2.3
+tomli==2.0.1
     # via
     #   black
+    #   coverage
+    #   django-stubs
     #   mypy
-types-pytz==2021.3.4
+    #   pytest
+types-pytz==2021.3.6
     # via django-stubs
-types-pyyaml==6.0.3
+types-pyyaml==6.0.7
     # via django-stubs
-typing-extensions==4.0.1
+typing-extensions==4.2.0
     # via
-    #   black
     #   django-countries
     #   django-stubs
     #   django-stubs-ext
     #   mypy
-urllib3==1.26.8
+urllib3==1.26.9
     # via requests

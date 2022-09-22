@@ -42,35 +42,35 @@ class TestPartnerModel(TestCase):
             path="/hello/",
             matching=False,
             domain="example.com",
-            geo="Canada",
+            geo="CA",
         )
         AdvertiserUrl.objects.create(
             advertiser=advertiser1,
             path="/",
             matching=True,
             domain="example.com",
-            geo="Canada",
+            geo="CA",
         )
         AdvertiserUrl.objects.create(
             advertiser=advertiser1,
             path="/read/",
             matching=False,
             domain="1.example.com",
-            geo="Canada",
+            geo="CA",
         )
         AdvertiserUrl.objects.create(
             advertiser=advertiser1,
             path="/read/",
             matching=False,
             domain="example.com",
-            geo="Germany",
+            geo="DE",
         )
         AdvertiserUrl.objects.create(
             advertiser=advertiser2,
             path="/read/",
             matching=False,
             domain="example.com",
-            geo="Germany",
+            geo="DE",
         )
         self.maxDiff = None
         expected_result = {
@@ -122,7 +122,7 @@ class TestAdvertiserUrlModel(TestCase):
     def test_ad_url_invalid_domain_structure(self):
         with self.assertRaises(ValidationError) as e:
             AdvertiserUrl.objects.create(
-                geo="Canada",
+                geo="CA",
                 domain="example.",
                 path="/hello/",
                 matching=False,
@@ -136,7 +136,7 @@ class TestAdvertiserUrlModel(TestCase):
     def test_ad_url_invalid_domain_structure_double_dots(self):
         with self.assertRaises(ValidationError) as e:
             AdvertiserUrl.objects.create(
-                geo="Canada",
+                geo="CA",
                 domain="example..com",
                 path="/hello/",
                 matching=False,
@@ -150,7 +150,7 @@ class TestAdvertiserUrlModel(TestCase):
     def test_ad_url_invalid_prefix_value_with_singular_slash(self):
         with self.assertRaises(ValidationError) as e:
             AdvertiserUrl.objects.create(
-                geo="Canada",
+                geo="CA",
                 domain="example.com",
                 path="/",
                 matching=False,
@@ -164,7 +164,7 @@ class TestAdvertiserUrlModel(TestCase):
     def test_ad_url_invalid_prefix_without_ending_slash(self):
         with self.assertRaises(ValidationError) as e:
             AdvertiserUrl.objects.create(
-                geo="Canada",
+                geo="CA",
                 domain="example.com",
                 path="/hello",
                 matching=False,
@@ -177,7 +177,7 @@ class TestAdvertiserUrlModel(TestCase):
 
     def test_ad_url_with_valid_prefix_saves_correctly(self):
         AdvertiserUrl.objects.create(
-            geo="France",
+            geo="FR",
             domain="example.com",
             path="/prefix/",
             matching=False,
@@ -185,7 +185,7 @@ class TestAdvertiserUrlModel(TestCase):
         )
         self.assertEqual(
             AdvertiserUrl.objects.filter(
-                geo="France",
+                geo="FR",
                 domain="example.com",
                 path="/prefix/",
                 matching=False,
@@ -196,7 +196,7 @@ class TestAdvertiserUrlModel(TestCase):
 
     def test_ad_url_with_valid_exact_saves_correctly(self):
         AdvertiserUrl.objects.create(
-            geo="Brazil",
+            geo="BR",
             domain="example.com",
             path="/exact/",
             matching=True,
@@ -204,7 +204,7 @@ class TestAdvertiserUrlModel(TestCase):
         )
         self.assertEqual(
             AdvertiserUrl.objects.filter(
-                geo="Brazil",
+                geo="BR",
                 domain="example.com",
                 path="/exact/",
                 matching=True,
@@ -215,7 +215,7 @@ class TestAdvertiserUrlModel(TestCase):
 
     def test_ad_url_with_valid_leaf_domain_saves_correctly(self):
         AdvertiserUrl.objects.create(
-            geo="Brazil",
+            geo="BR",
             domain="www.example.com",
             path="/exact/",
             matching=True,
@@ -223,7 +223,7 @@ class TestAdvertiserUrlModel(TestCase):
         )
         self.assertEqual(
             AdvertiserUrl.objects.filter(
-                geo="Brazil",
+                geo="BR",
                 domain="www.example.com",
                 path="/exact/",
                 matching=True,
