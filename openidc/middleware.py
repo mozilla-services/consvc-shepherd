@@ -10,7 +10,7 @@ class OpenIDCAuthMiddleware(AuthenticationMiddleware):
     request. This header will be populated by nginx configured to authenticate
     with OpenIDC.
     We will automatically create a user object and attach it to the
-    experimenters group.
+    shepherd group.
     """
 
     def __init__(self, get_response):
