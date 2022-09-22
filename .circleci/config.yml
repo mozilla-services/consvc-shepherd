@@ -42,6 +42,8 @@ jobs:
           pkg-manager: pip
           # app-dir: ~/project/package-directory/  # If you're requirements.txt isn't in the root directory.
           # pip-dependency-file: test-requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements.
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
           name: Login to Dockerhub
           command: |
@@ -50,6 +52,14 @@ jobs:
             else
               echo "${DOCKER_PASS}" | docker login -u="${DOCKER_USER}" --password-stdin
             fi
+      - run:
+          name: Build Docker image
+          command: docker build -t app:build .
+      - run:
+          name: docker save app:build
+          command: |
+            mkdir -p /home/circleci/cache
+            docker save -o /home/circleci/cache/docker.tar "app:build"
       - run:
           name: Run tests
           # This assumes pytest is installed via the install-package step above
@@ -67,6 +77,27 @@ jobs:
           name: Imports Sort
           command: isort . --profile black --check
 
+  deploy:
+    docker:
+      - image: docker:18.02.0-ce
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
+    steps:
+      - run:
+          name: Restore Docker image cache
+          command: docker load -i /home/circleci/cache/docker.tar
+      - run:
+          name: Deploy to Dockerhub
+          command: |
+            DOCKER_TAG="${CIRCLE_SHA1}"
+            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+            echo ${DOCKERHUB_REPO}:${DOCKER_TAG}
+            docker tag app:build ${DOCKERHUB_REPO}:${DOCKER_TAG}
+            docker images
+            docker push "${DOCKERHUB_REPO}:${DOCKER_TAG}"
+
+
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
@@ -74,3 +105,9 @@ workflows:
     # Inside the workflow, you define the jobs you want to run.
     jobs:
       - build-and-test
+      - deploy:
+          requires:
+            - build-and-test
+          filters:
+            branches:
+              only: main
