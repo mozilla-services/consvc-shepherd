@@ -16,12 +16,15 @@ WORKDIR /app
 COPY ./requirements.txt /app/requirements.txt
 RUN pip install -r /app/requirements.txt
 
+RUN apt-get remove --yes gcc python3-dev && \
+    apt-get -q --yes autoremove && \
+    apt-get clean
+
 COPY ./consvc_shepherd/ /app/consvc_shepherd/
 COPY ./static/ /app/static/
 COPY ./contile/ /app/contile/
 COPY ./manage.py /app/
 COPY ./bin/ /app/bin/
-RUN chmod +x /app/bin/wait-for-it.sh
 
 EXPOSE 8000
 
