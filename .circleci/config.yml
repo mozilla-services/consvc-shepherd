@@ -58,15 +58,20 @@ jobs:
       - run:
           name: docker save app:build
           command: |
-            mkdir -p /home/circleci/cache
-            docker save -o /home/circleci/cache/docker.tar "app:build"
+            mkdir -p /tmp/workspace
+            docker save -o /tmp/workspace/docker.tar app:build
+            gzip /tmp/workspace/docker.tar
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - docker.tar.gz
       - run:
           name: Run tests
           # This assumes pytest is installed via the install-package step above
           command: pytest --cov --cov-report=term-missing --cov-fail-under=95
       - run:
           name: Check Migrations
-          command: python manage.py makemigrations --check --dry-run --noinput 
+          command: python manage.py makemigrations --check --dry-run --noinput
       - run:
           name: Flake8 Lint
           command: flake8 .
@@ -84,9 +89,11 @@ jobs:
           username: $DOCKER_USER
           password: $DOCKER_PASS
     steps:
+      - attach_workspace:
+          at: workspace
       - run:
           name: Restore Docker image cache
-          command: docker load -i /home/circleci/cache/docker.tar
+          command: docker load -i workspace/docker.tar.gz
       - run:
           name: Deploy to Dockerhub
           command: |
