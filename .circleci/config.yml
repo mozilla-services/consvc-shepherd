@@ -85,9 +85,6 @@ jobs:
   deploy:
     docker:
       - image: cimg/base:2022.08
-        auth:
-          username: $DOCKER_USER
-          password: $DOCKER_PASS
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
