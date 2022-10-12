@@ -23,6 +23,7 @@ RUN apt-get remove --yes gcc python3-dev && \
 COPY ./consvc_shepherd/ /app/consvc_shepherd/
 COPY ./static/ /app/static/
 COPY ./contile/ /app/contile/
+COPY ./openidc/ /app/openidc/
 COPY ./manage.py /app/
 COPY ./bin/ /app/bin/
 
