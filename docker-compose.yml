@@ -6,6 +6,8 @@ services:
     env_file: .env
     links:
       - app
+    depends_on:
+      - app
     ports:
       - "443:443"
   db:
