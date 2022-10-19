@@ -16,7 +16,7 @@ flake8
 isort
 mypy
 mock
-psycopg2
+psycopg2-binary
 pytest
 pytest-django
 pytest-cov
