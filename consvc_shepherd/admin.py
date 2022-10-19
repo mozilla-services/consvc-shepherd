@@ -22,7 +22,7 @@ def publish_snapshot(modeladmin, request, queryset):
         snapshot.launched_by = request.user
         snapshot.launched_date = timezone.now()
         content = json.dumps(snapshot.json_settings, indent=2)
-        send_to_storage(snapshot.name, content)
+        send_to_storage(content)
         snapshot.save()
         messages.info(request, "Snapshot has been published")
 
