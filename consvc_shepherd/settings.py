@@ -18,8 +18,14 @@ SECRET_KEY: str = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG", default=False)
-
+DEV_USER_EMAIL = "dev@example.com"
+OPENIDC_EMAIL_HEADER = env("OPENIDC_EMAIL_HEADER", default=False)
 ALLOWED_HOSTS: List[str] = ["*"]
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SESSION_COOKIE_SECURE = env("SESSION_COOKIE_SECURE", default=True, cast=bool)
+CSRF_COOKIE_SECURE = env("CSRF_COOKIE_SECURE", default=True, cast=bool)
+SECURE_REFERRER_POLICY = env("SECURE_REFERRER_POLICY", default="origin")
 
 # Application definition
 
@@ -42,9 +48,9 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "openidc.middleware.OpenIDCAuthMiddleware",
     "dockerflow.django.middleware.DockerflowMiddleware",
 ]
 
