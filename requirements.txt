@@ -94,12 +94,12 @@ platformdirs==2.5.2
     # via black
 pluggy==1.0.0
     # via pytest
-protobuf==3.20.1
+protobuf==3.20.2
     # via
     #   google-api-core
     #   google-cloud-storage
     #   googleapis-common-protos
-psycopg2==2.9.3
+psycopg2-binary==2.9.4
     # via -r requirements.in
 py==1.11.0
     # via pytest
