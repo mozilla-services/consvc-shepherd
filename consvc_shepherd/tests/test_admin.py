@@ -36,8 +36,6 @@ class SettingsSnapshotAdminTest(TestCase):
         self.mock_storage_get_created_time.start()
         self.addCleanup(self.mock_storage_get_created_time.stop)
 
-
-
     def test_get_read_only_fields_when_obj_exists(self):
         obj = SettingsSnapshot.objects.create(
             name="Snapshot", settings_type=self.partner
