@@ -1,7 +1,6 @@
 import json
 
 from django.contrib import admin, messages
-from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from consvc_shepherd.models import SettingsSnapshot
@@ -34,13 +33,10 @@ class ModelAdmin(admin.ModelAdmin):
     actions = [publish_snapshot]
 
     def save_model(self, request, obj, form, change) -> None:
-        if obj.settings_type.is_active:
-            json_settings = obj.settings_type.to_dict()
-            obj.json_settings = json_settings
-            obj.created_by = request.user
-            super(ModelAdmin, self).save_model(request, obj, form, change)
-        else:
-            raise ValidationError("Partner Selected is not active")
+        json_settings = obj.settings_type.to_dict()
+        obj.json_settings = json_settings
+        obj.created_by = request.user
+        super(ModelAdmin, self).save_model(request, obj, form, change)
 
     def get_readonly_fields(self, request, obj=None):
         if obj:

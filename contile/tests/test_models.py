@@ -5,35 +5,9 @@ from contile.models import Advertiser, AdvertiserUrl, Partner
 
 
 class TestPartnerModel(TestCase):
-    def test_hostname_for_invalid_impressions_hosts(self):
-        with self.assertRaises(ValidationError) as e:
-            Partner.objects.create(
-                name="Partner Advertiser",
-                impression_hosts=["example.com", "ex@@@@m@@@ple.com"],
-                click_hosts=["example.com"],
-            )
-        self.assertIn(
-            "hostnames should only contain alpha numeric characters '-' and '.'",
-            str(e.exception),
-        )
-
-    def test_hostname_for_invalid_click_hosts(self):
-        with self.assertRaises(ValidationError) as e:
-            Partner.objects.create(
-                name="Partner Advertiser",
-                impression_hosts=["example.com", "test.example.com"],
-                click_hosts=["example.com", "ex@&!mple.com"],
-            )
-        self.assertIn(
-            "hostnames should only contain alpha numeric characters '-' and '.'",
-            str(e.exception),
-        )
-
     def test_to_dict_produces_correctly(self):
         partner = Partner.objects.create(
             name="Partner Advertiser",
-            impression_hosts=["example.com", "1.example.com"],
-            click_hosts=["2.example.com"],
         )
         advertiser1 = Advertiser.objects.create(name="Pocket", partner=partner)
         advertiser2 = Advertiser.objects.create(name="Firefox", partner=partner)
@@ -74,39 +48,37 @@ class TestPartnerModel(TestCase):
         )
         self.maxDiff = None
         expected_result = {
-            "DEFAULT": {
-                "click_hosts": ["2.example.com"],
-                "impression_hosts": ["example.com", "1.example.com"],
-            },
-            "Firefox": {
-                "DE": [
-                    {
-                        "host": "example.com",
-                        "paths": [{"matching": "prefix", "value": "/read/"}],
-                    }
-                ]
-            },
-            "Pocket": {
-                "CA": [
-                    {
-                        "host": "1.example.com",
-                        "paths": [{"matching": "prefix", "value": "/read/"}],
-                    },
-                    {
-                        "host": "example.com",
-                        "paths": [
-                            {"matching": "exact", "value": "/"},
-                            {"matching": "prefix", "value": "/hello/"},
-                        ],
-                    },
-                ],
-                "DE": [
-                    {
-                        "host": "example.com",
-                        "paths": [{"matching": "prefix", "value": "/read/"}],
-                    }
-                ],
-            },
+            "adm_advertisers": {
+                "Firefox": {
+                    "DE": [
+                        {
+                            "host": "example.com",
+                            "paths": [{"matching": "prefix", "value": "/read/"}],
+                        }
+                    ]
+                },
+                "Pocket": {
+                    "CA": [
+                        {
+                            "host": "1.example.com",
+                            "paths": [{"matching": "prefix", "value": "/read/"}],
+                        },
+                        {
+                            "host": "example.com",
+                            "paths": [
+                                {"matching": "exact", "value": "/"},
+                                {"matching": "prefix", "value": "/hello/"},
+                            ],
+                        },
+                    ],
+                    "DE": [
+                        {
+                            "host": "example.com",
+                            "paths": [{"matching": "prefix", "value": "/read/"}],
+                        }
+                    ],
+                },
+            }
         }
 
         self.assertEqual(partner.to_dict(), expected_result)

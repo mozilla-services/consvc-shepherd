@@ -16,9 +16,7 @@ class SettingsSnapshotAdminTest(TestCase):
 
         site = AdminSite()
         self.admin = ModelAdmin(SettingsSnapshot, site)
-        self.partner = Partner.objects.create(
-            name="Partner1", is_active=True, last_approved_by=self.request.user
-        )
+        self.partner = Partner.objects.create(name="Partner1")
 
         self.mock_storage = mock.patch(
             "django.core.files.storage.default_storage." "open"
