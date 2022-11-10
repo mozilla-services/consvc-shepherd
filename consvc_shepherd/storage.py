@@ -12,7 +12,7 @@ def send_to_storage(content):
         )
     else:
         latest_file_name = f"{settings.GS_BUCKET_FILE_NAME}_latest.json"
-        date_file_name = f"{settings.GS_BUCKET_FILE_NAME}_{timezone.now()}"
+        date_file_name = f"{settings.GS_BUCKET_FILE_NAME}_{timezone.now()}.json"
 
         date_file = default_storage.open(date_file_name, "w")
         date_file.write(content)
