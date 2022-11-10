@@ -2,6 +2,7 @@ import logging
 
 from django.conf import settings
 from django.core.files.storage import default_storage
+from django.utils import timezone
 
 
 def send_to_storage(content):
@@ -10,19 +11,13 @@ def send_to_storage(content):
             f"Sending to storage, name:{settings.GS_BUCKET_FILE_NAME}, content: {content}"
         )
     else:
-        current_file_name = f"{settings.GS_BUCKET_FILE_NAME}-current.json"
-        # write content in -current file to another file
-        if default_storage.exists(current_file_name):
-            creation_date = default_storage.get_created_time(current_file_name)
+        latest_file_name = f"{settings.GS_BUCKET_FILE_NAME}_latest.json"
+        date_file_name = f"{settings.GS_BUCKET_FILE_NAME}_{timezone.now()}"
 
-            current_file = default_storage.open(current_file_name, "r")
-            current_file_contents = current_file.read()
-            previous_file_name = f"{settings.GS_BUCKET_FILE_NAME}-{creation_date}"
+        date_file = default_storage.open(date_file_name, "w")
+        date_file.write(content)
+        date_file.close()
 
-            previous_file = default_storage.open(previous_file_name, "w")
-            previous_file.write(current_file_contents)
-            previous_file.close()
-
-        file = default_storage.open(current_file_name, "w")
-        file.write(content)
-        file.close()
+        latest_file = default_storage.open(latest_file_name, "w")
+        latest_file.write(content)
+        latest_file.close()

@@ -25,16 +25,6 @@ class SettingsSnapshotAdminTest(TestCase):
         )
         self.mock_storage_open.start()
         self.addCleanup(self.mock_storage_open.stop)
-        self.mock_storage_exists = mock.patch(
-            "django.core.files.storage.default_storage." "exists"
-        )
-        self.mock_storage_exists.start()
-        self.addCleanup(self.mock_storage_exists.stop)
-        self.mock_storage_get_created_time = mock.patch(
-            "django.core.files.storage.default_storage." "get_created_time"
-        )
-        self.mock_storage_get_created_time.start()
-        self.addCleanup(self.mock_storage_get_created_time.stop)
 
     def test_get_read_only_fields_when_obj_exists(self):
         obj = SettingsSnapshot.objects.create(
