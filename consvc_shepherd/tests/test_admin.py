@@ -18,11 +18,11 @@ class SettingsSnapshotAdminTest(TestCase):
         self.admin = ModelAdmin(SettingsSnapshot, site)
         self.partner = Partner.objects.create(name="Partner1")
 
-        self.mock_storage = mock.patch(
+        self.mock_storage_open = mock.patch(
             "django.core.files.storage.default_storage." "open"
         )
-        self.mock_storage.start()
-        self.addCleanup(self.mock_storage.stop)
+        self.mock_storage_open.start()
+        self.addCleanup(self.mock_storage_open.stop)
 
     def test_get_read_only_fields_when_obj_exists(self):
         obj = SettingsSnapshot.objects.create(
