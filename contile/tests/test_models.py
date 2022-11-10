@@ -101,7 +101,7 @@ class TestAdvertiserUrlModel(TestCase):
                 advertiser=self.advertiser,
             )
         self.assertIn(
-            "hostnames should have the structure <leaf-domain>.<second-level-domain>.<top-domain> or <second-level-domain>.<top-domain>",
+            "hostnames should have the structure <leaf-domain>.<second-level-domain>.<top-domain(s)>",
             str(e.exception),
         )
 
@@ -109,13 +109,13 @@ class TestAdvertiserUrlModel(TestCase):
         with self.assertRaises(ValidationError) as e:
             AdvertiserUrl.objects.create(
                 geo="CA",
-                domain="example..com",
+                domain="www.example.co.uk.com",
                 path="/hello/",
                 matching=False,
                 advertiser=self.advertiser,
             )
         self.assertIn(
-            "hostnames should have the structure <leaf-domain>.<second-level-domain>.<top-domain> or <second-level-domain>.<top-domain>",
+            "hostnames should have the structure <leaf-domain>.<second-level-domain>.<top-domain(s)>",
             str(e.exception),
         )
 
@@ -143,7 +143,7 @@ class TestAdvertiserUrlModel(TestCase):
                 advertiser=self.advertiser,
             )
         self.assertIn(
-            "All paths need to start and end with '/'",
+            "Prefix paths can't be just '/' but needs to end with '/'",
             str(e.exception),
         )
 
@@ -189,7 +189,7 @@ class TestAdvertiserUrlModel(TestCase):
         AdvertiserUrl.objects.create(
             geo="BR",
             domain="www.example.com",
-            path="/exact/",
+            path="/exact",
             matching=True,
             advertiser=self.advertiser,
         )
@@ -197,7 +197,7 @@ class TestAdvertiserUrlModel(TestCase):
             AdvertiserUrl.objects.filter(
                 geo="BR",
                 domain="www.example.com",
-                path="/exact/",
+                path="/exact",
                 matching=True,
                 advertiser=self.advertiser,
             ).count(),

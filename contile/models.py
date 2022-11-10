@@ -6,8 +6,8 @@ MATCHING_CHOICES = (
     (True, "exact"),
     (False, "prefix"),
 )
-INVALID_PREFIX_PATH_ERROR = "Prefix paths can't be just '/'"
-INVALID_PATH_ERROR = "All paths need to start and end with '/'"
+INVALID_PREFIX_PATH_ERROR = "Prefix paths can't be just '/' but needs to end with '/' "
+INVALID_PATH_ERROR = "All paths need to start '/'"
 
 
 class Partner(models.Model):
@@ -81,10 +81,12 @@ class AdvertiserUrl(models.Model):
 
     def clean(self) -> None:
         is_valid_host(self.domain)
-        if not (self.path.startswith("/") and self.path.endswith("/")):
+        if not self.path.startswith("/"):
             raise ValidationError(INVALID_PATH_ERROR)
 
-        if self.get_matching_display() == "prefix" and self.path == "/":
+        if self.get_matching_display() == "prefix" and (
+            self.path == "/" or not self.path.endswith("/")
+        ):
             raise ValidationError(INVALID_PREFIX_PATH_ERROR)
 
     def save(self, *args, **kwargs):
@@ -98,7 +100,7 @@ def is_valid_host(host):
         raise ValidationError(
             f"{host}: hostnames should only contain alpha numeric characters '-' and '.'"
         )
-    if not 2 <= len(host.split(".")) <= 3 or "" in host.split("."):
+    if not 2 <= len(host.split(".")) <= 4 or "" in host.split("."):
         raise ValidationError(
-            f"{host}: hostnames should have the structure <leaf-domain>.<second-level-domain>.<top-domain> or <second-level-domain>.<top-domain>"
+            f"{host}: hostnames should have the structure <leaf-domain>.<second-level-domain>.<top-domain(s)>"
         )
