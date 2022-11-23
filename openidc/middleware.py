@@ -1,7 +1,31 @@
+import logging
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.middleware import AuthenticationMiddleware
 from django.http import HttpResponse
+from google.auth.transport import requests
+from google.oauth2 import id_token
+
+
+def validate_iap_jwt(request):
+    iap_jwt = request.META.get(settings.OPENIDC_HEADER)
+    try:
+        decoded_jwt = id_token.verify_token(
+            iap_jwt,
+            requests.Request(),
+            audience=settings.IAP_AUDIENCE,
+            certs_url="https://www.gstatic.com/iap/verify/public_key",
+        )
+        return decoded_jwt["email"]
+    except ValueError as e:
+        logging.error(f"**ERROR: JWT validation error {e}**'.")
+
+
+def validate_openidc_header(request):
+    default_email = settings.DEV_USER_EMAIL
+    openidc_header_value = request.META.get(settings.OPENIDC_HEADER, default_email)
+    return openidc_header_value.split(settings.OPENIDC_HEADER_PREFIX)[-1]
 
 
 class OpenIDCAuthMiddleware(AuthenticationMiddleware):
@@ -18,18 +42,17 @@ class OpenIDCAuthMiddleware(AuthenticationMiddleware):
         self.User = get_user_model()
 
     def __call__(self, request):
-        default_email = settings.DEV_USER_EMAIL if settings.DEBUG else None
-        openidc_header_value = request.META.get(settings.OPENIDC_HEADER, default_email)
+        if settings.DEBUG:
+            openidc_email = validate_openidc_header(request)
+        else:
+            openidc_email = validate_iap_jwt(request)
 
-        if openidc_header_value is None:
+        if openidc_email is None:
             # If a user has bypassed the OpenIDC flow entirely and no header
             # is set then we reject the request entirely
             return HttpResponse("Please login using OpenID Connect", status=401)
 
         try:
-            openidc_email = openidc_header_value.split(settings.OPENIDC_HEADER_PREFIX)[
-                -1
-            ]
             user = self.User.objects.get(username=openidc_email)
         except self.User.DoesNotExist:
             user = self.User(username=openidc_email, email=openidc_email)
