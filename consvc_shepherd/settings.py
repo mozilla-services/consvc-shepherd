@@ -19,7 +19,8 @@ SECRET_KEY: str = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG", default=False)
 DEV_USER_EMAIL = "dev@example.com"
-OPENIDC_EMAIL_HEADER = env("OPENIDC_EMAIL_HEADER", default=False)
+OPENIDC_EMAIL_HEADER = env("OPENIDC_EMAIL_HEADER", default=None)
+OPENIDC_EMAIL_HEADER_PREFIX = env("OPENIDC_EMAIL_HEADER_PREFIX", default=None)
 ALLOWED_HOSTS: List[str] = ["*"]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
