@@ -15,12 +15,12 @@ class OpenIDCAuthMiddlewareTests(TestCase):
         self.mock_resolve = mock_resolve_patcher.start()
         self.addCleanup(mock_resolve_patcher.stop)
 
-    @override_settings(OPENIDC_EMAIL_HEADER_PREFIX="accounts.google.com:")
+    @override_settings(OPENIDC_HEADER_PREFIX="accounts.google.com:")
     def test_user_created_with_correct_email_from_header(self):
         header_value = "accounts.google.com:user@example.com"
 
         request = mock.Mock()
-        request.META = {settings.OPENIDC_EMAIL_HEADER: header_value}
+        request.META = {settings.OPENIDC_HEADER: header_value}
 
         User = get_user_model()
         self.assertEqual(User.objects.all().count(), 0)
@@ -31,12 +31,12 @@ class OpenIDCAuthMiddlewareTests(TestCase):
         self.assertEqual(User.objects.all().count(), 1)
         self.assertEqual("user@example.com", request.user.email)
 
-    @override_settings(OPENIDC_EMAIL_HEADER_PREFIX=None)
+    @override_settings(OPENIDC_HEADER_PREFIX=None)
     def test_user_created_with_dev_email_when_no_header(self):
         header_value = "user@example.com"
 
         request = mock.Mock()
-        request.META = {settings.OPENIDC_EMAIL_HEADER: header_value}
+        request.META = {settings.OPENIDC_HEADER: header_value}
 
         User = get_user_model()
 

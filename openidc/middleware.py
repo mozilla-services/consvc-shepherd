@@ -19,19 +19,17 @@ class OpenIDCAuthMiddleware(AuthenticationMiddleware):
 
     def __call__(self, request):
         default_email = settings.DEV_USER_EMAIL if settings.DEBUG else None
-        openidc_email_header_value = request.META.get(
-            settings.OPENIDC_EMAIL_HEADER, default_email
-        )
+        openidc_header_value = request.META.get(settings.OPENIDC_HEADER, default_email)
 
-        if openidc_email_header_value is None:
+        if openidc_header_value is None:
             # If a user has bypassed the OpenIDC flow entirely and no header
             # is set then we reject the request entirely
             return HttpResponse("Please login using OpenID Connect", status=401)
 
         try:
-            openidc_email = openidc_email_header_value.split(
-                settings.OPENIDC_EMAIL_HEADER_PREFIX
-            )[-1]
+            openidc_email = openidc_header_value.split(settings.OPENIDC_HEADER_PREFIX)[
+                -1
+            ]
             user = self.User.objects.get(username=openidc_email)
         except self.User.DoesNotExist:
             user = self.User(username=openidc_email, email=openidc_email)
