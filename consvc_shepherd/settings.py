@@ -52,7 +52,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "dockerflow.django.middleware.DockerflowMiddleware",
     "openidc.middleware.OpenIDCAuthMiddleware",
-
 ]
 
 ROOT_URLCONF = "consvc_shepherd.urls"
