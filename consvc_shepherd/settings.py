@@ -50,8 +50,8 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "openidc.middleware.OpenIDCAuthMiddleware",
     "dockerflow.django.middleware.DockerflowMiddleware",
+    "openidc.middleware.OpenIDCAuthMiddleware",
 ]
 
 ROOT_URLCONF = "consvc_shepherd.urls"
