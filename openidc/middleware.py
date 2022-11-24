@@ -7,6 +7,8 @@ from django.http import HttpResponse
 from google.auth.transport import requests
 from google.oauth2 import id_token
 
+logger = logging.getLogger("shepherd")
+
 
 def validate_iap_jwt(request):
     iap_jwt = request.META.get(settings.OPENIDC_HEADER)
@@ -18,8 +20,8 @@ def validate_iap_jwt(request):
             certs_url="https://www.gstatic.com/iap/verify/public_key",
         )
         return decoded_jwt["email"]
-    except ValueError as e:
-        logging.error(f"**ERROR: JWT validation error {e}**'.")
+    except Exception as e:
+        logger.error(f"**ERROR: JWT validation error {e}**'.")
 
 
 def validate_openidc_header(request):

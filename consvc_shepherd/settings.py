@@ -130,6 +130,10 @@ LOGGING = {
         },
     },
     "loggers": {
+        "shepherd": {
+            "handlers": ["console"],
+            "level": env("SHEPHERD_ENV", default="DEBUG"),
+        },
         "request.summary": {
             "handlers": ["console"],
             "level": env("SHEPHERD_ENV", default="DEBUG"),
