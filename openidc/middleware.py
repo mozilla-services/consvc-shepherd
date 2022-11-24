@@ -21,7 +21,7 @@ def validate_iap_jwt(request):
         )
         return decoded_jwt["email"]
     except Exception as e:
-        logger.error(f"**ERROR: JWT validation error {e}**'.")
+        logger.error(f"IAP JWT validation error: {e}")
 
 
 def validate_openidc_header(request):
