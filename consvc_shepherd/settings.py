@@ -21,6 +21,7 @@ DEBUG = env("DEBUG", default=False)
 DEV_USER_EMAIL = "dev@example.com"
 OPENIDC_HEADER = env("OPENIDC_HEADER", default=None)
 OPENIDC_HEADER_PREFIX = env("OPENIDC_HEADER_PREFIX", default=None)
+IAP_AUDIENCE = env("IAP_AUDIENCE", default=None)
 ALLOWED_HOSTS: List[str] = ["*"]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -129,6 +130,10 @@ LOGGING = {
         },
     },
     "loggers": {
+        "shepherd": {
+            "handlers": ["console"],
+            "level": env("SHEPHERD_ENV", default="DEBUG"),
+        },
         "request.summary": {
             "handlers": ["console"],
             "level": env("SHEPHERD_ENV", default="DEBUG"),

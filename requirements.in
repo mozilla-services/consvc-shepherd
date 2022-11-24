@@ -13,6 +13,7 @@ django-stubs
 dockerflow
 factory_boy
 flake8
+google
 isort
 mypy
 mock
