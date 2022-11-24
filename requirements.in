@@ -6,6 +6,7 @@ django-polymorphic
 
 black
 coverage
+cryptography
 django-environ
 django-storages[google]
 django-countries
