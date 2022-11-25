@@ -6,7 +6,6 @@ django-polymorphic
 
 black
 coverage
-cryptography
 django-environ
 django-storages[google]
 django-countries
@@ -15,6 +14,7 @@ dockerflow
 factory_boy
 flake8
 google-auth
+google-auth[pyopenssl]
 isort
 mypy
 mock
