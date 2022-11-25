@@ -1,8 +1,9 @@
 from pathlib import Path
 from typing import List
+
+import environ
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
-import environ
 
 env = environ.Env()
 
@@ -153,5 +154,4 @@ sentry_sdk.init(
     # of transactions for performance monitoring.
     # We recommend adjusting this value in production,
     traces_sample_rate=SENTRY_TRACE_SAMPLE_RATE,
-    debug=DEBUG,
 )
