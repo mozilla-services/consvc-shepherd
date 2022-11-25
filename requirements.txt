@@ -8,8 +8,6 @@ asgiref==3.5.2
     # via django
 attrs==22.1.0
     # via pytest
-beautifulsoup4==4.11.1
-    # via google
 black==22.10.0
     # via -r requirements.in
 cachetools==5.2.0
@@ -57,14 +55,13 @@ faker==15.3.3
     # via factory-boy
 flake8==6.0.0
     # via -r requirements.in
-google==3.0.0
-    # via -r requirements.in
 google-api-core==2.10.2
     # via
     #   google-cloud-core
     #   google-cloud-storage
 google-auth==2.14.1
     # via
+    #   -r requirements.in
     #   google-api-core
     #   google-cloud-core
     #   google-cloud-storage
@@ -105,9 +102,7 @@ platformdirs==2.5.4
 pluggy==1.0.0
     # via pytest
 protobuf==4.21.9
-    # via
-    #   google-api-core
-    #   googleapis-common-protos
+    # via google-api-core
 psycopg2-binary==2.9.5
     # via -r requirements.in
 pyasn1==0.4.8
@@ -145,8 +140,6 @@ six==1.16.0
     # via
     #   google-auth
     #   python-dateutil
-soupsieve==2.3.2.post1
-    # via beautifulsoup4
 sqlparse==0.4.3
     # via django
 tomli==2.0.1
