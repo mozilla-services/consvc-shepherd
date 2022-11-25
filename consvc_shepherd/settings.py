@@ -142,12 +142,13 @@ LOGGING = {
     },
 }
 # Sentry Setup
-SENTRY_SDK = env("SENTRY_SDK", default=None)
+SENTRY_DSN = env("SENTRY_SDK", default=None)
 SENTRY_TRACE_SAMPLE_RATE = env("SENTRY_TRACE_SAMPLE_RATE", default=1.0)
+SENTRY_ENV = env("SENTRY_ENV", default=None)
 sentry_sdk.init(
-    dsn=SENTRY_SDK,
+    dsn=SENTRY_DSN,
     integrations=[DjangoIntegration()],
-
+    environment=SENTRY_ENV,
     # Set traces_sample_rate to 1.0 to capture 100%
     # of transactions for performance monitoring.
     # We recommend adjusting this value in production,
