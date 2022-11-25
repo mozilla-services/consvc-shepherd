@@ -13,7 +13,6 @@ django-stubs
 dockerflow
 factory_boy
 flake8
-google-auth
 google-auth[pyopenssl]
 isort
 mypy
