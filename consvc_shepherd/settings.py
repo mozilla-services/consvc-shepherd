@@ -143,7 +143,7 @@ LOGGING = {
     },
 }
 # Sentry Setup
-SENTRY_DSN = env("SENTRY_SDK", default=None)
+SENTRY_DSN = env("SENTRY_DSN", default=None)
 SENTRY_TRACE_SAMPLE_RATE = env("SENTRY_TRACE_SAMPLE_RATE", default=1.0)
 SENTRY_ENV = env("SENTRY_ENV", default=None)
 sentry_sdk.init(
