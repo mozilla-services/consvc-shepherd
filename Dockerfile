@@ -25,6 +25,7 @@ COPY ./static/ /app/static/
 COPY ./contile/ /app/contile/
 COPY ./openidc/ /app/openidc/
 COPY ./manage.py /app/
+COPY ./version.json /app/
 COPY ./bin/ /app/bin/
 
 EXPOSE 8000
