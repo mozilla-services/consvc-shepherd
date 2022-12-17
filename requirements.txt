@@ -8,6 +8,8 @@ asgiref==3.5.2
     # via django
 attrs==22.1.0
     # via pytest
+bandit==1.7.4
+    # via -r requirements.in
 black==22.10.0
     # via -r requirements.in
 cachetools==5.2.0
@@ -59,6 +61,10 @@ faker==15.3.3
     # via factory-boy
 flake8==6.0.0
     # via -r requirements.in
+gitdb==4.0.10
+    # via gitpython
+gitpython==3.1.29
+    # via bandit
 google-api-core==2.10.2
     # via
     #   google-cloud-core
@@ -101,6 +107,8 @@ packaging==21.3
     # via pytest
 pathspec==0.10.2
     # via black
+pbr==5.11.0
+    # via stevedore
 platformdirs==2.5.4
     # via black
 pluggy==1.0.0
@@ -136,6 +144,8 @@ pytest-django==4.5.2
     # via -r requirements.in
 python-dateutil==2.8.2
     # via faker
+pyyaml==6.0
+    # via bandit
 requests==2.28.1
     # via
     #   google-api-core
@@ -148,8 +158,12 @@ six==1.16.0
     # via
     #   google-auth
     #   python-dateutil
+smmap==5.0.0
+    # via gitdb
 sqlparse==0.4.3
     # via django
+stevedore==4.1.1
+    # via bandit
 tomli==2.0.1
     # via
     #   black

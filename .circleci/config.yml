@@ -93,6 +93,9 @@ jobs:
       - run:
           name: Imports Sort
           command: isort . --profile black --check
+      - run:
+          name: Bandit Check
+          command: bandit .
 
   deploy:
     docker:
