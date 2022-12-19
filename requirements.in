@@ -5,6 +5,7 @@ django-polymorphic
 # from `pip-tools`.
 
 black
+bandit
 coverage
 django-environ
 django-storages[google]
