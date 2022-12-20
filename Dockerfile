@@ -1,20 +1,31 @@
-FROM python:3.10.5-slim
+ARG PYTHON_VERSION=3.11
+FROM python:${PYTHON_VERSION}-slim AS build
 
-ENV VIRTUAL_ENV=/opt/venv
-RUN python -m venv $VIRTUAL_ENV
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+WORKDIR /tmp
+# Pin Poetry to reduce image size
+RUN pip install --no-cache-dir --quiet poetry
 
-RUN pip install -U 'pip==21.3.1'
+COPY ./pyproject.toml ./poetry.lock /tmp/
+# Just need the requirements.txt from Poetry
+RUN poetry export --no-interaction --without dev --output requirements.txt --without-hashes
 
+FROM python:${PYTHON_VERSION}-slim
+
+ENV PYTHONUNBUFFERED True
+
+# Set app home
+ENV APP_HOME /app
+WORKDIR $APP_HOME
+
+COPY . $APP_HOME
+
+COPY --from=build /tmp/requirements.txt $APP_HOME/requirements.txt
 # install psycopg2 dependencies
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends gcc libpq-dev python3-dev
 
-WORKDIR /app
-
-COPY ./requirements.txt /app/requirements.txt
-RUN pip install -r /app/requirements.txt
+RUN pip install --no-cache-dir --quiet --upgrade -r requirements.txt
 
 RUN apt-get remove --yes gcc python3-dev && \
     apt-get -q --yes autoremove && \
