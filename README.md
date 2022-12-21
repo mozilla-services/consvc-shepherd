@@ -6,7 +6,8 @@ reducing the need for deployments of the services that use it.
 
 ## Quick Start
 
-To use consvc-shepherd, you'll need a Python 3.10 development environment.
+To use consvc-shepherd, you'll need a Python 3.11 development environment and 
+poetry installed.
 
 You'll need to specify some minimal configuration. Create a file `.env` and put
 in it at least, if using the docker workflow, you may want to use `.env.example` 
@@ -24,11 +25,8 @@ With that ready, you can set up the Django site:
 $ python -m venv .venv
 $ source .venv/bin/activate
 
-# Install bootstrap-dependencies
-$ pip install -U pip pip-tools
-
 # Install dependencies
-$ pip-sync
+$ poetry install
 
 # Set up Django
 $ ./manage.py migrate
