@@ -26,7 +26,7 @@ jobs:
           command: poetry run python manage.py makemigrations --check --dry-run --noinput
       - run:
           name: Flake8 Lint
-          command: poetry run flake8 .
+          command: poetry run flake8 . --ignore=E203,E302,E501,E701
       - run:
           name: Black Lint
           command: poetry run black . --check --diff
