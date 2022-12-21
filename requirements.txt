@@ -14,7 +14,7 @@ black==22.10.0
     # via -r requirements.in
 cachetools==5.2.0
     # via google-auth
-certifi==2022.9.24
+certifi==2022.12.7
     # via
     #   requests
     #   sentry-sdk
@@ -53,8 +53,6 @@ django-stubs-ext==0.7.0
     # via django-stubs
 dockerflow==2022.8.0
     # via -r requirements.in
-exceptiongroup==1.0.4
-    # via pytest
 factory-boy==3.2.1
     # via -r requirements.in
 faker==15.3.3
@@ -165,12 +163,7 @@ sqlparse==0.4.3
 stevedore==4.1.1
     # via bandit
 tomli==2.0.1
-    # via
-    #   black
-    #   coverage
-    #   django-stubs
-    #   mypy
-    #   pytest
+    # via django-stubs
 types-pytz==2022.6.0.1
     # via django-stubs
 types-pyyaml==6.0.12.2
