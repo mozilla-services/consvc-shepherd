@@ -1,5 +1,6 @@
 __pycache__
 .env
+.install.stamp
 dist
 .venv
 db.sqlite3
