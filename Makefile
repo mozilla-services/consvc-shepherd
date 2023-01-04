@@ -25,11 +25,11 @@ format: install  ##  Sort imports and reformat code
 	$(POETRY) run isort $(APP_DIRS) --profile black
 	$(POETRY) run black $(APP_DIRS)
 
-.PHONY: check
+.PHONY: migration-check
 check: install
 	$(POETRY) run python manage.py makemigrations --check --dry-run --noinput
 
 .PHONY: test
-test: check
+test: migration-check
 	$(POETRY) run pytest --cov --cov-report=term-missing --cov-fail-under=$(COV_FAIL_UNDER)
 

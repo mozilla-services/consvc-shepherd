@@ -8,7 +8,7 @@ jobs:
     steps:
       - checkout
       - run:
-          make lint
+          make -k lint
   test:
     docker:
       - image: cimg/python:3.11
@@ -23,7 +23,7 @@ jobs:
     steps:
       - checkout
       - run:
-         make check
+         make migration-check
   build:
     docker:
       - image: cimg/base:2022.08
