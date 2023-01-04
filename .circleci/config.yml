@@ -2,6 +2,13 @@ version: 2.1
 orbs:
   python: circleci/python@1.5.0
 jobs:
+  lint:
+    docker:
+      - image: cimg/python:3.11
+    steps:
+      - checkout
+      - run:
+          make lint
   test:
     docker:
       - image: cimg/python:3.11
@@ -16,26 +23,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install Dependencies
-          command: poetry install --no-interaction --no-root
-      - run:
-          name: Run tests
-          command: poetry run pytest --cov --cov-report=term-missing --cov-fail-under=95
-      - run:
-          name: Check Migrations
-          command: poetry run python manage.py makemigrations --check --dry-run --noinput
-      - run:
-          name: Flake8 Lint
-          command: poetry run flake8 . --ignore=E203,E302,E501,E701
-      - run:
-          name: Black Lint
-          command: poetry run black . --check --diff
-      - run:
-          name: Imports Sort
-          command: poetry run isort . --profile black --check
-      - run:
-          name: Bandit Check
-          command: poetry run bandit .
+         make check
   build:
     docker:
       - image: cimg/base:2022.08
@@ -101,13 +89,16 @@ jobs:
 workflows:
   shepherd:
     jobs:
+      - lint
       - test
       - build:
           requires:
+            - lint
             - test
       - deploy:
           requires:
             - build
+            - lint
             - test
           filters:
             branches:
