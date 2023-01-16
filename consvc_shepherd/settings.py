@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from typing import List
 
@@ -129,6 +130,7 @@ LOGGING = {
             "level": env("SHEPHERD_ENV", default="DEBUG"),
             "class": "logging.StreamHandler",
             "formatter": "json",
+            "stream": sys.stdout,
         },
     },
     "loggers": {
