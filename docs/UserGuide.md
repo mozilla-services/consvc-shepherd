@@ -9,7 +9,7 @@
 ## Access Requirements
 
 1. Shepherd Google Access Group
-   *  Not being part of the group would result in a google access denied warning when attempting visiting any of the shepherd urls
+   *  Not being part of the group would result in a Google access denied warning when attempting visiting any of the Shepherd URLs
 2. Shepherd Django Roles
    * Not having these roles would result in being presented the "Django Administration" login page
    
