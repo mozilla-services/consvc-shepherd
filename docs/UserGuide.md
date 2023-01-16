@@ -38,5 +38,5 @@ Select “Publish Settings Snapshot” from the actions dropdown and click “Go
 
 A green status bar should appear at the top of the page stating the snapshot has been published.
 
-*Note that Shepherd is unable to undo Snapshots, if changes need to be undone, one would have to manually revert the advertiser information and create a new Snapshot.
+*Note that Shepherd is unable to undo snapshots, if changes need to be undone, one would have to manually revert the advertiser information and create a new snapshot.
 For complex reverts, please contact the engineering team.*
