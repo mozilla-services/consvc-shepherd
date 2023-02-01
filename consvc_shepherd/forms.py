@@ -32,8 +32,8 @@ class SnapshotCompareForm(forms.Form):
         older_advertisers = set(older_json_settings["adm_advertisers"].keys())
         newer_advertisers = set(newer_json_settings["adm_advertisers"].keys())
 
-        added_advertisers = sorted(list(newer_advertisers - older_advertisers))
-        removed_advertisers = sorted(list(older_advertisers - newer_advertisers))
+        added_advertisers = sorted(newer_advertisers - older_advertisers)
+        removed_advertisers = sorted(older_advertisers - newer_advertisers)
         return {
             "title": f"Comparing {os_name} with {ns_name}",
             "differences": [
