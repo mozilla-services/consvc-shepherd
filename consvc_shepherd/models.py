@@ -22,7 +22,7 @@ class SettingsSnapshot(models.Model):
     launched_date = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.name}: {self.created_on}"
+        return f"{self.name}: {self.created_on.strftime('%Y-%m-%d %H:%M')}"
 
     def save(self, *args, **kwargs):
         return super(SettingsSnapshot, self).save(*args, **kwargs)

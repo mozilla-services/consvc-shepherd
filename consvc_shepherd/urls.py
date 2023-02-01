@@ -16,6 +16,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from consvc_shepherd.views import TableOverview
+
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("", TableOverview.as_view()),
 ]
