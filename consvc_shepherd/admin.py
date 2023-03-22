@@ -2,6 +2,7 @@ import json
 
 from django.contrib import admin, messages
 from django.utils import timezone
+from jsonschema import exceptions, validate
 
 from consvc_shepherd.models import SettingsSnapshot
 from consvc_shepherd.storage import send_to_storage
@@ -21,9 +22,17 @@ def publish_snapshot(modeladmin, request, queryset):
         snapshot.launched_by = request.user
         snapshot.launched_date = timezone.now()
         content = json.dumps(snapshot.json_settings, indent=2)
-        send_to_storage(content)
-        snapshot.save()
-        messages.info(request, "Snapshot has been published")
+        with open("./schema/shepherd.schema.json", "r") as f:
+            settings_schema = json.load(f)
+            try:
+                validate(content, schema=settings_schema)
+                send_to_storage(content)
+                snapshot.save()
+                messages.info(request, "Snapshot has been published")
+            except exceptions.ValidationError:
+                messages.error(
+                    request, "JSON generated is different from the expected schema"
+                )
 
 
 @admin.register(SettingsSnapshot)
