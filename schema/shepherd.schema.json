@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Shepherd Settings Snapshot",
+  "description": "The schema for Settings Snapshot from Shepherd",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "adm_advertisers": {
+      "description": "Adm Advertisers",
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-zA-Z\\d]*$": {
+          "description": "Specific Advertiser Data",
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^[A-Z]{2}$": {
+              "description": "Country Specific Advertiser Data",
+              "type": "array",
+              "uniqueItems": true,
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": [
+                  "paths",
+                  "host"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "host": {
+                    "type": "string"
+                  },
+                  "paths": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "value",
+                        "matching"
+                      ],
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        },
+                        "matching": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

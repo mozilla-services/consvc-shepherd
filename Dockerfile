@@ -35,6 +35,7 @@ COPY ./consvc_shepherd/ /app/consvc_shepherd/
 COPY ./static/ /app/static/
 COPY ./contile/ /app/contile/
 COPY ./openidc/ /app/openidc/
+COPY ./schema/ /app/schema/
 COPY ./manage.py /app/
 COPY ./version.json /app/
 COPY ./bin/ /app/bin/

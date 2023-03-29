@@ -1,7 +1,10 @@
+import json
+
 import mock
 from django.contrib.admin.sites import AdminSite
 from django.test import RequestFactory, TestCase
 from django.utils import timezone
+from jsonschema import validate
 
 from consvc_shepherd.admin import ModelAdmin, publish_snapshot
 from consvc_shepherd.models import Partner, SettingsSnapshot
@@ -13,6 +16,9 @@ class SettingsSnapshotAdminTest(TestCase):
         request_factory = RequestFactory()
         self.request = request_factory.get("/admin")
         self.request.user = UserFactory()
+
+        with open("./schema/shepherd.schema.json", "r") as f:
+            self.settings_schema = json.load(f)
 
         site = AdminSite()
         self.admin = ModelAdmin(SettingsSnapshot, site)
@@ -60,6 +66,7 @@ class SettingsSnapshotAdminTest(TestCase):
 
         self.assertEqual(SettingsSnapshot.objects.all().count(), 1)
         snapshot = SettingsSnapshot.objects.all().first()
+        validate(snapshot.json_settings, schema=self.settings_schema)
         self.assertEqual(snapshot.json_settings, expected_json)
 
     def test_publish_snapshot(self):
