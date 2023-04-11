@@ -2,6 +2,13 @@ version: 2.1
 orbs:
   python: circleci/python@1.5.0
 jobs:
+  add_ssh_key:
+    docker:
+      - image: cimg/python:3.11
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "11:b4:92:0f:38:89:4f:2c:13:c6:eb:1e:52:2d:33:07"
   lint:
     docker:
       - image: cimg/python:3.11
@@ -22,8 +29,11 @@ jobs:
           password: $DOCKER_PASS
     steps:
       - checkout
+      - python/install-packages:
+          pkg-manager: poetry
       - run:
-         make migration-check
+         make test
+
   build:
     docker:
       - image: cimg/base:2022.08

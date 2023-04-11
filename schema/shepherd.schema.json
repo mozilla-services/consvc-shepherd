@@ -46,7 +46,7 @@
                           "type": "string"
                         },
                         "matching": {
-                          "type": "boolean"
+                          "type": "string"
                         }
                       }
                     }

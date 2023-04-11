@@ -17,6 +17,7 @@ dockerflow = "^2022.8.0"
 google-auth = {extras = ["pyopenssl"], version = "^2.15.0"}
 sentry-sdk = "^1.14.0"
 psycopg2-binary = "^2.9.5"
+jsonschema = "^4.17.3"
 
 [tool.poetry.group.dev.dependencies]
 bandit = "^1.7.4"

@@ -11,17 +11,17 @@ class TestSnapshotCompareForm(TestCase):
         }
         form = SnapshotCompareForm(data=data)
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors, {"older_snapshot": ["This field is required."]})
+        self.assertEqual(form.errors["older_snapshot"], ["This field is required."])
 
     def test_compare_returns_differences(self):
-        SettingsSnapshot.objects.create(
+        snapshot1 = SettingsSnapshot.objects.create(
             name="o_snapshot", json_settings={"adm_advertisers": {"advertiser1": {}}}
         )
-        SettingsSnapshot.objects.create(
+        snapshot2 = SettingsSnapshot.objects.create(
             name="n_snapshot",
             json_settings={"adm_advertisers": {"advertiser2": {}, "advertiser3": {}}},
         )
-        data = {"older_snapshot": "o_snapshot", "newer_snapshot": "n_snapshot"}
+        data = {"older_snapshot": snapshot1.id, "newer_snapshot": snapshot2.id}
         form = SnapshotCompareForm(data=data)
         self.assertTrue(form.is_valid())
         differences = form.compare()
