@@ -25,7 +25,7 @@ def publish_snapshot(modeladmin, request, queryset):
         with open("./schema/shepherd.schema.json", "r") as f:
             settings_schema = json.load(f)
             try:
-                validate(content, schema=settings_schema)
+                validate(snapshot.json_settings, schema=settings_schema)
                 send_to_storage(content)
                 snapshot.save()
                 messages.info(request, "Snapshot has been published")

@@ -1,15 +1,16 @@
 from unittest import TestCase
-
+import pytest
 from jsonschema import validate
 import json
 
 from contile.models import Partner, Advertiser, AdvertiserUrl
 
-
+@pytest.mark.django_db
 class JSONSchema(TestCase):
 
     def test_schema(self):
-        with open("shepherd.schema.json", "r") as f:
+
+        with open("./schema/shepherd.schema.json", "r") as f:
             settings_schema = json.load(f)
             partner = Partner.objects.create(
                 name="Partner Advertiser",

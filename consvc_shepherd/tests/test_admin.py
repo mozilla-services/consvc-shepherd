@@ -9,6 +9,7 @@ from jsonschema import validate
 from consvc_shepherd.admin import ModelAdmin, publish_snapshot
 from consvc_shepherd.models import Partner, SettingsSnapshot
 from consvc_shepherd.tests.factories import UserFactory
+from contile.models import Advertiser, AdvertiserUrl
 
 
 class SettingsSnapshotAdminTest(TestCase):
@@ -22,8 +23,17 @@ class SettingsSnapshotAdminTest(TestCase):
 
         site = AdminSite()
         self.admin = ModelAdmin(SettingsSnapshot, site)
-        self.partner = Partner.objects.create(name="Partner1")
 
+        self.partner = Partner.objects.create(name="Partner1")
+        advertiser = Advertiser.objects.create(partner=self.partner, name="Advertiser1")
+        AdvertiserUrl.objects.create(
+            advertiser=advertiser,
+            geo="CA",
+            domain="example.com",
+            path="/",
+            matching=True,
+        )
+        self.partner = Partner.objects.get(name="Partner1")
         self.mock_storage_open = mock.patch(
             "django.core.files.storage.default_storage." "open"
         )
@@ -76,11 +86,13 @@ class SettingsSnapshotAdminTest(TestCase):
         SettingsSnapshot.objects.create(
             name="Settings Snapshot",
             settings_type=self.partner,
+            json_settings=self.partner.to_dict(),
             created_by=request.user,
         )
         publish_snapshot(None, request, SettingsSnapshot.objects.all())
         snapshot = SettingsSnapshot.objects.get(name="Settings Snapshot")
         self.assertIsNotNone(snapshot.launched_date)
+
         self.assertEqual(snapshot.launched_by, request.user)
 
     def test_publish_snapshot_does_not_update_with_multiple_snapshots(self):
