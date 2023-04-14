@@ -18,7 +18,7 @@ class SettingsSnapshotAdminTest(TestCase):
         self.request = request_factory.get("/admin")
         self.request.user = UserFactory()
 
-        with open("./schema/shepherd.schema.json", "r") as f:
+        with open("./schema/filter.schema.json", "r") as f:
             self.settings_schema = json.load(f)
 
         site = AdminSite()

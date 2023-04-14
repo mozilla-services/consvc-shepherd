@@ -1,1 +1,8 @@
-{}
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Shepherd Partner Allocation",
+    "description": "The schema for Allocation Configuration of Partners for Shepherd.",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+}
