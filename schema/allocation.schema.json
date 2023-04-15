@@ -4,5 +4,47 @@
     "description": "The schema for Allocation Configuration of Partners for Shepherd.",
     "type": "object",
     "additionalProperties": false,
-    "properties": {}
+    "properties": {
+        "name": {
+            "description": "Allocation Update Name. SOV-<UTC-datetime>",
+            "type": "string"
+        },
+        "allocations": {
+            "type": "array",
+            "uniqueItems": true,
+            "minItems": 1,
+            "items": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "position": {
+                            "type": "integer",
+                            "description": "0-based position of tile from left side, 0 for the first slot."
+                        },
+                        "allocation": {
+                            "type": "object",
+                            "properties": {
+                                "adm": {
+                                    "type": "integer",
+                                    "description": "adM percentage of allocation 0 - 100."
+                                },
+                                "kevel": {
+                                    "type": "integer",
+                                    "description": "Kevel percentage of allocation 0 - 100."
+                                }
+                            },
+                            "required": [
+                                "adm",
+                                "kevel"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "position",
+                        "allocation"
+                    ]
+                }
+            ]
+        }
+    }
 }
