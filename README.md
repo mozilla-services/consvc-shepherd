@@ -19,6 +19,10 @@ eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 ```
 
+You also need to ensure you have Postgres (pgAdmin) installed. You can select a distribution from [https://www.postgresql.org/download/](https://www.postgresql.org/download/), use homebrew or their edb installer client.  Make sure to install version 14.7, or equivalent and have it running when developing for consvc-shepherd.
+
+You'll want to make sure configuration files in the `.env` file match your database setup in pgAdmin, see below for details.
+
 You'll need to specify some minimal configuration. Create a file `.env` and put
 in it at least, if using the docker workflow, you may want to use `.env.example` 
 and rename it to `env`:
@@ -26,8 +30,11 @@ and rename it to `env`:
 ```shell
 DEBUG=true
 SECRET_KEY=keyboard-mash
+DB_NAME=postgres
+DB_USER=postgres
+DB_HOST=localhost
+DB_PASS=postgres
 ```
-
 
 Then, set up your virtual environment:
 
