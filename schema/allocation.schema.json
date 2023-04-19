@@ -5,46 +5,54 @@
     "type": "object",
     "additionalProperties": false,
     "properties": {
-        "name": {
-            "description": "Allocation Update Name. SOV-<UTC datetime:YYYYMMDDHHMMSS>",
-            "type": "string"
-        },
-        "allocations": {
-            "type": "array",
-            "uniqueItems": true,
-            "minItems": 1,
-            "items": [
-                {
-                    "type": "object",
-                    "properties": {
-                        "position": {
-                            "type": "integer",
-                            "description": "0-based position of tile from left side, 0 for the first slot."
-                        },
-                        "allocation": {
-                            "type": "object",
-                            "properties": {
-                                "adm": {
-                                    "type": "integer",
-                                    "description": "adM percentage of allocation 0 - 100."
-                                },
-                                "kevel": {
-                                    "type": "integer",
-                                    "description": "Kevel percentage of allocation 0 - 100."
-                                }
+        "patternProperties": {
+            "^SOV-([0-9]{4})(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])(2[0-3]|[01][0-9])([0-5][0-9])([0-5][0-9])$": {
+                "description": "Allocation Update Title Label. SOV-<UTC datetime:YYYYMMDDHHMMSS>",
+                "type": "string",
+                "additionalProperties": false
+            },
+            "allocations": {
+                "type": "array",
+                "description": "Allocations distributing partner percentages for each tile, left to right.",
+                "uniqueItems": true,
+                "minItems": 1,
+                "items": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "position": {
+                                "type": "integer",
+                                "description": "0-based position of tile from left side, 0 for the first slot."
                             },
-                            "required": [
-                                "adm",
-                                "kevel"
-                            ]
-                        }
-                    },
-                    "required": [
-                        "position",
-                        "allocation"
-                    ]
-                }
-            ]
+                            "allocation": {
+                                "type": "object",
+                                "properties": {
+                                    "adm": {
+                                        "type": "integer",
+                                        "description": "adM percentage of allocation 0 - 100."
+                                    },
+                                    "kevel": {
+                                        "type": "integer",
+                                        "description": "Kevel percentage of allocation 0 - 100."
+                                    }
+                                },
+                                "required": [
+                                    "adm",
+                                    "kevel"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "position",
+                            "allocation"
+                        ]
+                    }
+                ],
+                "required": [
+                    "name",
+                    "allocations"
+                ]
+            }
         }
     }
 }
