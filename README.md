@@ -7,7 +7,17 @@ reducing the need for deployments of the services that use it.
 ## Quick Start
 
 To use consvc-shepherd, you'll need a Python 3.11 development environment and 
-poetry installed.
+poetry installed. To achieve this, it is recommended you use a virtual Python environment.
+
+venv is a viable option, but for ease you can use pyenv-virtualenv as a plugin for 
+pyenv and virtual environments. Using virtualenv creates a .python-version file  in the project directory and if you add `eval "$(pyenv virtualenv-init -)"` to your  `./bashrc` or `./zshrc`, the environment will automatically be activated.
+
+Ex:
+```shell
+export PATH="$HOME/.pyenv/bin:$PATH"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
+```
 
 You'll need to specify some minimal configuration. Create a file `.env` and put
 in it at least, if using the docker workflow, you may want to use `.env.example` 
@@ -18,16 +28,31 @@ DEBUG=true
 SECRET_KEY=keyboard-mash
 ```
 
-With that ready, you can set up the Django site:
+
+Then, set up your virtual environment:
 
 ```shell
 # Prepare a virtual environment (customize this as you see fit)
+
+# pyenv verison install
+$ pyenv install 3.11
+
+# pyenv virtualenv
+$ pyenv virtualenv 3.11 shepherd # or whatever project name you like.
+$ pyenv local shepherd
+
+# venv
 $ python -m venv .venv
 $ source .venv/bin/activate
+```
+Install your dependencies:
 
-# Install dependencies
+```shell
 $ poetry install
+```
 
+With your environment ready, you can set up the Django site:
+```shell
 # Set up Django
 $ ./manage.py migrate
 $ ./manage.py createsuperuser
@@ -36,11 +61,18 @@ $ ./manage.py createsuperuser
 After that is done, you can run the development server:
 
 ```shell
-# Activate the virtualenv, if not already active
+# Activate the virtualenv, if not already active.
+
+# pyenv virtualenv 
+$ pyenv local shepherd
+# venv
 $ source .venv/bin/activate
 
 # Start the app
 $ ./manage.py runserver
+
+# To run on alternate port if in use
+$ ./manage.py runserver localhost:8001
 ```
 
 This will start a development server that reloads on changes to the files. You
