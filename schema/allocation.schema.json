@@ -6,7 +6,7 @@
     "additionalProperties": false,
     "properties": {
         "name": {
-            "description": "Allocation Update Name. SOV-<UTC-datetime>",
+            "description": "Allocation Update Name. SOV-<UTC datetime:YYYYMMDDHHMMSS>",
             "type": "string"
         },
         "allocations": {
