@@ -10,7 +10,7 @@
       "type": "object",
       "additionalProperties": false,
       "patternProperties": {
-        "^[a-zA-Z0-9 '!@#$&()\\\\-`.+,/\\\"]*$": {
+        "^[\\w\\s '!@#$&()\\-`.+,/]*$": {
           "description": "Specific Advertiser Data",
           "type": "object",
           "additionalProperties": false,
