@@ -14,7 +14,7 @@
             "type": "array",
             "description": "Allocations distributing partner percentages for each tile, left to right.",
             "uniqueItems": true,
-            "minItems": 1,
+            "minItems": 2,
             "items": [
                 {
                     "type": "object",
