@@ -1,9 +1,11 @@
+import json
 from unittest import TestCase
+
 import pytest
 from jsonschema import validate
-import json
 
-from contile.models import Partner, Advertiser, AdvertiserUrl
+from contile.models import Advertiser, AdvertiserUrl, Partner
+
 
 @pytest.mark.django_db
 class JSONSchema(TestCase):

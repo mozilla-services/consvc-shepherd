@@ -16,9 +16,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from consvc_shepherd.views import TableOverview
+from consvc_shepherd.models import AllocationSetting
+from consvc_shepherd.views import AllocationSettingList, TableOverview
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path(
+        "allocation/",
+        AllocationSettingList.as_view(model=AllocationSetting),
+        name="list_allocation",
+    ),
     path("", TableOverview.as_view()),
 ]

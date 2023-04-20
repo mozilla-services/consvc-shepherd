@@ -4,7 +4,12 @@ from django.contrib import admin, messages
 from django.utils import timezone
 from jsonschema import exceptions, validate
 
-from consvc_shepherd.models import SettingsSnapshot
+from consvc_shepherd.forms import PartnerAllocationForm
+from consvc_shepherd.models import (
+    AllocationSetting,
+    PartnerAllocation,
+    SettingsSnapshot,
+)
 from consvc_shepherd.storage import send_to_storage
 
 
@@ -54,3 +59,15 @@ class ModelAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return not (obj and obj.launched_by and obj.launched_date)
+
+
+class PartnerAllocationInline(admin.TabularInline):
+    extra = 1
+    model = PartnerAllocation
+    form = PartnerAllocationForm
+
+
+@admin.register(AllocationSetting)
+class AllocationSettingAdmin(admin.ModelAdmin):
+    model = AllocationSetting
+    inlines = [PartnerAllocationInline]

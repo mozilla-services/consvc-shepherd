@@ -1,6 +1,7 @@
 from django import forms
 
-from consvc_shepherd.models import SettingsSnapshot
+from consvc_shepherd.models import PartnerAllocation, SettingsSnapshot
+from contile.models import Partner
 
 
 class SnapshotCompareForm(forms.Form):
@@ -31,3 +32,12 @@ class SnapshotCompareForm(forms.Form):
                 {"diff_type": "Removed Advertisers", "diff_value": removed_advertisers},
             ],
         }
+
+
+class PartnerAllocationForm(forms.ModelForm):
+    partner = forms.ModelChoiceField(queryset=Partner.objects.all())
+    percentage = forms.IntegerField(min_value=0, max_value=100)
+
+    class Meta:
+        model = PartnerAllocation
+        fields = "__all__"
