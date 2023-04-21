@@ -32,6 +32,9 @@ SESSION_COOKIE_SECURE = env("SESSION_COOKIE_SECURE", default=True, cast=bool)
 CSRF_COOKIE_SECURE = env("CSRF_COOKIE_SECURE", default=True, cast=bool)
 SECURE_REFERRER_POLICY = env("SECURE_REFERRER_POLICY", default="origin")
 
+# Contile Output File Name
+CONTILE_OUTPUT_FILE_NAME = env("CONTILE_OUTPUT_FILE_NAME", default="contile_output.json")
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -144,6 +147,7 @@ LOGGING = {
         },
     },
 }
+
 # Sentry Setup
 SENTRY_DSN = env("SENTRY_DSN", default=None)
 SENTRY_TRACE_SAMPLE_RATE = env("SENTRY_TRACE_SAMPLE_RATE", default=1.0)
