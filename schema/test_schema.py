@@ -10,7 +10,7 @@ class JSONSchema(TestCase):
 
     def test_schema(self):
 
-        with open("./schema/filter.schema.json", "r") as f:
+        with open("./schema/adm_filter.schema.json", "r") as f:
             settings_schema = json.load(f)
             partner = Partner.objects.create(
                 name="Partner Advertiser",
