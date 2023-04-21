@@ -22,7 +22,7 @@ def publish_snapshot(modeladmin, request, queryset):
         snapshot.launched_by = request.user
         snapshot.launched_date = timezone.now()
         content = json.dumps(snapshot.json_settings, indent=2)
-        with open("./schema/filter.schema.json", "r") as f:
+        with open("./schema/adm_filter.schema.json", "r") as f:
             settings_schema = json.load(f)
             try:
                 validate(snapshot.json_settings, schema=settings_schema)
