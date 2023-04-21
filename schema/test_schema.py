@@ -16,7 +16,8 @@ class JSONSchema(TestCase):
                 name="Partner Advertiser",
             )
             advertiser1 = Advertiser.objects.create(name="Pocket", partner=partner)
-            advertiser2 = Advertiser.objects.create(name="Firefox", partner=partner)
+            # we want to test that Advertiser names with special characters are valid
+            advertiser2 = Advertiser.objects.create(name="F!-reΩ fox+", partner=partner)
             AdvertiserUrl.objects.create(
                 advertiser=advertiser1,
                 path="/hello/",
