@@ -33,7 +33,7 @@ CSRF_COOKIE_SECURE = env("CSRF_COOKIE_SECURE", default=True, cast=bool)
 SECURE_REFERRER_POLICY = env("SECURE_REFERRER_POLICY", default="origin")
 
 # Contile Output File Name
-CONTILE_OUTPUT_FILE_NAME = env("CONTILE_OUTPUT_FILE_NAME", default="contile_output.json")
+CONTILE_OUTPUT_FILE_NAME = env("CONTILE_OUTPUT_FILE_NAME")
 
 # Application definition
 
