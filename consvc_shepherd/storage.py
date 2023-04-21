@@ -5,7 +5,7 @@ from django.core.files.storage import default_storage
 from django.utils import timezone
 
 
-def send_to_storage(content):
+def send_to_storage(content, modified_file_name="") -> None:
     if settings.DEBUG:
         logging.info(
             f"Sending to storage, name:{settings.GS_BUCKET_FILE_NAME}, content: {content}"
