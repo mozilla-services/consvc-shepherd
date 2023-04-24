@@ -1,5 +1,6 @@
 import json
 
+from django.conf import settings
 from django.contrib import admin, messages
 from django.utils import timezone
 from jsonschema import exceptions, validate
@@ -26,7 +27,7 @@ def publish_snapshot(modeladmin, request, queryset):
             settings_schema = json.load(f)
             try:
                 validate(snapshot.json_settings, schema=settings_schema)
-                send_to_storage(content)
+                send_to_storage(content, settings.GS_BUCKET_FILE_NAME)
                 snapshot.save()
                 messages.info(request, "Snapshot has been published")
             except exceptions.ValidationError:
