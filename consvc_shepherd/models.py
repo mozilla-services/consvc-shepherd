@@ -26,3 +26,22 @@ class SettingsSnapshot(models.Model):
 
     def save(self, *args, **kwargs):
         return super(SettingsSnapshot, self).save(*args, **kwargs)
+
+
+class AllocationSetting(models.Model):
+    """Class that holds information for Allocation"""
+
+    position = models.IntegerField(unique=True)
+
+    def __str__(self):
+        return f"Allocation Position : {self.position}"
+
+
+class PartnerAllocation(models.Model):
+    """Class that holds information about Partner Specific Allocation"""
+
+    allocationPosition = models.ForeignKey(
+        AllocationSetting, on_delete=models.CASCADE, related_name="partner_allocations"
+    )
+    partner = models.ForeignKey(Partner, on_delete=models.SET_NULL, null=True)
+    percentage = models.IntegerField()

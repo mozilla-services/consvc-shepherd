@@ -1,10 +1,10 @@
 from typing import Any
 
 from django.shortcuts import render
-from django.views.generic import TemplateView
+from django.views.generic import ListView, TemplateView
 
 from consvc_shepherd.forms import SnapshotCompareForm
-from consvc_shepherd.models import SettingsSnapshot
+from consvc_shepherd.models import AllocationSetting, SettingsSnapshot
 
 
 class TableOverview(TemplateView):
@@ -25,3 +25,15 @@ class TableOverview(TemplateView):
         else:
             context["errors"] = form.errors
             return render(request, self.template_name, context=context)
+
+
+class AllocationSettingList(ListView):
+    model = AllocationSetting
+    template_name = "allocation/allocation_list.html"
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["allocation_settings"] = AllocationSetting.objects.all().order_by(
+            "position"
+        )
+        return context

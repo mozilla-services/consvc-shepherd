@@ -15,7 +15,7 @@ $(INSTALL_STAMP): pyproject.toml poetry.lock
 
 .PHONY: lint
 lint: install  ##  Run various linters
-	$(POETRY) run isort --check-only $(APP_DIRS)
+	$(POETRY) run isort --check-only $(APP_DIRS) --profile black
 	$(POETRY) run black --quiet --diff --check $(APP_DIRS)
 	$(POETRY) run flake8 $(APP_DIRS) --ignore=E203,E302,E501,E701
 	$(POETRY) run bandit --quiet -r $(APP_DIRS)
