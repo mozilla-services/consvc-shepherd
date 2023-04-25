@@ -29,6 +29,8 @@ class SettingsSnapshot(models.Model):
 
 
 class AllocationSetting(models.Model):
+    """Class that holds information for Allocation"""
+
     position = models.IntegerField(unique=True)
 
     def __str__(self):
@@ -36,6 +38,8 @@ class AllocationSetting(models.Model):
 
 
 class PartnerAllocation(models.Model):
+    """Class that holds information about Partner Specific Allocation"""
+
     allocationPosition = models.ForeignKey(
         AllocationSetting, on_delete=models.CASCADE, related_name="partner_allocations"
     )

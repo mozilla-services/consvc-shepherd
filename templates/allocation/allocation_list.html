@@ -5,9 +5,6 @@
     <div class="p-2 w-50 mx-auto">
         <h2>Allocation Settings</h2>
         <a class="mb-4" href="/admin/consvc_shepherd/allocationsetting/add/">Add New Position</a>
-        {% if not allocation_settings %}
-            <h5>No allocations set.</h5>
-        {% endif %}
         {% for a_s in allocation_settings %}
             <div class="card p-2 mt-4 ">
                 <div class="px-2 d-flex justify-content-between align-items-center">
@@ -33,6 +30,8 @@
                     </tbody>
                 </table>
             </div>
+        {% empty %}
+            <h5>No allocations set.</h5>
         {% endfor %}
     </div>
 {% endblock content %}
