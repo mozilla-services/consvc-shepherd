@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from typing import List
+from typing import Any
 
 import environ
 import sentry_sdk
@@ -25,7 +25,7 @@ DEV_USER_EMAIL = "dev@example.com"
 OPENIDC_HEADER = env("OPENIDC_HEADER", default=None)
 OPENIDC_HEADER_PREFIX = env("OPENIDC_HEADER_PREFIX", default=None)
 IAP_AUDIENCE = env("IAP_AUDIENCE", default=None)
-ALLOWED_HOSTS: List[str] = ["*"]
+ALLOWED_HOSTS: list[str] = ["*"]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = env("SESSION_COOKIE_SECURE", default=True, cast=bool)
@@ -34,7 +34,7 @@ SECURE_REFERRER_POLICY = env("SECURE_REFERRER_POLICY", default="origin")
 
 # Application definition
 
-INSTALLED_APPS = [
+INSTALLED_APPS: list[str] = [
     "polymorphic",
     "consvc_shepherd",
     "contile",
@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     "dockerflow.django",
 ]
 
-MIDDLEWARE = [
+MIDDLEWARE: list = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -59,9 +59,9 @@ MIDDLEWARE = [
     "openidc.middleware.OpenIDCAuthMiddleware",
 ]
 
-ROOT_URLCONF = "consvc_shepherd.urls"
+ROOT_URLCONF: str = "consvc_shepherd.urls"
 
-TEMPLATES = [
+TEMPLATES: list[dict[str, Any]] = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": ["./templates"],
@@ -77,12 +77,12 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "consvc_shepherd.wsgi.application"
+WSGI_APPLICATION: str = "consvc_shepherd.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DATABASES = {
+DATABASES: dict[str, Any] = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": env("DB_NAME"),
@@ -96,31 +96,32 @@ DATABASES = {
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE: str = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE: str = "UTC"
 
-USE_I18N = True
+USE_I18N: bool = True
 
-USE_TZ = True
+USE_TZ: bool = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_BUCKET_NAME = env("STATIC_BUCKET_NAME", default="")
-STATIC_URL = "static/"
-STATIC_ROOT = "./static"
+STATIC_URL: str = "static/"
+STATIC_ROOT: str = "./static"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+DEFAULT_AUTO_FIELD: str = "django.db.models.BigAutoField"
 
-DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
+DEFAULT_FILE_STORAGE: str = "storages.backends.gcloud.GoogleCloudStorage"
 GS_BUCKET_NAME = env("GS_BUCKET_NAME", default="")
 GS_BUCKET_FILE_NAME = env("GS_BUCKET_FILE_NAME", default="settings_from_shepherd")
+ALLOCATION_FILE_NAME: str = env("ALLOCATION_FILE_NAME", default="allocation_file")
 
-LOGGING = {
+LOGGING: dict[str, Any] = {
     "version": 1,
     "formatters": {
         "json": {"()": "dockerflow.logging.JsonLogFormatter", "logger_name": "shepherd"}
@@ -144,10 +145,12 @@ LOGGING = {
         },
     },
 }
+
 # Sentry Setup
 SENTRY_DSN = env("SENTRY_DSN", default=None)
 SENTRY_TRACE_SAMPLE_RATE = env("SENTRY_TRACE_SAMPLE_RATE", default=1.0)
 SENTRY_ENV = env("SENTRY_ENV", default=None)
+
 sentry_sdk.init(
     dsn=SENTRY_DSN,
     integrations=[DjangoIntegration()],

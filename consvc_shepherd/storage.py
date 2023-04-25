@@ -5,15 +5,14 @@ from django.core.files.storage import default_storage
 from django.utils import timezone
 
 
-def send_to_storage(content):
+def send_to_storage(content, file_name: str) -> None:
+    """Send adM filter and allocation settings to GCS bucket."""
     if settings.DEBUG:
-        logging.info(
-            f"Sending to storage, name:{settings.GS_BUCKET_FILE_NAME}, content: {content}"
-        )
+        logging.info(f"Sending to storage, name:{file_name}, content: {content}")
     else:
-        current_time_string = timezone.now().strftime("%Y%m%d%H%M%S")
-        latest_file_name = f"{settings.GS_BUCKET_FILE_NAME}_latest.json"
-        date_file_name = f"{settings.GS_BUCKET_FILE_NAME}_{current_time_string}.json"
+        current_time_string: str = timezone.now().strftime("%Y%m%d%H%M%S")
+        latest_file_name: str = f"{file_name}_latest.json"
+        date_file_name: str = f"{file_name}_{current_time_string}.json"
 
         date_file = default_storage.open(date_file_name, "w")
         date_file.write(content)
