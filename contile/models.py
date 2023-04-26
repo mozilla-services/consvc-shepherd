@@ -1,5 +1,8 @@
+from typing import Any
+
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import BooleanField, CharField, ForeignKey
 from django_countries.fields import CountryField
 
 MATCHING_CHOICES = (
@@ -11,7 +14,7 @@ INVALID_PATH_ERROR = "All paths need to start '/'"
 
 
 class Partner(models.Model):
-    name = models.CharField(max_length=128)
+    name: CharField = models.CharField(max_length=128)
 
     def to_dict(self):
         partner_dict = {}
@@ -25,8 +28,8 @@ class Partner(models.Model):
 
 
 class Advertiser(models.Model):
-    name = models.CharField(max_length=128)
-    partner = models.ForeignKey(
+    name: CharField = models.CharField(max_length=128)
+    partner: ForeignKey = models.ForeignKey(
         Partner,
         blank=False,
         null=False,
@@ -34,8 +37,8 @@ class Advertiser(models.Model):
         on_delete=models.CASCADE,
     )
 
-    def to_dict(self):
-        result = {}
+    def to_dict(self) -> dict[str, Any]:
+        result: dict = {}
         geo_domain_combos = (
             self.ad_urls.all()
             .values_list("geo", "domain")
@@ -63,7 +66,7 @@ class Advertiser(models.Model):
 
 
 class AdvertiserUrl(models.Model):
-    advertiser = models.ForeignKey(
+    advertiser: ForeignKey = models.ForeignKey(
         Advertiser,
         blank=False,
         null=False,
@@ -71,10 +74,10 @@ class AdvertiserUrl(models.Model):
         on_delete=models.CASCADE,
     )
 
-    geo = CountryField()
-    domain = models.CharField(max_length=255)
-    path = models.CharField(max_length=128)
-    matching = models.BooleanField(choices=MATCHING_CHOICES, default=True)
+    geo: CountryField = CountryField()
+    domain: CharField = models.CharField(max_length=255)
+    path: CharField = models.CharField(max_length=128)
+    matching: BooleanField = models.BooleanField(choices=MATCHING_CHOICES, default=True)
 
     def __str__(self):
         return f"{self.geo.code}: {self.domain} {self.path}"
@@ -94,7 +97,7 @@ class AdvertiserUrl(models.Model):
         return super(AdvertiserUrl, self).save(*args, **kwargs)
 
 
-def is_valid_host(host):
+def is_valid_host(host) -> None:
 
     if not all([h.isalnum() or h in [".", "-"] for h in host]):
         raise ValidationError(
