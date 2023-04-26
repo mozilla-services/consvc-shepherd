@@ -1,25 +1,34 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import (
+    CharField,
+    DateTimeField,
+    ForeignKey,
+    IntegerField,
+    JSONField,
+)
 
 from contile.models import Partner
 
 
 class SettingsSnapshot(models.Model):
-    name = models.CharField(max_length=128)
-    settings_type = models.ForeignKey(Partner, on_delete=models.SET_NULL, null=True)
-    json_settings = models.JSONField(blank=True, null=True)
-    created_by = models.ForeignKey(
+    name: CharField = models.CharField(max_length=128)
+    settings_type: ForeignKey = models.ForeignKey(
+        Partner, on_delete=models.SET_NULL, null=True
+    )
+    json_settings: JSONField = models.JSONField(blank=True, null=True)
+    created_by: ForeignKey = models.ForeignKey(
         get_user_model(), on_delete=models.CASCADE, blank=True, null=True
     )
-    created_on = models.DateTimeField(auto_now_add=True)
-    launched_by = models.ForeignKey(
+    created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
+    launched_by: ForeignKey = models.ForeignKey(
         get_user_model(),
         related_name="launched_by",
         on_delete=models.CASCADE,
         blank=True,
         null=True,
     )
-    launched_date = models.DateTimeField(blank=True, null=True)
+    launched_date: DateTimeField = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.name}: {self.created_on.strftime('%Y-%m-%d %H:%M')}"
@@ -31,7 +40,7 @@ class SettingsSnapshot(models.Model):
 class AllocationSetting(models.Model):
     """Class that holds information for Allocation"""
 
-    position = models.IntegerField(unique=True)
+    position: IntegerField = models.IntegerField(unique=True)
 
     def __str__(self):
         return f"Allocation Position : {self.position}"
@@ -40,8 +49,10 @@ class AllocationSetting(models.Model):
 class PartnerAllocation(models.Model):
     """Class that holds information about Partner Specific Allocation"""
 
-    allocationPosition = models.ForeignKey(
+    allocationPosition: ForeignKey = models.ForeignKey(
         AllocationSetting, on_delete=models.CASCADE, related_name="partner_allocations"
     )
-    partner = models.ForeignKey(Partner, on_delete=models.SET_NULL, null=True)
-    percentage = models.IntegerField()
+    partner: ForeignKey = models.ForeignKey(
+        Partner, on_delete=models.SET_NULL, null=True
+    )
+    percentage: IntegerField = models.IntegerField()
