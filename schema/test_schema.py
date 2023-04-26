@@ -83,17 +83,17 @@ class JSONSchema(TestCase):
                 percentage=100
             )
             allocation1_kevel = PartnerAllocation.objects.create(
-                allocationPosition=AllocationSetting.objects.create(position=0),
+                allocationPosition=AllocationSetting.objects.create(position=1),
                 partner=kevel_partner,
                 percentage=0
             )
             allocation2_adm = PartnerAllocation.objects.create(
-                allocationPosition=AllocationSetting.objects.create(position=1),
+                allocationPosition=AllocationSetting.objects.create(position=2),
                 partner=adm_partner,
                 percentage=85
             )
             allocation2_kevel = PartnerAllocation.objects.create(
-                allocationPosition=AllocationSetting.objects.create(position=1),
+                allocationPosition=AllocationSetting.objects.create(position=3),
                 partner=kevel_partner,
                 percentage=15
             )
