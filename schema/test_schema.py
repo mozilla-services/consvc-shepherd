@@ -64,11 +64,13 @@ class JSONSchema(TestCase):
 @pytest.mark.django_db
 class JSONSchema(TestCase):
 
-    def test_filter_schema(self):
+    def test_allocation_schema(self):
         """Tests allocation schema for SOV."""
+        # pass
         with open("./schema/allocation.schema.json", "r") as f:
             allocations_schema = json.load(f)
-            
+            allocation_name_label:str = "SOV-20230101140000"
+            pass
             adm_partner = Partner.objects.create(
                 name="adm"
             )
@@ -85,6 +87,16 @@ class JSONSchema(TestCase):
                 partner=kevel_partner,
                 percentage=0
             )
+            allocation2_adm = PartnerAllocation.objects.create(
+                allocationPosition=AllocationSetting.objects.create(position=1),
+                partner=adm_partner,
+                percentage=85
+            )
+            allocation2_kevel = PartnerAllocation.objects.create(
+                allocationPosition=AllocationSetting.objects.create(position=1),
+                partner=kevel_partner,
+                percentage=15
+            )
 
-        pass
+
 
