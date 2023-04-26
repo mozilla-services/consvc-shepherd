@@ -6,9 +6,9 @@ faker = FakerFactory.create()
 
 
 class UserFactory(factory.django.DjangoModelFactory):
-    first_name = factory.LazyAttribute(lambda o: faker.first_name())
-    last_name = factory.LazyAttribute(lambda o: faker.last_name())
-    email = factory.LazyAttribute(lambda o: faker.company_email())
+    first_name = factory.LazyAttribute(lambda o: faker.first_name())  # type: ignore [attr-defined]
+    last_name = factory.LazyAttribute(lambda o: faker.last_name())  # type: ignore [attr-defined]
+    email = factory.LazyAttribute(lambda o: faker.company_email())  # type: ignore [attr-defined]
     username = factory.LazyAttribute(lambda o: o.email)
 
     class Meta:

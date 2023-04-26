@@ -42,14 +42,14 @@ class Advertiser(models.Model):
     def to_dict(self) -> dict[str, Any]:
         result: dict = {}
         geo_domain_combos = (
-            self.ad_urls.all()
+            self.ad_urls.all()  # type: ignore [attr-defined]
             .values_list("geo", "domain")
             .distinct()
             .order_by("geo", "domain")
         )
 
         for geo, domain in geo_domain_combos:
-            ad_urls = self.ad_urls.filter(geo=geo, domain=domain).order_by("path")
+            ad_urls = self.ad_urls.filter(geo=geo, domain=domain).order_by("path")  # type: ignore [attr-defined]
             paths = [
                 {
                     "value": ad_url.path,
@@ -89,7 +89,7 @@ class AdvertiserUrl(models.Model):
         if not self.path.startswith("/"):
             raise ValidationError(INVALID_PATH_ERROR)
 
-        if self.get_matching_display() == "prefix" and (
+        if self.get_matching_display() == "prefix" and (  # type: ignore [attr-defined]
             self.path == "/" or not self.path.endswith("/")
         ):
             raise ValidationError(INVALID_PREFIX_PATH_ERROR)
