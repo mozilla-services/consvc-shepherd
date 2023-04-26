@@ -5,12 +5,14 @@ from django.db import models
 from django.db.models import BooleanField, CharField, ForeignKey
 from django_countries.fields import CountryField
 
-MATCHING_CHOICES = (
+MATCHING_CHOICES: tuple[tuple[bool, str], tuple[bool, str]] = (
     (True, "exact"),
     (False, "prefix"),
 )
-INVALID_PREFIX_PATH_ERROR = "Prefix paths can't be just '/' but needs to end with '/' "
-INVALID_PATH_ERROR = "All paths need to start '/'"
+INVALID_PREFIX_PATH_ERROR: str = (
+    "Prefix paths can't be just '/' but needs to end with '/' "
+)
+INVALID_PATH_ERROR: str = "All paths need to start '/'"
 
 
 class Partner(models.Model):
