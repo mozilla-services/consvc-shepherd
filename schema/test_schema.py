@@ -1,9 +1,11 @@
+"""Schema validation and testing module."""
 import json
 from unittest import TestCase
 
 import pytest
 from jsonschema import validate
 
+from consvc_shepherd.models import AllocationSetting, PartnerAllocation
 from contile.models import Advertiser, AdvertiserUrl, Partner
 
 
@@ -66,4 +68,23 @@ class JSONSchema(TestCase):
         """Tests allocation schema for SOV."""
         with open("./schema/allocation.schema.json", "r") as f:
             allocations_schema = json.load(f)
+            
+            adm_partner = Partner.objects.create(
+                name="adm"
+            )
+            kevel_partner = Partner.objects.create(
+                name="kevel"
+            )
+            allocation1_adm = PartnerAllocation.objects.create(
+                allocationPosition=AllocationSetting.objects.create(position=0),
+                partner=adm_partner,
+                percentage=100
+            )
+            allocation1_kevel = PartnerAllocation.objects.create(
+                allocationPosition=AllocationSetting.objects.create(position=0),
+                partner=kevel_partner,
+                percentage=0
+            )
+
         pass
+
