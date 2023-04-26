@@ -31,5 +31,5 @@ check: install
 
 .PHONY: test
 test: migration-check
-	$(POETRY) run pytest --cov --cov-report=term-missing --cov-fail-under=$(COV_FAIL_UNDER)
+	export DJANGO_SETTINGS_MODULE=consvc_shepherd.settings && $(POETRY) run pytest --cov --cov-report=term-missing --cov-fail-under=$(COV_FAIL_UNDER)
 
