@@ -13,6 +13,10 @@ $(INSTALL_STAMP): pyproject.toml poetry.lock
 	$(POETRY) install
 	touch $(INSTALL_STAMP)
 
+.PHONY: mypy
+mypy: $(INSTALL_STAMP)  ##  Run mypy
+	$(POETRY) run mypy $(APP_DIRS) --config-file="pyproject.toml"
+
 .PHONY: lint
 lint: install  ##  Run various linters
 	$(POETRY) run isort --check-only $(APP_DIRS) --profile black
