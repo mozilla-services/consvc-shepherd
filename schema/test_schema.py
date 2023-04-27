@@ -9,11 +9,10 @@ from jsonschema import validate
 from consvc_shepherd.models import AllocationSetting, PartnerAllocation
 from contile.models import Advertiser, AdvertiserUrl, Partner
 
-@pytest.mark.skip(reason="in progress")
 @pytest.mark.django_db
 class JSONSchema(TestCase):
 
-    def test_filter_schema(self): # noqa
+    def test_filter_schema(self): # pragma: no cover
         """Tests filter schema for adM."""
 
         with open("./schema/adm_filter.schema.json", "r") as f:
@@ -62,11 +61,11 @@ class JSONSchema(TestCase):
 
             validate(partner.to_dict(), settings_schema)
 
-@pytest.mark.skip(reason="in progress")
+
 @pytest.mark.django_db
 class JSONSchema(TestCase):
 
-    def test_allocation_schema(self): # noqa
+    def test_allocation_schema(self): # pragma: no cover
         """Tests allocation schema for SOV."""
         # pass
         with open("./schema/allocation.schema.json", "r") as f:
