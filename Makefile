@@ -13,12 +13,28 @@ $(INSTALL_STAMP): pyproject.toml poetry.lock
 	$(POETRY) install
 	touch $(INSTALL_STAMP)
 
-.PHONY: lint
-lint: install  ##  Run various linters
+.PHONY: isort
+isort: $(INSTALL_STAMP)  ##  Run isort
 	$(POETRY) run isort --check-only $(APP_DIRS) --profile black
+
+.PHONY: black
+black: $(INSTALL_STAMP)  ##  Run black
 	$(POETRY) run black --quiet --diff --check $(APP_DIRS)
+
+.PHONY: flake8
+flake8: $(INSTALL_STAMP)  ##  Run flake8
 	$(POETRY) run flake8 $(APP_DIRS) --ignore=E203,E302,E501,E701
-	$(POETRY) run bandit --quiet -r $(APP_DIRS)
+
+.PHONY: bandit
+bandit: $(INSTALL_STAMP)  ##  Run bandit ##CHECK -c "pyproject.toml"
+	$(POETRY) run bandit --quiet -r $(APP_DIRS) 
+
+.PHONY: mypy
+mypy: $(INSTALL_STAMP)  ##  Run mypy
+	$(POETRY) run mypy $(APP_DIRS) --config-file="pyproject.toml"
+
+.PHONY: lint
+lint: $(INSTALL_STAMP) isort black flake8 bandit mypy ##  Run various linters
 
 .PHONY: format
 format: install  ##  Sort imports and reformat code

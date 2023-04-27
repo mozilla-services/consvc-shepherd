@@ -1,17 +1,22 @@
+from typing import Any
+
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import BooleanField, CharField, ForeignKey
 from django_countries.fields import CountryField
 
-MATCHING_CHOICES = (
+MATCHING_CHOICES: tuple[tuple[bool, str], tuple[bool, str]] = (
     (True, "exact"),
     (False, "prefix"),
 )
-INVALID_PREFIX_PATH_ERROR = "Prefix paths can't be just '/' but needs to end with '/' "
-INVALID_PATH_ERROR = "All paths need to start '/'"
+INVALID_PREFIX_PATH_ERROR: str = (
+    "Prefix paths can't be just '/' but needs to end with '/' "
+)
+INVALID_PATH_ERROR: str = "All paths need to start '/'"
 
 
 class Partner(models.Model):
-    name = models.CharField(max_length=128)
+    name: CharField = models.CharField(max_length=128)
 
     def to_dict(self):
         partner_dict = {}
@@ -25,8 +30,8 @@ class Partner(models.Model):
 
 
 class Advertiser(models.Model):
-    name = models.CharField(max_length=128)
-    partner = models.ForeignKey(
+    name: CharField = models.CharField(max_length=128)
+    partner: ForeignKey = models.ForeignKey(
         Partner,
         blank=False,
         null=False,
@@ -34,17 +39,17 @@ class Advertiser(models.Model):
         on_delete=models.CASCADE,
     )
 
-    def to_dict(self):
-        result = {}
+    def to_dict(self) -> dict[str, Any]:
+        result: dict = {}
         geo_domain_combos = (
-            self.ad_urls.all()
+            self.ad_urls.all()  # type: ignore [attr-defined]
             .values_list("geo", "domain")
             .distinct()
             .order_by("geo", "domain")
         )
 
         for geo, domain in geo_domain_combos:
-            ad_urls = self.ad_urls.filter(geo=geo, domain=domain).order_by("path")
+            ad_urls = self.ad_urls.filter(geo=geo, domain=domain).order_by("path")  # type: ignore [attr-defined]
             paths = [
                 {
                     "value": ad_url.path,
@@ -63,7 +68,7 @@ class Advertiser(models.Model):
 
 
 class AdvertiserUrl(models.Model):
-    advertiser = models.ForeignKey(
+    advertiser: ForeignKey = models.ForeignKey(
         Advertiser,
         blank=False,
         null=False,
@@ -71,10 +76,10 @@ class AdvertiserUrl(models.Model):
         on_delete=models.CASCADE,
     )
 
-    geo = CountryField()
-    domain = models.CharField(max_length=255)
-    path = models.CharField(max_length=128)
-    matching = models.BooleanField(choices=MATCHING_CHOICES, default=True)
+    geo: CountryField = CountryField()
+    domain: CharField = models.CharField(max_length=255)
+    path: CharField = models.CharField(max_length=128)
+    matching: BooleanField = models.BooleanField(choices=MATCHING_CHOICES, default=True)
 
     def __str__(self):
         return f"{self.geo.code}: {self.domain} {self.path}"
@@ -84,7 +89,7 @@ class AdvertiserUrl(models.Model):
         if not self.path.startswith("/"):
             raise ValidationError(INVALID_PATH_ERROR)
 
-        if self.get_matching_display() == "prefix" and (
+        if self.get_matching_display() == "prefix" and (  # type: ignore [attr-defined]
             self.path == "/" or not self.path.endswith("/")
         ):
             raise ValidationError(INVALID_PREFIX_PATH_ERROR)
@@ -94,7 +99,7 @@ class AdvertiserUrl(models.Model):
         return super(AdvertiserUrl, self).save(*args, **kwargs)
 
 
-def is_valid_host(host):
+def is_valid_host(host) -> None:
 
     if not all([h.isalnum() or h in [".", "-"] for h in host]):
         raise ValidationError(

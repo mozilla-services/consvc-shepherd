@@ -1,6 +1,6 @@
 import json
 
-import mock
+import mock  # type: ignore [import]
 from django.contrib.admin.sites import AdminSite
 from django.test import RequestFactory, TestCase
 from django.utils import timezone
