@@ -1,5 +1,6 @@
 """Schema validation and testing module."""
 import json
+from typing import Any
 from unittest import TestCase
 
 import pytest
@@ -69,7 +70,9 @@ class JSONSchema(TestCase):
         # pass
         with open("./schema/allocation.schema.json", "r") as f:
             allocations_schema = json.load(f)
-            allocation_name_label:str = "SOV-20230101140000"
+            allocations: dict[str, Any] = {}
+            allocations.update({"name": "SOV-20230101140000",
+                               "allocations": []})
             pass
             adm_partner = Partner.objects.create(
                 name="adm"
@@ -77,11 +80,13 @@ class JSONSchema(TestCase):
             kevel_partner = Partner.objects.create(
                 name="kevel"
             )
-            allocation1_adm = PartnerAllocation.objects.create(
+            allocations["allocations"].append({
+                "position": AllocationSetting.objects.create(position=0),
+                "allocation": PartnerAllocation.objects.create(
                 allocationPosition=AllocationSetting.objects.create(position=0),
                 partner=adm_partner,
                 percentage=100
-            )
+            )})
             allocation1_kevel = PartnerAllocation.objects.create(
                 allocationPosition=AllocationSetting.objects.create(position=1),
                 partner=kevel_partner,
