@@ -33,10 +33,6 @@ bandit: $(INSTALL_STAMP)  ##  Run bandit ##CHECK -c "pyproject.toml"
 mypy: $(INSTALL_STAMP)  ##  Run mypy
 	$(POETRY) run mypy $(APP_DIRS) --config-file="pyproject.toml"
 
-.PHONY: mypy
-mypy: $(INSTALL_STAMP)  ##  Run mypy
-	$(POETRY) run mypy $(APP_DIRS) --config-file="pyproject.toml"
-
 .PHONY: lint
 lint: $(INSTALL_STAMP) isort black flake8 bandit mypy ##  Run various linters
 
