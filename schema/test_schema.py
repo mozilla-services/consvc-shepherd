@@ -13,7 +13,7 @@ from contile.models import Advertiser, AdvertiserUrl, Partner
 @pytest.mark.django_db
 class JSONSchema(TestCase):
 
-    def test_filter_schema(self):
+    def test_filter_schema(self): # noqa
         """Tests filter schema for adM."""
 
         with open("./schema/adm_filter.schema.json", "r") as f:
@@ -65,7 +65,7 @@ class JSONSchema(TestCase):
 @pytest.mark.django_db
 class JSONSchema(TestCase):
 
-    def test_allocation_schema(self):
+    def test_allocation_schema(self): # noqa
         """Tests allocation schema for SOV."""
         # pass
         with open("./schema/allocation.schema.json", "r") as f:
@@ -80,10 +80,10 @@ class JSONSchema(TestCase):
                 name="kevel"
             )
             position1_alloc: AllocationSetting = AllocationSetting.objects.create(
-                postition=1
+                position=1
             )
             position2_alloc: AllocationSetting = AllocationSetting.objects.create(
-                postition=2
+                position=2
             )
 
             allocation1_adm: PartnerAllocation = PartnerAllocation.objects.create(
@@ -107,6 +107,3 @@ class JSONSchema(TestCase):
                 partner=kevel_partner,
                 percentage=15
             )
-
-
-
