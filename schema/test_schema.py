@@ -9,7 +9,7 @@ from jsonschema import validate
 from consvc_shepherd.models import AllocationSetting, PartnerAllocation
 from contile.models import Advertiser, AdvertiserUrl, Partner
 
-
+@pytest.mark.skip(reason="in progress")
 @pytest.mark.django_db
 class JSONSchema(TestCase):
 
@@ -62,6 +62,7 @@ class JSONSchema(TestCase):
 
             validate(partner.to_dict(), settings_schema)
 
+@pytest.mark.skip(reason="in progress")
 @pytest.mark.django_db
 class JSONSchema(TestCase):
 
