@@ -73,32 +73,37 @@ class JSONSchema(TestCase):
             allocations: dict[str, Any] = {}
             allocations.update({"name": "SOV-20230101140000",
                                "allocations": []})
-            pass
-            adm_partner = Partner.objects.create(
+            adm_partner: Partner = Partner.objects.create(
                 name="adm"
             )
-            kevel_partner = Partner.objects.create(
+            kevel_partner: Partner = Partner.objects.create(
                 name="kevel"
             )
-            allocations["allocations"].append({
-                "position": AllocationSetting.objects.create(position=0),
-                "allocation": PartnerAllocation.objects.create(
-                allocationPosition=AllocationSetting.objects.create(position=0),
-                partner=adm_partner,
+            position1_alloc: AllocationSetting = AllocationSetting.objects.create(
+                postition=1
+            )
+            position2_alloc: AllocationSetting = AllocationSetting.objects.create(
+                postition=2
+            )
+
+            allocation1_adm: PartnerAllocation = PartnerAllocation.objects.create(
+                allocationPosition=position1_alloc,
+                partner=kevel_partner,
                 percentage=100
-            )})
-            allocation1_kevel = PartnerAllocation.objects.create(
-                allocationPosition=AllocationSetting.objects.create(position=1),
+            )
+            allocation1_kevel: PartnerAllocation = PartnerAllocation.objects.create(
+                allocationPosition=position1_alloc,
                 partner=kevel_partner,
                 percentage=0
             )
-            allocation2_adm = PartnerAllocation.objects.create(
-                allocationPosition=AllocationSetting.objects.create(position=2),
+
+            allocation2_adm: PartnerAllocation = PartnerAllocation.objects.create(
+                allocationPosition=position2_alloc,
                 partner=adm_partner,
                 percentage=85
             )
-            allocation2_kevel = PartnerAllocation.objects.create(
-                allocationPosition=AllocationSetting.objects.create(position=3),
+            allocation2_kevel: PartnerAllocation = PartnerAllocation.objects.create(
+                allocationPosition=position2_alloc,
                 partner=kevel_partner,
                 percentage=15
             )
