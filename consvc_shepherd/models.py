@@ -37,10 +37,7 @@ class AllocationSetting(models.Model):
 
     def to_dict(self) -> dict[str, Any]:
         """Creates dictionary representation of AllocationSetting instance."""
-        allocation_dict: dict = {}
-        for allocation in self.partner_allocations.all():
-            allocation_dict.update(allocation.to_dict())
-        return {"allocations": allocation_dict}
+        return {"position": self.position}
 
     def __str__(self):
         return f"Allocation Position : {self.position}"
@@ -54,3 +51,10 @@ class PartnerAllocation(models.Model):
     )
     partner = models.ForeignKey(Partner, on_delete=models.SET_NULL, null=True)
     percentage = models.IntegerField()
+
+    def to_dict(self) -> dict[str, Any]:
+        """Creates dictionary representation of PartnerAllocation instance."""
+        partner_allocation_dict: dict = {}
+        for allocation in self.partner_allocations.all():
+            partner_allocation_dict.update(allocation.to_dict())
+        return {"partner_allocations": partner_allocation_dict}
