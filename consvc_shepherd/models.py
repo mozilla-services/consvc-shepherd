@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.contrib.auth import get_user_model
 from django.db import models
 
@@ -32,6 +34,13 @@ class AllocationSetting(models.Model):
     """Class that holds information for Allocation"""
 
     position = models.IntegerField(unique=True)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Creates dictionary representation of AllocationSetting instance."""
+        allocation_dict: dict = {}
+        for allocation in self.partner_allocations.all():
+            allocation_dict.update(allocation.to_dict())
+        return {"allocations": allocation_dict}
 
     def __str__(self):
         return f"Allocation Position : {self.position}"
