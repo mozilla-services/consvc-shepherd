@@ -67,7 +67,6 @@ class JSONSchema(TestCase):
 
     def test_allocation_schema(self): # pragma: no cover
         """Tests allocation schema for SOV."""
-        # pass
         with open("./schema/allocation.schema.json", "r") as f:
             allocations_schema = json.load(f)
             allocations: dict[str, Any] = {}
