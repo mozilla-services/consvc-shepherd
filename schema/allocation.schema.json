@@ -14,43 +14,42 @@
             "type": "array",
             "description": "Allocations distributing partner percentages for each tile, left to right.",
             "uniqueItems": true,
-            "minItems": 2,
-            "items": [
-                {
-                    "type": "object",
-                    "properties": {
-                        "position": {
-                            "type": "integer",
-                            "description": "0-based position of tile from left side, 0 for the first slot."
-                        },
-                        "allocation": {
-                            "type": "object",
-                            "properties": {
-                                "adm": {
-                                    "type": "integer",
-                                    "description": "adM percentage of allocation 0 - 100."
-                                },
-                                "kevel": {
-                                    "type": "integer",
-                                    "description": "Kevel percentage of allocation 0 - 100."
-                                }
-                            },
-                            "required": [
-                                "adm",
-                                "kevel"
-                            ]
-                        }
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "position": {
+                        "type": "integer",
+                        "description": "0-based position of tile from left side, 0 for the first slot.",
+                        "minimum": 0,
+                        "maximum": 6
                     },
-                    "required": [
-                        "position",
-                        "allocation"
-                    ]
-                }
-            ],
-            "required": [
-                "name",
-                "allocations"
-            ]
+                    "allocation": {
+                        "type": "object",
+                        "patternProperties": {
+                            "kevel|adm": {
+                                "description": "Percentage of allocation to partner 0 - 100.",
+                                "uniqueItems": true,
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 100
+                            }
+                        },
+                        "required": [
+                            "kevel",
+                            "adm"
+                        ]
+                    }
+                },
+                "required": [
+                    "position",
+                    "allocation"
+                ]
+            }
         }
-    }
+    },
+    "required": [
+        "name",
+        "allocations"
+    ]
 }
