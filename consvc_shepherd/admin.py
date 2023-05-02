@@ -2,7 +2,7 @@ import json
 
 from django.conf import settings
 from django.contrib import admin, messages
-from django.utils import timezone
+from django.utils import dateformat, timezone
 from jsonschema import exceptions, validate
 
 from consvc_shepherd.forms import AllocationSettingForm, PartnerAllocationForm
@@ -16,6 +16,7 @@ from consvc_shepherd.storage import send_to_storage
 
 @admin.action(description="Publish Settings Snapshot")
 def publish_snapshot(modeladmin, request, queryset):
+    """Publish advertiser snapshot."""
     if len(queryset) > 1:
         messages.error(request, "Only 1 snapshot can be published at the same time")
     elif queryset[0].launched_date is not None:
@@ -34,7 +35,7 @@ def publish_snapshot(modeladmin, request, queryset):
                 validate(snapshot.json_settings, schema=settings_schema)
                 send_to_storage(content, settings.GS_BUCKET_FILE_NAME)
                 snapshot.save()
-                messages.info(request, "Snapshot has been published")
+                messages.info(request, "Snapshot has been published.")
             except exceptions.ValidationError:
                 messages.error(
                     request, "JSON generated is different from the expected schema"
@@ -43,7 +44,27 @@ def publish_snapshot(modeladmin, request, queryset):
 
 @admin.action(description="Publish Allocation")
 def publish_allocation(modeladmin, request, queryset) -> None:
-    pass
+    """Publish allocation JSON settings."""
+    allocation_request = queryset[0]
+    allocation_request.launched_by = request.user
+    allocation_request.launched_date = timezone.now()
+    allocation_settings_name: str = (
+        f"SOV-{dateformat.format(allocation_request.launched_date, 'YmdHis')}"
+    )
+
+    allocation: dict = {
+        "name": allocation_settings_name,
+        "allocations": [allocation_request.to_dict()],
+    }
+
+    with open("./schema/allocation.schema.json", "r") as f:
+        allocation_schema = json.load(f)
+        validate(allocation, schema=allocation_schema)
+
+        allocation_json = json.dumps(allocation, indent=2)
+        send_to_storage(allocation_json, settings.ALLOCATION_FILE_NAME)
+        allocation_request.save()
+        messages.info(request, "Allocation setting has been published.")
 
 
 @admin.register(SettingsSnapshot)
