@@ -70,8 +70,7 @@ class JSONSchema(TestCase):
         with open("./schema/allocation.schema.json", "r") as f:
             allocations_schema = json.load(f)
             allocations: dict[str, Any] = {}
-            allocations.update({"name": "SOV-20230101140000",
-                               "allocations": []})
+            allocations.update({"name": "SOV-20230101140000","allocations": []})
             adm_partner: Partner = Partner.objects.create(
                 name="adm"
             )
@@ -79,30 +78,21 @@ class JSONSchema(TestCase):
                 name="kevel"
             )
             position1_alloc: AllocationSetting = AllocationSetting.objects.create(
-                position=1
+                position=0
             )
-            position2_alloc: AllocationSetting = AllocationSetting.objects.create(
-                position=2
-            )
-
             allocation1_adm: PartnerAllocation = PartnerAllocation.objects.create(
                 allocationPosition=position1_alloc,
-                partner=kevel_partner,
-                percentage=100
+                partner=adm_partner,
+                percentage=85
             )
             allocation1_kevel: PartnerAllocation = PartnerAllocation.objects.create(
                 allocationPosition=position1_alloc,
                 partner=kevel_partner,
-                percentage=0
-            )
-
-            allocation2_adm: PartnerAllocation = PartnerAllocation.objects.create(
-                allocationPosition=position2_alloc,
-                partner=adm_partner,
-                percentage=85
-            )
-            allocation2_kevel: PartnerAllocation = PartnerAllocation.objects.create(
-                allocationPosition=position2_alloc,
-                partner=kevel_partner,
                 percentage=15
             )
+
+            allocations["allocations"].append(allocation1_adm.to_dict())
+            allocations["allocations"].append(allocation1_kevel.to_dict())
+            
+            validate(allocations, allocations_schema)
+     
