@@ -61,10 +61,6 @@ class JSONSchema(TestCase):
 
             validate(partner.to_dict(), settings_schema)
 
-
-@pytest.mark.django_db
-class JSONSchema(TestCase):
-
     def test_allocation_schema(self): # pragma: no cover
         """Tests allocation schema for SOV."""
         with open("./schema/allocation.schema.json", "r") as f:
@@ -91,8 +87,6 @@ class JSONSchema(TestCase):
                 percentage=15
             )
 
-            allocations["allocations"].append(allocation1_adm.to_dict())
-            allocations["allocations"].append(allocation1_kevel.to_dict())
-            
+            allocations["allocations"].append(position1_alloc.to_dict())
             validate(allocations, allocations_schema)
      

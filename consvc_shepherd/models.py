@@ -31,20 +31,27 @@ class SettingsSnapshot(models.Model):
 
 
 class AllocationSetting(models.Model):
-    """Class that holds information for Allocation"""
+    """Class that holds information for AllocationSetting."""
 
     position = models.IntegerField(unique=True)
 
     def to_dict(self) -> dict[str, Any]:
         """Creates dictionary representation of AllocationSetting instance."""
-        return {"position": self.position}
+        allocations_dict: dict = {}
+        for allocation in self.partner_allocations.all():
+            allocation = allocation.to_dict()
+            if allocation["position"] == allocations_dict.get("position"):
+                allocations_dict["allocation"].update(**allocation["allocation"])
+            else:
+                allocations_dict.update(allocation)
+        return allocations_dict
 
     def __str__(self):
         return f"Allocation Position : {self.position}"
 
 
 class PartnerAllocation(models.Model):
-    """Class that holds information about Partner Specific Allocation"""
+    """Class that holds information about Partner Specific Allocation."""
 
     allocationPosition = models.ForeignKey(
         AllocationSetting, on_delete=models.CASCADE, related_name="partner_allocations"
@@ -55,6 +62,6 @@ class PartnerAllocation(models.Model):
     def to_dict(self) -> dict[str, Any]:
         """Creates dictionary representation of PartnerAllocation instance."""
         partner_allocation_dict: dict = {}
-        for allocation in self.partner_allocations.all():
-            partner_allocation_dict.update(allocation.to_dict())
-        return {"partner_allocations": partner_allocation_dict}
+        partner_allocation_dict["position"] = self.allocationPosition.position
+        partner_allocation_dict["allocation"] = {self.partner.name: self.percentage}
+        return partner_allocation_dict

@@ -43,15 +43,7 @@ def publish_snapshot(modeladmin, request, queryset):
 
 @admin.action(description="Publish Allocation")
 def publish_allocation(modeladmin, request, queryset) -> None:
-    if queryset[0].launched_date is not None:
-        messages.error(
-            request,
-            "Allocation has already been published, create or change allocation to publish new settings.",
-        )
-    else:
-        snapshot = queryset[0]
-        snapshot.launched_by = request.user
-        snapshot.launched_date = timezone.now()
+    pass
 
 
 @admin.register(SettingsSnapshot)
@@ -86,3 +78,4 @@ class AllocationSettingAdmin(admin.ModelAdmin):
     model = AllocationSetting
     inlines = [PartnerAllocationInline]
     form = AllocationSettingForm
+    actions = [publish_allocation]

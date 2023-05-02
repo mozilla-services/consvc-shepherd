@@ -23,7 +23,7 @@
                         "type": "integer",
                         "description": "0-based position of tile from left side, 0 for the first slot.",
                         "minimum": 0,
-                        "maximum": 6
+                        "exclusiveMaximum": 6
                     },
                     "allocation": {
                         "type": "object",
