@@ -44,7 +44,7 @@ def publish_snapshot(modeladmin, request, queryset):
 
 
 @admin.action(description="Publish Allocation")
-def publish_allocation(modeladmin, request, queryset) -> None: # pragma: no cover
+def publish_allocation(modeladmin, request, queryset) -> None:  # pragma: no cover
     """Publish allocation JSON settings."""
     allocation_request = queryset
     if AllocationSetting.objects.count() != len(queryset):
