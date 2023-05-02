@@ -27,18 +27,22 @@
                     "allocation": {
                         "type": "object",
                         "patternProperties": {
-                            "kevel|adm": {
-                                "description": "Percentage of allocation to partner 0 - 100.",
+                            "^adm$": {
+                                "description": "Percentage of allocation to adM partner 0 - 100.",
+                                "uniqueItems": true,
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 100
+                            },
+                            "^kevel$": {
+                                "description": "Percentage of allocation to Kevel partner 0 - 100.",
                                 "uniqueItems": true,
                                 "type": "integer",
                                 "minimum": 0,
                                 "maximum": 100
                             }
                         },
-                        "required": [
-                            "kevel",
-                            "adm"
-                        ]
+                        "additionalProperties": false
                     }
                 },
                 "required": [
