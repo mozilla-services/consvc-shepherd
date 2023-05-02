@@ -74,7 +74,7 @@ class JSONSchema(TestCase):
                 name="kevel"
             )
             position1_alloc: AllocationSetting = AllocationSetting.objects.create(
-                position=0
+                position=1
             )
             allocation1_adm: PartnerAllocation = PartnerAllocation.objects.create(
                 allocationPosition=position1_alloc,
@@ -86,7 +86,6 @@ class JSONSchema(TestCase):
                 partner=kevel_partner,
                 percentage=15
             )
-
             allocations["allocations"].append(position1_alloc.to_dict())
             validate(allocations, allocations_schema)
      

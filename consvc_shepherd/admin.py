@@ -38,33 +38,36 @@ def publish_snapshot(modeladmin, request, queryset):
                 messages.info(request, "Snapshot has been published.")
             except exceptions.ValidationError:
                 messages.error(
-                    request, "JSON generated is different from the expected schema"
+                    request,
+                    "JSON generated is different from the expected snapshot schema.",
                 )
 
 
 @admin.action(description="Publish Allocation")
 def publish_allocation(modeladmin, request, queryset) -> None:
     """Publish allocation JSON settings."""
-    allocation_request = queryset[0]
-    allocation_request.launched_by = request.user
-    allocation_request.launched_date = timezone.now()
-    allocation_settings_name: str = (
-        f"SOV-{dateformat.format(allocation_request.launched_date, 'YmdHis')}"
-    )
+    allocation_request = queryset
+    if AllocationSetting.objects.count() != len(queryset):
+        messages.warning(request, "Warning: Not all allocation settings were selected.")
 
+    allocation_settings_name: str = f"SOV-{dateformat.format(timezone.now(), 'YmdHis')}"
     allocation: dict = {
         "name": allocation_settings_name,
-        "allocations": [allocation_request.to_dict()],
+        "allocations": [allocation.to_dict() for allocation in allocation_request],
     }
 
     with open("./schema/allocation.schema.json", "r") as f:
         allocation_schema = json.load(f)
-        validate(allocation, schema=allocation_schema)
-
-        allocation_json = json.dumps(allocation, indent=2)
-        send_to_storage(allocation_json, settings.ALLOCATION_FILE_NAME)
-        allocation_request.save()
-        messages.info(request, "Allocation setting has been published.")
+        try:
+            validate(allocation, schema=allocation_schema)
+            allocation_json = json.dumps(allocation, indent=2)
+            send_to_storage(allocation_json, settings.ALLOCATION_FILE_NAME)
+            messages.info(request, "Allocation setting has been published.")
+        except exceptions.ValidationError:
+            messages.error(
+                request,
+                "JSON generated is different from the expected allocation schema.",
+            )
 
 
 @admin.register(SettingsSnapshot)

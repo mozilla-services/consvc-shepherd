@@ -37,13 +37,10 @@ class AllocationSetting(models.Model):
 
     def to_dict(self) -> dict[str, Any]:
         """Creates dictionary representation of AllocationSetting instance."""
-        allocations_dict: dict = {}
+        allocations_dict: dict = {"position": self.position}
         for allocation in self.partner_allocations.all():
             allocation = allocation.to_dict()
-            if allocation["position"] == allocations_dict.get("position"):
-                allocations_dict["allocation"].update(**allocation["allocation"])
-            else:
-                allocations_dict.update(allocation)
+            allocations_dict.update(allocation)
         return allocations_dict
 
     def __str__(self):
