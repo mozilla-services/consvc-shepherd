@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 import mock
 from django.contrib.admin.sites import AdminSite
@@ -6,13 +7,20 @@ from django.test import RequestFactory, TestCase
 from django.utils import timezone
 from jsonschema import validate
 
-from consvc_shepherd.admin import ModelAdmin, publish_snapshot
-from consvc_shepherd.models import Partner, SettingsSnapshot
+from consvc_shepherd.admin import ModelAdmin, publish_allocation, publish_snapshot
+from consvc_shepherd.models import (
+    AllocationSetting,
+    Partner,
+    PartnerAllocation,
+    SettingsSnapshot,
+)
 from consvc_shepherd.tests.factories import UserFactory
 from contile.models import Advertiser, AdvertiserUrl
 
 
 class SettingsSnapshotAdminTest(TestCase):
+    """Test class for SettingsSnapshot."""
+
     def setUp(self):
         request_factory = RequestFactory()
         self.request = request_factory.get("/admin")
@@ -153,3 +161,50 @@ class SettingsSnapshotAdminTest(TestCase):
             created_by=request.user,
         )
         self.assertTrue(self.admin.has_delete_permission(request, snapshot))
+
+
+class AllocationSettingAdminTest(TestCase):
+    """Test class for AllocationSetting."""
+
+    def setUp(self):
+        request_factory = RequestFactory()
+        self.request = request_factory.get("/admin/consvc_shepherd/allocationsetting/")
+        self.request.user = UserFactory()
+
+        with open("./schema/allocation.schema.json", "r") as f:
+            self.allocation_schema = json.load(f)
+
+        site = AdminSite()
+        self.admin = ModelAdmin(AllocationSetting, site)
+
+        allocations: dict[str, Any] = {}
+        allocations.update({"name": "SOV-20230101140000", "allocations": []})
+
+        adm_partner: Partner = Partner.objects.create(name="adm")
+        kevel_partner: Partner = Partner.objects.create(name="kevel")
+        position1_alloc: AllocationSetting = AllocationSetting.objects.create(
+            position=1
+        )
+        allocation1_adm: PartnerAllocation = (  # noqa: F841
+            PartnerAllocation.objects.create(
+                allocationPosition=position1_alloc, partner=adm_partner, percentage=85
+            )
+        )
+        allocation1_kevel: PartnerAllocation = (  # noqa: F841
+            PartnerAllocation.objects.create(
+                allocationPosition=position1_alloc, partner=kevel_partner, percentage=15
+            )
+        )
+        self.mock_storage_open = mock.patch(
+            "django.core.files.storage.default_storage." "open"
+        )
+        self.mock_storage_open.start()
+        self.addCleanup(self.mock_storage_open.stop)
+
+    def test_publish_allocation(self):
+        request = mock.Mock()
+        expected: dict = {"position": 1, "allocation": {"adm": 85, "kevel": 15}}
+
+        publish_allocation(None, request, AllocationSetting.objects.all())
+        allocation_setting: dict = AllocationSetting.objects.get(position=1).to_dict()
+        self.assertEqual(allocation_setting, expected)
