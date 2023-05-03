@@ -46,7 +46,6 @@ class AllocationSetting(models.Model):
                 allocations_dict.update(allocation)
         return allocations_dict
 
-
     def __str__(self):
         return f"Allocation Position : {self.position}"
 
