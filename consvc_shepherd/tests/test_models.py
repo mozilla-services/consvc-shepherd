@@ -14,16 +14,14 @@ class TestAllocationSettingModel(TestCase):
         position1_alloc: AllocationSetting = AllocationSetting.objects.create(
             position=1
         )
-        allocation1_adm: PartnerAllocation = (  # noqa: F841
-            PartnerAllocation.objects.create(
-                allocationPosition=position1_alloc, partner=adm_partner, percentage=85
-            )
+
+        PartnerAllocation.objects.create(
+            allocationPosition=position1_alloc, partner=adm_partner, percentage=85
         )
-        allocation1_kevel: PartnerAllocation = (  # noqa: F841
-            PartnerAllocation.objects.create(
-                allocationPosition=position1_alloc, partner=kevel_partner, percentage=15
-            )
+        PartnerAllocation.objects.create(
+            allocationPosition=position1_alloc, partner=kevel_partner, percentage=15
         )
+
         expected_result: dict = {
             "position": 1,
             "allocation": {"adm": 85, "kevel": 15},
@@ -47,9 +45,5 @@ class TestPartnerAllocationModel(TestCase):
         allocation1_kevel: PartnerAllocation = PartnerAllocation.objects.create(
             allocationPosition=position1_alloc, partner=kevel_partner, percentage=15
         )
-        self.assertEqual(
-            allocation1_adm.to_dict(), {"position": 1, "allocation": {"adm": 85}}
-        )
-        self.assertEqual(
-            allocation1_kevel.to_dict(), {"position": 1, "allocation": {"kevel": 15}}
-        )
+        self.assertEqual(allocation1_adm.to_dict(), {"adm": 85})
+        self.assertEqual(allocation1_kevel.to_dict(), {"kevel": 15})

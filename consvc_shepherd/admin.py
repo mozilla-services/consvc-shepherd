@@ -46,7 +46,7 @@ def publish_snapshot(modeladmin, request, queryset):
 @admin.action(description="Publish Allocation")
 def publish_allocation(modeladmin, request, queryset) -> None:  # pragma: no cover
     """Publish allocation JSON settings."""
-    allocation_request = queryset
+    allocation_request = queryset.order_by("position")
     if AllocationSetting.objects.count() != len(queryset):
         messages.warning(request, "Warning: Not all allocation settings were selected.")
 
@@ -72,6 +72,8 @@ def publish_allocation(modeladmin, request, queryset) -> None:  # pragma: no cov
 
 @admin.register(SettingsSnapshot)
 class ModelAdmin(admin.ModelAdmin):
+    """Registration of SettingsSnapshot."""
+
     list_display = ("name", "created_by", "launched_by", "launched_date")
     readonly_fields = ["json_settings", "created_by", "launched_by", "launched_date"]
     actions = [publish_snapshot]
@@ -92,6 +94,8 @@ class ModelAdmin(admin.ModelAdmin):
 
 
 class PartnerAllocationInline(admin.TabularInline):
+    """PartnerAllocationInline TabularInline child model."""
+
     extra = 1
     model = PartnerAllocation
     form = PartnerAllocationForm
@@ -99,6 +103,8 @@ class PartnerAllocationInline(admin.TabularInline):
 
 @admin.register(AllocationSetting)
 class AllocationSettingAdmin(admin.ModelAdmin):
+    """Registration of AllocationSetting."""
+
     model = AllocationSetting
     inlines = [PartnerAllocationInline]
     form = AllocationSettingForm

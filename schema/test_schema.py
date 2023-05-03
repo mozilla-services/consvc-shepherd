@@ -12,7 +12,7 @@ from contile.models import Advertiser, AdvertiserUrl, Partner
 @pytest.mark.django_db
 class JSONSchema(TestCase):
 
-    def test_filter_schema(self): # pragma: no cover
+    def test_filter_schema(self):
         """Tests filter schema for adM."""
 
         with open("./schema/adm_filter.schema.json", "r") as f:
@@ -61,7 +61,7 @@ class JSONSchema(TestCase):
 
             validate(partner.to_dict(), settings_schema)
 
-    def test_allocation_schema(self): # pragma: no cover
+    def test_allocation_schema(self):
         """Tests allocation schema for SOV."""
         with open("./schema/allocation.schema.json", "r") as f:
             allocations_schema = json.load(f)
@@ -76,12 +76,12 @@ class JSONSchema(TestCase):
             position1_alloc: AllocationSetting = AllocationSetting.objects.create(
                 position=1
             )
-            allocation1_adm: PartnerAllocation = PartnerAllocation.objects.create(
+            PartnerAllocation.objects.create(
                 allocationPosition=position1_alloc,
                 partner=adm_partner,
                 percentage=85
             )
-            allocation1_kevel: PartnerAllocation = PartnerAllocation.objects.create(
+            PartnerAllocation.objects.create(
                 allocationPosition=position1_alloc,
                 partner=kevel_partner,
                 percentage=15
@@ -92,12 +92,12 @@ class JSONSchema(TestCase):
             position2_alloc: AllocationSetting = AllocationSetting.objects.create(
                 position=2
             )
-            allocation2_adm: PartnerAllocation = PartnerAllocation.objects.create(
+            PartnerAllocation.objects.create(
                 allocationPosition=position2_alloc,
                 partner=adm_partner,
                 percentage=50
             )
-            allocation2_kevel: PartnerAllocation = PartnerAllocation.objects.create(
+            PartnerAllocation.objects.create(
                 allocationPosition=position2_alloc,
                 partner=kevel_partner,
                 percentage=50

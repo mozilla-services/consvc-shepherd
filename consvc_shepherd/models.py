@@ -37,13 +37,9 @@ class AllocationSetting(models.Model):
 
     def to_dict(self) -> dict[str, Any]:
         """Creates dictionary representation of AllocationSetting instance."""
-        allocations_dict: dict = {}
+        allocations_dict: dict = {"position": self.position, "allocation": {}}
         for allocation in self.partner_allocations.all():
-            allocation = allocation.to_dict()
-            if allocation["position"] == allocations_dict.get("position"):
-                allocations_dict["allocation"].update(**allocation["allocation"])
-            else:
-                allocations_dict.update(allocation)
+            allocations_dict["allocation"].update(allocation.to_dict())
         return allocations_dict
 
     def __str__(self):
@@ -61,7 +57,4 @@ class PartnerAllocation(models.Model):
 
     def to_dict(self) -> dict[str, Any]:
         """Creates dictionary representation of PartnerAllocation instance."""
-        partner_allocation_dict: dict = {}
-        partner_allocation_dict["position"] = self.allocationPosition.position
-        partner_allocation_dict["allocation"] = {self.partner.name: self.percentage}
-        return partner_allocation_dict
+        return {self.partner.name: self.percentage}
