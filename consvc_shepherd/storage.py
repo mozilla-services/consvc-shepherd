@@ -5,7 +5,7 @@ from django.core.files.storage import default_storage
 from django.utils import timezone
 
 
-def send_to_storage(content, file_name: str) -> None:  # pragma: no cover
+def send_to_storage(content, file_name: str) -> None:
     """Send adM filter and allocation settings to GCS bucket."""
     if settings.DEBUG:
         logging.info(f"Sending to storage, name:{file_name}, content: {content}")

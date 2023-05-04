@@ -28,15 +28,8 @@
                     "allocation": {
                         "type": "object",
                         "patternProperties": {
-                            "^adm$": {
-                                "description": "Percentage of allocation to adM partner 0 - 100.",
-                                "uniqueItems": true,
-                                "type": "integer",
-                                "minimum": 0,
-                                "maximum": 100
-                            },
-                            "^kevel$": {
-                                "description": "Percentage of allocation to Kevel partner 0 - 100.",
+                            "^[A-Za-z]*$": {
+                                "description": "Percentage of allocation to partner 0 - 100.",
                                 "uniqueItems": true,
                                 "type": "integer",
                                 "minimum": 0,
