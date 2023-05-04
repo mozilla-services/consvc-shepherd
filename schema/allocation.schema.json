@@ -28,7 +28,7 @@
                     "allocation": {
                         "type": "object",
                         "patternProperties": {
-                            "^[A-Za-z]*$": {
+                            "^[a-zA-Z0-9'-]*$": {
                                 "description": "Percentage of allocation to partner 0 - 100.",
                                 "uniqueItems": true,
                                 "type": "integer",
