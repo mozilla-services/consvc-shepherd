@@ -12,7 +12,7 @@ GitHub: [#TODO](https://github.com/mozilla-services/consvc-shepherd/issues/TODO)
 
 _Put an `x` in the boxes that apply_
 
-- [ ] This PR conforms to the [Contribution Guidelines](https://github.com/mozilla-services/merino-py/blob/main/CONTRIBUTING.md).
+- [ ] This PR conforms to the [Contribution Guidelines](https://github.com/mozilla-services/consvc-shepherd/blob/main/CONTRIBUTING.md).
 - [ ] The PR title starts with the JIRA issue reference, format `[DISCO-####]`, and has the same title (if applicable).
 - [ ] [Documentation](https://github.com/mozilla-services/consvc-shepherd/tree/main/docs) has been updated (if applicable).
 - [ ] Functional and performance test coverage has been expanded and maintained (if applicable).
