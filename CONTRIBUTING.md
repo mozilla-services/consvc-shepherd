@@ -4,6 +4,10 @@ Anyone is welcome to contribute to this project. Feel free to get in touch with
 other community members on [Matrix](https://chat.mozilla.org), the mailing list or through issues here on
 GitHub.
 
+See the main [documentation](https://github.com/mozilla-services/consvc-shepherd/blob/main/README.md) for information on prerequisites, installing, running and testing.
+
+See the [Shepherd User Guide](https://github.com/mozilla-services/consvc-shepherd/blob/main/docs/UserGuide.md) for how to use the application.
+
 ## Bug Reports
 
 You can file issues here on GitHub. Please try to include as much information as
@@ -37,9 +41,6 @@ When submitting a PR:
 - Please do not include merge commits in pull requests; include only commits
   with the new relevant code.
 
-WIP: See the main [documentation](https://github.com/mozilla-services/consvc-shepherd/blob/main/README.md) for information on prerequisites, installing, running and testing.
-
-See the [Shepherd User Guide](https://github.com/mozilla-services/consvc-shepherd/blob/main/docs/UserGuide.md) for how to use the application.
 
 ## Code Review
 
