@@ -71,7 +71,7 @@ class JSONSchema(TestCase):
                 name="adm"
             )
             kevel_partner: Partner = Partner.objects.create(
-                name="kevel"
+                name="k3-v-3l"
             )
             position1_alloc: AllocationSetting = AllocationSetting.objects.create(
                 position=1
