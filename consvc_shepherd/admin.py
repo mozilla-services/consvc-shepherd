@@ -2,7 +2,7 @@ import json
 
 from django.conf import settings
 from django.contrib import admin, messages
-from django.utils import timezone
+from django.utils import dateformat, timezone
 from jsonschema import exceptions, validate
 
 from consvc_shepherd.forms import AllocationSettingForm, PartnerAllocationForm
@@ -16,6 +16,7 @@ from consvc_shepherd.storage import send_to_storage
 
 @admin.action(description="Publish Settings Snapshot")
 def publish_snapshot(modeladmin, request, queryset):
+    """Publish advertiser snapshot."""
     if len(queryset) > 1:
         messages.error(request, "Only 1 snapshot can be published at the same time")
     elif queryset[0].launched_date is not None:
@@ -34,15 +35,45 @@ def publish_snapshot(modeladmin, request, queryset):
                 validate(snapshot.json_settings, schema=settings_schema)
                 send_to_storage(content, settings.GS_BUCKET_FILE_NAME)
                 snapshot.save()
-                messages.info(request, "Snapshot has been published")
+                messages.info(request, "Snapshot has been published.")
             except exceptions.ValidationError:
                 messages.error(
-                    request, "JSON generated is different from the expected schema"
+                    request,
+                    "JSON generated is different from the expected snapshot schema.",
                 )
+
+
+@admin.action(description="Publish Allocation")
+def publish_allocation(modeladmin, request, queryset) -> None:
+    """Publish allocation JSON settings."""
+    allocation_request = queryset.order_by("position")
+    if AllocationSetting.objects.count() != len(queryset):
+        messages.warning(request, "Warning: Not all allocation settings were selected.")
+
+    allocation_settings_name: str = f"SOV-{dateformat.format(timezone.now(), 'YmdHis')}"
+    allocation: dict = {
+        "name": allocation_settings_name,
+        "allocations": [allocation.to_dict() for allocation in allocation_request],
+    }
+
+    with open("./schema/allocation.schema.json", "r") as f:
+        allocation_schema = json.load(f)
+        try:
+            validate(allocation, schema=allocation_schema)
+            allocation_json = json.dumps(allocation, indent=2)
+            send_to_storage(allocation_json, settings.ALLOCATION_FILE_NAME)
+            messages.info(request, "Allocation setting has been published.")
+        except exceptions.ValidationError:
+            messages.error(
+                request,
+                "JSON generated is different from the expected allocation schema.",
+            )
 
 
 @admin.register(SettingsSnapshot)
 class ModelAdmin(admin.ModelAdmin):
+    """Registration of SettingsSnapshot."""
+
     list_display = ("name", "created_by", "launched_by", "launched_date")
     readonly_fields = ["json_settings", "created_by", "launched_by", "launched_date"]
     actions = [publish_snapshot]
@@ -63,6 +94,8 @@ class ModelAdmin(admin.ModelAdmin):
 
 
 class PartnerAllocationInline(admin.TabularInline):
+    """PartnerAllocationInline TabularInline child model."""
+
     extra = 1
     model = PartnerAllocation
     form = PartnerAllocationForm
@@ -70,6 +103,9 @@ class PartnerAllocationInline(admin.TabularInline):
 
 @admin.register(AllocationSetting)
 class AllocationSettingAdmin(admin.ModelAdmin):
+    """Registration of AllocationSetting."""
+
     model = AllocationSetting
     inlines = [PartnerAllocationInline]
     form = AllocationSettingForm
+    actions = [publish_allocation]

@@ -8,49 +8,46 @@
         "name": {
             "pattern": "^(SOV-)([0-9]{4})(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])(2[0-3]|[01][0-9])([0-5][0-9])([0-5][0-9])$",
             "description": "Allocation Update Title Label. SOV-<UTC datetime:YYYYMMDDHHMMSS>",
-            "type": "string"
+            "type": "string",
+            "additionalProperties": false
         },
         "allocations": {
             "type": "array",
             "description": "Allocations distributing partner percentages for each tile, left to right.",
             "uniqueItems": true,
-            "minItems": 2,
-            "items": [
-                {
-                    "type": "object",
-                    "properties": {
-                        "position": {
-                            "type": "integer",
-                            "description": "0-based position of tile from left side, 0 for the first slot."
-                        },
-                        "allocation": {
-                            "type": "object",
-                            "properties": {
-                                "adm": {
-                                    "type": "integer",
-                                    "description": "adM percentage of allocation 0 - 100."
-                                },
-                                "kevel": {
-                                    "type": "integer",
-                                    "description": "Kevel percentage of allocation 0 - 100."
-                                }
-                            },
-                            "required": [
-                                "adm",
-                                "kevel"
-                            ]
-                        }
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "position": {
+                        "type": "integer",
+                        "description": "1-based position of tile from left side, 1 for the first slot.",
+                        "minimum": 1,
+                        "maximum": 8
                     },
-                    "required": [
-                        "position",
-                        "allocation"
-                    ]
-                }
-            ],
-            "required": [
-                "name",
-                "allocations"
-            ]
+                    "allocation": {
+                        "type": "object",
+                        "patternProperties": {
+                            "^[a-zA-Z0-9'-]*$": {
+                                "description": "Percentage of allocation to partner 0 - 100.",
+                                "uniqueItems": true,
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 100
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "required": [
+                    "position",
+                    "allocation"
+                ]
+            }
         }
-    }
+    },
+    "required": [
+        "name",
+        "allocations"
+    ]
 }

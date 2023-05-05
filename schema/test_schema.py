@@ -1,16 +1,19 @@
+"""Schema validation and testing module."""
 import json
+from typing import Any
 from unittest import TestCase
 
 import pytest
 from jsonschema import validate
 
+from consvc_shepherd.models import AllocationSetting, PartnerAllocation
 from contile.models import Advertiser, AdvertiserUrl, Partner
-
 
 @pytest.mark.django_db
 class JSONSchema(TestCase):
 
-    def test_schema(self):
+    def test_filter_schema(self):
+        """Tests filter schema for adM."""
 
         with open("./schema/adm_filter.schema.json", "r") as f:
             settings_schema = json.load(f)
@@ -58,3 +61,47 @@ class JSONSchema(TestCase):
 
             validate(partner.to_dict(), settings_schema)
 
+    def test_allocation_schema(self):
+        """Tests allocation schema for SOV."""
+        with open("./schema/allocation.schema.json", "r") as f:
+            allocations_schema = json.load(f)
+            allocations: dict[str, Any] = {}
+            allocations.update({"name": "SOV-20230101140000","allocations": []})
+            adm_partner: Partner = Partner.objects.create(
+                name="adm"
+            )
+            kevel_partner: Partner = Partner.objects.create(
+                name="k3-v-3l"
+            )
+            position1_alloc: AllocationSetting = AllocationSetting.objects.create(
+                position=1
+            )
+            PartnerAllocation.objects.create(
+                allocationPosition=position1_alloc,
+                partner=adm_partner,
+                percentage=85
+            )
+            PartnerAllocation.objects.create(
+                allocationPosition=position1_alloc,
+                partner=kevel_partner,
+                percentage=15
+            )
+            allocations["allocations"].append(position1_alloc.to_dict())
+            validate(allocations, allocations_schema)
+
+            position2_alloc: AllocationSetting = AllocationSetting.objects.create(
+                position=2
+            )
+            PartnerAllocation.objects.create(
+                allocationPosition=position2_alloc,
+                partner=adm_partner,
+                percentage=50
+            )
+            PartnerAllocation.objects.create(
+                allocationPosition=position2_alloc,
+                partner=kevel_partner,
+                percentage=50
+            )
+            allocations["allocations"].append(position2_alloc.to_dict())
+            validate(allocations, allocations_schema)
+     

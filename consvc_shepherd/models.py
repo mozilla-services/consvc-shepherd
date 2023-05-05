@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import (
@@ -38,16 +40,23 @@ class SettingsSnapshot(models.Model):
 
 
 class AllocationSetting(models.Model):
-    """Class that holds information for Allocation"""
+    """Class that holds information for AllocationSetting."""
 
     position: IntegerField = models.IntegerField(unique=True)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Creates dictionary representation of AllocationSetting instance."""
+        allocations_dict: dict = {"position": self.position, "allocation": {}}
+        for allocation in self.partner_allocations.all():  # type: ignore [attr-defined]
+            allocations_dict["allocation"].update(allocation.to_dict())
+        return allocations_dict
 
     def __str__(self):
         return f"Allocation Position : {self.position}"
 
 
 class PartnerAllocation(models.Model):
-    """Class that holds information about Partner Specific Allocation"""
+    """Class that holds information about Partner Specific Allocation."""
 
     allocationPosition: ForeignKey = models.ForeignKey(
         AllocationSetting, on_delete=models.CASCADE, related_name="partner_allocations"
@@ -56,3 +65,7 @@ class PartnerAllocation(models.Model):
         Partner, on_delete=models.SET_NULL, null=True
     )
     percentage: IntegerField = models.IntegerField()
+
+    def to_dict(self) -> dict[str, Any]:
+        """Creates dictionary representation of PartnerAllocation instance."""
+        return {self.partner.name: self.percentage}
