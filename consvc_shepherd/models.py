@@ -2,6 +2,7 @@ from typing import Any
 
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import ForeignKey, IntegerField
 
 from contile.models import Partner
 
@@ -38,7 +39,7 @@ class AllocationSetting(models.Model):
     def to_dict(self) -> dict[str, Any]:
         """Creates dictionary representation of AllocationSetting instance."""
         allocations_dict: dict = {"position": self.position, "allocation": {}}
-        for allocation in self.partner_allocations.all():
+        for allocation in self.partner_allocations.all():  # type: ignore [attr-defined]
             allocations_dict["allocation"].update(allocation.to_dict())
         return allocations_dict
 
@@ -52,8 +53,10 @@ class PartnerAllocation(models.Model):
     allocationPosition = models.ForeignKey(
         AllocationSetting, on_delete=models.CASCADE, related_name="partner_allocations"
     )
-    partner = models.ForeignKey(Partner, on_delete=models.SET_NULL, null=True)
-    percentage = models.IntegerField()
+    partner: ForeignKey = models.ForeignKey(
+        Partner, on_delete=models.SET_NULL, null=True
+    )
+    percentage: IntegerField = models.IntegerField()
 
     def to_dict(self) -> dict[str, Any]:
         """Creates dictionary representation of PartnerAllocation instance."""
