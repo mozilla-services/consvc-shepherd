@@ -1,3 +1,4 @@
+"""Admin module for consvc-shepherd."""
 import json
 
 from django.conf import settings

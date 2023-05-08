@@ -1,3 +1,4 @@
+"""Models module for consvc_shepherd."""
 from typing import Any
 
 from django.contrib.auth import get_user_model

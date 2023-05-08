@@ -1,3 +1,4 @@
+"""Settings, configuration and environment variables for consvc-shepherd."""
 import sys
 from pathlib import Path
 from typing import Any

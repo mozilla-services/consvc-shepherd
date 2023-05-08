@@ -1,3 +1,4 @@
+"""Forms module for consvc-shepherd."""
 from django import forms
 
 from consvc_shepherd.models import (

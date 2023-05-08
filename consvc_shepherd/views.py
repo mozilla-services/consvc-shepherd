@@ -1,3 +1,4 @@
+"""Views module for consvc_shepherd."""
 from typing import Any
 
 from django.shortcuts import render
