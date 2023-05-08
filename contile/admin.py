@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 
 from contile.models import Advertiser, AdvertiserUrl, Partner
 
@@ -26,3 +26,10 @@ class AdvertiserListAdmin(admin.ModelAdmin):
 @admin.register(Partner)
 class PartnerListAdmin(admin.ModelAdmin):
     model = Partner
+
+    def delete_queryset(self, request, queryset):
+        super(PartnerListAdmin, self).delete_queryset(request, queryset)
+        messages.warning(
+            request,
+            "Please ensure SOV allocation percentages are adjusted to account for the deleted Partner.",
+        )
