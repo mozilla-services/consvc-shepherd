@@ -26,8 +26,12 @@ flake8: $(INSTALL_STAMP)  ##  Run flake8
 	$(POETRY) run flake8 $(APP_DIRS) --ignore=E203,E302,E501,E701
 
 .PHONY: bandit
-bandit: $(INSTALL_STAMP)  ##  Run bandit ##CHECK -c "pyproject.toml"
+bandit: $(INSTALL_STAMP)  ##  Run bandit
 	$(POETRY) run bandit --quiet -r $(APP_DIRS) 
+
+.PHONY: pydocstyle
+pydocstyle: $(INSTALL_STAMP)  ##  Run pydocstyle
+	$(POETRY) run pydocstyle $(APP_DIRS) --config="pyproject.toml"
 
 .PHONY: mypy
 mypy: $(INSTALL_STAMP)  ##  Run mypy
