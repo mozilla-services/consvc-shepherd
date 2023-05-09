@@ -1,3 +1,4 @@
+"""Models for consvc_shepherd/contile."""
 from typing import Any
 
 from django.core.exceptions import ValidationError
@@ -49,7 +50,9 @@ class Advertiser(models.Model):
         )
 
         for geo, domain in geo_domain_combos:
-            ad_urls = self.ad_urls.filter(geo=geo, domain=domain).order_by("path")  # type: ignore [attr-defined]
+            ad_urls = self.ad_urls.filter(geo=geo, domain=domain).order_by(  # type: ignore [attr-defined]
+                "path"
+            )
             paths = [
                 {
                     "value": ad_url.path,

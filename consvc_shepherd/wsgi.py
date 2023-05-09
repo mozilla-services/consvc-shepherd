@@ -1,5 +1,5 @@
 """
-WSGI config for consvc-shepherd project.
+WSGI config for consvc_shepherd project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

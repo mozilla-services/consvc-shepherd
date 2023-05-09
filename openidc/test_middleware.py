@@ -1,3 +1,4 @@
+"""Tests related to the verification of OpenIDCAuthMiddleware."""
 import mock
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -15,7 +16,8 @@ class OpenIDCAuthMiddlewareTests(TestCase):
         self.mock_resolve = mock_resolve_patcher.start()
         self.addCleanup(mock_resolve_patcher.stop)
 
-        mock_verify_token_patcher = mock.patch("google.oauth2.id_token.verify_token")
+        mock_verify_token_patcher = mock.patch(
+            "google.oauth2.id_token.verify_token")
 
         self.mock_verify_token = mock_verify_token_patcher.start()
         self.mock_verify_token.return_value = {"email": "non-dev@example.com"}

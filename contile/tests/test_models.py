@@ -1,3 +1,10 @@
+"""Tests related to the verification of Contile models.
+
+Models:
+- Advertiser
+- AdvertiserUrl
+- Partner
+"""
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 

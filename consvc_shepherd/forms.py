@@ -1,4 +1,4 @@
-"""Forms module for consvc-shepherd."""
+"""Forms module for consvc_shepherd."""
 from django import forms
 
 from consvc_shepherd.models import (

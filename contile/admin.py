@@ -1,3 +1,4 @@
+"""Admin module for consvc_shepherd/contile."""
 from django import forms
 from django.contrib import admin
 
