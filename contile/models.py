@@ -17,20 +17,51 @@ INVALID_PATH_ERROR: str = "All paths need to start '/'"
 
 
 class Partner(models.Model):
+    """Partner model for consvc_shepherd/contile.
+
+    Methods
+    -------
+    to_dict(self)
+        Convert Advertiser instances into a single dictionary object.
+    __str__(self)
+        Return string representation of Partner model.
+    """
+
     name: CharField = models.CharField(max_length=128)
 
-    def to_dict(self):
+    def to_dict(self) -> dict[str, Any]:
+        """Convert Advertiser instances into a single dictionary object.
+
+        A partner dictionary of all advertiser instances is created by calling
+        the Advertiser model's to_dict() method iteratively.  The result is a
+        dictionary of dictionaries, each mapping to individual advertisers. See
+        the  Advertiser.to_dict() method for additional context.
+
+        Returns
+        -------
+        dict
+            a dictionary mapping of adm_advertisers to each advertiser dictionary object.
+        """
         partner_dict = {}
-        for advertiser in self.advertisers.all():
+        for advertiser in self.advertisers.all():  # type: ignore [attr-defined]
             partner_dict.update(advertiser.to_dict())
 
         return {"adm_advertisers": partner_dict}
 
     def __str__(self):
+        """Return string representation of Partner model."""
         return self.name
 
 
 class Advertiser(models.Model):
+    """Advertiser model for consvc_shepherd/contile.
+
+    Methods
+    -------
+    __str__(self)
+        Return string representation of Advertiser model
+    """
+
     name: CharField = models.CharField(max_length=128)
     partner: ForeignKey = models.ForeignKey(
         Partner,
@@ -41,6 +72,22 @@ class Advertiser(models.Model):
     )
 
     def to_dict(self) -> dict[str, Any]:
+        """Convert Advertiser instance into a single dictionary object.
+
+        Creates a dictionary object that has a key of the advertiser name and the value is
+        a dictionary object containing the following advertiser attributes:
+
+            advertiser : Advertiser
+            path : str
+            matching : bool
+            domain : str
+            geo : str
+
+        Returns
+        -------
+        dict
+            a dictionary mapping of the advertiser name to a dictionary object of attributes.
+        """
         result: dict = {}
         geo_domain_combos = (
             self.ad_urls.all()  # type: ignore [attr-defined]
@@ -67,6 +114,7 @@ class Advertiser(models.Model):
         return {self.name: result}
 
     def __str__(self):
+        """Return string representation of Advertiser model."""
         return self.name
 
 
@@ -76,10 +124,11 @@ class AdvertiserUrl(models.Model):
     Methods
     -------
     __str__(self)
-        String representation of AdvertiserUrl
+        Return string representation of AdvertiserUrl
     clean(self)
-        Checks that path and domain fields conform to defined format.
+        Check that path and domain fields conform to defined format.
     save(self)
+        Save instance of the AdvertiserUrl model after validation.
     """
 
     advertiser: ForeignKey = models.ForeignKey(
@@ -96,7 +145,7 @@ class AdvertiserUrl(models.Model):
     matching: BooleanField = models.BooleanField(choices=MATCHING_CHOICES, default=True)
 
     def __str__(self) -> str:
-        """String representation of AdvertiserUrl model."""
+        """Return string representation of AdvertiserUrl model."""
         return f"{self.geo.code}: {self.domain} {self.path}"
 
     def clean(self) -> None:
