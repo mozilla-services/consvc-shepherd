@@ -12,7 +12,17 @@ from contile.models import Advertiser, AdvertiserUrl, Partner
 
 
 class TestPartnerModel(TestCase):
+    """Test class for Contile Partner Model. Extends Django TestCase.
+
+    Methods
+    -------
+    test_to_dict_produces_correctly(self)
+        Verifies a dictionary object is created from Partner model.
+
+    """
+
     def test_to_dict_produces_correctly(self):
+        """Verifies a dictionary object is created from Partner model."""
         partner = Partner.objects.create(
             name="Partner Advertiser",
         )
@@ -92,13 +102,40 @@ class TestPartnerModel(TestCase):
 
 
 class TestAdvertiserUrlModel(TestCase):
+    """Test class for Contile AdvertiserUrl Model. Extends Django TestCase.
+
+    Methods
+    -------
+    setUp(self)
+        Create Partner and Advertiser objects.
+    test_ad_url_invalid_domain_structure(self)
+        Ensure invalid URL domain structure raises a ValidationError.
+    test_ad_url_invalid_domain_structure_double_dots(self)
+        Verify that invalid ad url that contains double dots raises a ValidationError.
+    test_ad_url_invalid_prefix_value_with_singular_slash(self)
+        Verify that ad url prefix consisting of single forward slash raises a ValidationError.
+    test_ad_url_invalid_prefix_without_ending_slash(self)
+        Verify that ad url without ending slash raises a ValidationError.
+    test_ad_url_with_valid_prefix_saves_correctly(self)
+        Verify that ad url with valid prefix saves as expected.
+    test_ad_url_with_valid_exact_saves_correctly(self)
+        Verify that exact matching ad url with saves as expected.
+    test_ad_url_with_valid_leaf_domain_saves_correctly(self)
+        Verify that ad url with validated leaf domain saves as expected.
+    """
+
     def setUp(self):
+        """Create Partner and Advertiser objects."""
         self.partner = Partner.objects.create(name="Partner Advertiser")
         self.advertiser = Advertiser.objects.create(
             name="Advertiser Name", partner=self.partner
         )
 
     def test_ad_url_invalid_domain_structure(self):
+        """Ensure invalid URL domain structure raises a ValidationError.
+
+        is_valid_host() function in models.py validates and raises said exception.
+        """
         with self.assertRaises(ValidationError) as e:
             AdvertiserUrl.objects.create(
                 geo="CA",
@@ -113,6 +150,7 @@ class TestAdvertiserUrlModel(TestCase):
         )
 
     def test_ad_url_invalid_domain_structure_double_dots(self):
+        """Verify that invalid ad url that contains double dots raises a ValidationError."""
         with self.assertRaises(ValidationError) as e:
             AdvertiserUrl.objects.create(
                 geo="CA",
@@ -127,6 +165,7 @@ class TestAdvertiserUrlModel(TestCase):
         )
 
     def test_ad_url_invalid_prefix_value_with_singular_slash(self):
+        """Verify that ad url prefix consisting of single forward slash raises a ValidationError."""
         with self.assertRaises(ValidationError) as e:
             AdvertiserUrl.objects.create(
                 geo="CA",
@@ -141,6 +180,7 @@ class TestAdvertiserUrlModel(TestCase):
         )
 
     def test_ad_url_invalid_prefix_without_ending_slash(self):
+        """Verify that ad url without ending slash raises a ValidationError."""
         with self.assertRaises(ValidationError) as e:
             AdvertiserUrl.objects.create(
                 geo="CA",
@@ -155,6 +195,7 @@ class TestAdvertiserUrlModel(TestCase):
         )
 
     def test_ad_url_with_valid_prefix_saves_correctly(self):
+        """Verify that ad url with valid prefix saves as expected."""
         AdvertiserUrl.objects.create(
             geo="FR",
             domain="example.com",
@@ -174,6 +215,7 @@ class TestAdvertiserUrlModel(TestCase):
         )
 
     def test_ad_url_with_valid_exact_saves_correctly(self):
+        """Verify that exact matching ad url with saves as expected."""
         AdvertiserUrl.objects.create(
             geo="BR",
             domain="example.com",
@@ -193,6 +235,7 @@ class TestAdvertiserUrlModel(TestCase):
         )
 
     def test_ad_url_with_valid_leaf_domain_saves_correctly(self):
+        """Verify that ad url with validated leaf domain saves as expected."""
         AdvertiserUrl.objects.create(
             geo="BR",
             domain="www.example.com",

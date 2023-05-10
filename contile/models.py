@@ -71,6 +71,17 @@ class Advertiser(models.Model):
 
 
 class AdvertiserUrl(models.Model):
+    """Class for AdvertiserUrl model.
+
+    Methods
+    -------
+    __str__(self)
+        String representation of AdvertiserUrl
+    clean(self)
+        Checks that path and domain fields conform to defined format.
+    save(self)
+    """
+
     advertiser: ForeignKey = models.ForeignKey(
         Advertiser,
         blank=False,
@@ -84,10 +95,19 @@ class AdvertiserUrl(models.Model):
     path: CharField = models.CharField(max_length=128)
     matching: BooleanField = models.BooleanField(choices=MATCHING_CHOICES, default=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """String representation of AdvertiserUrl model."""
         return f"{self.geo.code}: {self.domain} {self.path}"
 
     def clean(self) -> None:
+        """Check that path and domain fields conform to defined format.
+
+        Raises
+        ------
+        ValidationError
+            If path does not start with '/', end with '/' or is a '/' only.
+
+        """
         is_valid_host(self.domain)
         if not self.path.startswith("/"):
             raise ValidationError(INVALID_PATH_ERROR)
@@ -98,15 +118,40 @@ class AdvertiserUrl(models.Model):
             raise ValidationError(INVALID_PREFIX_PATH_ERROR)
 
     def save(self, *args, **kwargs):
+        """Save instance of the AdvertiserUrl model after validation.
+
+        Whenever an instance of AdvertiserUrl is created or updated, this
+        override save() method is run. This allows for some logic to be
+        run prior to storing data. In this case, running full_clean().
+
+        Returns
+        -------
+        AdvertiserUrl
+            Saved instance of AdvertiserUrl model.
+        """
         self.full_clean()
         return super(AdvertiserUrl, self).save(*args, **kwargs)
 
 
-def is_valid_host(host) -> None:
+def is_valid_host(host: str) -> None:
+    """Check if host conforms to valid structure and allowable characters.
+
+    Parameters
+    ----------
+    host : str
+        The host domain string
+
+    Raises
+    ------
+    ValidationError
+        If hostname contains non-alphanumeric including '-' and '.'
+        or
+        does not conform to structure: <leaf-domain>.<second-level-domain>.<top-domain(s)>
+    """
 
     if not all([h.isalnum() or h in [".", "-"] for h in host]):
         raise ValidationError(
-            f"{host}: hostnames should only contain alpha numeric characters '-' and '.'"
+            f"{host}: hostnames should only contain alphanumeric characters '-' and '.'"
         )
     if not 2 <= len(host.split(".")) <= 4 or "" in host.split("."):
         raise ValidationError(

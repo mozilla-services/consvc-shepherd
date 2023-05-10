@@ -1,3 +1,8 @@
+"""This module contains logic to allow a superuser to revert data in Shephard
+back to a specific snapshot.
+
+See `README.md` file in this directory for instructions.
+"""
 import json
 import sys
 
@@ -7,7 +12,14 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.select import Select
 
 
-def fill_text_field_by_id(element_id, value, driver):
+def fill_text_field_by_id(element_id, value, driver) -> None:
+    """Fill field value based on element indentifier.
+
+    Arguments:
+    element_id -- UI element identifier
+    value -- value contained
+    driver -- webdriver browser instance
+    """
     field = driver.find_element(By.ID, element_id)
     field.clear()
     field.send_keys(value)
@@ -32,7 +44,7 @@ def main():
             add_buttons = driver.find_elements(By.CLASS_NAME, "addlink")
             for elem in add_buttons:
                 adv_add_url = f"{shepherd_url}/admin/contile/advertiser/add/"
-                if (elem.get_attribute("href")== adv_add_url):
+                if (elem.get_attribute("href") == adv_add_url):
                     elem.click()
                     break
 
