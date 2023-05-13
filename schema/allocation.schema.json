@@ -26,16 +26,21 @@
                         "maximum": 8
                     },
                     "allocation": {
-                        "type": "object",
-                        "patternProperties": {
-                            "^[a-zA-Z0-9'-]*$": {
+                        "type": "array",
+                        "uniqueItems": true,
+                        "items": {
+                            "type": "object",
+                            "patternProperties": {
+                            "^[\\d '-]*$": {
                                 "description": "Percentage of allocation to partner 0 - 100.",
                                 "uniqueItems": true,
                                 "type": "integer",
                                 "minimum": 0,
                                 "maximum": 100
                             }
+                        }
                         },
+
                         "additionalProperties": false
                     }
                 },

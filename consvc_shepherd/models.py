@@ -110,9 +110,8 @@ class AllocationSetting(models.Model):
         dict[str, int | dict[str, int]]
         Ex. {"position": 1, "allocation" {"adm": 80}}
         """
-        allocations_dict: dict = {"position": self.position, "allocation": {}}
-        for allocation in self.partner_allocations.all():  # type: ignore [attr-defined]
-            allocations_dict["allocation"].update(allocation.to_dict())
+        allocations_dict: dict = {"position": self.position}
+        allocations_dict["allocation"] = [allocation.to_dict() for allocation in self.partner_allocations.all()]  # type: ignore [attr-defined]
         return allocations_dict
 
     def __str__(self):
@@ -155,4 +154,5 @@ class PartnerAllocation(models.Model):
 
         Example: {"adm": 100}
         """
-        return {self.partner.name: self.percentage}
+
+        return {"partner": self.partner.name, "percentage": self.percentage}

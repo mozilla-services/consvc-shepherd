@@ -211,7 +211,13 @@ class AllocationSettingAdminTest(TestCase):
     def test_publish_allocation(self):
         """Test that publish action of allocation settings returns expected AllocationSetting."""
         request = mock.Mock()
-        expected: dict = {"position": 1, "allocation": {"adm": 85, "kevel": 15}}
+        expected: dict = {
+            "position": 1,
+            "allocation": [
+                {"partner": "adm", "percentage": 85},
+                {"partner": "kevel", "percentage": 15},
+            ],
+        }
 
         publish_allocation(None, request, AllocationSetting.objects.all())
         allocation_setting: dict = AllocationSetting.objects.get(position=1).to_dict()
