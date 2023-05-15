@@ -1,3 +1,4 @@
+"""Forms test module for consvc_shepherd."""
 from django.test import TestCase
 
 from consvc_shepherd.forms import SnapshotCompareForm
@@ -5,7 +6,10 @@ from consvc_shepherd.models import SettingsSnapshot
 
 
 class TestSnapshotCompareForm(TestCase):
+    """Test Snapshot Compare Form."""
+
     def test_required_fields_for_form(self):
+        """Test that validation error occurs when missing a required field."""
         data = {
             "newer_snapshot": "Snapshot 1",
         }
@@ -14,6 +18,9 @@ class TestSnapshotCompareForm(TestCase):
         self.assertEqual(form.errors["older_snapshot"], ["This field is required."])
 
     def test_compare_returns_differences(self):
+        """Test that comparison between old and new snapshots returns differences in
+        data representation.
+        """
         snapshot1 = SettingsSnapshot.objects.create(
             name="o_snapshot", json_settings={"adm_advertisers": {"advertiser1": {}}}
         )
