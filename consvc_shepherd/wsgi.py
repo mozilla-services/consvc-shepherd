@@ -1,5 +1,4 @@
-"""
-WSGI (Web Server Gateway Interface) config for consvc_shepherd project.
+"""WSGI (Web Server Gateway Interface) config for consvc_shepherd project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

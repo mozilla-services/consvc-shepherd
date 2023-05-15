@@ -65,3 +65,4 @@ add-select = ["D212"]
 # D205 1 blank line required between summary line and description, awkward spacing
 # D400 First line should end with a period, doesn't work when sentence spans 2 lines
 add-ignore = ["D105","D107","D203", "D205", "D400"]
+match-dir = '((contile|consvc_shepherd)/migrations$).*'

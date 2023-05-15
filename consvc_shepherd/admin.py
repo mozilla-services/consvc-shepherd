@@ -75,22 +75,35 @@ def publish_allocation(modeladmin, request, queryset) -> None:
 class ModelAdmin(admin.ModelAdmin):
     """Registration of SettingsSnapshot."""
 
-    list_display = ("name", "created_by", "launched_by", "launched_date")
-    readonly_fields = ["json_settings", "created_by", "launched_by", "launched_date"]
-    actions = [publish_snapshot]
+    list_display: tuple[str, str, str, str] = (
+        "name",
+        "created_by",
+        "launched_by",
+        "launched_date",
+    )
+    readonly_fields: list[str] = [
+        "json_settings",
+        "created_by",
+        "launched_by",
+        "launched_date",
+    ]
+    actions: list = [publish_snapshot]
 
     def save_model(self, request, obj, form, change) -> None:
+        """Save SettingsSnapshot model instance."""
         json_settings = obj.settings_type.to_dict()
         obj.json_settings = json_settings
         obj.created_by = request.user
         super(ModelAdmin, self).save_model(request, obj, form, change)
 
-    def get_readonly_fields(self, request, obj=None):
+    def get_readonly_fields(self, request, obj=None) -> list:
+        """Return list of read-only fields for SettingsSnapshot."""
         if obj:
             return ["name", "settings_type"] + self.readonly_fields
         return self.readonly_fields
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
+        """Return boolean of object's delete permissions."""
         return not (obj and obj.launched_by and obj.launched_date)
 
 

@@ -33,7 +33,7 @@ class Partner(models.Model):
         """Convert Advertiser instances into a single dictionary object.
 
         A partner dictionary of all advertiser instances is created by calling
-        the Advertiser model's to_dict() method iteratively.  The result is a
+        each Advertiser model's to_dict() method iteratively.  The result is a
         dictionary of dictionaries, each mapping to individual advertisers. See
         the  Advertiser.to_dict() method for additional context.
 
@@ -197,7 +197,6 @@ def is_valid_host(host: str) -> None:
         or
         does not conform to structure: <leaf-domain>.<second-level-domain>.<top-domain(s)>
     """
-
     if not all([h.isalnum() or h in [".", "-"] for h in host]):
         raise ValidationError(
             f"{host}: hostnames should only contain alphanumeric characters '-' and '.'"

@@ -1,5 +1,4 @@
-"""
-ASGI (Asynchronous Server Gateway Interface) config for consvc_shepherd project.
+"""ASGI (Asynchronous Server Gateway Interface) config for consvc_shepherd project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
