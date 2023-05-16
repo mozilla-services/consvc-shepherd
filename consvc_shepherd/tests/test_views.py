@@ -1,3 +1,4 @@
+"""Views test module for consvc_shepherd."""
 from django.test import TestCase, override_settings
 
 from consvc_shepherd.models import SettingsSnapshot
@@ -6,7 +7,12 @@ from consvc_shepherd.models import SettingsSnapshot
 # override DEBUG to override auth check
 @override_settings(DEBUG=True)
 class TestExperimentRisksUpdateView(TestCase):
+    """Test of view when SettingSnapshot updated."""
+
     def test_view_returns_post_request(self):
+        """Verify POST returns 200 response after creating and posting
+        settings snapshot.
+        """
         SettingsSnapshot.objects.create(
             name="o_snapshot", json_settings={"adm_advertisers": {"advertiser1": {}}}
         )

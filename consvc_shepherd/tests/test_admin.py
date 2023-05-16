@@ -1,3 +1,4 @@
+"""Admin test module for consvc_shepherd."""
 import json
 from typing import Any
 
@@ -22,6 +23,7 @@ class SettingsSnapshotAdminTest(TestCase):
     """Test class for SettingsSnapshot."""
 
     def setUp(self):
+        """Set up objects and variables for testing SettingsSnapshot."""
         request_factory = RequestFactory()
         self.request = request_factory.get("/admin")
         self.request.user = UserFactory()
@@ -49,6 +51,7 @@ class SettingsSnapshotAdminTest(TestCase):
         self.addCleanup(self.mock_storage_open.stop)
 
     def test_get_read_only_fields_when_obj_exists(self):
+        """Test that expected read only fields are returned when object created."""
         obj = SettingsSnapshot.objects.create(
             name="Snapshot", settings_type=self.partner
         )
@@ -66,12 +69,14 @@ class SettingsSnapshotAdminTest(TestCase):
         )
 
     def test_get_read_only_fields_when_obj_does_not_exists(self):
+        """Test that read only fields return when object not created."""
         fields = self.admin.get_readonly_fields(self.request, None)
         self.assertEqual(
             fields, ["json_settings", "created_by", "launched_by", "launched_date"]
         )
 
     def test_save_model_generates_json(self):
+        """Test that snapshot value matches expected json object."""
         self.assertEqual(SettingsSnapshot.objects.all().count(), 0)
 
         expected_json = self.partner.to_dict()
@@ -88,6 +93,7 @@ class SettingsSnapshotAdminTest(TestCase):
         self.assertEqual(snapshot.json_settings, expected_json)
 
     def test_publish_snapshot(self):
+        """Test that publishing snapshot returns expected metadata."""
         request = mock.Mock()
         request.user = UserFactory()
 
@@ -104,6 +110,7 @@ class SettingsSnapshotAdminTest(TestCase):
         self.assertEqual(snapshot.launched_by, request.user)
 
     def test_publish_snapshot_does_not_update_with_multiple_snapshots(self):
+        """Test that single publish action does not update with multiple snapshots."""
         request = mock.Mock()
         request.user = UserFactory()
         SettingsSnapshot.objects.create(
@@ -123,6 +130,7 @@ class SettingsSnapshotAdminTest(TestCase):
         self.assertEqual(len(snapshots), 2)
 
     def test_publish_snapshot_does_not_launch_already_launch_snapshot(self):
+        """Test that publish snapshot action does not launch pre-existing snapshot."""
         request = mock.Mock()
         request.user = UserFactory()
         timestamp = timezone.datetime(2022, 1, 11, 1, 15, 12)
@@ -141,6 +149,7 @@ class SettingsSnapshotAdminTest(TestCase):
         self.assertEqual(len(snapshots), 0)
 
     def test_snapshot_cannot_be_deleted_when_launched(self):
+        """Test that snapshot cannot be deleted once launched."""
         request = mock.Mock()
         request.user = UserFactory()
         snapshot = SettingsSnapshot.objects.create(
@@ -153,6 +162,7 @@ class SettingsSnapshotAdminTest(TestCase):
         self.assertFalse(self.admin.has_delete_permission(request, snapshot))
 
     def test_snapshot_can_be_deleted_when_unlaunched(self):
+        """Test that snapshot can be deleted when unlaunched."""
         request = mock.Mock()
         request.user = UserFactory()
         snapshot = SettingsSnapshot.objects.create(
@@ -167,6 +177,7 @@ class AllocationSettingAdminTest(TestCase):
     """Test class for AllocationSetting."""
 
     def setUp(self):
+        """Set up objects and variables for testing AllocationSetting."""
         request_factory = RequestFactory()
         self.request = request_factory.get("/admin/consvc_shepherd/allocationsetting/")
         self.request.user = UserFactory()
@@ -198,6 +209,7 @@ class AllocationSettingAdminTest(TestCase):
         self.addCleanup(self.mock_storage_open.stop)
 
     def test_publish_allocation(self):
+        """Test that publish action of allocation settings returns expected AllocationSetting."""
         request = mock.Mock()
         expected: dict = {"position": 1, "allocation": {"adm": 85, "kevel": 15}}
 

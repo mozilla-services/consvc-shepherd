@@ -1,3 +1,4 @@
+"""OpenIDC authentication middleware module for the consvc_shepherd service."""
 import logging
 
 from django.conf import settings
@@ -26,7 +27,8 @@ def validate_iap_jwt(request):
 
 def validate_openidc_header(request):
     default_email = settings.DEV_USER_EMAIL
-    openidc_header_value = request.META.get(settings.OPENIDC_HEADER, default_email)
+    openidc_header_value = request.META.get(
+        settings.OPENIDC_HEADER, default_email)
     return openidc_header_value.split(settings.OPENIDC_HEADER_PREFIX)[-1]
 
 

@@ -1,3 +1,6 @@
+"""Forms module for consvc_shepherd."""
+from typing import Any
+
 from django import forms
 
 from consvc_shepherd.models import (
@@ -9,6 +12,23 @@ from contile.models import Partner
 
 
 class SnapshotCompareForm(forms.Form):
+    """Form model comparing Partner snapshots.
+
+    Attributes
+    ----------
+    older_snapshot : ModelChoiceField
+        Old snapshot value selector
+    newer_snapshot : ModelChoiceField
+        New snapshot value selector
+
+    Methods
+    -------
+    compare(self)
+        Compare older_snapshot to newer_snapshot advertiser data.
+        Compares json settings for each object and returns a dictionary
+        capturing added and removed advertiser.
+    """
+
     older_snapshot = forms.ModelChoiceField(
         label="Older Snapshot",
         queryset=SettingsSnapshot.objects.all().order_by("-created_on"),
@@ -18,7 +38,8 @@ class SnapshotCompareForm(forms.Form):
         queryset=SettingsSnapshot.objects.all().order_by("-created_on"),
     )
 
-    def compare(self):
+    def compare(self) -> dict[str, Any]:
+        """Compare older_snapshot to newer_snapshot advertiser data."""
         os = SettingsSnapshot.objects.get(id=self.data["older_snapshot"])
         ns = SettingsSnapshot.objects.get(id=self.data["newer_snapshot"])
         older_json_settings = os.json_settings
@@ -45,15 +66,25 @@ class PartnerAllocationForm(forms.ModelForm):
     percentage = forms.IntegerField(min_value=0, max_value=100)
 
     class Meta:
+        """Meta class for PartnerAllocationForm."""
+
         model = PartnerAllocation
         fields = "__all__"
 
 
 class AllocationSettingForm(forms.ModelForm):
-    """Allocation Settings Class Form."""
+    """Allocation Settings Class Form.
+
+    Attributes
+    ----------
+    position : IntegerField
+        1-based position form value.
+    """
 
     position = forms.IntegerField(min_value=1, help_text="Position value is 1-based")
 
     class Meta:
+        """Meta class for AllocationSettingForm."""
+
         model = AllocationSetting
         fields = "__all__"

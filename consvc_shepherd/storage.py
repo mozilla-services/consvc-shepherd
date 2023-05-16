@@ -1,3 +1,4 @@
+"""Module to save data to GCS storage."""
 import logging
 
 from django.conf import settings

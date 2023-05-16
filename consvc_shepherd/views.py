@@ -1,3 +1,4 @@
+"""Views module for consvc_shepherd."""
 from typing import Any
 
 from django.shortcuts import render
@@ -8,15 +9,32 @@ from consvc_shepherd.models import AllocationSetting, SettingsSnapshot
 
 
 class TableOverview(TemplateView):
+    """TableOverview TemplateView Class
+
+    Attributes
+    ----------
+    template_name : str
+        Directory and file for given TableOverview template
+
+    Methods
+    -------
+    get_context_data(self, **kwargs: Any)
+        Return ordered context data from all SettingsSnapshot instances.
+    post(self, request, *args, **kwargs)
+        Post data entered in SnapshotCompareForm.
+    """
+
     template_name = "index.html"
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        """Return ordered context data from all SettingsSnapshot instances."""
         context = super().get_context_data(**kwargs)
         context["data"] = SettingsSnapshot.objects.all().order_by("-created_on")
         context["form"] = SnapshotCompareForm
         return context
 
     def post(self, request, *args, **kwargs):
+        """Post data entered in SnapshotCompareForm."""
         context = self.get_context_data()
         form = SnapshotCompareForm(request.POST)
         if form.is_valid():
@@ -28,10 +46,26 @@ class TableOverview(TemplateView):
 
 
 class AllocationSettingList(ListView):
+    """AllocationSettingList ListView class.
+
+    Attributes
+    ----------
+    model : AllocationSetting
+        Specific AllocationSetting model
+    template_name : str
+        Directory and file for given AllocationSetting template
+
+    Methods
+    -------
+    get_context_data(self, **kwargs: Any)
+        Return ordered context data from all AllocationSetting instances.
+    """
+
     model = AllocationSetting
     template_name = "allocation/allocation_list.html"
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        """Return ordered context data from all AllocationSetting instances."""
         context = super().get_context_data(**kwargs)
         context["allocation_settings"] = AllocationSetting.objects.all().order_by(
             "position"
