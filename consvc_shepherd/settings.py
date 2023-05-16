@@ -40,6 +40,7 @@ INSTALLED_APPS: list[str] = [
     "consvc_shepherd",
     "contile",
     "django.contrib.admin",
+    "django.contrib.admindocs",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -119,8 +120,10 @@ DEFAULT_AUTO_FIELD: str = "django.db.models.BigAutoField"
 
 DEFAULT_FILE_STORAGE: str = "storages.backends.gcloud.GoogleCloudStorage"
 GS_BUCKET_NAME = env("GS_BUCKET_NAME", default="")
-GS_BUCKET_FILE_NAME = env("GS_BUCKET_FILE_NAME", default="settings_from_shepherd")
-ALLOCATION_FILE_NAME: str = env("ALLOCATION_FILE_NAME", default="allocation_file")
+GS_BUCKET_FILE_NAME = env("GS_BUCKET_FILE_NAME",
+                          default="settings_from_shepherd")
+ALLOCATION_FILE_NAME: str = env(
+    "ALLOCATION_FILE_NAME", default="allocation_file")
 
 LOGGING: dict[str, Any] = {
     "version": 1,

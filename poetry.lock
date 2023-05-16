@@ -510,6 +510,18 @@ flask = ["blinker", "flask"]
 sanic = ["sanic"]
 
 [[package]]
+name = "docutils"
+version = "0.20"
+description = "Docutils -- Python Documentation Utilities"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "docutils-0.20-py3-none-any.whl", hash = "sha256:a428f10de4de4774389734c986a01b4af2d802d26717108b0f1b9356862937c5"},
+    {file = "docutils-0.20.tar.gz", hash = "sha256:f75a5a52fbcacd81b47e42888ad2b380748aaccfb3f13af0fe69deb759f01eb6"},
+]
+
+[[package]]
 name = "factory-boy"
 version = "3.2.1"
 description = "A versatile test fixtures replacement based on thoughtbot's factory_bot for Ruby."
@@ -1744,4 +1756,4 @@ h11 = ">=0.9.0,<1"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "7e75abe2e1224de9a13de5349d8a7a6541dd6ea835a901dd8bb426f3e7dd36fe"
+content-hash = "1e4e7378c3388e04e455e23a134b615e58c6672123351084290bff65fed449b9"

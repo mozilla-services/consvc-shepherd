@@ -13,13 +13,14 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path
+from django.contrib import admin, admindocs
+from django.urls import path, include
 
 from consvc_shepherd.models import AllocationSetting
 from consvc_shepherd.views import AllocationSettingList, TableOverview
 
 urlpatterns = [
+    path('admin/doc/', include('django.contrib.admindocs.urls')),
     path("admin/", admin.site.urls),
     path(
         "allocation/",
