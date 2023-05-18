@@ -108,11 +108,14 @@ class AllocationSetting(models.Model):
         Returns
         -------
         dict[str, int | dict[str, int]]
-        Ex. {"position": 1, "allocation" {"adm": 80}}
+        Ex. {"position": 1, "allocations" :[{"partner": "mozilla", "percentage": 100}]}
         """
-        allocations_dict: dict = {"position": self.position}
-        allocations_dict["allocation"] = [allocation.to_dict() for allocation in self.partner_allocations.all()]  # type: ignore [attr-defined]
-        return allocations_dict
+        return {
+            "position": self.position,
+            "allocations": [
+                allocation.to_dict() for allocation in self.partner_allocations.all()  # type: ignore [attr-defined]
+            ],
+        }
 
     def __str__(self):
         """Return string representation of AllocationSetting model."""
@@ -149,10 +152,7 @@ class PartnerAllocation(models.Model):
     def to_dict(self) -> dict[str, Any]:
         """Return PartnerAllocation instance as a dictionary representation.
 
-        key :  partner's name (str)
-        value : partner's allocation percentage (int)
-
-        Example: {"adm": 100}
+        Example: {"partner": "mozilla", "percentage": 100}
         """
 
         return {"partner": self.partner.name, "percentage": self.percentage}

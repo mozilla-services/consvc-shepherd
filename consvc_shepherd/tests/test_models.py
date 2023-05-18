@@ -24,7 +24,7 @@ class TestAllocationSettingModel(TestCase):
 
         expected_result: dict = {
             "position": 1,
-            "allocation": [
+            "allocations": [
                 {"partner": "adm", "percentage": 85},
                 {"partner": "kevel", "percentage": 15},
             ],
