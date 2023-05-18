@@ -213,7 +213,7 @@ class AllocationSettingAdminTest(TestCase):
         request = mock.Mock()
         expected: dict = {
             "position": 1,
-            "allocations": [
+            "allocation": [
                 {"partner": "adm", "percentage": 85},
                 {"partner": "kevel", "percentage": 15},
             ],

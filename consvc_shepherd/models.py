@@ -112,7 +112,7 @@ class AllocationSetting(models.Model):
         """
         return {
             "position": self.position,
-            "allocations": [
+            "allocation": [
                 allocation.to_dict() for allocation in self.partner_allocations.all()  # type: ignore [attr-defined]
             ],
         }
