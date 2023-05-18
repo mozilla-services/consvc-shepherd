@@ -30,14 +30,17 @@
                         "uniqueItems": true,
                         "items": {
                             "type": "object",
-                            "patternProperties": {
-                            "^[\\d '-]*$": {
-                                "description": "Percentage of allocation to partner 0 - 100.",
-                                "uniqueItems": true,
-                                "type": "integer",
-                                "minimum": 0,
-                                "maximum": 100
-                            }
+                            "properties": {
+                                "partner": {
+                                    "description": "Partner identifier",
+                                    "type": "string"
+                                },
+                                "percentage": {
+                                    "description": "Allocation percentage ranges from 0 to 100 to the partner",
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 100
+                                }
                         }
                         },
 
