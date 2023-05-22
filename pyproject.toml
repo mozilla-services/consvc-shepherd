@@ -21,7 +21,7 @@ psycopg2-binary = "^2.9.5"
 jsonschema = "^4.17.3"
 
 [tool.poetry.group.dev.dependencies]
-bandit = "^1.7.4"
+bandit = {extras = ["toml"], version = "^1.7.4"}
 black = "^22.12.0"
 coverage = "^6.5.0"
 factory-boy = "^3.2.1"
@@ -39,6 +39,12 @@ mypy = "^1.2.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.bandit]
+# skips asserts
+# B101: https://bandit.readthedocs.io/en/latest/plugins/b101_assert_used.html#
+# B104: https://bandit.readthedocs.io/en/latest/plugins/b104_hardcoded_bind_all_interfaces.html
+skips = ["B101", "B104"]
 
 [tool.mypy]
 python_version = "3.11"
