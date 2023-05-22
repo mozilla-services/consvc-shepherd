@@ -7,6 +7,8 @@ import environ
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
+from consvc_shepherd.version import fetch_app_version_from_file
+
 env = environ.Env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -150,13 +152,24 @@ LOGGING: dict[str, Any] = {
 
 # Sentry Setup
 SENTRY_DSN = env("SENTRY_DSN", default=None)
+# Any of "release", "debug", or "disabled". Using "debug" will enable logging for Sentry.
+SENTRY_MODE = env("SENTRY_DEBUG_MODE", default="disabled")
 SENTRY_TRACE_SAMPLE_RATE = env("SENTRY_TRACE_SAMPLE_RATE", default=1.0)
 SENTRY_ENV = env("SENTRY_ENV", default=None)
 
 sentry_sdk.init(
     dsn=SENTRY_DSN,
-    integrations=[DjangoIntegration()],
+    integrations=[
+        DjangoIntegration(
+            transaction_style="url",
+            middleware_spans=True,
+            signals_spans=False,
+            cache_spans=True,
+        )
+    ],
+    debug=SENTRY_MODE,
     environment=SENTRY_ENV,
+    release=fetch_app_version_from_file().commit,
     # Set traces_sample_rate to 1.0 to capture 100%
     # of transactions for performance monitoring.
     # We recommend adjusting this value in production,
