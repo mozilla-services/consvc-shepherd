@@ -153,7 +153,7 @@ LOGGING: dict[str, Any] = {
 # Sentry Setup
 SENTRY_DSN = env("SENTRY_DSN", default=None)
 # Any of "release", "debug", or "disabled". Using "debug" will enable logging for Sentry.
-SENTRY_MODE = env("SENTRY_DEBUG_MODE", default="release")
+SENTRY_MODE = env("SENTRY_DEBUG_MODE", default="disabled")
 SENTRY_TRACE_SAMPLE_RATE = env("SENTRY_TRACE_SAMPLE_RATE", default=1.0)
 SENTRY_ENV = env("SENTRY_ENV", default=None)
 
