@@ -154,5 +154,4 @@ class PartnerAllocation(models.Model):
 
         Example: {"partner": "mozilla", "percentage": 100}
         """
-
         return {"partner": self.partner.name, "percentage": self.percentage}
