@@ -27,7 +27,7 @@ flake8: $(INSTALL_STAMP)  ##  Run flake8
 
 .PHONY: bandit
 bandit: $(INSTALL_STAMP)  ##  Run bandit
-	$(POETRY) run bandit --quiet -r $(APP_DIRS) 
+	$(POETRY) run bandit --quiet -r $(APP_DIRS) -c "pyproject.toml"
 
 .PHONY: pydocstyle
 pydocstyle: $(INSTALL_STAMP)  ##  Run pydocstyle
