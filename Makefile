@@ -32,7 +32,7 @@ bandit: $(INSTALL_STAMP)  ##  Run bandit
 
 .PHONY: pydocstyle
 pydocstyle: $(INSTALL_STAMP)  ##  Run pydocstyle
-	$(POETRY) run pydocstyle $(APP_DIRS) --config="pyproject.toml"
+	$(POETRY) run pydocstyle $(APP_DIRS) --explain --config="pyproject.toml"
 
 .PHONY: mypy
 mypy: $(INSTALL_STAMP)  ##  Run mypy
