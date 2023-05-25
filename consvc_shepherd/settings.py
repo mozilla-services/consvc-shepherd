@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 
 import environ
+import markus
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
@@ -34,6 +35,13 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = env("SESSION_COOKIE_SECURE", default=True, cast=bool)
 CSRF_COOKIE_SECURE = env("CSRF_COOKIE_SECURE", default=True, cast=bool)
 SECURE_REFERRER_POLICY = env("SECURE_REFERRER_POLICY", default="origin")
+
+DJANGO_STATSD_ENABLED = env("DJANGO_STATSD_ENABLED", default=False, cast=bool)
+STATSD_DEBUG = env("STATSD_DEBUG", default=False, cast=bool)
+STATSD_ENABLED = DJANGO_STATSD_ENABLED or STATSD_DEBUG
+STATSD_HOST = ("DJANGO_STATSD_HOST", "127.0.0.1")
+STATSD_PORT = ("DJANGO_STATSD_PORT", "8125")
+STATSD_PREFIX = ("DJANGO_STATSD_PREFIX", "consvc.shepherd")
 
 # Application definition
 
@@ -122,8 +130,10 @@ DEFAULT_AUTO_FIELD: str = "django.db.models.BigAutoField"
 
 DEFAULT_FILE_STORAGE: str = "storages.backends.gcloud.GoogleCloudStorage"
 GS_BUCKET_NAME = env("GS_BUCKET_NAME", default="")
-GS_BUCKET_FILE_NAME = env("GS_BUCKET_FILE_NAME", default="settings_from_shepherd")
-ALLOCATION_FILE_NAME: str = env("ALLOCATION_FILE_NAME", default="allocation_file")
+GS_BUCKET_FILE_NAME = env("GS_BUCKET_FILE_NAME",
+                          default="settings_from_shepherd")
+ALLOCATION_FILE_NAME: str = env(
+    "ALLOCATION_FILE_NAME", default="allocation_file")
 
 LOGGING: dict[str, Any] = {
     "version": 1,
@@ -147,6 +157,7 @@ LOGGING: dict[str, Any] = {
             "handlers": ["console"],
             "level": env("SHEPHERD_ENV", default="DEBUG"),
         },
+        "markus": {"handlers": ["console"], "level": "DEBUG"},
     },
 }
 
@@ -175,3 +186,28 @@ sentry_sdk.init(
     # We recommend adjusting this value in production,
     traces_sample_rate=SENTRY_TRACE_SAMPLE_RATE,
 )
+
+# Metrics Configuration
+_MARKUS_BACKENDS: list[dict[str, Any]] = []
+if DJANGO_STATSD_ENABLED:
+    _MARKUS_BACKENDS.append(
+        {
+            "class": "markus.backends.datadog.DatadogMetrics",
+            "options": {
+                "statsd_host": STATSD_HOST,
+                "statsd_port": STATSD_PORT,
+                "statsd_prefix": STATSD_PREFIX,
+            },
+        }
+    )
+if STATSD_DEBUG:
+    _MARKUS_BACKENDS.append(
+        {
+            "class": "markus.backends.logging.LoggingMetrics",
+            "options": {
+                "logger_name": "markus",
+                "leader": "METRICS",
+            },
+        }
+    )
+markus.configure(backends=_MARKUS_BACKENDS)
