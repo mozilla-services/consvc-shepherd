@@ -40,6 +40,10 @@ mypy = "^1.2.0"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.isort]
+profile = "black"
+skip_gitignore = true
+
 [tool.bandit]
 # skips asserts
 # B101: https://bandit.readthedocs.io/en/latest/plugins/b101_assert_used.html#

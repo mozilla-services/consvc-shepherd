@@ -30,6 +30,7 @@ class TestAllocationSettingModel(TestCase):
             ],
         }
         self.assertEqual(position1_alloc.to_dict(), expected_result)
+        self.assertEqual(str(position1_alloc), "Allocation Position : 1")
 
 
 class TestPartnerAllocationModel(TestCase):

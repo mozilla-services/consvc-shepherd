@@ -1,4 +1,5 @@
 APP_DIRS := consvc_shepherd contile
+TEST_DIRS := consvc_shepherd/tests contile/tests
 COV_FAIL_UNDER := 95
 INSTALL_STAMP := .install.stamp
 POETRY := $(shell command -v poetry 2> /dev/null)
@@ -31,14 +32,14 @@ bandit: $(INSTALL_STAMP)  ##  Run bandit
 
 .PHONY: pydocstyle
 pydocstyle: $(INSTALL_STAMP)  ##  Run pydocstyle
-	$(POETRY) run pydocstyle $(APP_DIRS) --config="pyproject.toml"
+	$(POETRY) run pydocstyle $(APP_DIRS) --explain --config="pyproject.toml"
 
 .PHONY: mypy
 mypy: $(INSTALL_STAMP)  ##  Run mypy
 	$(POETRY) run mypy $(APP_DIRS) --config-file="pyproject.toml"
 
 .PHONY: lint
-lint: $(INSTALL_STAMP) isort black flake8 bandit mypy ##  Run various linters
+lint: $(INSTALL_STAMP) isort black flake8 bandit pydocstyle mypy ##  Run various linters
 
 .PHONY: format
 format: install  ##  Sort imports and reformat code
@@ -49,7 +50,15 @@ format: install  ##  Sort imports and reformat code
 check: install
 	$(POETRY) run python manage.py makemigrations --check --dry-run --noinput
 
+.PHONY: migrate
+migrate: install
+	$(POETRY) run python manage.py makemigrations
+	$(POETRY) run python manage.py migrate
+
 .PHONY: test
 test: migration-check
 	env DJANGO_SETTINGS_MODULE=consvc_shepherd.settings $(POETRY) run pytest --cov --cov-report=term-missing --cov-fail-under=$(COV_FAIL_UNDER)
 
+.PHONY: dev
+dev: $(INSTALL_STAMP)  ##  Run shepherd locally and reload automatically
+	$(POETRY) run python manage.py runserver

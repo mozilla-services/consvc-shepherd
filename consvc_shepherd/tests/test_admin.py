@@ -22,7 +22,7 @@ from contile.models import Advertiser, AdvertiserUrl
 class SettingsSnapshotAdminTest(TestCase):
     """Test class for SettingsSnapshot."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up objects and variables for testing SettingsSnapshot."""
         request_factory = RequestFactory()
         self.request = request_factory.get("/admin")
@@ -50,7 +50,7 @@ class SettingsSnapshotAdminTest(TestCase):
         self.mock_storage_open.start()
         self.addCleanup(self.mock_storage_open.stop)
 
-    def test_get_read_only_fields_when_obj_exists(self):
+    def test_get_read_only_fields_when_obj_exists(self) -> None:
         """Test that expected read only fields are returned when object created."""
         obj = SettingsSnapshot.objects.create(
             name="Snapshot", settings_type=self.partner
@@ -68,18 +68,18 @@ class SettingsSnapshotAdminTest(TestCase):
             ],
         )
 
-    def test_get_read_only_fields_when_obj_does_not_exists(self):
+    def test_get_read_only_fields_when_obj_does_not_exists(self) -> None:
         """Test that read only fields return when object not created."""
         fields = self.admin.get_readonly_fields(self.request, None)
         self.assertEqual(
             fields, ["json_settings", "created_by", "launched_by", "launched_date"]
         )
 
-    def test_save_model_generates_json(self):
+    def test_save_model_generates_json(self) -> None:
         """Test that snapshot value matches expected json object."""
         self.assertEqual(SettingsSnapshot.objects.all().count(), 0)
 
-        expected_json = self.partner.to_dict()
+        expected_json: dict = self.partner.to_dict()
         self.admin.save_model(
             self.request,
             SettingsSnapshot(name="dev", settings_type=self.partner),
@@ -89,10 +89,11 @@ class SettingsSnapshotAdminTest(TestCase):
 
         self.assertEqual(SettingsSnapshot.objects.all().count(), 1)
         snapshot = SettingsSnapshot.objects.all().first()
-        validate(snapshot.json_settings, schema=self.settings_schema)
-        self.assertEqual(snapshot.json_settings, expected_json)
+        if snapshot:
+            validate(snapshot.json_settings, schema=self.settings_schema)
+            self.assertEqual(snapshot.json_settings, expected_json)
 
-    def test_publish_snapshot(self):
+    def test_publish_snapshot(self) -> None:
         """Test that publishing snapshot returns expected metadata."""
         request = mock.Mock()
         request.user = UserFactory()
@@ -104,12 +105,14 @@ class SettingsSnapshotAdminTest(TestCase):
             created_by=request.user,
         )
         publish_snapshot(None, request, SettingsSnapshot.objects.all())
-        snapshot = SettingsSnapshot.objects.get(name="Settings Snapshot")
+        snapshot: SettingsSnapshot = SettingsSnapshot.objects.get(
+            name="Settings Snapshot"
+        )
         self.assertIsNotNone(snapshot.launched_date)
 
         self.assertEqual(snapshot.launched_by, request.user)
 
-    def test_publish_snapshot_does_not_update_with_multiple_snapshots(self):
+    def test_publish_snapshot_does_not_update_with_multiple_snapshots(self) -> None:
         """Test that single publish action does not update with multiple snapshots."""
         request = mock.Mock()
         request.user = UserFactory()
@@ -129,7 +132,7 @@ class SettingsSnapshotAdminTest(TestCase):
         )
         self.assertEqual(len(snapshots), 2)
 
-    def test_publish_snapshot_does_not_launch_already_launch_snapshot(self):
+    def test_publish_snapshot_does_not_launch_already_launch_snapshot(self) -> None:
         """Test that publish snapshot action does not launch pre-existing snapshot."""
         request = mock.Mock()
         request.user = UserFactory()
@@ -148,7 +151,7 @@ class SettingsSnapshotAdminTest(TestCase):
         )
         self.assertEqual(len(snapshots), 0)
 
-    def test_snapshot_cannot_be_deleted_when_launched(self):
+    def test_snapshot_cannot_be_deleted_when_launched(self) -> None:
         """Test that snapshot cannot be deleted once launched."""
         request = mock.Mock()
         request.user = UserFactory()
@@ -161,7 +164,7 @@ class SettingsSnapshotAdminTest(TestCase):
         )
         self.assertFalse(self.admin.has_delete_permission(request, snapshot))
 
-    def test_snapshot_can_be_deleted_when_unlaunched(self):
+    def test_snapshot_can_be_deleted_when_unlaunched(self) -> None:
         """Test that snapshot can be deleted when unlaunched."""
         request = mock.Mock()
         request.user = UserFactory()
@@ -176,7 +179,7 @@ class SettingsSnapshotAdminTest(TestCase):
 class AllocationSettingAdminTest(TestCase):
     """Test class for AllocationSetting."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up objects and variables for testing AllocationSetting."""
         request_factory = RequestFactory()
         self.request = request_factory.get("/admin/consvc_shepherd/allocationsetting/")
@@ -208,7 +211,7 @@ class AllocationSettingAdminTest(TestCase):
         self.mock_storage_open.start()
         self.addCleanup(self.mock_storage_open.stop)
 
-    def test_publish_allocation(self):
+    def test_publish_allocation(self) -> None:
         """Test that publish action of allocation settings returns expected AllocationSetting."""
         request = mock.Mock()
         expected: dict = {
