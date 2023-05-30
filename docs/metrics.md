@@ -44,6 +44,13 @@ so metrics are emitted but do not appear in logs.
 By default, metrics are disabled in development. They must be enabled via an
 environment variable or in `.env`.
 
+Metrics are set, incremented and controlled by utility functions that are defined in the  [consvc_shepherd/utils.py](../consvc_shepherd/utils.py) module:
+
+- `time_if_enabled(name)`
+- `incr_if_enabled(name, value=1, tags=None)`
+- `histogram_if_enabled(name, value, tags=None)`
+- `gauge_if_enabled(name, value, tags=None)`
+
 With `DJANGO_STATSD_ENABLED=True`, metrics are sent to the server identified by
 `STATSD_HOST` and `STATSD_PORT`, using the [DatadogMetrics
 backend][markus-datadogmetrics]. These are sent as UDP packets, which means
