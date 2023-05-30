@@ -1,13 +1,14 @@
+# Shepherd Metrics
 This documentation describes the statsd-style metrics emitted by consvc_shepherd.
 
-# Metrics
+## Metrics
 
-consvc_shepherd uses [markus][markus] to emit statsd-style metrics like
+consvc_shepherd uses [markus][markus] (metrics client) to emit statsd-style metrics like
 counters, gauges, and timers. We use the [datadog extensions][dogstatsd], which
 include tags for metrics. In the production instance of Shepherd, metrics are emitted as
 [UDP packets][udp], collected by a local [telegraf][telegraf] forwarder, and
 stored in [influxdb][influxdb]. In development, metrics are disabled by
-default, though there is a way described below to view metrics in development.
+default, but there is a way described below to view metrics in development via `nc`.
 
 ## Telegraf
 
