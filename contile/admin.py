@@ -39,6 +39,7 @@ class PartnerListAdmin(admin.ModelAdmin):
     model = Partner
 
     def delete_queryset(self, request, queryset):
+        """Delete given PartnerListAdmin entry."""
         super(PartnerListAdmin, self).delete_queryset(request, queryset)
         messages.warning(
             request,

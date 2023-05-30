@@ -1,6 +1,7 @@
 """Admin module for consvc_shepherd."""
 import json
 
+import markus
 from django.conf import settings
 from django.contrib import admin, messages
 from django.utils import dateformat, timezone
@@ -13,9 +14,13 @@ from consvc_shepherd.models import (
     SettingsSnapshot,
 )
 from consvc_shepherd.storage import send_to_storage
+from consvc_shepherd.utils import incr_if_enabled, time_if_enabled
+
+metrics = markus.get_metrics(__name__)
 
 
 @admin.action(description="Publish Settings Snapshot")
+@time_if_enabled("publish.snapshot")
 def publish_snapshot(modeladmin, request, queryset):
     """Publish advertiser snapshot."""
     if len(queryset) > 1:
@@ -36,8 +41,10 @@ def publish_snapshot(modeladmin, request, queryset):
                 validate(snapshot.json_settings, schema=settings_schema)
                 send_to_storage(content, settings.GS_BUCKET_FILE_NAME)
                 snapshot.save()
+                incr_if_enabled("snapshot.upload.success")
                 messages.info(request, "Snapshot has been published.")
             except exceptions.ValidationError:
+                incr_if_enabled("schema.snapshot.validation.fail")
                 messages.error(
                     request,
                     "JSON generated is different from the expected snapshot schema.",
@@ -45,6 +52,7 @@ def publish_snapshot(modeladmin, request, queryset):
 
 
 @admin.action(description="Publish Allocation")
+@time_if_enabled("publish.allocation")
 def publish_allocation(modeladmin, request, queryset) -> None:
     """Publish allocation JSON settings."""
     allocation_request = queryset.order_by("position")
@@ -63,8 +71,10 @@ def publish_allocation(modeladmin, request, queryset) -> None:
             validate(allocation, schema=allocation_schema)
             allocation_json = json.dumps(allocation, indent=2)
             send_to_storage(allocation_json, settings.ALLOCATION_FILE_NAME)
+            incr_if_enabled("allocation.upload.success")
             messages.info(request, "Allocation setting has been published.")
         except exceptions.ValidationError:
+            incr_if_enabled("schema.allocation.validation.fail")
             messages.error(
                 request,
                 "JSON generated is different from the expected allocation schema.",
