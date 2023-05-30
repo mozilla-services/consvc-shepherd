@@ -1,13 +1,18 @@
-This document describes the statsd-style metrics emitted by consvc_shepherd.
+This documentation describes the statsd-style metrics emitted by consvc_shepherd.
 
 # Metrics
 
 consvc_shepherd uses [markus][markus] to emit statsd-style metrics like
 counters, gauges, and timers. We use the [datadog extensions][dogstatsd], which
-include tags for metrics. In deployments, metrics are emitted as
+include tags for metrics. In the production instance of Shepherd, metrics are emitted as
 [UDP packets][udp], collected by a local [telegraf][telegraf] forwarder, and
 stored in [influxdb][influxdb]. In development, metrics are disabled by
-default.
+default, though there is a way described below to view metrics in development.
+
+## Telegraf
+
+[Telegraf](https://github.com/influxdata/telegraf) is a plugin-driven server agent written by the folks over at [InfluxData](https://influxdata.com) for collecting & reporting metrics. To understand the 
+configuration for Mozilla services, please view the documentation in [cloudops-infra](https://github.com/mozilla-services/cloudops-infra/tree/master/libs/influx/k8s/charts/telegraf).
 
 [markus]: https://markus.readthedocs.io/en/latest/index.html "Markus documentation"
 [dogstatsd]: https://docs.datadoghq.com/developers/dogstatsd "dogstatsd documentation"
