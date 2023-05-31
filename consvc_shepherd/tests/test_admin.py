@@ -114,7 +114,6 @@ class SettingsSnapshotAdminTest(TestCase):
         """Test that publishing snapshot emits metrics."""
         request = mock.Mock()
         request.user = UserFactory()
-        metrics_mock = MetricsMock()
 
         SettingsSnapshot.objects.create(
             name="Settings Snapshot",
@@ -122,7 +121,7 @@ class SettingsSnapshotAdminTest(TestCase):
             json_settings=self.partner.to_dict(),
             created_by=request.user,
         )
-        with metrics_mock as mm:
+        with MetricsMock() as mm:
             publish_snapshot(None, request, SettingsSnapshot.objects.all())
             mm.assert_incr("shepherd.snapshot.upload.success")
             mm.assert_timing("shepherd.snapshot.publish.timer")
@@ -244,9 +243,8 @@ class AllocationSettingAdminTest(TestCase):
     def test_publish_allocation_metrics(self):
         """Test that publish action of allocation settings emits metrics."""
         request = mock.Mock()
-        metrics_mock = MetricsMock()
 
-        with metrics_mock as mm:
+        with MetricsMock() as mm:
             publish_allocation(None, request, AllocationSetting.objects.all())
             mm.assert_incr("shepherd.allocation.upload.success")
             mm.assert_timing("shepherd.allocation.publish.timer")
