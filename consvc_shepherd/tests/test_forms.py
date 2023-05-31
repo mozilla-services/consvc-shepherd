@@ -1,5 +1,4 @@
 """Forms test module for consvc_shepherd."""
-from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from consvc_shepherd.forms import AllocationFormset, SnapshotCompareForm
@@ -87,10 +86,10 @@ class TestAllocationFormSet(TestCase):
         """
         self.data["partner_allocations-1-percentage"] = "55"
         form = AllocationFormset(data=self.data)
-
-        with self.assertRaises(ValidationError) as e:
-            form.clean()
-        self.assertEqual(str(e.exception), "['Total Percentage has to add up to 100.']")
+        self.assertFalse(form.is_valid())
+        self.assertEqual(
+            form.non_form_errors(), ["Total Percentage has to add up to 100."]
+        )
 
     def test_returns_errors_when_partners_are_not_unique(self):
         """Test to ensure forms.ValidationError is raise when partners
@@ -98,6 +97,7 @@ class TestAllocationFormSet(TestCase):
         """
         self.data["partner_allocations-1-partner"] = f"{self.partner1.id}"
         form = AllocationFormset(data=self.data)
-        with self.assertRaises(ValidationError) as e:
-            form.clean()
-        self.assertEqual(str(e.exception), "['A Partner is listed multiple times.']")
+        self.assertFalse(form.is_valid())
+        self.assertEqual(
+            form.non_form_errors(), ["A Partner is listed multiple times."]
+        )
