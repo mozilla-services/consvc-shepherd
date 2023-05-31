@@ -2,6 +2,8 @@
 from typing import Any
 
 from django import forms
+from django.forms import BaseInlineFormSet
+from django.forms.models import inlineformset_factory
 
 from consvc_shepherd.models import (
     AllocationSetting,
@@ -88,3 +90,30 @@ class AllocationSettingForm(forms.ModelForm):
 
         model = AllocationSetting
         fields = "__all__"
+
+
+class AllocationSettingFormset(BaseInlineFormSet):
+    """Allocation Settings Class Formset."""
+
+    def clean(self):
+        """Additional Form Validation."""
+        super(AllocationSettingFormset, self).clean()
+
+        if sum((form.cleaned_data.get("percentage") for form in self.forms)) != 100:
+            raise forms.ValidationError("Total Percentage has to add up to 100.")
+
+        partners = [form.cleaned_data.get("partner").name for form in self.forms]
+
+        if len(set(partners)) < len(partners):
+            raise forms.ValidationError("A Partner is listed multiple times.")
+
+
+AllocationFormset = inlineformset_factory(
+    AllocationSetting,
+    PartnerAllocation,
+    form=PartnerAllocationForm,
+    formset=AllocationSettingFormset,
+    extra=1,
+    can_delete=False,
+    can_delete_extra=True,
+)
