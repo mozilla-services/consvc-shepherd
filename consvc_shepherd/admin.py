@@ -6,7 +6,7 @@ from django.contrib import admin, messages
 from django.utils import dateformat, timezone
 from jsonschema import exceptions, validate
 
-from consvc_shepherd.forms import AllocationSettingForm, PartnerAllocationForm
+from consvc_shepherd.forms import AllocationSettingForm, AllocationSettingFormset
 from consvc_shepherd.models import (
     AllocationSetting,
     PartnerAllocation,
@@ -112,7 +112,7 @@ class PartnerAllocationInline(admin.TabularInline):
 
     extra = 1
     model = PartnerAllocation
-    form = PartnerAllocationForm
+    formset = AllocationSettingFormset
 
 
 @admin.register(AllocationSetting)
