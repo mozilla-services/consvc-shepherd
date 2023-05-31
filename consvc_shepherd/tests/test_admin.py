@@ -200,10 +200,10 @@ class AllocationSettingAdminTest(TestCase):
             position=1
         )
         PartnerAllocation.objects.create(
-            allocationPosition=position1_alloc, partner=adm_partner, percentage=85
+            allocation_position=position1_alloc, partner=adm_partner, percentage=85
         )
         PartnerAllocation.objects.create(
-            allocationPosition=position1_alloc, partner=kevel_partner, percentage=15
+            allocation_position=position1_alloc, partner=kevel_partner, percentage=15
         )
         self.mock_storage_open = mock.patch(
             "django.core.files.storage.default_storage." "open"

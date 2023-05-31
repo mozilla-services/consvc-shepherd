@@ -141,7 +141,7 @@ class PartnerAllocation(models.Model):
         Return PartnerAllocation instance as a dictionary representation.
     """
 
-    allocationPosition: ForeignKey = models.ForeignKey(
+    allocation_position: ForeignKey = models.ForeignKey(
         AllocationSetting, on_delete=models.CASCADE, related_name="partner_allocations"
     )
     partner: ForeignKey = models.ForeignKey(
