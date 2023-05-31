@@ -6,7 +6,7 @@ import markus
 from django.conf import settings
 
 
-class ShepherdMetrics:
+class ShepherdMetrics:  # pragma: no cover
     """Instantiate a metrics instance for a given module."""
 
     def __init__(self, thing=__name__) -> None:

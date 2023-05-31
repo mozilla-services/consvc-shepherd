@@ -19,7 +19,7 @@ metrics: ShepherdMetrics = ShepherdMetrics("shepherd")
 
 
 @admin.action(description="Publish Settings Snapshot")
-@metrics.time_if_enabled("snapshot.publish")
+@metrics.time_if_enabled("snapshot.publish.timer")
 def publish_snapshot(modeladmin, request, queryset):
     """Publish advertiser snapshot."""
     if len(queryset) > 1:
@@ -40,7 +40,7 @@ def publish_snapshot(modeladmin, request, queryset):
                 validate(snapshot.json_settings, schema=settings_schema)
                 send_to_storage(content, settings.GS_BUCKET_FILE_NAME)
                 snapshot.save()
-                metrics.incr_if_enabled("snapshot.upload")
+                metrics.incr_if_enabled("snapshot.upload.success")
                 messages.info(request, "Snapshot has been published.")
             except exceptions.ValidationError:
                 metrics.incr_if_enabled("snapshot.schema.validation.fail")
@@ -51,7 +51,7 @@ def publish_snapshot(modeladmin, request, queryset):
 
 
 @admin.action(description="Publish Allocation")
-@metrics.time_if_enabled("allocation.publish")
+@metrics.time_if_enabled("allocation.publish.timer")
 def publish_allocation(modeladmin, request, queryset) -> None:
     """Publish allocation JSON settings."""
     allocation_request = queryset.order_by("position")

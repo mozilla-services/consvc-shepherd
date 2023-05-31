@@ -7,6 +7,7 @@ from django.contrib.admin.sites import AdminSite
 from django.test import RequestFactory, TestCase
 from django.utils import timezone
 from jsonschema import validate
+from markus.testing import MetricsMock
 
 from consvc_shepherd.admin import ModelAdmin, publish_allocation, publish_snapshot
 from consvc_shepherd.models import (
@@ -108,6 +109,23 @@ class SettingsSnapshotAdminTest(TestCase):
         self.assertIsNotNone(snapshot.launched_date)
 
         self.assertEqual(snapshot.launched_by, request.user)
+
+    def test_publish_snapshot_metrics(self):
+        """Test that publishing snapshot emits metrics."""
+        request = mock.Mock()
+        request.user = UserFactory()
+        metrics_mock = MetricsMock()
+
+        SettingsSnapshot.objects.create(
+            name="Settings Snapshot",
+            settings_type=self.partner,
+            json_settings=self.partner.to_dict(),
+            created_by=request.user,
+        )
+        with metrics_mock as mm:
+            publish_snapshot(None, request, SettingsSnapshot.objects.all())
+            mm.assert_incr("shepherd.snapshot.upload.success")
+            mm.assert_timing("shepherd.snapshot.publish.timer")
 
     def test_publish_snapshot_does_not_update_with_multiple_snapshots(self):
         """Test that single publish action does not update with multiple snapshots."""
@@ -222,3 +240,13 @@ class AllocationSettingAdminTest(TestCase):
         publish_allocation(None, request, AllocationSetting.objects.all())
         allocation_setting: dict = AllocationSetting.objects.get(position=1).to_dict()
         self.assertEqual(allocation_setting, expected)
+
+    def test_publish_allocation_metrics(self):
+        """Test that publish action of allocation settings emits metrics."""
+        request = mock.Mock()
+        metrics_mock = MetricsMock()
+
+        with metrics_mock as mm:
+            publish_allocation(None, request, AllocationSetting.objects.all())
+            mm.assert_incr("shepherd.allocation.upload.success")
+            mm.assert_timing("shepherd.allocation.publish.timer")
