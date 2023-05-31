@@ -81,12 +81,12 @@ class JSONSchema(TestCase):
                 position=1
             )
             PartnerAllocation.objects.create(
-                allocationPosition=position1_alloc,
+                allocation_position=position1_alloc,
                 partner=adm_partner,
                 percentage=85
             )
             PartnerAllocation.objects.create(
-                allocationPosition=position1_alloc,
+                allocation_position=position1_alloc,
                 partner=kevel_partner,
                 percentage=15
             )
@@ -97,12 +97,12 @@ class JSONSchema(TestCase):
                 position=2
             )
             PartnerAllocation.objects.create(
-                allocationPosition=position2_alloc,
+                allocation_position=position2_alloc,
                 partner=adm_partner,
                 percentage=50
             )
             PartnerAllocation.objects.create(
-                allocationPosition=position2_alloc,
+                allocation_position=position2_alloc,
                 partner=kevel_partner,
                 percentage=50
             )
