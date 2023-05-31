@@ -7,10 +7,29 @@ from django.conf import settings
 
 
 class ShepherdMetrics:  # pragma: no cover
-    """Instantiate a metrics instance for a given module."""
+    """Instantiate a metrics instance for a given module.
+
+    Attributes
+    ----------
+    metrics : markus.main.MetricsInterface
+        Metrics interface client
+
+
+    Methods
+    -------
+    incr_if_enabled(self, name, value, tags)
+        Increment the given stat.  Calls markus incr function.
+    histogram_if_enabled(self, name, value, tags)
+        Records a histogram value for a given stat. Calls markus histogram function.
+    gauge_if_enabled(self, name, value, tags)
+        Gauge the given stat. Calls markus gauge function.
+    time_if_enabled(self, name, tags)
+        Timing decorator to record a timing for a given function. Calls markus timing function.
+
+    """
 
     def __init__(self, thing=__name__) -> None:
-        self.metrics = markus.get_metrics(thing)
+        self.metrics: markus.main.MetricsInterface = markus.get_metrics(thing)
 
     def incr_if_enabled(
         self, name: str, value: int = 1, tags: str | None = None
