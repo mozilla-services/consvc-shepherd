@@ -51,6 +51,7 @@ class TestAllocationFormSet(TestCase):
     """Test Allocation FormSet."""
 
     def setUp(self):
+        """Set up data for tests."""
         self.partner1 = Partner.objects.create(name="partner1")
         self.partner2 = Partner.objects.create(name="partner2")
         self.data = {
@@ -95,7 +96,6 @@ class TestAllocationFormSet(TestCase):
         """Test to ensure forms.ValidationError is raise when partners
         are not unique.
         """
-
         self.data["partner_allocations-1-partner"] = f"{self.partner1.id}"
         form = AllocationFormset(data=self.data)
         with self.assertRaises(ValidationError) as e:
