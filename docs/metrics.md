@@ -44,12 +44,14 @@ so metrics are emitted but do not appear in logs.
 By default, metrics are disabled in development. They must be enabled via an
 environment variable or in `.env`.
 
-Metrics are set, incremented and controlled by utility functions that are defined in the  [consvc_shepherd/utils.py](../consvc_shepherd/utils.py) module:
+Metrics are set, incremented and controlled by utility methods that are defined in the `ShepherdMetrics` class contained in the [consvc_shepherd/utils.py](../consvc_shepherd/utils.py) module:
 
 - `time_if_enabled(name)`
 - `incr_if_enabled(name, value=1, tags=None)`
 - `histogram_if_enabled(name, value, tags=None)`
 - `gauge_if_enabled(name, value, tags=None)`
+
+Simply instantiate a `ShepherdMetrics` class in your module, passing to it the `thing` parameter as defined in the `markus` docs, which defines the prefix keys that will be generated. Be default, `thing` will be set to `__name__`. Instantiating this class calls `markus.get_metrics()` and returns `markus.main.MetricsInterface` under the hood, on which all these methods are called. Ths metrics class decouples the logic from direct calls to `markus.main.MetricsInterface` instances.  
 
 With `DJANGO_STATSD_ENABLED=True`, metrics are sent to the server identified by
 `STATSD_HOST` and `STATSD_PORT`, using the [DatadogMetrics
