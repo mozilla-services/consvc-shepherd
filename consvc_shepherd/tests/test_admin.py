@@ -3,7 +3,6 @@ import json
 from typing import Any
 
 import mock  # type: ignore [import]
-from django.conf import settings
 from django.contrib.admin.sites import AdminSite
 from django.test import RequestFactory, TestCase, override_settings
 from django.utils import timezone
@@ -145,12 +144,8 @@ class SettingsSnapshotAdminTest(TestCase):
         )
         with MetricsMock() as mm:
             publish_snapshot(None, request, SettingsSnapshot.objects.all())
-            # Placeholder until updated .env in stage/prod for testing
-            if settings.STATSD_ENABLED:
-                mm.assert_incr("shepherd.snapshot.upload.success")
-                mm.assert_timing("shepherd.snapshot.publish.timer")
-            else:
-                return
+            mm.assert_incr("shepherd.snapshot.upload.success")
+            mm.assert_timing("shepherd.snapshot.publish.timer")
 
     def test_publish_snapshot_does_not_update_with_multiple_snapshots(self):
         """Test that single publish action does not update with multiple snapshots."""
@@ -273,9 +268,5 @@ class AllocationSettingAdminTest(TestCase):
 
         with MetricsMock() as mm:
             publish_allocation(None, request, AllocationSetting.objects.all())
-            # Placeholder until updated .env in stage/prod for testing
-            if settings.STATSD_ENABLED:
-                mm.assert_incr("shepherd.allocation.upload.success")
-                mm.assert_timing("shepherd.allocation.publish.timer")
-            else:
-                return
+            mm.assert_incr("shepherd.allocation.upload.success")
+            mm.assert_timing("shepherd.allocation.publish.timer")
