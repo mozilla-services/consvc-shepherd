@@ -5,7 +5,7 @@ from typing import Any
 import mock  # type: ignore [import]
 from django.conf import settings
 from django.contrib.admin.sites import AdminSite
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory, TestCase, override_settings
 from django.utils import timezone
 from jsonschema import validate
 from markus.testing import MetricsMock
@@ -111,6 +111,7 @@ class SettingsSnapshotAdminTest(TestCase):
 
         self.assertEqual(snapshot.launched_by, request.user)
 
+    @override_settings(STATSD_ENABLED=True)
     def test_publish_snapshot_metrics(self):
         """Test that publishing snapshot emits metrics."""
         request = mock.Mock()
@@ -245,6 +246,7 @@ class AllocationSettingAdminTest(TestCase):
         allocation_setting: dict = AllocationSetting.objects.get(position=1).to_dict()
         self.assertEqual(allocation_setting, expected)
 
+    @override_settings(STATSD_ENABLED=True)
     def test_publish_allocation_metrics(self):
         """Test that publish action of allocation settings emits metrics."""
         request = mock.Mock()

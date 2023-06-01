@@ -19,7 +19,7 @@ configuration for Mozilla services, please view the documentation in [cloudops-i
 [dogstatsd]: https://docs.datadoghq.com/developers/dogstatsd "dogstatsd documentation"
 [udp]: https://en.wikipedia.org/wiki/User_Datagram_Protocol
 [telegraf]: https://docs.influxdata.com/telegraf
-[influxdb]: https://docs.influxdata.com/influxdb/v2.4/reference/key-concepts/
+[influxdb]: https://docs.influxdata.com/influxdb/latest/reference/key-concepts/
 
 ## Configuration
 
@@ -39,10 +39,12 @@ With the defaults `DJANGO_STATSD_ENABLED=False` and `STATSD_DEBUG=False`, no met
 are emitted. In deployments, `DJANGO_STATSD_ENABLED=True` and `STATSD_DEBUG=False`,
 so metrics are emitted but do not appear in logs.
 
+Deployment variables are set in `cloudops-infra` in the `configmap.yaml` file in the Shepherd directory.
+
 ## Development
 
 By default, metrics are disabled in development. They must be enabled via an
-environment variable or in `.env`.
+environment variable or in the `.env` file.
 
 Metrics are set, incremented and controlled by utility methods that are defined in the `ShepherdMetrics` class contained in the [consvc_shepherd/utils.py](../consvc_shepherd/utils.py) module:
 
@@ -53,6 +55,13 @@ Metrics are set, incremented and controlled by utility methods that are defined 
 
 Simply instantiate a `ShepherdMetrics` class in your module, passing to it the `thing` parameter as defined in the `markus` docs, which defines the prefix keys that will be generated. Be default, `thing` will be set to `__name__`. Instantiating this class calls `markus.get_metrics()` and returns `markus.main.MetricsInterface` under the hood, on which all these methods are called. Ths metrics class decouples the logic from direct calls to `markus.main.MetricsInterface` instances.  
 
+```python
+from consvc_shepherd.utils import ShepherdMetrics
+
+metrics = ShepherdMetrics("shepherd")
+
+metrics.incr_if_enabled("publication.success")
+```
 With `DJANGO_STATSD_ENABLED=True`, metrics are sent to the server identified by
 `STATSD_HOST` and `STATSD_PORT`, using the [DatadogMetrics
 backend][markus-datadogmetrics]. These are sent as UDP packets, which means
@@ -67,6 +76,7 @@ With `STATSD_DEBUG=True`, metrics are sent to the `markus` log using the
 [LoggingMetrics backend][markus-loggingmetrics]. They are displayed along
 with other logs like `request.summary` from that service.
 
+## Testing
 When writing tests for metrics, they can be enabled via
 [override_settings][override_settings], and captured for test assertions with
 [MetricsMock][metricsmock]. For example:
@@ -76,7 +86,7 @@ from django.test import TestCase, override_settings
 
 from markus.testing import MetricsMock
 
-from emails.utils import incr_if_enabled
+from shepherd.utils import incr_if_enabled
 
 
 def code_that_emits_metric() -> int:
@@ -103,6 +113,6 @@ when determining what metrics code is emitting.
 
 [markus-datadogmetrics]: https://markus.readthedocs.io/en/latest/backends.html#datadog-metrics
 [markus-loggingmetrics]: https://markus.readthedocs.io/en/latest/backends.html#logging-metrics
-[override_settings]: https://docs.djangoproject.com/en/3.2/topics/testing/tools/#django.test.override_settings
+[override_settings]: https://docs.djangoproject.com/en/4.2/topics/testing/tools/#django.test.override_settings
 [metricsmock]: https://markus.readthedocs.io/en/latest/testing.html
 [print_records]: https://markus.readthedocs.io/en/latest/testing.html#markus.testing.MetricsMock.print_records

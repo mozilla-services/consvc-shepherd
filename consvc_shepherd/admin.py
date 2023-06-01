@@ -104,6 +104,7 @@ class ModelAdmin(admin.ModelAdmin):
         obj.json_settings = json_settings
         obj.created_by = request.user
         super(ModelAdmin, self).save_model(request, obj, form, change)
+        metrics.incr_if_enabled("snapshot.create")
 
     def get_readonly_fields(self, request, obj=None) -> list:
         """Return list of read-only fields for SettingsSnapshot."""
@@ -114,6 +115,11 @@ class ModelAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None) -> bool:
         """Return boolean of object's delete permissions."""
         return not (obj and obj.launched_by and obj.launched_date)
+
+    def delete_queryset(self, request, queryset) -> None:
+        """Delete given SettingsSnapshot entry."""
+        metrics.incr_if_enabled("snapshot.delete")
+        queryset.delete()
 
 
 class PartnerAllocationInline(admin.TabularInline):
@@ -132,3 +138,8 @@ class AllocationSettingAdmin(admin.ModelAdmin):
     inlines = [PartnerAllocationInline]
     form = AllocationSettingForm
     actions = [publish_allocation]
+
+    def delete_queryset(self, request, queryset) -> None:
+        """Delete given AllocationSetting entry."""
+        metrics.incr_if_enabled("allocation.delete")
+        queryset.delete()
