@@ -240,6 +240,15 @@ class AllocationSettingAdminTest(TestCase):
         PartnerAllocation.objects.create(
             allocationPosition=position1_alloc, partner=kevel_partner, percentage=15
         )
+        position2_alloc: AllocationSetting = AllocationSetting.objects.create(
+            position=2
+        )
+        PartnerAllocation.objects.create(
+            allocationPosition=position2_alloc, partner=adm_partner, percentage=90
+        )
+        PartnerAllocation.objects.create(
+            allocationPosition=position2_alloc, partner=kevel_partner, percentage=10
+        )
         self.mock_storage_open = mock.patch(
             "django.core.files.storage.default_storage." "open"
         )
@@ -270,3 +279,15 @@ class AllocationSettingAdminTest(TestCase):
             publish_allocation(None, request, AllocationSetting.objects.all())
             mm.assert_incr("shepherd.allocation.upload.success")
             mm.assert_timing("shepherd.allocation.publish.timer")
+
+    @override_settings(STATSD_ENABLED=True)
+    def test_delete_allocation(self):
+        """Test that delete_queryset removes AllocationSetting."""
+        request = mock.Mock()
+        request.user = UserFactory()
+
+        self.assertEqual(AllocationSetting.objects.all().count(), 2)
+        allocation_setting_2 = AllocationSetting.objects.get(position=2)
+
+        self.admin.delete_queryset(request, allocation_setting_2)
+        self.assertEqual(AllocationSetting.objects.all().count(), 1)

@@ -118,8 +118,8 @@ class ModelAdmin(admin.ModelAdmin):
 
     def delete_queryset(self, request, queryset) -> None:
         """Delete given SettingsSnapshot entry."""
-        metrics.incr_if_enabled("snapshot.delete")
         queryset.delete()
+        metrics.incr_if_enabled("snapshot.delete")
 
 
 class PartnerAllocationInline(admin.TabularInline):
@@ -141,5 +141,5 @@ class AllocationSettingAdmin(admin.ModelAdmin):
 
     def delete_queryset(self, request, queryset) -> None:
         """Delete given AllocationSetting entry."""
-        metrics.incr_if_enabled("allocation.delete")
         queryset.delete()
+        metrics.incr_if_enabled("allocation.delete")
