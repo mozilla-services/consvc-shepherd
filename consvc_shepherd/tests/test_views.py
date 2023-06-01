@@ -6,7 +6,7 @@ from consvc_shepherd.models import SettingsSnapshot
 
 # override DEBUG to override auth check
 @override_settings(DEBUG=True)
-class TestExperimentRisksUpdateView(TestCase):
+class TestTableOverviewCompareSnapshot(TestCase):
     """Test of view when SettingSnapshot updated."""
 
     def test_view_returns_post_request(self):
