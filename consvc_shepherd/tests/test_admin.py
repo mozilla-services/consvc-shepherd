@@ -94,6 +94,26 @@ class SettingsSnapshotAdminTest(TestCase):
         validate(snapshot.json_settings, schema=self.settings_schema)
         self.assertEqual(snapshot.json_settings, expected_json)
 
+    @override_settings(STATSD_ENABLED=True)
+    def test_delete_settings_snapshot(self):
+        """Test that delete_queryset removes settings snapshot."""
+        request = mock.Mock()
+        request.user = UserFactory()
+
+        snapshot = SettingsSnapshot.objects.create(
+            name="Settings Snapshot",
+            settings_type=self.partner,
+            json_settings=self.partner.to_dict(),
+            created_by=request.user,
+        )
+
+        self.assertEqual(SettingsSnapshot.objects.all().count(), 1)
+
+        with MetricsMock() as mm:
+            self.admin.delete_queryset(request, snapshot)
+            mm.assert_incr("shepherd.snapshot.delete")
+        self.assertEqual(SettingsSnapshot.objects.all().count(), 0)
+
     def test_publish_snapshot(self):
         """Test that publishing snapshot returns expected metadata."""
         request = mock.Mock()
