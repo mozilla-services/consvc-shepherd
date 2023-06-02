@@ -12,7 +12,7 @@ default, but there is a way described below to view metrics in development via `
 
 ## Telegraf
 
-[Telegraf](https://github.com/influxdata/telegraf) is a plugin-driven server agent written by the folks over at [InfluxData](https://influxdata.com) for collecting & reporting metrics. To understand the 
+[Telegraf](https://github.com/influxdata/telegraf) is a plugin-driven server agent written by the team at [InfluxData](https://influxdata.com) for collecting & reporting metrics. To understand the 
 configuration for Mozilla services, please view the documentation in [cloudops-infra](https://github.com/mozilla-services/cloudops-infra/tree/master/libs/influx/k8s/charts/telegraf).
 
 [markus]: https://markus.readthedocs.io/en/latest/index.html "Markus documentation"
@@ -23,37 +23,37 @@ configuration for Mozilla services, please view the documentation in [cloudops-i
 
 ## Configuration
 
-Configuration is controlled by these environment variables:
+Configuration is controlled by the following environment variables:
 
-- `DJANGO_STATSD_ENABLED` (default `False`) - Enables / disables emitting metrics to a
+- `DJANGO_STATSD_ENABLED` (default `False`) : Enables / disables emitting metrics to a
   statsd server
-- `STATSD_DEBUG` (default `False`) - Enables / disables metrics logging
-- `STATSD_ENABLED` (default `False`) - Enables metrics, `True` if either
+- `STATSD_DEBUG` (default `False`) : Enables / disables metrics logging
+- `STATSD_ENABLED` (default `False`) : Enables metrics, `True` if either
   `DJANGO_STATSD_ENABLED` or `STATSD_DEBUG` are `True`
-- `STATSD_HOST` (default `"127.0.0.1"`) - statsd server IP
-- `STATSD_PORT` (default `8125`) - statsd server port
-- `STATSD_PREFIX` (default `"shepherd"`) - prefix for all metrics.
-  Dashes (and maybe other values) are converted to periods.
+- `STATSD_HOST` (default `"127.0.0.1"`) : statsd server IP
+- `STATSD_PORT` (default `8125`) : statsd server port
+- `STATSD_PREFIX` (default `"shepherd"`) : prefix definition for all metrics in project.
+  Dashes (and some other values) are converted to periods.
 
 With the defaults `DJANGO_STATSD_ENABLED=False` and `STATSD_DEBUG=False`, no metrics
-are emitted. In deployments, `DJANGO_STATSD_ENABLED=True` and `STATSD_DEBUG=False`,
-so metrics are emitted but do not appear in logs.
+are emitted. Ensure that in the deployed production instance of Shepherd, the following values are set accordingly:
+`DJANGO_STATSD_ENABLED=True` and `STATSD_DEBUG=False`. This is so metrics are emitted but do not appear in logs.
 
-Deployment variables are set in `cloudops-infra` in the `configmap.yaml` file in the Shepherd directory.
+Deployment variables are set in `cloudops-infra` in the `configmap.yaml` file in the topsites/shepherd directory.
 
 ## Development
 
 By default, metrics are disabled in development. They must be enabled via an
-environment variable or in the `.env` file.
+environment variable or in the `.env` file. Set `STATSD_DEBUG` to `True`.
 
-Metrics are set, incremented and controlled by utility methods that are defined in the `ShepherdMetrics` class contained in the [consvc_shepherd/utils.py](../consvc_shepherd/utils.py) module:
+Metrics are set, incremented, and controlled by utility wrapper methods that are defined in the `ShepherdMetrics` class contained in the [consvc_shepherd/utils.py](../consvc_shepherd/utils.py) module:
 
 - `time_if_enabled(name)`
 - `incr_if_enabled(name, value=1, tags=None)`
 - `histogram_if_enabled(name, value, tags=None)`
 - `gauge_if_enabled(name, value, tags=None)`
 
-Simply instantiate a `ShepherdMetrics` class in your module, passing to it the `thing` parameter as defined in the `markus` docs, which defines the prefix keys that will be generated. Be default, `thing` will be set to `__name__`. Instantiating this class calls `markus.get_metrics()` and returns `markus.main.MetricsInterface` under the hood, on which all these methods are called. Ths metrics class decouples the logic from direct calls to `markus.main.MetricsInterface` instances.  
+Simply instantiate a `ShepherdMetrics` class in your module, passing to it the `thing` parameter as defined in the `markus` docs, which defines the prefix keys that will be generated. Generally, `thing`  should be set to the module name and question, which you can define explicitly or by passing  `__name__`. Instantiating this class calls `markus.get_metrics()` and returns `markus.main.MetricsInterface` under the hood, on which all these methods are called. This metrics class decouples the logic from direct calls to `markus.main.MetricsInterface` instances.  
 
 ```python
 from consvc_shepherd.utils import ShepherdMetrics

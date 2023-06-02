@@ -28,7 +28,7 @@ class ShepherdMetrics:  # pragma: no cover
 
     """
 
-    def __init__(self, thing=__name__) -> None:
+    def __init__(self, thing) -> None:
         self.metrics: markus.main.MetricsInterface = markus.get_metrics(thing)
 
     def incr_if_enabled(
