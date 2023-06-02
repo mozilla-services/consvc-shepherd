@@ -38,6 +38,7 @@ def publish_snapshot(modeladmin, request, queryset):
             settings_schema = json.load(f)
             try:
                 validate(snapshot.json_settings, schema=settings_schema)
+                metrics.incr_if_enabled("snapshot.schema.validation.success")
                 send_to_storage(content, settings.GS_BUCKET_FILE_NAME)
                 snapshot.save()
                 metrics.incr_if_enabled("snapshot.upload.success")
@@ -68,6 +69,7 @@ def publish_allocation(modeladmin, request, queryset) -> None:
         allocation_schema = json.load(f)
         try:
             validate(allocation, schema=allocation_schema)
+            metrics.incr_if_enabled("allocation.schema.validation.success")
             allocation_json = json.dumps(allocation, indent=2)
             send_to_storage(allocation_json, settings.ALLOCATION_FILE_NAME)
             metrics.incr_if_enabled("allocation.upload.success")
