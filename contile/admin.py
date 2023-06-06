@@ -30,6 +30,7 @@ class AdvertiserListAdmin(admin.ModelAdmin):
 
     model = Advertiser
     inlines = [AdUrlInline]
+    ordering = ("name",)
 
 
 @admin.register(Partner)
