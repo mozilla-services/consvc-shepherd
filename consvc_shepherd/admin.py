@@ -55,22 +55,18 @@ def publish_snapshot(modeladmin, request, queryset):
 @metrics.time_if_enabled("allocation.publish.timer")
 def publish_allocation(modeladmin, request, queryset) -> None:
     """Publish allocation JSON settings."""
-    allocation_request = queryset.order_by("position")
-    if AllocationSetting.objects.count() != len(queryset):
-        messages.warning(request, "Warning: Not all allocation settings were selected.")
-
+    allocation_qs = queryset.order_by("position")
     allocation_settings_name: str = f"SOV-{dateformat.format(timezone.now(), 'YmdHis')}"
-    allocation: dict = {
+    allocation_dict: dict = {
         "name": allocation_settings_name,
-        "allocations": [allocation.to_dict() for allocation in allocation_request],
+        "allocations": [allocation.to_dict() for allocation in allocation_qs],
     }
-
     with open("./schema/allocation.schema.json", "r") as f:
         allocation_schema = json.load(f)
         try:
-            validate(allocation, schema=allocation_schema)
+            validate(allocation_dict, schema=allocation_schema)
             metrics.incr_if_enabled("allocation.schema.validation.success")
-            allocation_json = json.dumps(allocation, indent=2)
+            allocation_json = json.dumps(allocation_dict, indent=2)
             send_to_storage(allocation_json, settings.ALLOCATION_FILE_NAME)
             metrics.incr_if_enabled("allocation.upload.success")
             messages.info(request, "Allocation setting has been published.")
@@ -78,7 +74,8 @@ def publish_allocation(modeladmin, request, queryset) -> None:
             metrics.incr_if_enabled("allocation.schema.validation.fail")
             messages.error(
                 request,
-                "JSON generated is different from the expected allocation schema.",
+                "JSON generated is different from the expected allocation schema. "
+                "Ensure that there are two allocation settings selected",
             )
 
 

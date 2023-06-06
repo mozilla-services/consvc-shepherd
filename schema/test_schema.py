@@ -77,6 +77,7 @@ class TestJSONSchema(TestCase):
             position1_alloc: AllocationSetting = AllocationSetting.objects.create(
                 position=1
             )
+
             PartnerAllocation.objects.create(
                 allocation_position=position1_alloc, partner=adm_partner, percentage=85
             )
@@ -85,8 +86,6 @@ class TestJSONSchema(TestCase):
                 partner=kevel_partner,
                 percentage=15,
             )
-            allocations["allocations"].append(position1_alloc.to_dict())
-            validate(allocations, allocations_schema)
 
             position2_alloc: AllocationSetting = AllocationSetting.objects.create(
                 position=2
@@ -99,5 +98,5 @@ class TestJSONSchema(TestCase):
                 partner=kevel_partner,
                 percentage=50,
             )
-            allocations["allocations"].append(position2_alloc.to_dict())
+            allocations["allocations"] = [position1_alloc.to_dict(), position2_alloc.to_dict()]
             validate(allocations, allocations_schema)
