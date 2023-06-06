@@ -101,3 +101,15 @@ class TestAllocationFormSet(TestCase):
         self.assertEqual(
             form.non_form_errors(), ["A Partner is listed multiple times."]
         )
+
+    def test_returns_valid_with_one_blank_form_set(self):
+        """Test to ensure blank form is ignored when validating form data"""
+        extra_blank_form = {
+            "partner_allocations-2-id": "",
+            "partner_allocations-2-allocation_position": "",
+            "partner_allocations-2-partner": "",
+            "partner_allocations-2-percentage": "",
+        }
+        self.data.update(extra_blank_form)
+        form = AllocationFormset(data=self.data)
+        self.assertTrue(form.is_valid())

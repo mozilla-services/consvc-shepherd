@@ -99,10 +99,10 @@ class AllocationSettingFormset(BaseInlineFormSet):
         """Additional Form Validation."""
         super(AllocationSettingFormset, self).clean()
 
-        if sum((form.cleaned_data.get("percentage") for form in self.forms)) != 100:
+        if sum((form.cleaned_data.get("percentage", 0) for form in self.forms)) != 100:
             raise forms.ValidationError("Total Percentage has to add up to 100.")
 
-        partners = [form.cleaned_data.get("partner").name for form in self.forms]
+        partners = [form.cleaned_data.get("partner", "") for form in self.forms]
 
         if len(set(partners)) < len(partners):
             raise forms.ValidationError("A Partner is listed multiple times.")
