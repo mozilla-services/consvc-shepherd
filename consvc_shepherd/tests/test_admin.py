@@ -93,26 +93,6 @@ class SettingsSnapshotAdminTest(TestCase):
         validate(snapshot.json_settings, schema=self.settings_schema)
         self.assertEqual(snapshot.json_settings, expected_json)
 
-    @override_settings(STATSD_ENABLED=True)
-    def test_delete_settings_snapshot(self) -> None:
-        """Test that delete_queryset removes settings snapshot."""
-        request = mock.Mock()
-        request.user = UserFactory()
-
-        snapshot = SettingsSnapshot.objects.create(
-            name="Settings Snapshot",
-            settings_type=self.partner,
-            json_settings=self.partner.to_dict(),
-            created_by=request.user,
-        )
-        self.assertEqual(SettingsSnapshot.objects.all().count(), 1)
-
-        with MetricsMock() as mm:
-            self.admin.delete_queryset(request, snapshot)
-            mm.assert_incr("shepherd.filters.snapshot.delete")
-        self.assertEqual(SettingsSnapshot.objects.all().count(), 0)
-
-
     def test_publish_snapshot(self) -> None:
         """Test that publishing snapshot returns expected metadata."""
         request = mock.Mock()
@@ -129,25 +109,6 @@ class SettingsSnapshotAdminTest(TestCase):
         snapshot = SettingsSnapshot.objects.get(name="Settings Snapshot")
         self.assertIsNotNone(snapshot.launched_date)
         self.assertEqual(snapshot.launched_by, request.user)
-
-    @override_settings(STATSD_ENABLED=True)
-    def test_publish_snapshot_metrics(self) -> None:
-        """Test that publishing snapshot emits metrics."""
-        request = mock.Mock()
-        request.user = UserFactory()
-
-        SettingsSnapshot.objects.create(
-            name="Settings Snapshot",
-            settings_type=self.partner,
-            json_settings=self.partner.to_dict(),
-            created_by=request.user,
-        )
-
-        with MetricsMock() as mm:
-            publish_snapshot(None, request, SettingsSnapshot.objects.all())
-            mm.assert_incr("shepherd.filters.snapshot.upload.success")
-            mm.assert_timing("shepherd.filters.snapshot.publish.timer")
-
 
     def test_publish_snapshot_does_not_update_with_multiple_snapshots(self) -> None:
         """Test that single publish action does not update with multiple snapshots."""
@@ -211,6 +172,43 @@ class SettingsSnapshotAdminTest(TestCase):
             created_by=request.user,
         )
         self.assertTrue(self.admin.has_delete_permission(request, snapshot))
+
+    @override_settings(STATSD_ENABLED=True)
+    def test_delete_settings_snapshot(self) -> None:
+        """Test that delete_queryset removes settings snapshot."""
+        request = mock.Mock()
+        request.user = UserFactory()
+
+        snapshot = SettingsSnapshot.objects.create(
+            name="Settings Snapshot",
+            settings_type=self.partner,
+            json_settings=self.partner.to_dict(),
+            created_by=request.user,
+        )
+        self.assertEqual(SettingsSnapshot.objects.all().count(), 1)
+
+        with MetricsMock() as mm:
+            self.admin.delete_queryset(request, snapshot)
+            mm.assert_incr("shepherd.filters.snapshot.delete")
+        self.assertEqual(SettingsSnapshot.objects.all().count(), 0)
+
+    @override_settings(STATSD_ENABLED=True)
+    def test_publish_snapshot_metrics(self) -> None:
+        """Test that publishing snapshot emits metrics."""
+        request = mock.Mock()
+        request.user = UserFactory()
+
+        SettingsSnapshot.objects.create(
+            name="Settings Snapshot",
+            settings_type=self.partner,
+            json_settings=self.partner.to_dict(),
+            created_by=request.user,
+        )
+
+        with MetricsMock() as mm:
+            publish_snapshot(None, request, SettingsSnapshot.objects.all())
+            mm.assert_incr("shepherd.filters.snapshot.upload.success")
+            mm.assert_timing("shepherd.filters.snapshot.publish.timer")
 
 
 class AllocationSettingAdminTest(TestCase):
