@@ -9,7 +9,12 @@ from django.utils import timezone
 from jsonschema import validate
 from markus.testing import MetricsMock
 
-from consvc_shepherd.admin import ModelAdmin, publish_allocation, publish_snapshot, AllocationSettingAdmin
+from consvc_shepherd.admin import (
+    AllocationSettingAdmin,
+    ModelAdmin,
+    publish_allocation,
+    publish_snapshot,
+)
 from consvc_shepherd.models import (
     AllocationSetting,
     Partner,
@@ -266,7 +271,6 @@ class AllocationSettingAdminTest(TestCase):
         publish_allocation(None, request, AllocationSetting.objects.all())
         self.mock_storage_open.assert_called()
 
-
     def test_insufficient_positions_results_in_no_publish(self) -> None:
         """Test that publish action with insufficient allocation
         does not call send_to_storage.
@@ -274,7 +278,7 @@ class AllocationSettingAdminTest(TestCase):
         request = mock.Mock()
         publish_allocation(None, request, AllocationSetting.objects.filter(position=1))
         self.mock_storage_open.assert_not_called()
-    
+
     @override_settings(STATSD_ENABLED=True)
     def test_publish_allocation_metrics(self) -> None:
         """Test that publish action of allocation settings emits metrics."""
@@ -296,5 +300,3 @@ class AllocationSettingAdminTest(TestCase):
         allocation_setting_2 = AllocationSetting.objects.get(position=2)
         self.admin.delete_queryset(request, allocation_setting_2)
         self.assertEqual(AllocationSetting.objects.all().count(), 1)
-
-
