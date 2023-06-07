@@ -13,9 +13,13 @@ from consvc_shepherd.models import (
     SettingsSnapshot,
 )
 from consvc_shepherd.storage import send_to_storage
+from consvc_shepherd.utils import ShepherdMetrics
+
+metrics: ShepherdMetrics = ShepherdMetrics("shepherd")
 
 
 @admin.action(description="Publish Settings Snapshot")
+@metrics.time_if_enabled("filters.snapshot.publish.timer")
 def publish_snapshot(modeladmin, request, queryset):
     """Publish advertiser snapshot."""
     if len(queryset) > 1:
@@ -34,10 +38,13 @@ def publish_snapshot(modeladmin, request, queryset):
             settings_schema = json.load(f)
             try:
                 validate(snapshot.json_settings, schema=settings_schema)
+                metrics.incr_if_enabled("filters.snapshot.schema.validation.success")
                 send_to_storage(content, settings.GS_BUCKET_FILE_NAME)
                 snapshot.save()
+                metrics.incr_if_enabled("filters.snapshot.upload.success")
                 messages.info(request, "Snapshot has been published.")
             except exceptions.ValidationError:
+                metrics.incr_if_enabled("filters.snapshot.schema.validation.fail")
                 messages.error(
                     request,
                     "JSON generated is different from the expected snapshot schema.",
@@ -45,6 +52,7 @@ def publish_snapshot(modeladmin, request, queryset):
 
 
 @admin.action(description="Publish Allocation")
+@metrics.time_if_enabled("allocation.publish.timer")
 def publish_allocation(modeladmin, request, queryset) -> None:
     """Publish allocation JSON settings."""
     allocation_request = queryset.order_by("position")
@@ -61,10 +69,13 @@ def publish_allocation(modeladmin, request, queryset) -> None:
         allocation_schema = json.load(f)
         try:
             validate(allocation, schema=allocation_schema)
+            metrics.incr_if_enabled("allocation.schema.validation.success")
             allocation_json = json.dumps(allocation, indent=2)
             send_to_storage(allocation_json, settings.ALLOCATION_FILE_NAME)
+            metrics.incr_if_enabled("allocation.upload.success")
             messages.info(request, "Allocation setting has been published.")
         except exceptions.ValidationError:
+            metrics.incr_if_enabled("allocation.schema.validation.fail")
             messages.error(
                 request,
                 "JSON generated is different from the expected allocation schema.",
@@ -95,6 +106,7 @@ class ModelAdmin(admin.ModelAdmin):
         obj.json_settings = json_settings
         obj.created_by = request.user
         super(ModelAdmin, self).save_model(request, obj, form, change)
+        metrics.incr_if_enabled("filters.snapshot.create")
 
     def get_readonly_fields(self, request, obj=None) -> list:
         """Return list of read-only fields for SettingsSnapshot."""
@@ -105,6 +117,11 @@ class ModelAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None) -> bool:
         """Return boolean of object's delete permissions."""
         return not (obj and obj.launched_by and obj.launched_date)
+
+    def delete_queryset(self, request, queryset) -> None:
+        """Delete given SettingsSnapshot entry."""
+        super(ModelAdmin, self).delete_queryset(request, queryset)
+        metrics.incr_if_enabled("filters.snapshot.delete")
 
 
 class PartnerAllocationInline(admin.TabularInline):
@@ -123,3 +140,8 @@ class AllocationSettingAdmin(admin.ModelAdmin):
     inlines = [PartnerAllocationInline]
     form = AllocationSettingForm
     actions = [publish_allocation]
+
+    def delete_queryset(self, request, queryset) -> None:
+        """Delete given AllocationSetting entry."""
+        super(AllocationSettingAdmin, self).delete_queryset(request, queryset)
+        metrics.incr_if_enabled("allocation.delete")
