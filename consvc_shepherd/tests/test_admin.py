@@ -36,8 +36,7 @@ class SettingsSnapshotAdminTest(TestCase):
         self.admin = ModelAdmin(SettingsSnapshot, site)
 
         self.partner = Partner.objects.create(name="Partner1")
-        advertiser = Advertiser.objects.create(
-            partner=self.partner, name="Advertiser1")
+        advertiser = Advertiser.objects.create(partner=self.partner, name="Advertiser1")
         AdvertiserUrl.objects.create(
             advertiser=advertiser,
             geo="CA",
@@ -74,8 +73,7 @@ class SettingsSnapshotAdminTest(TestCase):
         """Test that read only fields return when object not created."""
         fields = self.admin.get_readonly_fields(self.request, None)
         self.assertEqual(
-            fields, ["json_settings", "created_by",
-                     "launched_by", "launched_date"]
+            fields, ["json_settings", "created_by", "launched_by", "launched_date"]
         )
 
     def test_save_model_generates_json(self):
@@ -219,8 +217,7 @@ class AllocationSettingAdminTest(TestCase):
     def setUp(self):
         """Set up objects and variables for testing AllocationSetting."""
         request_factory = RequestFactory()
-        self.request = request_factory.get(
-            "/admin/consvc_shepherd/allocationsetting/")
+        self.request = request_factory.get("/admin/consvc_shepherd/allocationsetting/")
         self.request.user = UserFactory()
 
         with open("./schema/allocation.schema.json", "r") as f:
@@ -270,8 +267,7 @@ class AllocationSettingAdminTest(TestCase):
         }
 
         publish_allocation(None, request, AllocationSetting.objects.all())
-        allocation_setting: dict = AllocationSetting.objects.get(
-            position=1).to_dict()
+        allocation_setting: dict = AllocationSetting.objects.get(position=1).to_dict()
         self.assertEqual(allocation_setting, expected)
 
     @override_settings(STATSD_ENABLED=True)
