@@ -47,7 +47,7 @@ format: install  ##  Sort imports and reformat code
 	$(POETRY) run black $(APP_DIRS)
 
 .PHONY: migration-check
-check: install
+migration-check: install
 	$(POETRY) run python manage.py makemigrations --check --dry-run --noinput
 
 .PHONY: migrate
