@@ -12,6 +12,7 @@ logger = logging.getLogger("shepherd")
 
 
 def validate_iap_jwt(request):
+    """Validate IAP JWT."""
     iap_jwt = request.META.get(settings.OPENIDC_HEADER)
     try:
         decoded_jwt = id_token.verify_token(
@@ -26,15 +27,14 @@ def validate_iap_jwt(request):
 
 
 def validate_openidc_header(request):
+    """Validate OpenIdc header."""
     default_email = settings.DEV_USER_EMAIL
-    openidc_header_value = request.META.get(
-        settings.OPENIDC_HEADER, default_email)
+    openidc_header_value = request.META.get(settings.OPENIDC_HEADER, default_email)
     return openidc_header_value.split(settings.OPENIDC_HEADER_PREFIX)[-1]
 
 
 class OpenIDCAuthMiddleware(AuthenticationMiddleware):
-    """
-    An authentication middleware that depends on a header being set in the
+    """An authentication middleware that depends on a header being set in the
     request. This header will be populated by nginx configured to authenticate
     with OpenIDC.
     We will automatically create a user object and attach it to the
@@ -46,6 +46,7 @@ class OpenIDCAuthMiddleware(AuthenticationMiddleware):
         self.User = get_user_model()
 
     def __call__(self, request):
+        """Handle auth before request is made."""
         if settings.DEBUG:
             openidc_email = validate_openidc_header(request)
         else:

@@ -11,21 +11,23 @@ from contile.models import Advertiser, AdvertiserUrl, Partner
 
 
 @pytest.mark.django_db
-class JSONSchema(TestCase):
+class TestJSONSchema(TestCase):
+    """Test JSON schemas that Shepherd produces."""
 
-    def test_filter_schema(self):
+    def test_filter_schema(self) -> None:
         """Tests filter schema for adM."""
-
         with open("./schema/adm_filter.schema.json", "r") as f:
             settings_schema = json.load(f)
-            partner = Partner.objects.create(
+            partner: Partner = Partner.objects.create(
                 name="Partner Advertiser",
             )
-            advertiser1 = Advertiser.objects.create(
-                name="Pocket", partner=partner)
+            advertiser1: Advertiser = Advertiser.objects.create(
+                name="Pocket", partner=partner
+            )
             # we want to test that Advertiser names with special characters are valid
-            advertiser2 = Advertiser.objects.create(
-                name="F!-reΩ fox+", partner=partner)
+            advertiser2: Advertiser = Advertiser.objects.create(
+                name="F!-reΩ fox+", partner=partner
+            )
             AdvertiserUrl.objects.create(
                 advertiser=advertiser1,
                 path="/hello/",
@@ -64,31 +66,24 @@ class JSONSchema(TestCase):
 
             validate(partner.to_dict(), settings_schema)
 
-    def test_allocation_schema(self):
+    def test_allocation_schema(self) -> None:
         """Tests partner allocation schema for SOV (Share of Voice)."""
         with open("./schema/allocation.schema.json", "r") as f:
             allocations_schema = json.load(f)
             allocations: dict[str, Any] = {}
-            allocations.update(
-                {"name": "SOV-20230101140000", "allocations": []})
-            adm_partner: Partner = Partner.objects.create(
-                name="adm"
-            )
-            kevel_partner: Partner = Partner.objects.create(
-                name="k3-v-3l"
-            )
+            allocations.update({"name": "SOV-20230101140000", "allocations": []})
+            adm_partner: Partner = Partner.objects.create(name="adm")
+            kevel_partner: Partner = Partner.objects.create(name="k3-v-3l")
             position1_alloc: AllocationSetting = AllocationSetting.objects.create(
                 position=1
             )
             PartnerAllocation.objects.create(
-                allocation_position=position1_alloc,
-                partner=adm_partner,
-                percentage=85
+                allocation_position=position1_alloc, partner=adm_partner, percentage=85
             )
             PartnerAllocation.objects.create(
                 allocation_position=position1_alloc,
                 partner=kevel_partner,
-                percentage=15
+                percentage=15,
             )
             allocations["allocations"].append(position1_alloc.to_dict())
             validate(allocations, allocations_schema)
@@ -97,14 +92,12 @@ class JSONSchema(TestCase):
                 position=2
             )
             PartnerAllocation.objects.create(
-                allocation_position=position2_alloc,
-                partner=adm_partner,
-                percentage=50
+                allocation_position=position2_alloc, partner=adm_partner, percentage=50
             )
             PartnerAllocation.objects.create(
                 allocation_position=position2_alloc,
                 partner=kevel_partner,
-                percentage=50
+                percentage=50,
             )
             allocations["allocations"].append(position2_alloc.to_dict())
             validate(allocations, allocations_schema)

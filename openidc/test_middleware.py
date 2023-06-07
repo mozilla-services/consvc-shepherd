@@ -1,5 +1,5 @@
 """Tests related to the verification of OpenIDCAuthMiddleware."""
-import mock
+import mock  # type: ignore [import]
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
@@ -8,7 +8,10 @@ from openidc.middleware import OpenIDCAuthMiddleware
 
 
 class OpenIDCAuthMiddlewareTests(TestCase):
+    """Test class for OpenIDCAuthMiddleware."""
+
     def setUp(self):
+        """Set up fot testing OpenIDCAuthMiddleward."""
         self.response = "Response"
         self.middleware = OpenIDCAuthMiddleware(lambda request: self.response)
 
@@ -16,8 +19,7 @@ class OpenIDCAuthMiddlewareTests(TestCase):
         self.mock_resolve = mock_resolve_patcher.start()
         self.addCleanup(mock_resolve_patcher.stop)
 
-        mock_verify_token_patcher = mock.patch(
-            "google.oauth2.id_token.verify_token")
+        mock_verify_token_patcher = mock.patch("google.oauth2.id_token.verify_token")
 
         self.mock_verify_token = mock_verify_token_patcher.start()
         self.mock_verify_token.return_value = {"email": "non-dev@example.com"}
@@ -25,6 +27,7 @@ class OpenIDCAuthMiddlewareTests(TestCase):
 
     @override_settings(OPENIDC_HEADER_PREFIX="accounts.google.com:", DEBUG=True)
     def test_user_created_with_correct_email_from_header(self):
+        """Test that users are created with the information from the header."""
         header_value = "accounts.google.com:user@example.com"
 
         request = mock.Mock()
@@ -41,7 +44,9 @@ class OpenIDCAuthMiddlewareTests(TestCase):
 
     @override_settings(DEBUG=True)
     def test_user_created_with_dev_email_when_no_header(self):
-
+        """Test that a user is created using the dev email
+        when there is no header.
+        """
         request = mock.Mock()
         request.META = {}
         User = get_user_model()
@@ -55,6 +60,7 @@ class OpenIDCAuthMiddlewareTests(TestCase):
 
     @override_settings(DEBUG=False)
     def test_user_created_with_jwt_header(self):
+        """Test a user is created using info from jwt header when present."""
         header_value = "x-goog-iap-jwt-assertion"
 
         request = mock.Mock()
