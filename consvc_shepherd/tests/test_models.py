@@ -9,24 +9,24 @@ class TestAllocationSettingModel(TestCase):
 
     def test_to_dict_produces_correctly(self) -> None:
         """Test for verifying to_dict() method for AllocationSetting"""
-        adm_partner: Partner = Partner.objects.create(name="adm")
-        kevel_partner: Partner = Partner.objects.create(name="kevel")
+        amp_partner: Partner = Partner.objects.create(name="amp")
+        moz_partner: Partner = Partner.objects.create(name="moz-sales")
         position1_alloc: AllocationSetting = AllocationSetting.objects.create(
             position=1
         )
 
         PartnerAllocation.objects.create(
-            allocation_position=position1_alloc, partner=adm_partner, percentage=85
+            allocation_position=position1_alloc, partner=amp_partner, percentage=85
         )
         PartnerAllocation.objects.create(
-            allocation_position=position1_alloc, partner=kevel_partner, percentage=15
+            allocation_position=position1_alloc, partner=moz_partner, percentage=15
         )
 
         expected_result: dict = {
             "position": 1,
             "allocation": [
-                {"partner": "adm", "percentage": 85},
-                {"partner": "kevel", "percentage": 15},
+                {"partner": "amp", "percentage": 85},
+                {"partner": "moz-sales", "percentage": 15},
             ],
         }
         self.assertEqual(position1_alloc.to_dict(), expected_result)
@@ -38,13 +38,13 @@ class TestPartnerAllocationModel(TestCase):
 
     def test_to_dict_produces_correctly(self) -> None:
         """Test for verifying to_dict() method for PartnerAllocation"""
-        adm_partner: Partner = Partner.objects.create(name="adm")
+        amp_partner: Partner = Partner.objects.create(name="amp")
         position1_alloc: AllocationSetting = AllocationSetting.objects.create(
             position=1
         )
         allocation1_adm: PartnerAllocation = PartnerAllocation.objects.create(
-            allocation_position=position1_alloc, partner=adm_partner, percentage=85
+            allocation_position=position1_alloc, partner=amp_partner, percentage=85
         )
         self.assertEqual(
-            allocation1_adm.to_dict(), {"partner": "adm", "percentage": 85}
+            allocation1_adm.to_dict(), {"partner": "amp", "percentage": 85}
         )

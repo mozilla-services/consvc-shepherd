@@ -232,26 +232,26 @@ class AllocationSettingAdminTest(TestCase):
         allocations: dict[str, Any] = {}
         allocations.update({"name": "SOV-20230101140000", "allocations": []})
 
-        adm_partner: Partner = Partner.objects.create(name="adm")
-        kevel_partner: Partner = Partner.objects.create(name="kevel")
+        amp_partner: Partner = Partner.objects.create(name="amp")
+        moz_partner: Partner = Partner.objects.create(name="moz_sales")
         position1_alloc: AllocationSetting = AllocationSetting.objects.create(
             position=1
         )
         PartnerAllocation.objects.create(
-            allocation_position=position1_alloc, partner=adm_partner, percentage=100
+            allocation_position=position1_alloc, partner=amp_partner, percentage=100
         )
         PartnerAllocation.objects.create(
-            allocation_position=position1_alloc, partner=kevel_partner, percentage=0
+            allocation_position=position1_alloc, partner=moz_partner, percentage=0
         )
 
         position2_alloc: AllocationSetting = AllocationSetting.objects.create(
             position=2
         )
         PartnerAllocation.objects.create(
-            allocation_position=position2_alloc, partner=adm_partner, percentage=85
+            allocation_position=position2_alloc, partner=amp_partner, percentage=85
         )
         PartnerAllocation.objects.create(
-            allocation_position=position2_alloc, partner=kevel_partner, percentage=15
+            allocation_position=position2_alloc, partner=moz_partner, percentage=15
         )
 
         mock_storage_open = mock.patch(
