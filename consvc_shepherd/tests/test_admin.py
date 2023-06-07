@@ -105,7 +105,6 @@ class SettingsSnapshotAdminTest(TestCase):
             json_settings=self.partner.to_dict(),
             created_by=request.user,
         )
-
         self.assertEqual(SettingsSnapshot.objects.all().count(), 1)
 
         with MetricsMock() as mm:
@@ -142,6 +141,7 @@ class SettingsSnapshotAdminTest(TestCase):
             json_settings=self.partner.to_dict(),
             created_by=request.user,
         )
+
         with MetricsMock() as mm:
             publish_snapshot(None, request, SettingsSnapshot.objects.all())
             mm.assert_incr("shepherd.filters.snapshot.upload.success")
