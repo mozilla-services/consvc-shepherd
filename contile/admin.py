@@ -5,7 +5,7 @@ from django.contrib import admin, messages
 from consvc_shepherd.utils import ShepherdMetrics
 from contile.models import Advertiser, AdvertiserUrl, Partner
 
-metrics = ShepherdMetrics("contile")
+metrics = ShepherdMetrics("shepherd")
 
 
 class AdUrlInlineForm(forms.ModelForm):

@@ -110,7 +110,7 @@ class SettingsSnapshotAdminTest(TestCase):
 
         with MetricsMock() as mm:
             self.admin.delete_queryset(request, snapshot)
-            mm.assert_incr("shepherd.snapshot.delete")
+            mm.assert_incr("shepherd.filters.snapshot.delete")
         self.assertEqual(SettingsSnapshot.objects.all().count(), 0)
 
     def test_publish_snapshot(self):
@@ -144,8 +144,8 @@ class SettingsSnapshotAdminTest(TestCase):
         )
         with MetricsMock() as mm:
             publish_snapshot(None, request, SettingsSnapshot.objects.all())
-            mm.assert_incr("shepherd.snapshot.upload.success")
-            mm.assert_timing("shepherd.snapshot.publish.timer")
+            mm.assert_incr("shepherd.filters.snapshot.upload.success")
+            mm.assert_timing("shepherd.filters.snapshot.publish.timer")
 
     def test_publish_snapshot_does_not_update_with_multiple_snapshots(self):
         """Test that single publish action does not update with multiple snapshots."""
