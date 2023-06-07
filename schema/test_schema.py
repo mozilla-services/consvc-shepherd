@@ -72,32 +72,30 @@ class TestJSONSchema(TestCase):
             allocations_schema = json.load(f)
             allocations: dict[str, Any] = {}
             allocations.update({"name": "SOV-20230101140000", "allocations": []})
-            adm_partner: Partner = Partner.objects.create(name="adm")
-            kevel_partner: Partner = Partner.objects.create(name="k3-v-3l")
+            amp_partner: Partner = Partner.objects.create(name="amp")
+            moz_partner: Partner = Partner.objects.create(name="m0z-s@les")
             position1_alloc: AllocationSetting = AllocationSetting.objects.create(
                 position=1
             )
+
             PartnerAllocation.objects.create(
-                allocation_position=position1_alloc, partner=adm_partner, percentage=85
+                allocation_position=position1_alloc, partner=amp_partner, percentage=85
             )
             PartnerAllocation.objects.create(
-                allocation_position=position1_alloc,
-                partner=kevel_partner,
-                percentage=15,
+                allocation_position=position1_alloc, partner=moz_partner, percentage=15
             )
-            allocations["allocations"].append(position1_alloc.to_dict())
-            validate(allocations, allocations_schema)
 
             position2_alloc: AllocationSetting = AllocationSetting.objects.create(
                 position=2
             )
             PartnerAllocation.objects.create(
-                allocation_position=position2_alloc, partner=adm_partner, percentage=50
+                allocation_position=position2_alloc, partner=amp_partner, percentage=50
             )
             PartnerAllocation.objects.create(
-                allocation_position=position2_alloc,
-                partner=kevel_partner,
-                percentage=50,
+                allocation_position=position2_alloc, partner=moz_partner, percentage=50
             )
-            allocations["allocations"].append(position2_alloc.to_dict())
+            allocations["allocations"] = [
+                position1_alloc.to_dict(),
+                position2_alloc.to_dict(),
+            ]
             validate(allocations, allocations_schema)

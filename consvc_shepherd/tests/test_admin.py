@@ -9,7 +9,12 @@ from django.utils import timezone
 from jsonschema import validate
 from markus.testing import MetricsMock
 
-from consvc_shepherd.admin import ModelAdmin, publish_allocation, publish_snapshot
+from consvc_shepherd.admin import (
+    AllocationSettingAdmin,
+    ModelAdmin,
+    publish_allocation,
+    publish_snapshot,
+)
 from consvc_shepherd.models import (
     AllocationSetting,
     Partner,
@@ -45,10 +50,10 @@ class SettingsSnapshotAdminTest(TestCase):
             matching=True,
         )
         self.partner = Partner.objects.get(name="Partner1")
-        self.mock_storage_open = mock.patch(
+        mock_storage_open = mock.patch(
             "django.core.files.storage.default_storage." "open"
         )
-        self.mock_storage_open.start()
+        self.mock_storage_open = mock_storage_open.start()
         self.addCleanup(self.mock_storage_open.stop)
 
     def test_get_read_only_fields_when_obj_exists(self) -> None:
@@ -227,52 +232,52 @@ class AllocationSettingAdminTest(TestCase):
             self.allocation_schema = json.load(f)
 
         site = AdminSite()
-        self.admin = ModelAdmin(AllocationSetting, site)
+        self.admin = AllocationSettingAdmin(AllocationSetting, site)
 
         allocations: dict[str, Any] = {}
         allocations.update({"name": "SOV-20230101140000", "allocations": []})
 
-        adm_partner: Partner = Partner.objects.create(name="adm")
-        kevel_partner: Partner = Partner.objects.create(name="kevel")
+        amp_partner: Partner = Partner.objects.create(name="amp")
+        moz_partner: Partner = Partner.objects.create(name="moz_sales")
         position1_alloc: AllocationSetting = AllocationSetting.objects.create(
             position=1
         )
         PartnerAllocation.objects.create(
-            allocation_position=position1_alloc, partner=adm_partner, percentage=85
+            allocation_position=position1_alloc, partner=amp_partner, percentage=100
         )
         PartnerAllocation.objects.create(
-            allocation_position=position1_alloc, partner=kevel_partner, percentage=15
+            allocation_position=position1_alloc, partner=moz_partner, percentage=0
         )
+
         position2_alloc: AllocationSetting = AllocationSetting.objects.create(
             position=2
         )
         PartnerAllocation.objects.create(
-            allocation_position=position2_alloc, partner=adm_partner, percentage=90
+            allocation_position=position2_alloc, partner=amp_partner, percentage=85
         )
         PartnerAllocation.objects.create(
-            allocation_position=position2_alloc, partner=kevel_partner, percentage=10
+            allocation_position=position2_alloc, partner=moz_partner, percentage=15
         )
-        self.mock_storage_open = mock.patch(
+
+        mock_storage_open = mock.patch(
             "django.core.files.storage.default_storage." "open"
         )
-        self.mock_storage_open.start()
+        self.mock_storage_open = mock_storage_open.start()
         self.addCleanup(self.mock_storage_open.stop)
 
     def test_publish_allocation(self) -> None:
-        """Test that publish action of allocation settings returns expected AllocationSetting."""
+        """Test that publish action of allocation settings calls send_to_storage."""
         request = mock.Mock()
-        expected: dict = {
-            "position": 1,
-            "allocation": [
-                {"partner": "adm", "percentage": 85},
-                {"partner": "kevel", "percentage": 15},
-            ],
-        }
-
         publish_allocation(None, request, AllocationSetting.objects.all())
+        self.mock_storage_open.assert_called()
 
-        allocation_setting: dict = AllocationSetting.objects.get(position=1).to_dict()
-        self.assertEqual(allocation_setting, expected)
+    def test_insufficient_positions_results_in_no_publish(self) -> None:
+        """Test that publish action with insufficient allocation
+        does not call send_to_storage.
+        """
+        request = mock.Mock()
+        publish_allocation(None, request, AllocationSetting.objects.filter(position=1))
+        self.mock_storage_open.assert_not_called()
 
     @override_settings(STATSD_ENABLED=True)
     def test_publish_allocation_metrics(self) -> None:
