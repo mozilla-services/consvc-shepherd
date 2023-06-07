@@ -124,10 +124,10 @@ class SettingsSnapshotAdminTest(TestCase):
             json_settings=self.partner.to_dict(),
             created_by=request.user,
         )
+
         publish_snapshot(None, request, SettingsSnapshot.objects.all())
         snapshot = SettingsSnapshot.objects.get(name="Settings Snapshot")
         self.assertIsNotNone(snapshot.launched_date)
-
         self.assertEqual(snapshot.launched_by, request.user)
 
     @override_settings(STATSD_ENABLED=True)
@@ -267,6 +267,7 @@ class AllocationSettingAdminTest(TestCase):
         }
 
         publish_allocation(None, request, AllocationSetting.objects.all())
+
         allocation_setting: dict = AllocationSetting.objects.get(position=1).to_dict()
         self.assertEqual(allocation_setting, expected)
 
@@ -287,7 +288,7 @@ class AllocationSettingAdminTest(TestCase):
         request.user = UserFactory()
 
         self.assertEqual(AllocationSetting.objects.all().count(), 2)
-        allocation_setting_2 = AllocationSetting.objects.get(position=2)
 
+        allocation_setting_2 = AllocationSetting.objects.get(position=2)
         self.admin.delete_queryset(request, allocation_setting_2)
         self.assertEqual(AllocationSetting.objects.all().count(), 1)
