@@ -36,7 +36,8 @@ class SettingsSnapshotAdminTest(TestCase):
         self.admin = ModelAdmin(SettingsSnapshot, site)
 
         self.partner = Partner.objects.create(name="Partner1")
-        advertiser = Advertiser.objects.create(partner=self.partner, name="Advertiser1")
+        advertiser = Advertiser.objects.create(
+            partner=self.partner, name="Advertiser1")
         AdvertiserUrl.objects.create(
             advertiser=advertiser,
             geo="CA",
@@ -73,7 +74,8 @@ class SettingsSnapshotAdminTest(TestCase):
         """Test that read only fields return when object not created."""
         fields = self.admin.get_readonly_fields(self.request, None)
         self.assertEqual(
-            fields, ["json_settings", "created_by", "launched_by", "launched_date"]
+            fields, ["json_settings", "created_by",
+                     "launched_by", "launched_date"]
         )
 
     def test_save_model_generates_json(self):
@@ -217,7 +219,8 @@ class AllocationSettingAdminTest(TestCase):
     def setUp(self):
         """Set up objects and variables for testing AllocationSetting."""
         request_factory = RequestFactory()
-        self.request = request_factory.get("/admin/consvc_shepherd/allocationsetting/")
+        self.request = request_factory.get(
+            "/admin/consvc_shepherd/allocationsetting/")
         self.request.user = UserFactory()
 
         with open("./schema/allocation.schema.json", "r") as f:
@@ -235,19 +238,19 @@ class AllocationSettingAdminTest(TestCase):
             position=1
         )
         PartnerAllocation.objects.create(
-            allocation_position=position1_alloc, partner=adm_partner, percentage=85
+            allocationPosition=position1_alloc, partner=adm_partner, percentage=85
         )
         PartnerAllocation.objects.create(
-            allocation_position=position1_alloc, partner=kevel_partner, percentage=15
+            allocationPosition=position1_alloc, partner=kevel_partner, percentage=15
         )
         position2_alloc: AllocationSetting = AllocationSetting.objects.create(
             position=2
         )
         PartnerAllocation.objects.create(
-            allocation_position=position2_alloc, partner=adm_partner, percentage=90
+            allocationPosition=position2_alloc, partner=adm_partner, percentage=90
         )
         PartnerAllocation.objects.create(
-            allocation_position=position2_alloc, partner=kevel_partner, percentage=10
+            allocationPosition=position2_alloc, partner=kevel_partner, percentage=10
         )
         self.mock_storage_open = mock.patch(
             "django.core.files.storage.default_storage." "open"
@@ -267,7 +270,8 @@ class AllocationSettingAdminTest(TestCase):
         }
 
         publish_allocation(None, request, AllocationSetting.objects.all())
-        allocation_setting: dict = AllocationSetting.objects.get(position=1).to_dict()
+        allocation_setting: dict = AllocationSetting.objects.get(
+            position=1).to_dict()
         self.assertEqual(allocation_setting, expected)
 
     @override_settings(STATSD_ENABLED=True)
