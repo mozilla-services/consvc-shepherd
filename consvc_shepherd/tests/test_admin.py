@@ -94,7 +94,7 @@ class SettingsSnapshotAdminTest(TestCase):
         self.assertEqual(snapshot.json_settings, expected_json)
 
     @override_settings(STATSD_ENABLED=True)
-    def test_delete_settings_snapshot(self):
+    def test_delete_settings_snapshot(self) -> None:
         """Test that delete_queryset removes settings snapshot."""
         request = mock.Mock()
         request.user = UserFactory()
@@ -113,7 +113,7 @@ class SettingsSnapshotAdminTest(TestCase):
             mm.assert_incr("shepherd.filters.snapshot.delete")
         self.assertEqual(SettingsSnapshot.objects.all().count(), 0)
 
-    def test_publish_snapshot(self):
+    def test_publish_snapshot(self) -> None:
         """Test that publishing snapshot returns expected metadata."""
         request = mock.Mock()
         request.user = UserFactory()
@@ -131,7 +131,7 @@ class SettingsSnapshotAdminTest(TestCase):
         self.assertEqual(snapshot.launched_by, request.user)
 
     @override_settings(STATSD_ENABLED=True)
-    def test_publish_snapshot_metrics(self):
+    def test_publish_snapshot_metrics(self) -> None:
         """Test that publishing snapshot emits metrics."""
         request = mock.Mock()
         request.user = UserFactory()
@@ -147,7 +147,7 @@ class SettingsSnapshotAdminTest(TestCase):
             mm.assert_incr("shepherd.filters.snapshot.upload.success")
             mm.assert_timing("shepherd.filters.snapshot.publish.timer")
 
-    def test_publish_snapshot_does_not_update_with_multiple_snapshots(self):
+    def test_publish_snapshot_does_not_update_with_multiple_snapshots(self) -> None:
         """Test that single publish action does not update with multiple snapshots."""
         request = mock.Mock()
         request.user = UserFactory()
@@ -271,7 +271,7 @@ class AllocationSettingAdminTest(TestCase):
         self.assertEqual(allocation_setting, expected)
 
     @override_settings(STATSD_ENABLED=True)
-    def test_publish_allocation_metrics(self):
+    def test_publish_allocation_metrics(self) -> None:
         """Test that publish action of allocation settings emits metrics."""
         request = mock.Mock()
 
@@ -281,7 +281,7 @@ class AllocationSettingAdminTest(TestCase):
             mm.assert_timing("shepherd.allocation.publish.timer")
 
     @override_settings(STATSD_ENABLED=True)
-    def test_delete_allocation(self):
+    def test_delete_allocation(self) -> None:
         """Test that delete_queryset removes AllocationSetting."""
         request = mock.Mock()
         request.user = UserFactory()
