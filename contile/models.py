@@ -121,6 +121,17 @@ class Advertiser(models.Model):
 class AdvertiserUrl(models.Model):
     """Class for AdvertiserUrl model.
 
+    Attributes
+    ----------
+    geo : django_countries.fields.CountryField
+        2-character ISO-3166-1 Country Code (str)
+    domain : CharField
+        Advertiser domain url
+    path : CharField
+        Advertiser path added to domain (requires '/' at minimum)
+    matching : BooleanField
+        boolean to trigger exact or prefix matching
+
     Methods
     -------
     __str__(self)
