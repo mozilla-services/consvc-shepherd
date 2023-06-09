@@ -1,4 +1,4 @@
-# [short title of solved problem and solution]
+# [StatsD Client Library for Shepherd]
 
 * Status: accepted
 * Deciders: taddes, tif, nan
