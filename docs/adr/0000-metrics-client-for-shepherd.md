@@ -1,4 +1,4 @@
-# [StatsD Client Library for Shepherd]
+# StatsD Client Library for Shepherd
 
 * Status: accepted
 * Deciders: taddes, tif, nan
@@ -44,7 +44,7 @@ markus.get_metrics(thing='', extra='', filters=None)
 `extra` adds bits to end of prefix
 `filters`, list of filters to apply
 
-**[Backends](https://markus.readthedocs.io/en/latest/backends.html)**- A significant feature Markus has over other libraries is the ability to define metrics backends. It comes with the `LoggingMetrics`, `LoggingRollupMetrics`, `StatsdMetrics`, `DatadogMetrics`, `CloudwatchMetrics` by default, handling numerous configuration optimizations. You can also define your own backedn.
+**[Backends](https://markus.readthedocs.io/en/latest/backends.html)** - A significant feature Markus has over other libraries is the ability to define metrics backends. It comes with the `LoggingMetrics`, `LoggingRollupMetrics`, `StatsdMetrics`, `DatadogMetrics`, `CloudwatchMetrics` by default, handling numerous configuration optimizations. You can also define your own backedn.
 
 Example:
 
@@ -98,7 +98,8 @@ class DebugFilter(MetricsFilter):
 
 ### Markus
 [Docs](https://markus.readthedocs.io/en/latest/)
-[Source](https://github.com/willkg/markus)
+
+[GitHub Repo](https://github.com/willkg/markus)
 
 #### Pros
 
@@ -120,7 +121,8 @@ class DebugFilter(MetricsFilter):
 
 ### Prometheus
 [Docs](https://prometheus.io/)
-[Source](https://github.com/prometheus/client_python)
+
+[GitHub Repo](https://github.com/prometheus/client_python)
 
 #### Pros
 
@@ -138,7 +140,8 @@ class DebugFilter(MetricsFilter):
 
 ### statsd (pystatsd)
 [Docs](https://statsd.readthedocs.io/en/latest/index.html)
-[Source](https://github.com/jsocol/pystatsd)
+
+[GitHub Repo](https://github.com/jsocol/pystatsd)
 
 
 #### Pros
@@ -160,7 +163,8 @@ class DebugFilter(MetricsFilter):
 
 ### aiodogstatsd 
 [Docs](https://gr1n.github.io/aiodogstatsd/usage/)
-[Source](https://github.com/Gr1N/aiodogstatsd)
+
+[GitHub Repo](https://github.com/Gr1N/aiodogstatsd)
 
 #### Pros
 
