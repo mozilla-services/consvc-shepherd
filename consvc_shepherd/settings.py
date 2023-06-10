@@ -43,6 +43,25 @@ STATSD_HOST = env("DJANGO_STATSD_HOST", default="127.0.0.1")
 STATSD_PORT = env("DJANGO_STATSD_PORT", default="8125")
 STATSD_PREFIX = env("DJANGO_STATSD_PREFIX", default="shepherd")
 
+# Settings for django-countries. Contile AdvertiserUrl "geo" dropdown attribute.
+# See: https://pypi.org/project/django-countries/#customization
+# Contile advertisers list. Simply add the ISO 3166-1 country code to add as option.
+COUNTRIES_ONLY: list[str] = [
+    "AU",
+    "BR",
+    "CA",
+    "DE",
+    "ES",
+    "FR",
+    "GB",
+    "IN",
+    "IT",
+    "JP",
+    "MX",
+    "US",
+]
+COUNTRIES_FIRST_SORT: bool = True
+
 # Application definition
 
 INSTALLED_APPS: list[str] = [
