@@ -100,7 +100,9 @@ class DebugFilter(MetricsFilter):
 
 ### Markus
 [Docs](https://markus.readthedocs.io/en/latest/)
+
 [pypi Project](https://pypi.org/project/markus/)
+
 [GitHub Repo](https://github.com/willkg/markus)
 
 #### Pros
@@ -123,7 +125,9 @@ class DebugFilter(MetricsFilter):
 
 ### Prometheus
 [Docs](https://prometheus.io/)
+
 [pypi](https://pypi.org/project/prometheus-client/)
+
 [GitHub Repo](https://github.com/prometheus/client_python)
 
 #### Pros
@@ -142,7 +146,9 @@ class DebugFilter(MetricsFilter):
 
 ### statsd (pystatsd)
 [Docs](https://statsd.readthedocs.io/en/latest/index.html)
+
 [pypi](https://pypi.org/project/statsd/)
+
 [GitHub Repo](https://github.com/jsocol/pystatsd)
 
 
@@ -165,7 +171,9 @@ class DebugFilter(MetricsFilter):
 
 ### aiodogstatsd 
 [Docs](https://gr1n.github.io/aiodogstatsd/usage/)
+
 [pypi](https://pypi.org/project/aiodogstatsd/)
+
 [GitHub Repo](https://github.com/Gr1N/aiodogstatsd)
 
 #### Pros
