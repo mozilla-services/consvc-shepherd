@@ -39,9 +39,9 @@ SECURE_REFERRER_POLICY = env("SECURE_REFERRER_POLICY", default="origin")
 DJANGO_STATSD_ENABLED = env("DJANGO_STATSD_ENABLED", default=False, cast=bool)
 STATSD_DEBUG = env("STATSD_DEBUG", default=False, cast=bool)
 STATSD_ENABLED = DJANGO_STATSD_ENABLED or STATSD_DEBUG
-STATSD_HOST = env("DJANGO_STATSD_HOST", default="127.0.0.1")
-STATSD_PORT = env("DJANGO_STATSD_PORT", default="8125")
-STATSD_PREFIX = env("DJANGO_STATSD_PREFIX", default="shepherd")
+STATSD_HOST = env("STATSD_HOST", default="127.0.0.1")
+STATSD_PORT = env("STATSD_PORT", default="8125")
+STATSD_PREFIX = env("STATSD_PREFIX", default="shepherd")
 
 # Settings for django-countries. Contile AdvertiserUrl "geo" dropdown attribute.
 # See: https://pypi.org/project/django-countries/#customization
@@ -149,8 +149,10 @@ DEFAULT_AUTO_FIELD: str = "django.db.models.BigAutoField"
 
 DEFAULT_FILE_STORAGE: str = "storages.backends.gcloud.GoogleCloudStorage"
 GS_BUCKET_NAME = env("GS_BUCKET_NAME", default="")
-GS_BUCKET_FILE_NAME = env("GS_BUCKET_FILE_NAME", default="settings_from_shepherd")
-ALLOCATION_FILE_NAME: str = env("ALLOCATION_FILE_NAME", default="allocation_file")
+GS_BUCKET_FILE_NAME = env("GS_BUCKET_FILE_NAME",
+                          default="settings_from_shepherd")
+ALLOCATION_FILE_NAME: str = env(
+    "ALLOCATION_FILE_NAME", default="allocation_file")
 
 LOGGING: dict[str, Any] = {
     "version": 1,
