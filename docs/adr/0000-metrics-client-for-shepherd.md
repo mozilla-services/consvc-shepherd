@@ -101,7 +101,7 @@ class DebugFilter(MetricsFilter):
 ### Markus
 [Docs](https://markus.readthedocs.io/en/latest/)
 
-[pypi Project](https://pypi.org/project/markus/)
+[pypi](https://pypi.org/project/markus/)
 
 [GitHub Repo](https://github.com/willkg/markus)
 
