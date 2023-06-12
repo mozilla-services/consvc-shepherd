@@ -6,15 +6,17 @@
 
 ## Context and Problem Statement
 
-Shepherd is currently a simple Django Admin application used to create and publish snapshots and allocations of advertising partners.  The recent expansion of the service through the Project Honeycomb: Share-of-Voice epic [DISCO-2290] along with moving to a continuous deployment model [DISCO-2208] necessitated discussion around metrics and observability.  Up to this point, we did not have any information to analyze Shepherd's internal state pre or post deploy other than some automated testing and manual testing.
+Shepherd is currently a minimal Django Admin application used to create and publish snapshots of advertiser settings of Sponsored Tiles. The recent expansion of the service through the Project Honeycomb: Share-of-Voice epic [DISCO-2290] along with moving to a developer-driven Continuous Deployment model [DISCO-2208] necessitated discussion around application metrics and observability. Up to this point, we did not have any information to analyze Shepherd's internal state pre or post deploy aside from automated testing and manual testing.
 
 ## Decision Drivers
 
 1. Easy to implement, provides necessary features. 
 2. Does not require excessive customization to Shepherd that hinders current/future development.
-3. Has precedent of effective usage, is used at Mozilla by other teams with more mature Django applications.
-4. Good documentation, engagement, and maintenance with broader community.
-5. Easy testing (plus if testing/mocking framework provided). 
+3. Does not require asynchronous features like Merino (aiodogstatsd).
+4. Has precedent of effective usage, is used at Mozilla by other teams with more mature Django applications.
+5. Good documentation, engagement, and maintenance with broader community.
+6. Easy testing (plus if testing/mocking framework provided). 
+7. Rapid Release: easier for engineers to use the same tool (library/framework) between services. May necessitate consideration of Markus for other services for unified tooling.
 
 ## Considered Options
 
@@ -30,7 +32,7 @@ Chosen option:
 * A. Markus
 
 Markus essentially meets all our required needs with a number of significant features that provide great benefit. 
-Most StatsD libraries are simple, in that the core functions of calling an increment, gauge, timer and histogram.  Markus matches this simplicity with added flexibility, in that you can define tags and filters when calling a given metric.  
+Most StatsD libraries are not excessively complicated, in that the core functions of calling an increment, gauge, timer and histogram.  Markus matches this need with added flexibility, in that you can define tags and filters when calling a given metric and define backends.
 
 Example:
 
@@ -82,11 +84,11 @@ class DebugFilter(MetricsFilter):
 ### Positive Consequences
 
 * Quality of metrics customizations mean significant control of what metrics we want to emit.
-* Built-in DogStatsD though backend.
+* Built-in DogStatsD through backend.
 * Lines up perfectly with our deployed infrastructure in Docker/Kubernetes (Telegraf & InfluxDB)
 * High quality library and documentation mean an ease of development and maintenance.
 * Backend configuration and filters mean fine-tuning of our metrics.
-* Fast development time for simple use cases.
+* Fast development time for minimal use cases.
 
 ### Negative Consequences
 
@@ -98,7 +100,7 @@ class DebugFilter(MetricsFilter):
 
 ### Markus
 [Docs](https://markus.readthedocs.io/en/latest/)
-
+[pypi Project](https://pypi.org/project/markus/)
 [GitHub Repo](https://github.com/willkg/markus)
 
 #### Pros
@@ -121,7 +123,7 @@ class DebugFilter(MetricsFilter):
 
 ### Prometheus
 [Docs](https://prometheus.io/)
-
+[pypi](https://pypi.org/project/prometheus-client/)
 [GitHub Repo](https://github.com/prometheus/client_python)
 
 #### Pros
@@ -140,7 +142,7 @@ class DebugFilter(MetricsFilter):
 
 ### statsd (pystatsd)
 [Docs](https://statsd.readthedocs.io/en/latest/index.html)
-
+[pypi](https://pypi.org/project/statsd/)
 [GitHub Repo](https://github.com/jsocol/pystatsd)
 
 
@@ -149,7 +151,7 @@ class DebugFilter(MetricsFilter):
 * Excellent documentation.
 * Good Django support and instructions for configuration.
 * Active community and contribution.
-* Basic, simple, no frills.
+* Basic, no frills.
 
 
 #### Cons
@@ -163,13 +165,13 @@ class DebugFilter(MetricsFilter):
 
 ### aiodogstatsd 
 [Docs](https://gr1n.github.io/aiodogstatsd/usage/)
-
+[pypi](https://pypi.org/project/aiodogstatsd/)
 [GitHub Repo](https://github.com/Gr1N/aiodogstatsd)
 
 #### Pros
 
 * Already used in Merino.
-* Simple to use.
+* Fairly self-evident implementation.
 
 
 #### Cons
