@@ -33,7 +33,7 @@ class AdvertiserListAdmin(admin.ModelAdmin):
 
     model = Advertiser
     inlines = [AdUrlInline]
-    ordering = ("name",)
+    ordering = ["name"]
 
 
 @admin.register(Partner)
@@ -41,6 +41,7 @@ class PartnerListAdmin(admin.ModelAdmin):
     """Registration of Partner for PartnerListAdmin Model."""
 
     model = Partner
+    ordering = ["name"]
     metrics.incr("partner.create")
 
     def delete_queryset(self, request, queryset) -> None:
