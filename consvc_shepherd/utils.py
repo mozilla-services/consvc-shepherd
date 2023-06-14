@@ -31,26 +31,22 @@ class ShepherdMetrics:  # pragma: no cover
     def __init__(self, thing) -> None:
         self.metrics: markus.main.MetricsInterface = markus.get_metrics(thing)
 
-    def incr_if_enabled(
-        self, name: str, value: int = 1, tags: str | None = None
-    ) -> None:
+    def incr(self, name: str, value: int = 1, tags: str | None = None) -> None:
         """Increment supplied metric by 1 (default) and add tags if specified."""
         if settings.STATSD_ENABLED:
             self.metrics.incr(name, value, tags)
 
-    def histogram_if_enabled(
-        self, name: str, value: int, tags: str | None = None
-    ) -> None:
+    def histogram(self, name: str, value: int, tags: str | None = None) -> None:
         """Histogram metric instance and add tags if specified."""
         if settings.STATSD_ENABLED:
             self.metrics.histogram(name, value=value, tags=tags)
 
-    def gauge_if_enabled(self, name: str, value: int, tags: str | None = None) -> None:
+    def gauge(self, name: str, value: int, tags: str | None = None) -> None:
         """Gauge metric instance and add tags if specified."""
         if settings.STATSD_ENABLED:
             self.metrics.gauge(name, value=value, tags=tags)
 
-    def time_if_enabled(self, name: str, tags: str | None = None):
+    def timer(self, name: str, tags: str | None = None):
         """Time metric of execution of a function."""
 
         def timing_decorator(func):
