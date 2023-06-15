@@ -137,6 +137,17 @@ class AllocationSettingAdmin(admin.ModelAdmin):
     inlines = [PartnerAllocationInline]
     form = AllocationSettingForm
     actions = [publish_allocation]
+    list_display = ["position", "partner_allocation"]
+
+    def partner_allocation(self, obj) -> str:
+        """Partner allocation summary display column."""
+        result = PartnerAllocation.objects.filter(allocation_position=obj)
+        results = [alloc.to_dict() for alloc in result]
+        results.sort(key=lambda item: item.get("percentage"), reverse=True)  # type: ignore
+        row = ""
+        for item in results:
+            row += f'{item.get("partner", "")}: {item.get("percentage", "0")}% '
+        return row
 
     def delete_queryset(self, request, queryset) -> None:
         """Delete given AllocationSetting entry."""
