@@ -62,6 +62,8 @@ COUNTRIES_ONLY: list[str] = [
 ]
 COUNTRIES_FIRST_SORT: bool = True
 
+CONTILE_MAX_TILES = 8
+
 # Application definition
 
 INSTALLED_APPS: list[str] = [

@@ -137,7 +137,6 @@ class AllocationSettingAdmin(admin.ModelAdmin):
     inlines = [PartnerAllocationInline]
     form = AllocationSettingForm
     actions = [publish_allocation]
-    ordering = ["partner_allocations"]
 
     def delete_queryset(self, request, queryset) -> None:
         """Delete given AllocationSetting entry."""
