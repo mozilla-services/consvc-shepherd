@@ -138,6 +138,7 @@ class AllocationSettingAdmin(admin.ModelAdmin):
     form = AllocationSettingForm
     actions = [publish_allocation]
     list_display = ["position", "partner_allocation"]
+    ordering = ["position"]
 
     def partner_allocation(self, obj) -> str:
         """Partner allocation summary display column."""
