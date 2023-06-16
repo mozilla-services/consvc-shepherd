@@ -149,8 +149,10 @@ DEFAULT_AUTO_FIELD: str = "django.db.models.BigAutoField"
 
 DEFAULT_FILE_STORAGE: str = "storages.backends.gcloud.GoogleCloudStorage"
 GS_BUCKET_NAME = env("GS_BUCKET_NAME", default="")
-GS_BUCKET_FILE_NAME = env("GS_BUCKET_FILE_NAME", default="settings_from_shepherd")
-ALLOCATION_FILE_NAME: str = env("ALLOCATION_FILE_NAME", default="allocation_file")
+GS_BUCKET_FILE_NAME = env("GS_BUCKET_FILE_NAME",
+                          default="settings_from_shepherd")
+ALLOCATION_FILE_NAME: str = env(
+    "ALLOCATION_FILE_NAME", default="allocation_file")
 
 LOGGING: dict[str, Any] = {
     "version": 1,
@@ -181,7 +183,7 @@ LOGGING: dict[str, Any] = {
 # Sentry Setup
 SENTRY_DSN = env("SENTRY_DSN", default=None)
 # Any of "release", "debug", or "disabled". Using "debug" will enable logging for Sentry.
-SENTRY_MODE = env("SENTRY_DEBUG_MODE", default="disabled")
+SENTRY_MODE = env("SENTRY_MODE", default="disabled")
 SENTRY_TRACE_SAMPLE_RATE = env("SENTRY_TRACE_SAMPLE_RATE", default=0)
 SENTRY_ENV = env("SENTRY_ENV", default=None)
 
