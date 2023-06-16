@@ -140,14 +140,17 @@ class AllocationSettingAdmin(admin.ModelAdmin):
     list_display = ["position", "partner_allocation"]
     ordering = ["position"]
 
-    def partner_allocation(self, obj) -> str:
+    def partner_allocation(self, obj) -> str:  # pragma: no cover
         """Partner allocation summary display column."""
         result = PartnerAllocation.objects.filter(allocation_position=obj).order_by(
             "-percentage"
         )
         row = ""
         for item in result:
-            row += f"{item.partner.name}: {item.percentage}% "
+            if not item.partner:
+                row += f"Deleted Partner: {item.percentage}% "
+            else:
+                row += f"{item.partner.name}: {item.percentage}% "
         return row
 
     def delete_queryset(self, request, queryset) -> None:
