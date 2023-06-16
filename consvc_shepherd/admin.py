@@ -141,12 +141,12 @@ class AllocationSettingAdmin(admin.ModelAdmin):
 
     def partner_allocation(self, obj) -> str:
         """Partner allocation summary display column."""
-        result = PartnerAllocation.objects.filter(allocation_position=obj)
-        results = [alloc.to_dict() for alloc in result]
-        results.sort(key=lambda item: item.get("percentage"), reverse=True)  # type: ignore
+        result = PartnerAllocation.objects.filter(allocation_position=obj).order_by(
+            "-percentage"
+        )
         row = ""
-        for item in results:
-            row += f'{item.get("partner", "")}: {item.get("percentage", "0")}% '
+        for item in result:
+            row += f"{item.partner.name}: {item.percentage}% "
         return row
 
     def delete_queryset(self, request, queryset) -> None:
