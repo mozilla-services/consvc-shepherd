@@ -182,7 +182,7 @@ LOGGING: dict[str, Any] = {
 SENTRY_DSN = env("SENTRY_DSN", default=None)
 # Any of "release", "debug", or "disabled". Using "debug" will enable logging for Sentry.
 SENTRY_MODE = env("SENTRY_DEBUG_MODE", default="disabled")
-SENTRY_TRACE_SAMPLE_RATE = env("SENTRY_TRACE_SAMPLE_RATE", default=1.0)
+SENTRY_TRACE_SAMPLE_RATE = env("SENTRY_TRACE_SAMPLE_RATE", default=0)
 SENTRY_ENV = env("SENTRY_ENV", default=None)
 
 sentry_sdk.init(
@@ -200,7 +200,7 @@ sentry_sdk.init(
     release=fetch_app_version_from_file().commit,
     # Set traces_sample_rate to 1.0 to capture 100%
     # of transactions for performance monitoring.
-    # We recommend adjusting this value in production,
+    # Disabled by default as not utilized currently. Extra cost.
     traces_sample_rate=SENTRY_TRACE_SAMPLE_RATE,
 )
 
