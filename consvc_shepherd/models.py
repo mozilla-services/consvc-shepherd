@@ -20,7 +20,7 @@ class SettingsSnapshot(models.Model):
     Attributes
     ----------
     name : CharField
-        Advertiser name
+        Name of Snapshot
     settings_type :
         Partner associated with setting
     json_settings : JSONField
@@ -37,9 +37,7 @@ class SettingsSnapshot(models.Model):
     Methods
     -------
     __str__(self)
-        Return string representation of AllocationSetting model
-    save(self)
-        Save instance of the SettingsSnapshot model after validation
+        Return string representation of Settings Snapshot
     """
 
     name: CharField = models.CharField(max_length=128)
@@ -63,20 +61,6 @@ class SettingsSnapshot(models.Model):
     def __str__(self):
         """Return string representation of SettingsSnapshot model."""
         return f"{self.name}: {self.created_on.strftime('%Y-%m-%d %H:%M')}"
-
-    def save(self, *args, **kwargs):
-        """Save instance of the SettingsSnapshot model after validation.
-
-        Whenever an instance of SettingsSnapshot is created or updated, this
-        override save() method is run. This allows for some logic to be
-        run prior to storing data.
-
-        Returns
-        -------
-        SettingsSnapshot
-            Saved instance of SettingsSnapshot model.
-        """
-        return super(SettingsSnapshot, self).save(*args, **kwargs)
 
 
 class AllocationSetting(models.Model):
