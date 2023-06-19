@@ -2,6 +2,7 @@
 from typing import Any
 
 from django import forms
+from django.conf import settings
 from django.forms import BaseInlineFormSet
 from django.forms.models import inlineformset_factory
 
@@ -83,7 +84,11 @@ class AllocationSettingForm(forms.ModelForm):
         1-based position form value.
     """
 
-    position = forms.IntegerField(min_value=1, help_text="Position value is 1-based")
+    position = forms.IntegerField(
+        min_value=1,
+        max_value=settings.CONTILE_MAX_TILES,
+        help_text="Position value is 1-based",
+    )
 
     class Meta:
         """Meta class for AllocationSettingForm."""

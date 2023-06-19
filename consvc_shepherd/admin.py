@@ -19,7 +19,7 @@ metrics: ShepherdMetrics = ShepherdMetrics("shepherd")
 
 
 @admin.action(description="Publish Settings Snapshot")
-@metrics.time_if_enabled("filters.snapshot.publish.timer")
+@metrics.timer("filters.snapshot.publish.timer")
 def publish_snapshot(modeladmin, request, queryset):
     """Publish advertiser snapshot."""
     if len(queryset) > 1:
@@ -38,13 +38,13 @@ def publish_snapshot(modeladmin, request, queryset):
             settings_schema = json.load(f)
             try:
                 validate(snapshot.json_settings, schema=settings_schema)
-                metrics.incr_if_enabled("filters.snapshot.schema.validation.success")
+                metrics.incr("filters.snapshot.schema.validation.success")
                 send_to_storage(content, settings.GS_BUCKET_FILE_NAME)
                 snapshot.save()
-                metrics.incr_if_enabled("filters.snapshot.upload.success")
+                metrics.incr("filters.snapshot.upload.success")
                 messages.info(request, "Snapshot has been published.")
             except exceptions.ValidationError:
-                metrics.incr_if_enabled("filters.snapshot.schema.validation.fail")
+                metrics.incr("filters.snapshot.schema.validation.fail")
                 messages.error(
                     request,
                     "JSON generated is different from the expected snapshot schema.",
@@ -52,7 +52,7 @@ def publish_snapshot(modeladmin, request, queryset):
 
 
 @admin.action(description="Publish Allocation")
-@metrics.time_if_enabled("allocation.publish.timer")
+@metrics.timer("allocation.publish.timer")
 def publish_allocation(modeladmin, request, queryset) -> None:
     """Publish allocation JSON settings."""
     allocation_qs = queryset.order_by("position")
@@ -65,13 +65,13 @@ def publish_allocation(modeladmin, request, queryset) -> None:
         allocation_schema = json.load(f)
         try:
             validate(allocation_dict, schema=allocation_schema)
-            metrics.incr_if_enabled("allocation.schema.validation.success")
+            metrics.incr("allocation.schema.validation.success")
             allocation_json = json.dumps(allocation_dict, indent=2)
             send_to_storage(allocation_json, settings.ALLOCATION_FILE_NAME)
-            metrics.incr_if_enabled("allocation.upload.success")
+            metrics.incr("allocation.upload.success")
             messages.info(request, "Allocation setting has been published.")
         except exceptions.ValidationError:
-            metrics.incr_if_enabled("allocation.schema.validation.fail")
+            metrics.incr("allocation.schema.validation.fail")
             messages.error(
                 request,
                 "JSON generated is different from the expected allocation schema. "
@@ -103,7 +103,7 @@ class ModelAdmin(admin.ModelAdmin):
         obj.json_settings = json_settings
         obj.created_by = request.user
         super(ModelAdmin, self).save_model(request, obj, form, change)
-        metrics.incr_if_enabled("filters.snapshot.create")
+        metrics.incr("filters.snapshot.create")
 
     def get_readonly_fields(self, request, obj=None) -> list:
         """Return list of read-only fields for SettingsSnapshot."""
@@ -118,7 +118,7 @@ class ModelAdmin(admin.ModelAdmin):
     def delete_queryset(self, request, queryset) -> None:
         """Delete given SettingsSnapshot entry."""
         super(ModelAdmin, self).delete_queryset(request, queryset)
-        metrics.incr_if_enabled("filters.snapshot.delete")
+        metrics.incr("filters.snapshot.delete")
 
 
 class PartnerAllocationInline(admin.TabularInline):
@@ -137,8 +137,23 @@ class AllocationSettingAdmin(admin.ModelAdmin):
     inlines = [PartnerAllocationInline]
     form = AllocationSettingForm
     actions = [publish_allocation]
+    list_display = ["position", "partner_allocation"]
+    ordering = ["position"]
+
+    def partner_allocation(self, obj) -> str:  # pragma: no cover
+        """Partner allocation summary display column."""
+        result = PartnerAllocation.objects.filter(allocation_position=obj).order_by(
+            "-percentage"
+        )
+        row = ""
+        for item in result:
+            if not item.partner:
+                row += f"Deleted Partner: {item.percentage}% "
+            else:
+                row += f"{item.partner.name}: {item.percentage}% "
+        return row
 
     def delete_queryset(self, request, queryset) -> None:
         """Delete given AllocationSetting entry."""
         super(AllocationSettingAdmin, self).delete_queryset(request, queryset)
-        metrics.incr_if_enabled("allocation.delete")
+        metrics.incr("allocation.delete")

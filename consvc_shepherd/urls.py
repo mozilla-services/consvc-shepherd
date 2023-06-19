@@ -29,3 +29,8 @@ urlpatterns = [
     ),
     path("", TableOverview.as_view()),
 ]
+
+admin.site.site_title = "Shepherd"
+admin.site.site_header = "Shepherd"
+admin.site.index_title = "Advertiser Settings Manager"
+admin.site.enable_nav_sidebar = True
