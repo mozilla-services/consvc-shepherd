@@ -179,7 +179,7 @@ class PartnerAllocation(models.Model):
         AllocationSetting, on_delete=models.CASCADE, related_name="partner_allocations"
     )
     partner: ForeignKey = models.ForeignKey(
-        Partner, on_delete=models.SET_NULL, null=True
+        Partner, on_delete=models.CASCADE, null=True
     )
     percentage: IntegerField = models.IntegerField()
 

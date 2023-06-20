@@ -61,10 +61,11 @@ def publish_allocation(modeladmin, request, queryset) -> None:
     elif queryset[0].launched_date is not None:
         messages.error(
             request,
-            "Snapshot has already been launched, create a new snapshot to launch",
+            "Allocation Snapshot has already been launched, create a new snapshot to launch",
         )
     else:
-        json_settings = queryset[0].json_settings
+        snapshot = queryset[0]
+        json_settings = snapshot.json_settings
         with open("./schema/allocation.schema.json", "r") as f:
             allocation_schema = json.load(f)
             try:
@@ -72,6 +73,8 @@ def publish_allocation(modeladmin, request, queryset) -> None:
                 metrics.incr("allocation.schema.validation.success")
                 allocation_json = json.dumps(json_settings, indent=2)
                 send_to_storage(allocation_json, settings.ALLOCATION_FILE_NAME)
+                snapshot.launched_date = timezone.now()
+                snapshot.save()
                 metrics.incr("allocation.upload.success")
                 messages.info(request, "Allocation setting has been published.")
             except exceptions.ValidationError:
@@ -140,7 +143,7 @@ class AllocationSettingsSnapshotModelAdmin(admin.ModelAdmin):
         "launched_by",
         "launched_date",
     ]
-    actions: list = [publish_snapshot]
+    actions: list = [publish_allocation]
 
     def save_model(self, request, obj, form, change) -> None:
         """Save SettingsSnapshot model instance."""
@@ -191,7 +194,6 @@ class AllocationSettingAdmin(admin.ModelAdmin):
     model = AllocationSetting
     inlines = [PartnerAllocationInline]
     form = AllocationSettingForm
-    actions = [publish_allocation]
     list_display = ["position", "partner_allocation"]
     ordering = ["position"]
 
