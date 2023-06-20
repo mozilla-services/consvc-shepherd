@@ -46,12 +46,16 @@ class SettingsSnapshot(models.Model):
     )
     json_settings: JSONField = models.JSONField(blank=True, null=True)
     created_by: ForeignKey = models.ForeignKey(
-        get_user_model(), on_delete=models.CASCADE, blank=True, null=True
+        get_user_model(),
+        related_name="ss_created_by",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
     )
     created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
     launched_by: ForeignKey = models.ForeignKey(
         get_user_model(),
-        related_name="launched_by",
+        related_name="ss_launched_by",
         on_delete=models.CASCADE,
         blank=True,
         null=True,
@@ -61,6 +65,52 @@ class SettingsSnapshot(models.Model):
     def __str__(self):
         """Return string representation of SettingsSnapshot model."""
         return f"{self.name}: {self.created_on.strftime('%Y-%m-%d %H:%M')}"
+
+
+class AllocationSettingsSnapshot(models.Model):
+    """AllocationSettingsSnapshot model for consvc_shepherd.
+
+    Attributes
+    ----------
+    name : CharField
+        Snopshot Name
+    json_settings : JSONField
+        JSON settings for snapshot
+    created_by : ForeignKey
+        User name of snapshot creator
+    created_on : DateTimeField
+        Date of snapshot creation
+    launched_by : ForeignKey
+        User name of who launches setting
+    launched_date : DateTimeField
+        Date of snapshot launch
+
+    Methods
+    -------
+    __str__(self)
+        Return string representation of AllocationSetting model
+    save(self)
+        Save instance of the SettingsSnapshot model after validation
+    """
+
+    name: CharField = models.CharField(max_length=128)
+    json_settings: JSONField = models.JSONField(blank=True, null=True)
+    created_by: ForeignKey = models.ForeignKey(
+        get_user_model(),
+        related_name="alloc_ss_created_by",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
+    created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
+    launched_by: ForeignKey = models.ForeignKey(
+        get_user_model(),
+        related_name="alloc_ss_launched_by",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
+    launched_date: DateTimeField = models.DateTimeField(blank=True, null=True)
 
 
 class AllocationSetting(models.Model):
