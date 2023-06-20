@@ -162,9 +162,7 @@ class AllocationSettingsSnapshotModelAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None) -> list:
         """Return list of read-only fields for SettingsSnapshot."""
-        if obj:
-            return ["name"] + self.readonly_fields
-        return self.readonly_fields
+        return ["name", *self.readonly_fields] if obj else self.readonly_fields
 
     def has_delete_permission(self, request, obj=None) -> bool:
         """Return boolean of object's delete permissions."""
