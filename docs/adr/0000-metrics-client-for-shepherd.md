@@ -53,7 +53,7 @@ markus.get_metrics(thing='', extra='', filters=None)
 `extra` adds bits to end of prefix
 `filters`, list of filters to apply
 
-**[Backends](https://markus.readthedocs.io/en/latest/backends.html)** - A significant feature Markus has over other libraries is the ability to define metrics backends. It comes with the `LoggingMetrics`, `LoggingRollupMetrics`, `StatsdMetrics`, `DatadogMetrics`, `CloudwatchMetrics` by default, handling numerous configuration optimizations. You can also define your own backedn.
+**[Backends](https://markus.readthedocs.io/en/latest/backends.html)** - A significant feature Markus has over other libraries is the ability to define metrics backends. It comes with the `LoggingMetrics`, `LoggingRollupMetrics`, `StatsdMetrics`, `DatadogMetrics`, `CloudwatchMetrics` by default, handling numerous configuration optimizations. You can also define your own backend.
 
 Example:
 
