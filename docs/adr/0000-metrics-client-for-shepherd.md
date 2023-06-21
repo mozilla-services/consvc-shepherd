@@ -37,9 +37,12 @@ Chosen option:
 * A. Markus
 
 Markus essentially meets all our required needs with a number of significant features that provide great benefit. 
+
 Most StatsD libraries are not excessively complicated, in that the core functions of calling an increment, gauge, timer and histogram.  Markus matches this need with added flexibility, in that you can define tags and filters when calling a given metric and define backends.
 
-Even though aiodogstatsd is used in Merino and we'd like to aim to use the same library across services, it is not the appropriate choice for Shepherd. We do not require asynchronous features. Also, aiodogstatsd is harder to test and has significantly fewer features than Markus. This could hamper maintenance and development. Essentially, it would require more effort to do the same task with likely poorer outcomes.
+Even though aiodogstatsd is used in Merino and we'd like to aim to use the same library across services, it is not the appropriate choice for Shepherd. We do not require asynchronous features. Since Merino runs on FastAPI, an asynchronous web-framework and Shepherd runs on Django, a synchronous web-framework, each respective choice is dictated by the architecture and service's needs. 
+
+As a side note, aiodogstatsd is harder to test and has significantly fewer features than Markus when testing is concerned. This could hamper maintenance and development efficiency. 
 
 Example:
 
