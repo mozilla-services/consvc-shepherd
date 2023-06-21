@@ -39,9 +39,30 @@ SECURE_REFERRER_POLICY = env("SECURE_REFERRER_POLICY", default="origin")
 DJANGO_STATSD_ENABLED = env("DJANGO_STATSD_ENABLED", default=False, cast=bool)
 STATSD_DEBUG = env("STATSD_DEBUG", default=False, cast=bool)
 STATSD_ENABLED = DJANGO_STATSD_ENABLED or STATSD_DEBUG
-STATSD_HOST = env("DJANGO_STATSD_HOST", default="127.0.0.1")
-STATSD_PORT = env("DJANGO_STATSD_PORT", default="8125")
-STATSD_PREFIX = env("DJANGO_STATSD_PREFIX", default="shepherd")
+STATSD_HOST = env("STATSD_HOST", default="127.0.0.1")
+STATSD_PORT = env("STATSD_PORT", default="8125")
+STATSD_PREFIX = env("STATSD_PREFIX", default="shepherd")
+
+# Settings for django-countries. Contile AdvertiserUrl "geo" dropdown attribute.
+# See: https://pypi.org/project/django-countries/#customization
+# Contile advertisers list. Simply add the ISO 3166-1 country code to add as option.
+COUNTRIES_ONLY: list[str] = [
+    "AU",
+    "BR",
+    "CA",
+    "DE",
+    "ES",
+    "FR",
+    "GB",
+    "IN",
+    "IT",
+    "JP",
+    "MX",
+    "US",
+]
+COUNTRIES_FIRST_SORT: bool = True
+
+CONTILE_MAX_TILES = 8
 
 # Application definition
 
@@ -162,8 +183,8 @@ LOGGING: dict[str, Any] = {
 # Sentry Setup
 SENTRY_DSN = env("SENTRY_DSN", default=None)
 # Any of "release", "debug", or "disabled". Using "debug" will enable logging for Sentry.
-SENTRY_MODE = env("SENTRY_DEBUG_MODE", default="disabled")
-SENTRY_TRACE_SAMPLE_RATE = env("SENTRY_TRACE_SAMPLE_RATE", default=1.0)
+SENTRY_MODE = env("SENTRY_MODE", default="disabled")
+SENTRY_TRACE_SAMPLE_RATE = env("SENTRY_TRACE_SAMPLE_RATE", default=0)
 SENTRY_ENV = env("SENTRY_ENV", default=None)
 
 sentry_sdk.init(
@@ -181,7 +202,7 @@ sentry_sdk.init(
     release=fetch_app_version_from_file().commit,
     # Set traces_sample_rate to 1.0 to capture 100%
     # of transactions for performance monitoring.
-    # We recommend adjusting this value in production,
+    # Disabled by default as not utilized currently. Extra cost.
     traces_sample_rate=SENTRY_TRACE_SAMPLE_RATE,
 )
 
