@@ -11,7 +11,7 @@
 
 ## Context and Problem Statement
 
-Shepherd is currently a minimal Django Admin application used to create and publish snapshots of advertiser settings of Sponsored Tiles. The recent expansion of the service through the Project Honeycomb: Share-of-Voice epic [DISCO-2290] along with moving to a developer-driven Continuous Deployment model [DISCO-2208] necessitated discussion around application metrics and observability. Up to this point, we did not have any information to analyze Shepherd's internal state pre or post deploy aside from automated testing and manual testing.
+Shepherd is currently a minimal Django Admin application used to create and publish snapshots of advertiser settings of Sponsored Tiles. The recent expansion of the service through the Project Honeycomb: Share-of-Voice epic [DISCO-2290](https://mozilla-hub.atlassian.net/browse/DISCO-2290) along with moving to a developer-driven Continuous Deployment model [DISCO-2208](https://mozilla-hub.atlassian.net/browse/DISCO-2208) necessitated discussion around application metrics and observability. Up to this point, we did not have any information to analyze Shepherd's internal state pre or post deploy aside from automated testing and manual testing.
 
 ## Decision Drivers
 
@@ -25,10 +25,10 @@ Shepherd is currently a minimal Django Admin application used to create and publ
 
 ## Considered Options
 
-* A. Markus [pypi](https://pypi.org/project/markus/)
-* B. Prometheus [pypi](https://pypi.org/project/prometheus-client/)
-* C. statsd (pystatsd) [pypi](https://pypi.org/project/statsd/)
-* D. aiodogstatsd [pypi](https://pypi.org/project/aiodogstatsd/)
+* A. Markus [PyPI](https://pypi.org/project/markus/)
+* B. Prometheus [PyPI](https://pypi.org/project/prometheus-client/)
+* C. statsd (pystatsd) [PyPI](https://pypi.org/project/statsd/)
+* D. aiodogstatsd [PyPI](https://pypi.org/project/aiodogstatsd/)
 
 ## Decision Outcome
 
@@ -81,7 +81,7 @@ markus.configure([
 ])
 ```
 
-**[Filters](https://markus.readthedocs.io/en/latest/filters.html)** - Markus lets you write filters to modify generated metrics on the fly. This allows infinite customization to drop or modify metric values before they are emitted. Th
+**[Filters](https://markus.readthedocs.io/en/latest/filters.html)** - Markus lets you write filters to modify generated metrics on the fly. This allows infinite customization to drop or modify metric values before they are emitted.
 
 ```python
 class DebugFilter(MetricsFilter):
@@ -105,13 +105,12 @@ class DebugFilter(MetricsFilter):
 * None that come to mind, there are other viable alternatives but Markus seems to fit our needs very well.
 * Possibly that Markus is a new and different library from say aiodogstatsd, which is used in Merino. However, that is an async library and it has several drabacks compared to Markus for our use case.
 
-
 ## Pros and Cons of the Options
 
 ### Markus
 [Docs](https://markus.readthedocs.io/en/latest/)
 
-[pypi](https://pypi.org/project/markus/)
+[PyPI](https://pypi.org/project/markus/)
 
 [GitHub Repo](https://github.com/willkg/markus)
 
@@ -136,7 +135,7 @@ class DebugFilter(MetricsFilter):
 ### Prometheus
 [Docs](https://prometheus.io/)
 
-[pypi](https://pypi.org/project/prometheus-client/)
+[PyPI](https://pypi.org/project/prometheus-client/)
 
 [GitHub Repo](https://github.com/prometheus/client_python)
 
@@ -154,13 +153,13 @@ class DebugFilter(MetricsFilter):
 * Supposedly some difficulty in configuring with our existing infrastructure.
 * A little bit too complicated for our use case.
 
+
 ### statsd (pystatsd)
 [Docs](https://statsd.readthedocs.io/en/latest/index.html)
 
-[pypi](https://pypi.org/project/statsd/)
+[PyPI](https://pypi.org/project/statsd/)
 
 [GitHub Repo](https://github.com/jsocol/pystatsd)
-
 
 #### Pros
 
@@ -168,7 +167,6 @@ class DebugFilter(MetricsFilter):
 * Good Django support and instructions for configuration.
 * Active community and contribution.
 * Basic, no frills.
-
 
 #### Cons
 
@@ -178,11 +176,10 @@ class DebugFilter(MetricsFilter):
 * Somewhat cumbersome when dealing with specific customizations.
 
 
-
 ### aiodogstatsd 
 [Docs](https://gr1n.github.io/aiodogstatsd/usage/)
 
-[pypi](https://pypi.org/project/aiodogstatsd/)
+[PyPI](https://pypi.org/project/aiodogstatsd/)
 
 [GitHub Repo](https://github.com/Gr1N/aiodogstatsd)
 
@@ -190,7 +187,6 @@ class DebugFilter(MetricsFilter):
 
 * Already used in Merino.
 * Fairly self-evident implementation.
-
 
 #### Cons
 
