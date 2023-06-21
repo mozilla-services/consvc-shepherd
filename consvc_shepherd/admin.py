@@ -23,20 +23,18 @@ metrics: ShepherdMetrics = ShepherdMetrics("shepherd")
 @metrics.timer("filters.snapshot.publish.timer")
 def publish_snapshot(modeladmin, request, queryset):
     """Publish advertiser snapshot."""
-    if len(queryset) > 1:
-        messages.error(request, "Only 1 snapshot can be published at the same time")
-    elif queryset[0].launched_date is not None:
-        messages.error(
-            request,
-            "Snapshot has already been launched, create a new snapshot to launch",
-        )
-    else:
-        snapshot = queryset[0]
-        snapshot.launched_by = request.user
-        snapshot.launched_date = timezone.now()
-        content = json.dumps(snapshot.json_settings, indent=2)
-        with open("./schema/adm_filter.schema.json", "r") as f:
-            settings_schema = json.load(f)
+    match list(queryset):
+        case [snapshot] if snapshot.launched_date is not None:
+            messages.error(
+                request,
+                "Snapshot has already been launched, create a new snapshot to launch",
+            )
+        case [snapshot]:
+            snapshot.launched_by = request.user
+            snapshot.launched_date = timezone.now()
+            content = json.dumps(snapshot.json_settings, indent=2)
+            with open("./schema/adm_filter.schema.json", "r") as f:
+                settings_schema = json.load(f)
             try:
                 validate(snapshot.json_settings, schema=settings_schema)
                 metrics.incr("filters.snapshot.schema.validation.success")
@@ -50,40 +48,42 @@ def publish_snapshot(modeladmin, request, queryset):
                     request,
                     "JSON generated is different from the expected snapshot schema.",
                 )
+        case _:  # queryset is either empty or has more than 1 entry
+            messages.error(request, "Only 1 snapshot can be published at the same time")
 
 
 @admin.action(description="Publish Allocation")
 @metrics.timer("allocation.publish.timer")
 def publish_allocation(modeladmin, request, queryset) -> None:
     """Publish allocation JSON settings."""
-    if len(queryset) > 1:
-        messages.error(request, "Only 1 snapshot can be published at the same time")
-    elif queryset[0].launched_date is not None:
-        messages.error(
-            request,
-            "Allocation Snapshot has already been launched, create a new snapshot to launch",
-        )
-    else:
-        snapshot = queryset[0]
-        json_settings = snapshot.json_settings
-        with open("./schema/allocation.schema.json", "r") as f:
-            allocation_schema = json.load(f)
-            try:
-                validate(json_settings, schema=allocation_schema)
-                metrics.incr("allocation.schema.validation.success")
-                allocation_json = json.dumps(json_settings, indent=2)
-                send_to_storage(allocation_json, settings.ALLOCATION_FILE_NAME)
-                snapshot.launched_date = timezone.now()
-                snapshot.save()
-                metrics.incr("allocation.upload.success")
-                messages.info(request, "Allocation setting has been published.")
-            except exceptions.ValidationError:
-                metrics.incr("allocation.schema.validation.fail")
-                messages.error(
-                    request,
-                    "JSON generated is different from the expected allocation schema. "
-                    "Ensure that there are two allocation settings selected",
-                )
+    match list(queryset):
+        case [snapshot] if snapshot.launched_date is not None:
+            messages.error(
+                request,
+                "Allocation Snapshot has already been launched, create a new snapshot to launch",
+            )
+        case [snapshot]:
+            json_settings = snapshot.json_settings
+            with open("./schema/allocation.schema.json", "r") as f:
+                allocation_schema = json.load(f)
+                try:
+                    validate(json_settings, schema=allocation_schema)
+                    metrics.incr("allocation.schema.validation.success")
+                    allocation_json = json.dumps(json_settings, indent=2)
+                    send_to_storage(allocation_json, settings.ALLOCATION_FILE_NAME)
+                    snapshot.launched_date = timezone.now()
+                    snapshot.save()
+                    metrics.incr("allocation.upload.success")
+                    messages.info(request, "Allocation setting has been published.")
+                except exceptions.ValidationError:
+                    metrics.incr("allocation.schema.validation.fail")
+                    messages.error(
+                        request,
+                        "JSON generated is different from the expected allocation schema. "
+                        "Ensure that there are two allocation settings selected",
+                    )
+        case _:
+            messages.error(request, "Only 1 snapshot can be published at the same time")
 
 
 @admin.register(SettingsSnapshot)
@@ -102,6 +102,7 @@ class SettingsSnapshotModelAdmin(admin.ModelAdmin):
         "launched_by",
         "launched_date",
     ]
+    actions: list = [publish_snapshot]
 
     def save_model(self, request, obj, form, change) -> None:
         """Save SettingsSnapshot model instance."""
@@ -153,7 +154,8 @@ class AllocationSettingsSnapshotModelAdmin(admin.ModelAdmin):
         json_settings: dict = {
             "name": allocation_settings_name,
             "allocations": [
-                allocation.to_dict() for allocation in AllocationSetting.objects.all()
+                allocation.to_dict()
+                for allocation in AllocationSetting.objects.all().order_by("position")
             ],
         }
         obj.json_settings = json_settings
