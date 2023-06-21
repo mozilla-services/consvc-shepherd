@@ -9,6 +9,7 @@ from jsonschema import exceptions, validate
 from consvc_shepherd.forms import AllocationSettingForm, AllocationSettingFormset
 from consvc_shepherd.models import (
     AllocationSetting,
+    AllocationSettingsSnapshot,
     PartnerAllocation,
     SettingsSnapshot,
 )
@@ -22,20 +23,18 @@ metrics: ShepherdMetrics = ShepherdMetrics("shepherd")
 @metrics.timer("filters.snapshot.publish.timer")
 def publish_snapshot(modeladmin, request, queryset):
     """Publish advertiser snapshot."""
-    if len(queryset) > 1:
-        messages.error(request, "Only 1 snapshot can be published at the same time")
-    elif queryset[0].launched_date is not None:
-        messages.error(
-            request,
-            "Snapshot has already been launched, create a new snapshot to launch",
-        )
-    else:
-        snapshot = queryset[0]
-        snapshot.launched_by = request.user
-        snapshot.launched_date = timezone.now()
-        content = json.dumps(snapshot.json_settings, indent=2)
-        with open("./schema/adm_filter.schema.json", "r") as f:
-            settings_schema = json.load(f)
+    match list(queryset):
+        case [snapshot] if snapshot.launched_date is not None:
+            messages.error(
+                request,
+                "Snapshot has already been launched, create a new snapshot to launch",
+            )
+        case [snapshot]:
+            snapshot.launched_by = request.user
+            snapshot.launched_date = timezone.now()
+            content = json.dumps(snapshot.json_settings, indent=2)
+            with open("./schema/adm_filter.schema.json", "r") as f:
+                settings_schema = json.load(f)
             try:
                 validate(snapshot.json_settings, schema=settings_schema)
                 metrics.incr("filters.snapshot.schema.validation.success")
@@ -49,39 +48,47 @@ def publish_snapshot(modeladmin, request, queryset):
                     request,
                     "JSON generated is different from the expected snapshot schema.",
                 )
+        case _:  # queryset is either empty or has more than 1 entry
+            messages.error(request, "Only 1 snapshot can be published at the same time")
 
 
 @admin.action(description="Publish Allocation")
 @metrics.timer("allocation.publish.timer")
 def publish_allocation(modeladmin, request, queryset) -> None:
     """Publish allocation JSON settings."""
-    allocation_qs = queryset.order_by("position")
-    allocation_settings_name: str = f"SOV-{dateformat.format(timezone.now(), 'YmdHis')}"
-    allocation_dict: dict = {
-        "name": allocation_settings_name,
-        "allocations": [allocation.to_dict() for allocation in allocation_qs],
-    }
-    with open("./schema/allocation.schema.json", "r") as f:
-        allocation_schema = json.load(f)
-        try:
-            validate(allocation_dict, schema=allocation_schema)
-            metrics.incr("allocation.schema.validation.success")
-            allocation_json = json.dumps(allocation_dict, indent=2)
-            send_to_storage(allocation_json, settings.ALLOCATION_FILE_NAME)
-            metrics.incr("allocation.upload.success")
-            messages.info(request, "Allocation setting has been published.")
-        except exceptions.ValidationError:
-            metrics.incr("allocation.schema.validation.fail")
+    match list(queryset):
+        case [snapshot] if snapshot.launched_date is not None:
             messages.error(
                 request,
-                "JSON generated is different from the expected allocation schema. "
-                "Ensure that there are two allocation settings selected",
+                "Allocation Snapshot has already been launched, create a new snapshot to launch",
             )
+        case [snapshot]:
+            json_settings = snapshot.json_settings
+            with open("./schema/allocation.schema.json", "r") as f:
+                allocation_schema = json.load(f)
+                try:
+                    validate(json_settings, schema=allocation_schema)
+                    metrics.incr("allocation.schema.validation.success")
+                    allocation_json = json.dumps(json_settings, indent=2)
+                    send_to_storage(allocation_json, settings.ALLOCATION_FILE_NAME)
+                    snapshot.launched_date = timezone.now()
+                    snapshot.save()
+                    metrics.incr("allocation.upload.success")
+                    messages.info(request, "Allocation setting has been published.")
+                except exceptions.ValidationError:
+                    metrics.incr("allocation.schema.validation.fail")
+                    messages.error(
+                        request,
+                        "JSON generated is different from the expected allocation schema. "
+                        "Ensure that there are two allocation settings selected",
+                    )
+        case _:
+            messages.error(request, "Only 1 snapshot can be published at the same time")
 
 
 @admin.register(SettingsSnapshot)
-class ModelAdmin(admin.ModelAdmin):
-    """Registration of SettingsSnapshot."""
+class SettingsSnapshotModelAdmin(admin.ModelAdmin):
+    """Admin model for Settings Snapshot."""
 
     list_display: tuple[str, str, str, str] = (
         "name",
@@ -102,7 +109,7 @@ class ModelAdmin(admin.ModelAdmin):
         json_settings = obj.settings_type.to_dict()
         obj.json_settings = json_settings
         obj.created_by = request.user
-        super(ModelAdmin, self).save_model(request, obj, form, change)
+        super(SettingsSnapshotModelAdmin, self).save_model(request, obj, form, change)
         metrics.incr("filters.snapshot.create")
 
     def get_readonly_fields(self, request, obj=None) -> list:
@@ -117,8 +124,61 @@ class ModelAdmin(admin.ModelAdmin):
 
     def delete_queryset(self, request, queryset) -> None:
         """Delete given SettingsSnapshot entry."""
-        super(ModelAdmin, self).delete_queryset(request, queryset)
+        super(SettingsSnapshotModelAdmin, self).delete_queryset(request, queryset)
         metrics.incr("filters.snapshot.delete")
+
+
+@admin.register(AllocationSettingsSnapshot)
+class AllocationSettingsSnapshotModelAdmin(admin.ModelAdmin):
+    """Admin model for AllocationSettingsSnapshot."""
+
+    list_display: tuple[str, str, str, str] = (
+        "name",
+        "created_by",
+        "launched_by",
+        "launched_date",
+    )
+    readonly_fields: list[str] = [
+        "json_settings",
+        "created_by",
+        "launched_by",
+        "launched_date",
+    ]
+    actions: list = [publish_allocation]
+
+    def save_model(self, request, obj, form, change) -> None:
+        """Save SettingsSnapshot model instance."""
+        allocation_settings_name: str = (
+            f"SOV-{dateformat.format(timezone.now(), 'YmdHis')}"
+        )
+        json_settings: dict = {
+            "name": allocation_settings_name,
+            "allocations": [
+                allocation.to_dict()
+                for allocation in AllocationSetting.objects.all().order_by("position")
+            ],
+        }
+        obj.json_settings = json_settings
+        obj.created_by = request.user
+        super(AllocationSettingsSnapshotModelAdmin, self).save_model(
+            request, obj, form, change
+        )
+        metrics.incr("allocations.snapshot.create")
+
+    def get_readonly_fields(self, request, obj=None) -> list:
+        """Return list of read-only fields for SettingsSnapshot."""
+        return ["name", *self.readonly_fields] if obj else self.readonly_fields
+
+    def has_delete_permission(self, request, obj=None) -> bool:
+        """Return boolean of object's delete permissions."""
+        return not (obj and obj.launched_by and obj.launched_date)
+
+    def delete_queryset(self, request, queryset) -> None:
+        """Delete given SettingsSnapshot entry."""
+        super(AllocationSettingsSnapshotModelAdmin, self).delete_queryset(
+            request, queryset
+        )
+        metrics.incr("allocations.snapshot.delete")
 
 
 class PartnerAllocationInline(admin.TabularInline):
@@ -136,7 +196,6 @@ class AllocationSettingAdmin(admin.ModelAdmin):
     model = AllocationSetting
     inlines = [PartnerAllocationInline]
     form = AllocationSettingForm
-    actions = [publish_allocation]
     list_display = ["position", "partner_allocation"]
     ordering = ["position"]
 

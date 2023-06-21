@@ -10,13 +10,14 @@ from jsonschema import validate
 from markus.testing import MetricsMock
 
 from consvc_shepherd.admin import (
-    AllocationSettingAdmin,
-    ModelAdmin,
+    AllocationSettingsSnapshotModelAdmin,
+    SettingsSnapshotModelAdmin,
     publish_allocation,
     publish_snapshot,
 )
 from consvc_shepherd.models import (
     AllocationSetting,
+    AllocationSettingsSnapshot,
     Partner,
     PartnerAllocation,
     SettingsSnapshot,
@@ -38,7 +39,7 @@ class SettingsSnapshotAdminTest(TestCase):
             self.settings_schema = json.load(f)
 
         site = AdminSite()
-        self.admin = ModelAdmin(SettingsSnapshot, site)
+        self.admin = SettingsSnapshotModelAdmin(SettingsSnapshot, site)
 
         self.partner = Partner.objects.create(name="Partner1")
         advertiser = Advertiser.objects.create(partner=self.partner, name="Advertiser1")
@@ -219,7 +220,7 @@ class SettingsSnapshotAdminTest(TestCase):
             mm.assert_timing("shepherd.filters.snapshot.publish.timer")
 
 
-class AllocationSettingAdminTest(TestCase):
+class AllocationSettingsSnapshotAdminTest(TestCase):
     """Test class for AllocationSetting."""
 
     def setUp(self) -> None:
@@ -232,10 +233,12 @@ class AllocationSettingAdminTest(TestCase):
             self.allocation_schema = json.load(f)
 
         site = AdminSite()
-        self.admin = AllocationSettingAdmin(AllocationSetting, site)
+        self.admin = AllocationSettingsSnapshotModelAdmin(AllocationSetting, site)
 
-        allocations: dict[str, Any] = {}
-        allocations.update({"name": "SOV-20230101140000", "allocations": []})
+        self.allocations_dict: dict[str, Any] = {
+            "name": "SOV-20230101140000",
+            "allocations": [],
+        }
 
         amp_partner: Partner = Partner.objects.create(name="amp")
         moz_partner: Partner = Partner.objects.create(name="moz_sales")
@@ -265,27 +268,89 @@ class AllocationSettingAdminTest(TestCase):
         self.mock_storage_open = mock_storage_open.start()
         self.addCleanup(self.mock_storage_open.stop)
 
+    def test_save_model_generates_json(self) -> None:
+        """Test that snapshot value matches expected json object."""
+        self.assertEqual(AllocationSettingsSnapshot.objects.all().count(), 0)
+        self.allocations_dict["allocations"] = [
+            allocation.to_dict() for allocation in AllocationSetting.objects.all()
+        ]
+
+        self.admin.save_model(
+            self.request,
+            AllocationSettingsSnapshot(name="snapshot1"),
+            None,
+            {},
+        )
+
+        self.assertEqual(AllocationSettingsSnapshot.objects.all().count(), 1)
+        snapshot = AllocationSettingsSnapshot.objects.all().first()
+        if snapshot:
+            validate(snapshot.json_settings, schema=self.allocation_schema)
+            self.assertEqual(
+                snapshot.json_settings["allocations"],
+                self.allocations_dict["allocations"],
+            )
+
+    def test_publish_snapshot_does_not_launch_already_launch_snapshot(self) -> None:
+        """Test that publish snapshot action does not launch pre-existing snapshot."""
+        request = mock.Mock()
+        request.user = UserFactory()
+        timestamp = timezone.datetime(2023, 5, 19, 1, 15, 12)
+
+        AllocationSettingsSnapshot.objects.create(
+            name="Settings Snapshot",
+            created_by=request.user,
+            launched_date=timestamp,
+            launched_by=request.user,
+            json_settings=self.allocations_dict,
+        )
+        publish_snapshot(None, request, AllocationSettingsSnapshot.objects.all())
+        snapshots = AllocationSettingsSnapshot.objects.filter(
+            launched_date=timezone.now(),
+            launched_by=request.user,
+        )
+        self.assertEqual(len(snapshots), 0)
+
     def test_publish_allocation(self) -> None:
         """Test that publish action of allocation settings calls send_to_storage."""
+        self.allocations_dict["allocations"] = [
+            allocation.to_dict() for allocation in AllocationSetting.objects.all()
+        ]
+        AllocationSettingsSnapshot.objects.create(
+            name="snapshot1", json_settings=self.allocations_dict
+        )
         request = mock.Mock()
-        publish_allocation(None, request, AllocationSetting.objects.all())
+        publish_allocation(None, request, AllocationSettingsSnapshot.objects.all())
         self.mock_storage_open.assert_called()
 
     def test_insufficient_positions_results_in_no_publish(self) -> None:
         """Test that publish action with insufficient allocation
         does not call send_to_storage.
         """
+        self.allocations_dict["allocations"] = [
+            allocation.to_dict()
+            for allocation in AllocationSetting.objects.filter(position=1)
+        ]
+        AllocationSettingsSnapshot.objects.create(
+            name="snapshot1", json_settings=self.allocations_dict
+        )
         request = mock.Mock()
-        publish_allocation(None, request, AllocationSetting.objects.filter(position=1))
+        publish_allocation(None, request, AllocationSettingsSnapshot.objects.all())
         self.mock_storage_open.assert_not_called()
 
     @override_settings(STATSD_ENABLED=True)
     def test_publish_allocation_metrics(self) -> None:
         """Test that publish action of allocation settings emits metrics."""
+        self.allocations_dict["allocations"] = [
+            allocation.to_dict() for allocation in AllocationSetting.objects.all()
+        ]
+        AllocationSettingsSnapshot.objects.create(
+            name="snapshot1", json_settings=self.allocations_dict
+        )
         request = mock.Mock()
 
         with MetricsMock() as mm:
-            publish_allocation(None, request, AllocationSetting.objects.all())
+            publish_allocation(None, request, AllocationSettingsSnapshot.objects.all())
             mm.assert_incr("shepherd.allocation.upload.success")
             mm.assert_timing("shepherd.allocation.publish.timer")
 
