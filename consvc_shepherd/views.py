@@ -5,7 +5,11 @@ from django.shortcuts import render
 from django.views.generic import ListView, TemplateView
 
 from consvc_shepherd.forms import SnapshotCompareForm
-from consvc_shepherd.models import AllocationSetting, SettingsSnapshot
+from consvc_shepherd.models import (
+    AllocationSetting,
+    AllocationSettingsSnapshot,
+    SettingsSnapshot,
+)
 
 
 class TableOverview(TemplateView):
@@ -69,5 +73,10 @@ class AllocationSettingList(ListView):
         context = super().get_context_data(**kwargs)
         context["allocation_settings"] = AllocationSetting.objects.all().order_by(
             "position"
+        )
+        context["latest_snapshot"] = (
+            AllocationSettingsSnapshot.objects.filter(launched_date__isnull=False)
+            .order_by("-created_on")
+            .first()
         )
         return context

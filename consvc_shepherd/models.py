@@ -1,4 +1,5 @@
 """Models module for consvc_shepherd."""
+import json
 from typing import Any
 
 from django.contrib.auth import get_user_model
@@ -111,6 +112,14 @@ class AllocationSettingsSnapshot(models.Model):
         null=True,
     )
     launched_date: DateTimeField = models.DateTimeField(blank=True, null=True)
+
+    @property
+    def json_settings_formatted(self):
+        """Pretty print json_settings."""
+        return json.dumps(self.json_settings, indent=2)
+
+    def __str__(self):
+        return f"{self.name} - {self.created_on.strftime('%Y-%m-%d %H:%M')}"
 
 
 class AllocationSetting(models.Model):
