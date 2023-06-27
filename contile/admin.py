@@ -10,6 +10,12 @@ from contile.models import Advertiser, AdvertiserUrl, Partner
 metrics = ShepherdMetrics("shepherd")
 
 
+class CsvImportForm(forms.Form):
+    """CSV Import Form"""
+
+    csv_upload = forms.FileField()
+
+
 class AdUrlInlineForm(forms.ModelForm):
     """Model Form Ad Url Inline Form Model."""
 
@@ -45,15 +51,9 @@ class AdvertiserListAdmin(admin.ModelAdmin):
 
     def upload_csv(self, request):
         """Render function for new csv endpoint."""
-        return render(request, "admin/csv_upload.html")
-
-        # if request.method == "POST":
-        #     csv_file = request.FILES["csv_upload"]
-        # if not csv_file.name.endswith('.csv'):
-        #     messages.warning(request, 'The wrong file type was uploaded')
-        #     return HttpResponseRedirect(request.path_info)
-        # file_data = csv_file.read().decode("utf-8")
-        # csv_data = file_data.split("\n")
+        form = CsvImportForm()
+        data = {"form": form}
+        return render(request, "admin/csv_upload.html", data)
 
 
 @admin.register(Partner)
