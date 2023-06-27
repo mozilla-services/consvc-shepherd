@@ -1,4 +1,5 @@
 """Admin module for consvc_shepherd/contile."""
+
 from django import forms
 from django.contrib import admin
 from django.shortcuts import render
@@ -43,16 +44,54 @@ class AdvertiserListAdmin(admin.ModelAdmin):
     inlines = [AdUrlInline]
     ordering = ["name"]
 
-    def get_urls(self):
+    def get_urls(self):  # pragma: no cover
         """Create new path to upload-csv"""
         urls = super().get_urls()
         new_urls = [path("upload-csv/", self.upload_csv)]
         return new_urls + urls
 
-    def upload_csv(self, request):
+    def upload_csv(self, request):  # pragma: no cover
         """Render function for new csv endpoint."""
+        if request.method == "POST":
+            csv_file = request.FILES["csv_upload"]
+            csv_data = [
+                entry.decode("utf-8").strip("\r\n") for entry in csv_file.readlines()
+            ][2:]
+            advertisers = {}
+            advertiser = ""
+            for entry in csv_data:
+                line = entry.split(",")
+                if line[0] != "":
+                    advertiser = line[0]
+                    advertisers[advertiser] = []
+                if line[0] in advertisers and line[3]:
+                    advertisers[advertiser].append(
+                        {
+                            "iso": line[2],
+                            "root_domain": line[3],
+                            "incl_filter_root": line[4],
+                            "path_var": line[5],
+                            "incl_filter_path_var": line[6],
+                            "last_updated_adm": line[7],
+                            "updated_by": line[8],
+                        }
+                    )
+                elif not line[0] and line[3]:
+                    advertisers[advertiser].append(
+                        {
+                            "iso": line[2],
+                            "root_domain": line[3],
+                            "incl_filter_root": line[4],
+                            "path_var": line[5],
+                            "incl_filter_path_var": line[6],
+                            "last_updated_adm": line[7],
+                            "updated_by": line[8],
+                        }
+                    )
+
         form = CsvImportForm()
         data = {"form": form}
+
         return render(request, "admin/csv_upload.html", data)
 
 
