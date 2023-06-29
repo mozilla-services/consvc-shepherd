@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="mx-auto w-75 p-5">
+        {% if "create" in request.path %}
+            <h1>Create Allocation</h1>
+        {% else %}
+            <h1>Edit Allocation</h1>
+        {% endif %}
+
+        <form method="post" id="form-container" class="w-100">
+            {% csrf_token %}
+            {% if form.non_form_errors or formset.non_form_errors or form.errors %}
+                <div class="alert alert-danger">
+                    {{ form.non_form_errors }}
+                    {{ formset.non_form_errors }}
+                    {{ form.errors }}
+                </div>
+            {% endif %}
+
+            <div class="form-group w-50 d-inline">
+                <label class="form-label ">{{ form.position.label }}</label>
+                <div class="w-50">
+                    {{ form.position }}
+                </div>
+            </div>
+            {{ formset.management_form }}
+            <hr/>
+            {% for form in formset %}
+                <div class="partner-allocation-form d-flex align-items-center my-2">
+                    {% for hidden in form.hidden_fields %}
+                        {{ hidden }}
+                    {% endfor %}
+                    {{ form }}
+
+                </div>
+            {% endfor %}
+            <button class="btn btn-secondary" id="add-form" type="button">Add Partner</button>
+            <hr/>
+            <div class="d-flex justify-content-end">
+                <a class="btn btn-secondary" href="/allocation/"> Back</a>
+                <button class="mx-2 btn btn-primary" type="submit">Save</button>
+            </div>
+        </form>
+    </div>
+
+
+    <script>
+        let formset = document.querySelectorAll(".partner-allocation-form");
+        let container = document.querySelector("#form-container");
+        let addButton = document.querySelector("#add-form");
+        let totalForms = document.querySelector("#id_partner_allocations-TOTAL_FORMS");
+
+        let formNum = formset.length - 1;
+        addButton.addEventListener('click', addForm);
+
+        function addForm() {
+            let newForm = formset[0].cloneNode(true);
+            let formRegex = RegExp(`-(\\d){1}-`, 'g');
+            formNum++;
+            newForm.innerHTML = newForm.innerHTML.replace(formRegex, `-${formNum}-`);
+            container.insertBefore(newForm, addButton);
+            totalForms.setAttribute('value', `${formNum + 1}`);
+        }
+    </script>
+    </body>
+    </html>
+
+
+
+{% endblock content %}

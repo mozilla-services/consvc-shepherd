@@ -65,8 +65,15 @@ class SnapshotCompareForm(forms.Form):
 class PartnerAllocationForm(forms.ModelForm):
     """Partner Specific Allocation Class Form."""
 
-    partner = forms.ModelChoiceField(queryset=Partner.objects.all())
-    percentage = forms.IntegerField(min_value=0, max_value=100)
+    partner = forms.ModelChoiceField(
+        queryset=Partner.objects.all(),
+        widget=forms.Select(attrs={"class": "form-select mx-2"}),
+    )
+    percentage = forms.IntegerField(
+        min_value=0,
+        max_value=100,
+        widget=forms.NumberInput(attrs={"class": "form-control mx-2"}),
+    )
 
     class Meta:
         """Meta class for PartnerAllocationForm."""
@@ -88,6 +95,7 @@ class AllocationSettingForm(forms.ModelForm):
         min_value=1,
         max_value=settings.CONTILE_MAX_TILES,
         help_text="Position value is 1-based",
+        widget=forms.NumberInput(attrs={"class": "form-control"}),
     )
 
     class Meta:
@@ -103,11 +111,14 @@ class AllocationSettingFormset(BaseInlineFormSet):
     def clean(self):
         """Additional Form Validation."""
         super(AllocationSettingFormset, self).clean()
+        alive_forms = [
+            form for form in self.forms if not form.cleaned_data.get("DELETE")
+        ]
 
-        if sum((form.cleaned_data.get("percentage", 0) for form in self.forms)) != 100:
+        if sum((form.cleaned_data.get("percentage", 0) for form in alive_forms)) != 100:
             raise forms.ValidationError("Total Percentage has to add up to 100.")
 
-        partners = [form.cleaned_data.get("partner", "") for form in self.forms]
+        partners = [form.cleaned_data.get("partner", "") for form in alive_forms]
 
         if len(set(partners)) < len(partners):
             raise forms.ValidationError("A Partner is listed multiple times.")
@@ -119,6 +130,6 @@ AllocationFormset = inlineformset_factory(
     form=PartnerAllocationForm,
     formset=AllocationSettingFormset,
     extra=1,
-    can_delete=False,
+    can_delete=True,
     can_delete_extra=True,
 )

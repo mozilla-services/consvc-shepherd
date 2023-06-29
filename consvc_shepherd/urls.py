@@ -17,7 +17,12 @@ from django.contrib import admin
 from django.urls import include, path
 
 from consvc_shepherd.models import AllocationSetting
-from consvc_shepherd.views import AllocationSettingList, TableOverview
+from consvc_shepherd.views import (
+    AllocationCreateView,
+    AllocationSettingList,
+    AllocationUpdateView,
+    TableOverview,
+)
 
 urlpatterns = [
     path("admin/doc/", include("django.contrib.admindocs.urls")),
@@ -27,6 +32,11 @@ urlpatterns = [
         AllocationSettingList.as_view(model=AllocationSetting),
         name="list_allocation",
     ),
+    path(
+        "allocation/create/",
+        AllocationCreateView.as_view(),
+    ),
+    path("allocation/<int:pk>/", AllocationUpdateView.as_view()),
     path("", TableOverview.as_view()),
 ]
 

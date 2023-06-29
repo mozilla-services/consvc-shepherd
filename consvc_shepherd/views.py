@@ -1,10 +1,15 @@
 """Views module for consvc_shepherd."""
 from typing import Any
 
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.views.generic import ListView, TemplateView
+from django.views.generic import CreateView, ListView, TemplateView, UpdateView
 
-from consvc_shepherd.forms import SnapshotCompareForm
+from consvc_shepherd.forms import (
+    AllocationFormset,
+    AllocationSettingForm,
+    SnapshotCompareForm,
+)
 from consvc_shepherd.models import (
     AllocationSetting,
     AllocationSettingsSnapshot,
@@ -79,4 +84,101 @@ class AllocationSettingList(ListView):
             .order_by("-created_on")
             .first()
         )
+        return context
+
+
+class AllocationViewMixin:
+    """AllocationViewMixin Class.
+
+    Methods
+    -------
+    form_valid(self, form)
+        validates form data and saves accordingly
+    """
+
+    def form_valid(self, form):
+        """Validate form data and saves models accordingly."""
+        alloc_formset = self.get_context_data()["formset"]
+        if not alloc_formset.is_valid():
+            return self.render_to_response(self.get_context_data(form=form))
+        variants = alloc_formset.save(commit=False)
+        allocation_setting = form.save()
+        for obj in alloc_formset.deleted_objects:
+            obj.delete()
+        for variant in variants:
+            variant.allocation_position = allocation_setting
+            variant.save()
+
+        return HttpResponseRedirect("/allocation/")
+
+
+class AllocationCreateView(AllocationViewMixin, CreateView):
+    """AllocationSetting CreateView class.
+
+    Attributes
+    ----------
+    model : AllocationSetting
+        Specific AllocationSetting model
+    url: str
+        Url that view redirects to upon successful request
+    form_class: AllocationSettingForm
+        Form used for the view
+    template_name : str
+        Directory and file for given AllocationSetting template
+
+    Methods
+    -------
+    get_context_data(self, **kwargs: Any)
+        Return relevant form data for view.
+    """
+
+    model = AllocationSetting
+    success_url = "/allocation/"
+    form_class = AllocationSettingForm
+    template_name = "allocation/allocation_create_or_edit.html"
+
+    def get_context_data(self, **kwargs):
+        """Get form data for view."""
+        context = super(AllocationCreateView, self).get_context_data(**kwargs)
+        if self.request.method == "GET":
+            context["formset"] = AllocationFormset()
+        else:
+            context["formset"] = AllocationFormset(self.request.POST)
+        return context
+
+
+class AllocationUpdateView(AllocationViewMixin, UpdateView):
+    """AllocationSettingList UpdateView class.
+
+    Attributes
+    ----------
+    model : AllocationSetting
+        Specific AllocationSetting model
+    url: str
+        Url that view redirects to upon successful request
+    form_class: AllocationSettingForm
+        Form used for the view
+    template_name : str
+        Directory and file for given AllocationSetting template
+
+    Methods
+    -------
+    get_context_data(self, **kwargs: Any)
+        Return relevant form data for view.
+    """
+
+    model = AllocationSetting
+    success_url = "/allocation/"
+    form_class = AllocationSettingForm
+    template_name = "allocation/allocation_create_or_edit.html"
+
+    def get_context_data(self, **kwargs):
+        """Get form data for view."""
+        context = super(AllocationUpdateView, self).get_context_data(**kwargs)
+        if self.request.method == "POST":
+            context["formset"] = AllocationFormset(
+                self.request.POST or None, self.request.FILES, instance=self.object
+            )
+        else:
+            context["formset"] = AllocationFormset(instance=self.object)
         return context
