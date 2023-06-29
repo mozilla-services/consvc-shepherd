@@ -1,13 +1,17 @@
 """Views module for consvc_shepherd."""
+import json
 from typing import Any
 
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.utils import timezone
 from django.views.generic import CreateView, ListView, TemplateView, UpdateView
 
+from consvc_shepherd import settings
 from consvc_shepherd.forms import (
     AllocationFormset,
     AllocationSettingForm,
+    AllocationSettingsSnapshotForm,
     SnapshotCompareForm,
 )
 from consvc_shepherd.models import (
@@ -15,6 +19,10 @@ from consvc_shepherd.models import (
     AllocationSettingsSnapshot,
     SettingsSnapshot,
 )
+from consvc_shepherd.storage import send_to_storage
+from consvc_shepherd.utils import ShepherdMetrics
+
+metrics: ShepherdMetrics = ShepherdMetrics("shepherd")
 
 
 class TableOverview(TemplateView):
@@ -84,7 +92,32 @@ class AllocationSettingList(ListView):
             .order_by("-created_on")
             .first()
         )
+        context["form"] = AllocationSettingsSnapshotForm
         return context
+
+    def post(self, request, *args, **kwargs):
+        """Post for allocationSettingsSnapshotForm."""
+        self.object_list = AllocationSetting.objects.all()
+        context = self.get_context_data(**kwargs)
+        form = AllocationSettingsSnapshotForm(request.POST)
+
+        if not form.is_valid():
+            context["errors"] = form.errors
+        else:
+            instance = form.save(commit=False)
+            instance.launched_by = self.request.user
+            instance.created_by = self.request.user
+            instance.launched_date = timezone.now()
+            instance.json_settings = form.get_json_settings()
+            instance.save()
+
+            send_to_storage(
+                json.dumps(instance.json_settings, indent=2),
+                settings.GS_BUCKET_FILE_NAME,
+            )
+            metrics.incr("allocation.upload.success")
+            context["latest_snapshot"] = instance
+        return render(request, self.template_name, context=context)
 
 
 class AllocationViewMixin:

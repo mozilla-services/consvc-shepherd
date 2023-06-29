@@ -3,6 +3,7 @@ from django.test import TestCase, override_settings
 
 from consvc_shepherd.models import (
     AllocationSetting,
+    AllocationSettingsSnapshot,
     PartnerAllocation,
     SettingsSnapshot,
 )
@@ -111,3 +112,32 @@ class TestAllocationCreateView(TestCase):
             **{"settings.OPENIDC_HEADER": "dev@example.com"},
         )
         self.assertEqual(response.status_code, 302)
+
+
+# override DEBUG to override auth check
+@override_settings(DEBUG=True)
+class TestAllocationSettingsListView(TestCase):
+    """Test of view when SettingSnapshot updated."""
+
+    def test_view_returns_post_request(self):
+        """Verify POST returns 200 response after creating and posting
+        settings snapshot.
+        """
+        data = {"name": "snapshot1"}
+        partner = Partner.objects.create(name="amp")
+        alloc_setting_1 = AllocationSetting.objects.create(position=1)
+        alloc_setting_2 = AllocationSetting.objects.create(position=2)
+        PartnerAllocation.objects.create(
+            allocation_position=alloc_setting_1, partner=partner, percentage=100
+        )
+        PartnerAllocation.objects.create(
+            allocation_position=alloc_setting_2, partner=partner, percentage=100
+        )
+        self.assertEqual(AllocationSettingsSnapshot.objects.count(), 0)
+        response = self.client.post(
+            "/allocation/",
+            data,
+            **{"settings.OPENIDC_HEADER": "dev@example.com"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(AllocationSettingsSnapshot.objects.count(), 1)

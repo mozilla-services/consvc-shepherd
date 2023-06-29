@@ -1,17 +1,25 @@
 """Forms module for consvc_shepherd."""
-from typing import Any
+import json
+from typing import Any, Dict
 
 from django import forms
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.forms import BaseInlineFormSet
 from django.forms.models import inlineformset_factory
+from django.utils import dateformat, timezone
+from jsonschema import exceptions, validate
 
 from consvc_shepherd.models import (
     AllocationSetting,
+    AllocationSettingsSnapshot,
     PartnerAllocation,
     SettingsSnapshot,
 )
+from consvc_shepherd.utils import ShepherdMetrics
 from contile.models import Partner
+
+metrics: ShepherdMetrics = ShepherdMetrics("shepherd")
 
 
 class SnapshotCompareForm(forms.Form):
@@ -58,6 +66,61 @@ class SnapshotCompareForm(forms.Form):
             "differences": [
                 {"diff_type": "Added Advertisers", "diff_value": added_advertisers},
                 {"diff_type": "Removed Advertisers", "diff_value": removed_advertisers},
+            ],
+        }
+
+
+class AllocationSettingsSnapshotForm(forms.ModelForm):
+    """Form for AllocationSettings Snapshot Model for the UI.
+
+    Attributes
+    ----------
+    name : CharField
+        name of the snapshot
+
+    Methods
+    -------
+    clean(self)
+        additional validation to validate json generated
+    get_json_settings(self)
+        generate JSON based on allocation settings
+    """
+
+    name = forms.CharField(max_length=128)
+
+    class Meta:
+        """Meta Class."""
+
+        model = AllocationSettingsSnapshot
+        fields = "__all__"
+
+    def clean(self):
+        """Validate json generated."""
+        cd = super(AllocationSettingsSnapshotForm, self).clean()
+        cd["json_settings"] = self.get_json_settings()
+        with open("./schema/allocation.schema.json", "r") as f:
+            settings_schema = json.load(f)
+            try:
+                validate(cd["json_settings"], schema=settings_schema)
+                metrics.incr("allocation.snapshot.schema.validation.success")
+            except exceptions.ValidationError as e:
+                metrics.incr("allocation.snapshot.schema.validation.fail")
+                raise ValidationError(
+                    message=f"JSON generated is different from the expected allocation schema. "
+                    f"Ensure that there are two allocation settings: {e}",
+                )
+        return cd
+
+    def get_json_settings(self) -> Dict[str, Any]:
+        """Generate JSON based on allocation settings."""
+        allocation_settings_name: str = (
+            f"SOV-{dateformat.format(timezone.now(), 'YmdHis')}"
+        )
+        return {
+            "name": allocation_settings_name,
+            "allocations": [
+                allocation.to_dict()
+                for allocation in AllocationSetting.objects.all().order_by("position")
             ],
         }
 

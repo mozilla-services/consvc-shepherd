@@ -4,13 +4,18 @@
 {% block content %}
     <div class="p-5 w-75 mx-auto">
         <h2>Allocation Settings</h2>
+        {% if errors %}
+            <div class="alert alert-danger">{{ errors }}</div>
+        {% endif %}
         <div class="d-flex justify-content-between mb-2">
             <span>Latest Snapshot:
             <button class="btn btn-link" data-bs-toggle="collapse" href="#snapshot">
             {{ latest_snapshot }}
         </button>
         </span>
-        <a class="btn btn-primary" href="/admin/consvc_shepherd/allocationsettingssnapshot/add/">Create Snapshot</a>
+            <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#snapshotModal">Create
+                Snapshot
+            </button>
         </div>
         <div id="snapshot" class="collapse">
             <pre class="bg-dark text-light p-2">{{ latest_snapshot.json_settings_formatted }}
@@ -45,5 +50,29 @@
         {% empty %}
             <h5>No allocations set.</h5>
         {% endfor %}
+        <div class="modal fade" id="snapshotModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="ModalLabel">Create Snapshot</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="" method="post">
+                        <div class="modal-body">
+
+                            {% csrf_token %}
+                            {{ form.name.label }}
+                            {{ form.name }}
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="Submit" class="btn btn-primary">Create</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
     </div>
 {% endblock content %}
