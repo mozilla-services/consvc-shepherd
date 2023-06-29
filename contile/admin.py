@@ -1,7 +1,7 @@
 """Admin module for consvc_shepherd/contile."""
 
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.shortcuts import render
 from django.urls import path
 
@@ -52,6 +52,8 @@ class AdvertiserListAdmin(admin.ModelAdmin):
 
     def upload_csv(self, request):  # pragma: no cover
         """Render function for new csv endpoint."""
+        form = CsvImportForm()
+        data = {"form": form}
         if request.method == "POST":
             csv_file = request.FILES["csv_upload"]
             csv_data = [
@@ -68,9 +70,9 @@ class AdvertiserListAdmin(admin.ModelAdmin):
                     advertisers[advertiser].append(
                         {
                             "iso": line[2],
-                            "root_domain": line[3],
+                            "root_domain": line[3].strip().replace('"', ""),
                             "incl_filter_root": line[4],
-                            "path_var": line[5],
+                            "path_var": line[5].strip().replace('"', ""),
                             "incl_filter_path_var": line[6],
                             "last_updated_adm": line[7],
                             "updated_by": line[8],
@@ -80,18 +82,34 @@ class AdvertiserListAdmin(admin.ModelAdmin):
                     advertisers[advertiser].append(
                         {
                             "iso": line[2],
-                            "root_domain": line[3],
+                            "root_domain": line[3].strip().replace('"', ""),
                             "incl_filter_root": line[4],
-                            "path_var": line[5],
+                            "path_var": line[5].strip().replace('"', ""),
                             "incl_filter_path_var": line[6],
                             "last_updated_adm": line[7],
                             "updated_by": line[8],
                         }
                     )
+            for adv_name, settings in advertisers.items():
+                if settings != []:
+                    print(adv_name, settings)
+                    advertiser = Advertiser.objects.create(
+                        name=adv_name, partner=Partner.objects.filter(name="adm")[0]
+                    )
+                    for entry in settings:
 
-        form = CsvImportForm()
-        data = {"form": form}
+                        path = entry["path_var"].strip('"').strip()
+                        if not path:
+                            path = "/"
+                        advertiser_url = AdvertiserUrl.objects.create(  # noqa
+                            advertiser=advertiser,
+                            geo=entry["iso"],
+                            domain=entry["root_domain"].strip('"'),
+                            path=path,
+                            matching=True,
+                        )
 
+        messages.info(request, "Advertisers successfully uploaded!")
         return render(request, "admin/csv_upload.html", data)
 
 
