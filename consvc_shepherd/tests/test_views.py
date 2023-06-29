@@ -1,7 +1,12 @@
 """Views test module for consvc_shepherd."""
 from django.test import TestCase, override_settings
 
-from consvc_shepherd.models import SettingsSnapshot
+from consvc_shepherd.models import (
+    AllocationSetting,
+    PartnerAllocation,
+    SettingsSnapshot,
+)
+from contile.models import Partner
 
 
 # override DEBUG to override auth check
@@ -10,7 +15,7 @@ class TestTableOverviewCompareSnapshot(TestCase):
     """Test of view when SettingSnapshot updated."""
 
     def test_view_returns_post_request(self):
-        """Verify POST returns 200 response after creating and posting
+        """Verify POST returns 200 response after comparing
         settings snapshot.
         """
         SettingsSnapshot.objects.create(
@@ -29,3 +34,80 @@ class TestTableOverviewCompareSnapshot(TestCase):
             **{"settings.OPENIDC_HEADER": "dev@example.com"},
         )
         self.assertEqual(response.status_code, 200)
+
+
+@override_settings(DEBUG=True)
+class TestAllocationCreateView(TestCase):
+    """Test of Allocation View."""
+
+    def test_create_view_returns_post_request(self):
+        """Verify POST returns 302 response after creating
+        Allocation Setting.
+        """
+        partner1 = Partner.objects.create(name="partner1")
+        partner2 = Partner.objects.create(name="partner2")
+        data = {
+            "position": "1",
+            "partner_allocations-TOTAL_FORMS": "2",
+            "partner_allocations-INITIAL_FORMS": "0",
+            "partner_allocations-MIN_NUM_FORMS": "0",
+            "partner_allocations-MAX_NUM_FORMS": "1000",
+            "partner_allocations-0-id": "",
+            "partner_allocations-0-allocation_position": "",
+            "partner_allocations-0-partner": f"{partner1.id}",
+            "partner_allocations-0-percentage": "50",
+            "partner_allocations-1-id": "",
+            "partner_allocations-1-allocation_position": "",
+            "partner_allocations-1-partner": f"{partner2.id}",
+            "partner_allocations-1-percentage": "50",
+            "partner_allocations-__prefix__-id": "",
+            "partner_allocations-__prefix__-allocation_position": "",
+            "partner_allocations-__prefix__-partner": "",
+            "partner_allocations-__prefix__-percentage": "",
+        }
+
+        response = self.client.post(
+            "/allocation/create/",
+            data,
+            **{"settings.OPENIDC_HEADER": "dev@example.com"},
+        )
+        self.assertEqual(response.status_code, 302)
+
+    def test_update_view_returns_post_request(self):
+        """Verify POST returns 302 response after updating
+        Allocation Setting.
+        """
+        partner1 = Partner.objects.create(name="partner1")
+        partner2 = Partner.objects.create(name="partner2")
+
+        alloc_setting = AllocationSetting.objects.create(position=2)
+        PartnerAllocation.objects.create(
+            allocation_position=alloc_setting, partner=partner1, percentage=100
+        )
+
+        data = {
+            "position": "2",
+            "partner_allocations-TOTAL_FORMS": "2",
+            "partner_allocations-INITIAL_FORMS": "0",
+            "partner_allocations-MIN_NUM_FORMS": "0",
+            "partner_allocations-MAX_NUM_FORMS": "1000",
+            "partner_allocations-0-id": "",
+            "partner_allocations-0-allocation_position": "",
+            "partner_allocations-0-partner": f"{partner1.id}",
+            "partner_allocations-0-percentage": "50",
+            "partner_allocations-1-id": "",
+            "partner_allocations-1-allocation_position": "",
+            "partner_allocations-1-partner": f"{partner2.id}",
+            "partner_allocations-1-percentage": "50",
+            "partner_allocations-__prefix__-id": "",
+            "partner_allocations-__prefix__-allocation_position": "",
+            "partner_allocations-__prefix__-partner": "",
+            "partner_allocations-__prefix__-percentage": "",
+        }
+
+        response = self.client.post(
+            f"/allocation/{alloc_setting.id}/",
+            data,
+            **{"settings.OPENIDC_HEADER": "dev@example.com"},
+        )
+        self.assertEqual(response.status_code, 302)
