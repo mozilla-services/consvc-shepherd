@@ -1,8 +1,16 @@
 """Forms test module for consvc_shepherd."""
 from django.test import TestCase
 
-from consvc_shepherd.forms import AllocationFormset, SnapshotCompareForm
-from consvc_shepherd.models import SettingsSnapshot
+from consvc_shepherd.forms import (
+    AllocationFormset,
+    AllocationSettingsSnapshotForm,
+    SnapshotCompareForm,
+)
+from consvc_shepherd.models import (
+    AllocationSetting,
+    PartnerAllocation,
+    SettingsSnapshot,
+)
 from contile.models import Partner
 
 
@@ -112,4 +120,35 @@ class TestAllocationFormSet(TestCase):
         }
         self.data.update(extra_blank_form)
         form = AllocationFormset(data=self.data)
+        self.assertTrue(form.is_valid())
+
+
+class TestAllocationSettingsSnapshotForm(TestCase):
+    """Test Allocation Snapshot Form."""
+
+    def test_form_raises_error_with_invalid_json(self):
+        """Test that validation error occurs when missing a required field."""
+        Partner.objects.create(name="amp")
+        AllocationSetting.objects.create(position=1)
+        data = {
+            "name": "Snapshot 1",
+        }
+        form = AllocationSettingsSnapshotForm(data=data)
+        self.assertFalse(form.is_valid())
+
+    def test_form_returns_true_when_valid(self):
+        """Test that validation error occurs when missing a required field."""
+        partner = Partner.objects.create(name="amp")
+        alloc_setting_1 = AllocationSetting.objects.create(position=1)
+        alloc_setting_2 = AllocationSetting.objects.create(position=2)
+        PartnerAllocation.objects.create(
+            allocation_position=alloc_setting_1, partner=partner, percentage=100
+        )
+        PartnerAllocation.objects.create(
+            allocation_position=alloc_setting_2, partner=partner, percentage=100
+        )
+        data = {
+            "name": "Snapshot 1",
+        }
+        form = AllocationSettingsSnapshotForm(data=data)
         self.assertTrue(form.is_valid())
