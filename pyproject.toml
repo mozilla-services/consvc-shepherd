@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-django = "^4.2.1"
+django = "^4.2.3"
 django-countries = "^7.5"
 django-environ = "^0.10.0"
 django-polymorphic = "^3.1.0"
