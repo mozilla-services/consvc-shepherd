@@ -23,7 +23,7 @@ black: $(INSTALL_STAMP)  ##  Run black
 
 .PHONY: flake8
 flake8: $(INSTALL_STAMP)  ##  Run flake8
-	$(POETRY) run flake8 $(APP_DIRS) --ignore=E203,E302,E501,E701
+	$(POETRY) run flake8 $(APP_DIRS) --ignore=E203,E302,E501,E701,W503
 
 .PHONY: bandit
 bandit: $(INSTALL_STAMP)  ##  Run bandit

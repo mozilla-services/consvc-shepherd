@@ -178,6 +178,15 @@ class AllocationSettingFormset(BaseInlineFormSet):
             form for form in self.forms if not form.cleaned_data.get("DELETE")
         ]
 
+        if alive_forms:
+            if (
+                min((form.cleaned_data.get("percentage", 0) for form in alive_forms))
+                <= 0
+            ):
+                raise forms.ValidationError(
+                    "Allocation percentage must be greater than 0."
+                )
+
         if sum((form.cleaned_data.get("percentage", 0) for form in alive_forms)) != 100:
             raise forms.ValidationError("Total Percentage has to add up to 100.")
 

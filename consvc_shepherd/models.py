@@ -3,6 +3,7 @@ import json
 from typing import Any
 
 from django.contrib.auth import get_user_model
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import (
     CharField,
@@ -156,7 +157,8 @@ class AllocationSetting(models.Model):
         return {
             "position": self.position,
             "allocation": [
-                allocation.to_dict() for allocation in self.partner_allocations.all()  # type: ignore [attr-defined]
+                allocation.to_dict()
+                for allocation in self.partner_allocations.all()  # type: ignore [attr-defined]
             ],
         }
 
@@ -176,7 +178,7 @@ class PartnerAllocation(models.Model):
     partner : Partner
         Foreign key pointing to Partner instance
     percentage : IntegerField
-        Percentage of allocation (from 0 - 100)
+        Percentage of allocation (from 1 - 100)
 
     Methods
     -------
@@ -190,7 +192,9 @@ class PartnerAllocation(models.Model):
     partner: ForeignKey = models.ForeignKey(
         Partner, on_delete=models.CASCADE, null=True
     )
-    percentage: IntegerField = models.IntegerField()
+    percentage: IntegerField = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(100)]
+    )
 
     def to_dict(self) -> dict[str, Any]:
         """Return PartnerAllocation instance as a dictionary representation.
