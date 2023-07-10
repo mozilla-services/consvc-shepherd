@@ -133,7 +133,7 @@ class PartnerAllocationForm(forms.ModelForm):
         widget=forms.Select(attrs={"class": "form-select mx-2"}),
     )
     percentage = forms.IntegerField(
-        min_value=0,
+        min_value=1,
         max_value=100,
         widget=forms.NumberInput(attrs={"class": "form-control mx-2"}),
     )
@@ -177,15 +177,6 @@ class AllocationSettingFormset(BaseInlineFormSet):
         alive_forms = [
             form for form in self.forms if not form.cleaned_data.get("DELETE")
         ]
-
-        if alive_forms:
-            if (
-                min((form.cleaned_data.get("percentage", 0) for form in alive_forms))
-                <= 0
-            ):
-                raise forms.ValidationError(
-                    "Allocation percentage must be greater than 0."
-                )
 
         if sum((form.cleaned_data.get("percentage", 0) for form in alive_forms)) != 100:
             raise forms.ValidationError("Total Percentage has to add up to 100.")

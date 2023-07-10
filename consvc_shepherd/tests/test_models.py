@@ -43,8 +43,8 @@ class TestPartnerAllocationModel(TestCase):
             position=1
         )
         allocation1_adm: PartnerAllocation = PartnerAllocation.objects.create(
-            allocation_position=position1_alloc, partner=amp_partner, percentage=85
+            allocation_position=position1_alloc, partner=amp_partner, percentage=100
         )
         self.assertEqual(
-            allocation1_adm.to_dict(), {"partner": "amp", "percentage": 85}
+            allocation1_adm.to_dict(), {"partner": "amp", "percentage": 100}
         )

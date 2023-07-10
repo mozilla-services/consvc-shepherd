@@ -184,7 +184,7 @@ class AllocationSettingsSnapshotModelAdmin(admin.ModelAdmin):
 class PartnerAllocationInline(admin.TabularInline):
     """PartnerAllocationInline TabularInline child model."""
 
-    extra = 0
+    extra = 1
     model = PartnerAllocation
     formset = AllocationSettingFormset
 
