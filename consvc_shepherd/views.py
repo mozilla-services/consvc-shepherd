@@ -113,7 +113,7 @@ class AllocationSettingList(ListView):
 
             send_to_storage(
                 json.dumps(instance.json_settings, indent=2),
-                settings.GS_BUCKET_FILE_NAME,
+                settings.ALLOCATION_FILE_NAME,
             )
             metrics.incr("allocation.upload.success")
             context["latest_snapshot"] = instance
