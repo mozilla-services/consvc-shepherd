@@ -154,6 +154,10 @@ class TestAllocationSettingsSnapshotForm(TestCase):
         form = AllocationSettingsSnapshotForm(data=data)
         self.assertTrue(form.is_valid())
 
+
+class TestPartnerAllocationForm(TestCase):
+    """Test partner Allocation Form."""
+
     def test_percentage_must_be_lower_than_hundred(self) -> None:
         """Test for verifying PartnerAllocation percentage has a 100% maximum."""
         amp_partner: Partner = Partner.objects.create(name="amp")
