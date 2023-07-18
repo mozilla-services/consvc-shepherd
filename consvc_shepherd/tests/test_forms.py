@@ -158,30 +158,46 @@ class TestAllocationSettingsSnapshotForm(TestCase):
 class TestPartnerAllocationForm(TestCase):
     """Test partner Allocation Form."""
 
-    def test_percentage_must_be_lower_than_hundred(self) -> None:
-        """Test for verifying PartnerAllocation percentage has a 100% maximum."""
-        amp_partner: Partner = Partner.objects.create(name="amp")
-        position1_alloc: AllocationSetting = AllocationSetting.objects.create(
+    def setUp(self) -> None:
+        """Set up PartnerAllocation Form tests."""
+        self.partner: Partner = Partner.objects.create(name="amp")
+        self.position1_alloc: AllocationSetting = AllocationSetting.objects.create(
             position=1
         )
-        partner_allocation = PartnerAllocation.objects.create(
-            allocation_position=position1_alloc, partner=amp_partner, percentage=101
+        self.partner_allocation_above = PartnerAllocation.objects.create(
+            allocation_position=self.position1_alloc,
+            partner=self.partner,
+            percentage=101,
         )
-        form = PartnerAllocationForm(partner_allocation.to_dict())
-        self.assertTrue(
-            partner_allocation.percentage > form.fields.get("percentage").max_value  # type: ignore [union-attr]
+        self.partner_allocation_below = PartnerAllocation.objects.create(
+            allocation_position=self.position1_alloc, partner=self.partner, percentage=0
         )
+        self.data_above: dict = {
+            "partner_allocations-TOTAL_FORMS": "1",
+            "partner_allocations-INITIAL_FORMS": "0",
+            "partner_allocations-MIN_NUM_FORMS": "0",
+            "partner_allocations-MAX_NUM_FORMS": "1000",
+            "id_partner_allocations-0-allocation_position": f"{self.position1_alloc.position}",
+            "id_partner_allocations-0-partner": f"{self.partner}",
+            "id_partner_allocations-0-percentage": f"{self.partner_allocation_above.percentage}",
+        }
+
+        self.data_below: dict = {
+            "partner_allocations-TOTAL_FORMS": "1",
+            "partner_allocations-INITIAL_FORMS": "0",
+            "partner_allocations-MIN_NUM_FORMS": "0",
+            "partner_allocations-MAX_NUM_FORMS": "1000",
+            "id_partner_allocations-0-allocation_position": f"{self.position1_alloc.position}",
+            "id_partner_allocations-0-partner": f"{self.partner}",
+            "id_partner_allocations-0-percentage": f"{self.partner_allocation_below.percentage}",
+        }
+
+    def test_percentage_must_be_lower_than_hundred(self) -> None:
+        """Test for verifying PartnerAllocation percentage has a 100% maximum."""
+        form = PartnerAllocationForm(data=self.data_above)
+        self.assertFalse(form.is_valid())
 
     def test_percentage_cannot_equal_zero(self) -> None:
         """Test for verifying PartnerAllocation percentage cannot be 0%."""
-        amp_partner: Partner = Partner.objects.create(name="amp")
-        position1_alloc: AllocationSetting = AllocationSetting.objects.create(
-            position=1
-        )
-        partner_allocation = PartnerAllocation.objects.create(
-            allocation_position=position1_alloc, partner=amp_partner, percentage=0
-        )
-        form = PartnerAllocationForm(partner_allocation.to_dict())
-        self.assertTrue(
-            partner_allocation.percentage < form.fields.get("percentage").min_value  # type: ignore [union-attr]
-        )
+        form = PartnerAllocationForm(data=self.data_below)
+        self.assertFalse(form.is_valid())
