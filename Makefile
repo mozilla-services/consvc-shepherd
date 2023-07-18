@@ -58,6 +58,18 @@ migrate: install
 test: migration-check
 	env DJANGO_SETTINGS_MODULE=consvc_shepherd.settings $(POETRY) run pytest --cov --cov-report=term-missing --cov-fail-under=$(COV_FAIL_UNDER)
 
+.PHONY: doc-install-deps
+doc-install-deps:  ## Install the dependencies for doc generation
+	cargo install mdbook && cargo install mdbook-mermaid
+
+.PHONY: doc
+doc: ##  Generate docs via mdBook
+	mdbook-mermaid install && mdbook clean && mdbook build  
+
+.PHONY: doc-preview
+doc-preview: doc  ##  Preview Merino docs via the default browser
+	mdbook serve --open
+
 .PHONY: dev
 dev: $(INSTALL_STAMP)  ##  Run shepherd locally and reload automatically
 	$(POETRY) run python manage.py runserver
