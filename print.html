@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Shepherd Book</title>
+        <title>Shepherd</title>
         <meta name="robots" content="noindex" />
 
 
@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item affix "><a href="intro.html">Setup</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="UserGuide.html"><strong aria-hidden="true">1.</strong> User Guide</a></li><li class="chapter-item affix "><li class="part-title">ADR</li><li class="chapter-item "><a href="adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">2.</strong> Shepherd Metrics</a></li><li class="chapter-item affix "><li class="part-title">Scripts</li><li class="chapter-item "><a href="recoveryScript.html"><strong aria-hidden="true">3.</strong> Recovery Script</a></li></ol>
+                <ol class="chapter"><li class="chapter-item affix "><a href="intro.html">Setup</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="UserGuide.html"><strong aria-hidden="true">1.</strong> User Guide</a></li><li class="chapter-item "><a href="metrics.html"><strong aria-hidden="true">2.</strong> Metrics</a></li><li class="chapter-item affix "><li class="part-title">ADR</li><li class="chapter-item "><a href="adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">3.</strong> Shepherd Metrics</a></li><li class="chapter-item affix "><li class="part-title">Scripts</li><li class="chapter-item "><a href="recoveryScript.html"><strong aria-hidden="true">4.</strong> Recovery Script</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -110,7 +110,7 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title">Shepherd Book</h1>
+                    <h1 class="menu-title">Shepherd</h1>
 
                     <div class="right-buttons">
                         <a href="print.html" title="Print this book" aria-label="Print this book">
@@ -287,6 +287,92 @@ Correct them and hit save again. </li>
 </ol>
 <p><em>Note that Shepherd is unable to undo snapshots, if changes need to be undone, one would have to manually revert the advertiser information and create a new snapshot.
 For complex reverts, please contact the engineering team.</em></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="shepherd-metrics"><a class="header" href="#shepherd-metrics">Shepherd Metrics</a></h1>
+<p>This documentation describes the statsd-style metrics emitted by consvc_shepherd.</p>
+<h2 id="metrics"><a class="header" href="#metrics">Metrics</a></h2>
+<p>consvc_shepherd uses <a href="https://markus.readthedocs.io/en/latest/index.html" title="Markus documentation">markus</a> (metrics client) to emit statsd-style metrics like
+counters, gauges, and timers. We use the <a href="https://docs.datadoghq.com/developers/dogstatsd" title="dogstatsd documentation">datadog extensions</a>, which
+include tags for metrics. In the production instance of Shepherd, metrics are emitted as
+<a href="https://en.wikipedia.org/wiki/User_Datagram_Protocol">UDP packets</a>, collected by a local <a href="https://docs.influxdata.com/telegraf">telegraf</a> forwarder, and
+stored in <a href="https://docs.influxdata.com/influxdb/latest/reference/key-concepts/">influxdb</a>. In development, metrics are disabled by
+default, but there is a way described below to view metrics in development via <code>nc</code>.</p>
+<h2 id="telegraf"><a class="header" href="#telegraf">Telegraf</a></h2>
+<p><a href="https://github.com/influxdata/telegraf">Telegraf</a> is a plugin-driven server agent written by the team at <a href="https://influxdata.com">InfluxData</a> for collecting &amp; reporting metrics. To understand the 
+configuration for Mozilla services, please view the documentation in <a href="https://github.com/mozilla-services/cloudops-infra/tree/master/libs/influx/k8s/charts/telegraf">cloudops-infra</a>.</p>
+<h2 id="configuration"><a class="header" href="#configuration">Configuration</a></h2>
+<p>Configuration is controlled by the following environment variables:</p>
+<ul>
+<li><code>DJANGO_STATSD_ENABLED</code> (default <code>False</code>) : Enables / disables emitting metrics to a
+statsd server</li>
+<li><code>STATSD_DEBUG</code> (default <code>False</code>) : Enables / disables metrics logging</li>
+<li><code>STATSD_ENABLED</code> (default <code>False</code>) : Enables metrics, <code>True</code> if either
+<code>DJANGO_STATSD_ENABLED</code> or <code>STATSD_DEBUG</code> are <code>True</code></li>
+<li><code>STATSD_HOST</code> (default <code>&quot;127.0.0.1&quot;</code>) : statsd server IP</li>
+<li><code>STATSD_PORT</code> (default <code>8125</code>) : statsd server port</li>
+<li><code>STATSD_PREFIX</code> (default <code>&quot;shepherd&quot;</code>) : prefix definition for all metrics in project.
+Dashes (and some other values) are converted to periods.</li>
+</ul>
+<p>With the defaults <code>DJANGO_STATSD_ENABLED=False</code> and <code>STATSD_DEBUG=False</code>, no metrics
+are emitted. Ensure that in the deployed production instance of Shepherd, the following values are set accordingly:
+<code>DJANGO_STATSD_ENABLED=True</code> and <code>STATSD_DEBUG=False</code>. This is so metrics are emitted but do not appear in logs.</p>
+<p>Deployment variables are set in <code>cloudops-infra</code> in the <code>configmap.yaml</code> file in the topsites/shepherd directory.</p>
+<h2 id="development"><a class="header" href="#development">Development</a></h2>
+<p>By default, metrics are disabled in development. They must be enabled via an
+environment variable or in the <code>.env</code> file. Set <code>STATSD_DEBUG</code> to <code>True</code>.</p>
+<p>Metrics are set, incremented, and controlled by utility wrapper methods that are defined in the <code>ShepherdMetrics</code> class contained in the <a href="../consvc_shepherd/utils.py">consvc_shepherd/utils.py</a> module:</p>
+<ul>
+<li><code>time_if_enabled(name)</code></li>
+<li><code>incr_if_enabled(name, value=1, tags=None)</code></li>
+<li><code>histogram_if_enabled(name, value, tags=None)</code></li>
+<li><code>gauge_if_enabled(name, value, tags=None)</code></li>
+</ul>
+<p>Simply instantiate a <code>ShepherdMetrics</code> class in your module, passing to it the <code>thing</code> parameter as defined in the <code>markus</code> docs, which defines the prefix keys that will be generated. Generally, <code>thing</code>  should be set to the module name and question, which you can define explicitly or by passing  <code>__name__</code>. Instantiating this class calls <code>markus.get_metrics()</code> and returns <code>markus.main.MetricsInterface</code> under the hood, on which all these methods are called. This metrics class decouples the logic from direct calls to <code>markus.main.MetricsInterface</code> instances.</p>
+<pre><code class="language-python">from consvc_shepherd.utils import ShepherdMetrics
+
+metrics = ShepherdMetrics(&quot;shepherd&quot;)
+
+metrics.incr_if_enabled(&quot;publication.success&quot;)
+</code></pre>
+<p>With <code>DJANGO_STATSD_ENABLED=True</code>, metrics are sent to the server identified by
+<code>STATSD_HOST</code> and <code>STATSD_PORT</code>, using the <a href="https://markus.readthedocs.io/en/latest/backends.html#datadog-metrics">DatadogMetrics
+backend</a>. These are sent as UDP packets, which means
+they are silently dropped if there is no server to receive them. In local
+development on macOS, you can emulate a <code>statsd</code> server and see the metrics with:</p>
+<pre><code class="language-sh">nc -lu localhost 8125
+</code></pre>
+<p>With <code>STATSD_DEBUG=True</code>, metrics are sent to the <code>markus</code> log using the
+<a href="https://markus.readthedocs.io/en/latest/backends.html#logging-metrics">LoggingMetrics backend</a>. They are displayed along
+with other logs like <code>request.summary</code> from that service.</p>
+<h2 id="testing"><a class="header" href="#testing">Testing</a></h2>
+<p>When writing tests for metrics, they can be enabled via
+<a href="https://docs.djangoproject.com/en/4.2/topics/testing/tools/#django.test.override_settings">override_settings</a>, and captured for test assertions with
+<a href="https://markus.readthedocs.io/en/latest/testing.html">MetricsMock</a>. For example:</p>
+<pre><code class="language-python">from django.test import TestCase, override_settings
+
+from markus.testing import MetricsMock
+
+from shepherd.utils import incr_if_enabled
+
+
+def code_that_emits_metric() -&gt; int:
+    incr_if_enabled(&quot;code_called&quot;)
+    return 1
+
+
+class CodeTest(TestCase):
+    @override_settings(STATSD_ENABLED=True)
+    def test_code(self) -&gt; None:
+        with MetricsMock() as mm:
+            assert code_that_emits_metric() == 1
+
+        mm.assert_incr_once(&quot;shepherd.code_called&quot;)
+</code></pre>
+<p>When testing, note that the <code>STATSD_PREFIX</code> (default <code>&quot;shepherd&quot;</code>) is
+in the emitted metric name, so in this example, the test is looking for
+<code>&quot;shepherd.code_called&quot;</code>, not <code>&quot;code_called&quot;</code>.</p>
+<p><code>MetricsMock</code> has other useful helper methods, such as
+<a href="https://markus.readthedocs.io/en/latest/testing.html#markus.testing.MetricsMock.print_records">print_records()</a> to see all captured metrics. This can help
+when determining what metrics code is emitting.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="statsd-client-library-for-shepherd"><a class="header" href="#statsd-client-library-for-shepherd">StatsD Client Library for Shepherd</a></h1>
 <ul>
 <li>Status: Accepted</li>
