@@ -1,0 +1,361 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Shepherd Metrics - Shepherd Book</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../intro.html">Setup</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="../UserGuide.html"><strong aria-hidden="true">1.</strong> User Guide</a></li><li class="chapter-item affix "><li class="part-title">ADR</li><li class="chapter-item expanded "><a href="../adr/0000-metrics-client-for-shepherd.html" class="active"><strong aria-hidden="true">2.</strong> Shepherd Metrics</a></li><li class="chapter-item affix "><li class="part-title">Scripts</li><li class="chapter-item "><a href="../recoveryScript.html"><strong aria-hidden="true">3.</strong> Recovery Script</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Shepherd Book</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="statsd-client-library-for-shepherd"><a class="header" href="#statsd-client-library-for-shepherd">StatsD Client Library for Shepherd</a></h1>
+<ul>
+<li>Status: Accepted</li>
+<li>Deciders: <a href="https://github.com/taddes">@taddes</a>, <a href="https://github.com/tiftran">@tiftran</a>, <a href="https://github.com/ncloudioj">@ncloudioj</a></li>
+<li>Date: 2023-05-30</li>
+</ul>
+<h2 id="context-and-problem-statement"><a class="header" href="#context-and-problem-statement">Context and Problem Statement</a></h2>
+<p>Shepherd is currently a minimal Django Admin application used to create and publish snapshots of advertiser settings of Sponsored Tiles. The recent expansion of the service through the Project Honeycomb: Share-of-Voice epic <a href="https://mozilla-hub.atlassian.net/browse/DISCO-2290">DISCO-2290</a> along with moving to a developer-driven Continuous Deployment model <a href="https://mozilla-hub.atlassian.net/browse/DISCO-2208">DISCO-2208</a> necessitated discussion around application metrics and observability. Up to this point, we did not have any information to analyze Shepherd's internal state pre or post deploy aside from automated testing and manual testing.</p>
+<h2 id="decision-drivers"><a class="header" href="#decision-drivers">Decision Drivers</a></h2>
+<ol>
+<li>Easy to implement, provides necessary features. </li>
+<li>Does not require excessive customization to Shepherd that hinders current/future development.</li>
+<li>Works well with synchronous Python web frameworks (Shepherd is using Django).</li>
+<li>Has precedent of effective usage (is used at Mozilla by other teams with more mature Django applications).</li>
+<li>Good documentation, engagement, and maintenance with broader community.</li>
+<li>Easy testing (plus if testing/mocking framework provided). </li>
+<li>Fits into Rapid Release Model strategy — specifically, using the same libraries and frameworks across similarly shaped services owned by the same team.</li>
+</ol>
+<h2 id="considered-options"><a class="header" href="#considered-options">Considered Options</a></h2>
+<ul>
+<li>A. Markus <a href="https://pypi.org/project/markus/">PyPI</a></li>
+<li>B. Prometheus <a href="https://pypi.org/project/prometheus-client/">PyPI</a></li>
+<li>C. statsd (pystatsd) <a href="https://pypi.org/project/statsd/">PyPI</a></li>
+<li>D. aiodogstatsd <a href="https://pypi.org/project/aiodogstatsd/">PyPI</a></li>
+</ul>
+<h2 id="decision-outcome"><a class="header" href="#decision-outcome">Decision Outcome</a></h2>
+<p>Chosen option:</p>
+<ul>
+<li>A. Markus</li>
+</ul>
+<p>Markus essentially meets all our required needs with a number of significant features that provide great benefit. </p>
+<p>Most StatsD libraries are not excessively complicated, in that the core functions of calling an increment, gauge, timer and histogram.  Markus matches this need with added flexibility, in that you can define tags and filters when calling a given metric and define backends.</p>
+<p>Even though aiodogstatsd is used in Merino and we'd like to aim to use the same library across services, it is not the appropriate choice for Shepherd. We do not require asynchronous features. Since Merino runs on FastAPI, an asynchronous web-framework and Shepherd runs on Django, a synchronous web-framework, each respective choice is dictated by the architecture and service's needs. </p>
+<p>As a side note, aiodogstatsd is harder to test and has significantly fewer features than Markus when testing is concerned. This could hamper maintenance and development efficiency. </p>
+<p>Example:</p>
+<p>To return a MetricsInterface instance (with a specified prefix):</p>
+<pre><code class="language-python">get_metrics(&quot;shepherd&quot;)
+markus.get_metrics(thing='', extra='', filters=None)
+</code></pre>
+<p><code>thing</code> is a prefix to use for keys 
+<code>extra</code> adds bits to end of prefix
+<code>filters</code>, list of filters to apply</p>
+<p><strong><a href="https://markus.readthedocs.io/en/latest/backends.html">Backends</a></strong> - A significant feature Markus has over other libraries is the ability to define metrics backends. It comes with the <code>LoggingMetrics</code>, <code>LoggingRollupMetrics</code>, <code>StatsdMetrics</code>, <code>DatadogMetrics</code>, <code>CloudwatchMetrics</code> by default, handling numerous configuration optimizations. You can also define your own backend.</p>
+<p>Example:</p>
+<p>Define <code>markus.configure()</code> and append backends, passing backends parameter as list of dicts. Each dict defines a backend. Can do datadog and logger configs, for example.  Each backend has a class argument, options dict for configuration, filters list to apply to emitted metrics:</p>
+<ol>
+<li>Configure Markus’ backends using <code>markus.configure()</code>.</li>
+<li>For each Python module or class or however you want to organize it, you use <code>markus.get_metrics()</code> to get a <code>markus.main.MetricsInterface</code>.</li>
+<li>Use the various metrics reporting methods on the <code>markus.main.MetricsInterface</code>.</li>
+</ol>
+<pre><code class="language-python">import markus
+from markus.filters import AddTagFilter
+
+markus.configure([
+    {
+        &quot;class&quot;: &quot;markus.backends.logging.LoggingMetrics&quot;,
+        &quot;options&quot;: {
+            &quot;logger_name&quot;: &quot;markus&quot;,
+            &quot;leader&quot;: &quot;METRICS&quot;,
+        }
+    }
+])
+</code></pre>
+<p><strong><a href="https://markus.readthedocs.io/en/latest/filters.html">Filters</a></strong> - Markus lets you write filters to modify generated metrics on the fly. This allows infinite customization to drop or modify metric values before they are emitted.</p>
+<pre><code class="language-python">class DebugFilter(MetricsFilter):
+    def filter(self, record):
+        if &quot;debug:true&quot; in record.tags:
+            return
+        return record
+</code></pre>
+<h3 id="positive-consequences"><a class="header" href="#positive-consequences">Positive Consequences</a></h3>
+<ul>
+<li>Quality of metrics customizations mean significant control of what metrics we want to emit.</li>
+<li>Built-in DogStatsD through backend.</li>
+<li>Lines up perfectly with our deployed infrastructure in Docker/Kubernetes (Telegraf &amp; InfluxDB)</li>
+<li>High quality library and documentation mean an ease of development and maintenance.</li>
+<li>Backend configuration and filters mean fine-tuning of our metrics.</li>
+<li>Fast development time for minimal use cases.</li>
+</ul>
+<h3 id="negative-consequences"><a class="header" href="#negative-consequences">Negative Consequences</a></h3>
+<ul>
+<li>None that come to mind, there are other viable alternatives but Markus seems to fit our needs very well.</li>
+<li>Possibly that Markus is a new and different library from say aiodogstatsd, which is used in Merino. However, that is an async library and it has several drabacks compared to Markus for our use case.</li>
+</ul>
+<h2 id="pros-and-cons-of-the-options"><a class="header" href="#pros-and-cons-of-the-options">Pros and Cons of the Options</a></h2>
+<h3 id="markus"><a class="header" href="#markus">Markus</a></h3>
+<p><a href="https://markus.readthedocs.io/en/latest/">Docs</a></p>
+<p><a href="https://pypi.org/project/markus/">PyPI</a></p>
+<p><a href="https://github.com/willkg/markus">GitHub Repo</a></p>
+<h4 id="pros"><a class="header" href="#pros">Pros</a></h4>
+<ul>
+<li>Used by several teams managing robust and large Django apps (fx-private-relay, mdn, etc)</li>
+<li>Very easy to use.</li>
+<li>Allows configuration of multiple backends to process metrics emissions. </li>
+<li>Filters for individual metrics.</li>
+<li>Highly customizable. </li>
+<li>Exceptional documentation with great examples.</li>
+<li>Included test class for mocking metrics emissions, backends and pre-built assertions. Excellent testing docs.</li>
+<li>Core maintainer a Mozillian (willkg)</li>
+<li>Active maintenance and support.</li>
+</ul>
+<h4 id="cons"><a class="header" href="#cons">Cons</a></h4>
+<ul>
+<li>Different from other used libraries</li>
+<li>Takes a little time to get up to speed, but still easy to understand.</li>
+</ul>
+<h3 id="prometheus"><a class="header" href="#prometheus">Prometheus</a></h3>
+<p><a href="https://prometheus.io/">Docs</a></p>
+<p><a href="https://pypi.org/project/prometheus-client/">PyPI</a></p>
+<p><a href="https://github.com/prometheus/client_python">GitHub Repo</a></p>
+<h4 id="pros-1"><a class="header" href="#pros-1">Pros</a></h4>
+<ul>
+<li>Widely used in Django community.</li>
+<li>High quality documentation.</li>
+<li>A lot of possible customization, especially for Django.</li>
+</ul>
+<h4 id="cons-1"><a class="header" href="#cons-1">Cons</a></h4>
+<ul>
+<li>Some Mozillians advised against usage due to difficulty to set up and maintain.</li>
+<li>Cumbersome as you have to import each metric class individually to call.</li>
+<li>An open-source monitoring solution that we as an organization are not using. Some vertical integration needed to get full benefit.</li>
+<li>Supposedly some difficulty in configuring with our existing infrastructure.</li>
+<li>A little bit too complicated for our use case.</li>
+</ul>
+<h3 id="statsd-pystatsd"><a class="header" href="#statsd-pystatsd">statsd (pystatsd)</a></h3>
+<p><a href="https://statsd.readthedocs.io/en/latest/index.html">Docs</a></p>
+<p><a href="https://pypi.org/project/statsd/">PyPI</a></p>
+<p><a href="https://github.com/jsocol/pystatsd">GitHub Repo</a></p>
+<h4 id="pros-2"><a class="header" href="#pros-2">Pros</a></h4>
+<ul>
+<li>Excellent documentation.</li>
+<li>Good Django support and instructions for configuration.</li>
+<li>Active community and contribution.</li>
+<li>Basic, no frills.</li>
+</ul>
+<h4 id="cons-2"><a class="header" href="#cons-2">Cons</a></h4>
+<ul>
+<li>No testing framework, have to write totally custom tests without mocking or test classes built-in. </li>
+<li>No provided backend configurations.</li>
+<li>A bit too simplistic and lacking in features.</li>
+<li>Somewhat cumbersome when dealing with specific customizations.</li>
+</ul>
+<h3 id="aiodogstatsd"><a class="header" href="#aiodogstatsd">aiodogstatsd</a></h3>
+<p><a href="https://gr1n.github.io/aiodogstatsd/usage/">Docs</a></p>
+<p><a href="https://pypi.org/project/aiodogstatsd/">PyPI</a></p>
+<p><a href="https://github.com/Gr1N/aiodogstatsd">GitHub Repo</a></p>
+<h4 id="pros-3"><a class="header" href="#pros-3">Pros</a></h4>
+<ul>
+<li>Already used in Merino.</li>
+<li>Fairly self-evident implementation.</li>
+</ul>
+<h4 id="cons-3"><a class="header" href="#cons-3">Cons</a></h4>
+<ul>
+<li>Designed for asynchronous applications and Django is not an asynchronous app. Don't really require those features.</li>
+<li>Uses port 9125 by default and differs from the default StatsD implementation (can be modified, of course).</li>
+<li>Documentation is very scant, examples are limited.</li>
+<li>Does not include a test class or framework, test documentation nonexistent.</li>
+<li>Smaller team of maintainers and contributors. (last commit Dec 12, 2021).</li>
+</ul>
+<h2 id="links"><a class="header" href="#links">Links</a></h2>
+<ul>
+<li><a href="https://thenewstack.io/collecting-metrics-using-statsd-a-standard-for-real-time-monitoring/">Collecting Metrics Using StatsD, a Standard for Real-Time Monitoring </a></li>
+<li><a href="https://github.com/statsd">Statsd - Original Protocol GitHub</a></li>
+<li><a href="https://docs.datadoghq.com/developers/dogstatsd/?tab=hostagent">DogStatsD</a></li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../UserGuide.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="../recoveryScript.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../UserGuide.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="../recoveryScript.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+    </body>
+</html>
