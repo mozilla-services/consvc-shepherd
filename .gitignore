@@ -137,3 +137,8 @@ dmypy.json
 
 # DB Synchronization Stamps
 .install.stamp
+
+# Docs Stuff
+book/
+mermaid-init.js
+mermaid.min.js
