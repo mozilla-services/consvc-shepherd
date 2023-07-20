@@ -11,6 +11,8 @@ metrics = ShepherdMetrics("shepherd")
 class AdUrlInlineForm(forms.ModelForm):
     """Model Form Ad Url Inline Form Model."""
 
+    path = forms.CharField(initial="/")
+
     class Meta:
         """Meta class for AdvertiserUrl AdUrlInlineForm."""
 
