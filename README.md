@@ -1,4 +1,5 @@
-# Contextual Services Shepherd
+# Contextual Services Shepherd [![CircleCI](https://dl.circleci.com/status-badge/img/gh/mozilla-services/consvc-shepherd/tree/main.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/mozilla-services/consvc-shepherd/tree/main)
+
 
 ## Service Overview
 
