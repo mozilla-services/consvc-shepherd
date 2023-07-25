@@ -1,8 +1,9 @@
 # Summary
 
-[Setup](./intro.md)
+[Service Overview](./intro.md)
 
 # Docs
+- [Quick Start](./quickStart.md)
 - [User Guide](./UserGuide.md)
 - [Metrics](./metrics.md)
 
