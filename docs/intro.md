@@ -10,6 +10,19 @@ Once changes have been made and the user is ready to have these changes be effec
 
 In the future there are plans to expand Shepherd's capabilities so that it can handle broader advertising campaign needs across various services.
 
+## Architecture
+```mermaid
+flowchart LR
+    AdopsUser[\fa:fa-user AdOps User/] --> Shep(Shepherd) --> DB[Postgres DB]
+    Shep --> GCP[Google Cloud JSON]
+    GCP --> Contile{Contile}
+    Contile --> Firefox{Firefox}
+    Firefox -->|Tile One| Tab[New Tab]
+    Firefox -->|Tile Two| Tab
+    Firefox -->|Tile Three| Tab
+    Tab --> FirefoxUser[\fa:fa-user Firefox User/]
+```
+
 ### Shepherd Service URLs:
 
 Dev: https://shepherd-dev.topsites.nonprod.cloudops.mozgcp.net/admin
