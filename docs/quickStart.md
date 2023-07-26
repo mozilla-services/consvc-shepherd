@@ -1,12 +1,13 @@
 # Quick Start Development Guide
 
-To use consvc-shepherd, you'll need a Python 3.11 development environment and
-Poetry installed. To achieve this, it is recommended you use a Python virtual environment.
+To use consvc-shepherd, you'll need a Python 3.11 development environment and Poetry installed.
+To achieve this, it is recommended you use a Python virtual environment.
 
-venv is a viable option, but for ease you can use pyenv-virtualenv as a plugin for
-pyenv and virtual environments. Using virtualenv creates a `.python-version` file  in the project
-directory and if you add `eval "$(pyenv virtualenv-init -)"` to your  `./bashrc` or `./zshrc`,
-the environment will automatically be activated. See the [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv)
+`venv` is a viable option, but for ease you can use `pyenv-virtualenv` as a plugin for `pyenv` and virtual environments.
+Using `virtualenv` creates a `.python-version` file  in the project directory.
+If you add `eval "$(pyenv virtualenv-init -)"` to your  `./bashrc` or `./zshrc`,
+the environment will automatically be activated.
+See the [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv)
 documentation for more information.
 
 Ex:
@@ -16,18 +17,19 @@ eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 ```
 
-You also need to ensure you have Postgres installed. You can select a distribution from
-[https://www.postgresql.org/download/](https://www.postgresql.org/download/), use homebrew
-or their EDB installer client.  Make sure to install version 14.7, or equivalent, and have
-it running when developing for consvc-shepherd.
+You also need to ensure you have Postgres installed.
+You can select a distribution from [https://www.postgresql.org/download/](https://www.postgresql.org/download/),
+use homebrew or their EDB installer client.
+Make sure to install version 14.7, or equivalent, and have it running when developing for consvc-shepherd.
 
 You'll want to make sure configuration files in the `.env` file match your database setup,
-configuring the database name, user, host and password variables. See below for details.
+configuring the database name, user, host and password variables.
 You can configure the database using pgAdmin, cli or configuration files.
+See below for details.
 
-You'll need to specify some minimal configuration. Create a file `.env` and put the
-following variables in it at least, if using the docker workflow. The simplest way is to
-use `.env.example` and rename it to `env`:
+You'll need to specify some minimal configuration.
+Create a file `.env` and put the following variables in it at least, if using the docker workflow.
+The simplest way is to use `.env.example` and rename it to `env`:
 
 ```shell
 $ mv .env.example .env
@@ -84,8 +86,8 @@ $ ./manage.py runserver
 $ ./manage.py runserver localhost:8001
 ```
 
-This will start a development server that reloads on changes to the files. You
-can access the configuration part of the site at
+This will start a development server that reloads on changes to the files.
+You can access the configuration part of the site at:
 `[http://localhost:8000/admin](http://localhost:8000/admin).`
 
 ### Docker set up
