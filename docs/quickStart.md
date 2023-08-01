@@ -1,14 +1,12 @@
 # Quick Start Development Guide
 
-To use consvc-shepherd, you'll need a Python 3.11 development environment and Poetry installed.
-To achieve this, it is recommended you use a Python virtual environment.
+To use consvc-shepherd, you'll need a Python 3.11 development environment with Poetry installed and Docker.
 
-`venv` is a viable option, but for ease you can use `pyenv-virtualenv` as a plugin for `pyenv` and virtual environments.
-Using `virtualenv` creates a `.python-version` file  in the project directory.
-If you add `eval "$(pyenv virtualenv-init -)"` to your  `./bashrc` or `./zshrc`,
-the environment will automatically be activated.
-See the [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv)
-documentation for more information.
+It is recommended to use `pyenv` and the `pyenv-virtualenv` plugin your virtual environments.
+1. Install `pyenv` using the [latest documentation](https://github.com/pyenv/pyenv#installation) for your platform.
+2. Follow the instructions to install the `pyenv-virtualenv` plugin.
+See the [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv) documentation.
+3. Ensure you've added `pyenv` and `pyenv-virtualenv` to your PATH.
 
 Ex:
 ```shell
@@ -17,19 +15,10 @@ eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 ```
 
-You also need to ensure you have Postgres installed.
-You can select a distribution from [https://www.postgresql.org/download/](https://www.postgresql.org/download/),
-use homebrew or their EDB installer client.
-Make sure to install version 14.7, or equivalent, and have it running when developing for consvc-shepherd.
-
-You'll want to make sure configuration files in the `.env` file match your database setup,
-configuring the database name, user, host and password variables.
-You can configure the database using pgAdmin, cli or configuration files.
-See below for details.
-
-You'll need to specify some minimal configuration.
-Create a file `.env` and put the following variables in it at least, if using the docker workflow.
-The simplest way is to use `.env.example` and rename it to `env`:
+4. To run consvc-shepherd, you'll need to specify some minimal configurations.
+Use the existing `.env.example` and rename it to `env`.
+You'll want to make sure configuration files in the `.env` file match your database setup, configuring the database name, user, host and password variables.
+It should appear as follows:
 
 ```shell
 $ mv .env.example .env
@@ -39,65 +28,43 @@ DEBUG=true
 SECRET_KEY=keyboard-mash
 DB_NAME=postgres
 DB_USER=postgres
-DB_HOST=localhost
-DB_PASS=
+DB_HOST=db
+DB_PASS=postgres
 ```
 
-Then, set up your virtual environment:
+5. Set up and enable your virtual environment:
 
 ```shell
-# Prepare a virtual environment (customize this as you see fit).
-
 # pyenv verison install
 $ pyenv install 3.11
 
 # pyenv virtualenv
 $ pyenv virtualenv 3.11 shepherd # or whatever project name you like.
-$ pyenv local shepherd
+$ pyenv local shepherd # enables virtual env when you enter directory. 
 
-# venv
-$ python -m venv .venv
-$ source .venv/bin/activate
+# Install dependencies
+$ pip install poetry
+$ poetry install
 ```
-Install your dependencies:
+
+6. Install your dependencies:
 ```shell
 $ poetry install
 ```
 
-With your environment ready, you can set up the Django site:
+7. [Install Docker](https://docs.docker.com/engine/install/) if not already installed.
+
+8. Build the Docker image and start the container:
 ```shell
-# Set up Django
-$ ./manage.py migrate
-$ ./manage.py createsuperuser
-```
-
-After that is done, you can run the development server:
-```shell
-# Activate the virtualenv, if not already active:
-# pyenv virtualenv 
-$ pyenv local shepherd
-# venv
-$ source .venv/bin/activate
-
-# Start the app:
-$ ./manage.py runserver
-
-# To run on alternate port if in use:
-$ ./manage.py runserver localhost:8001
-```
-
-This will start a development server that reloads on changes to the files.
-You can access the configuration part of the site at:
-`[http://localhost:8000/admin](http://localhost:8000/admin).`
-
-### Docker set up
-
-Start with building and get it up with:
-```
 docker compose build
 docker compose up
 ```
-To create a user, shell into the container and run
-``` 
-./manage.py createsuperuser
+
+The application will then be accessible at the following url: [http://0.0.0.0:7001/](http://0.0.0.0:7001/). The admin panel is available at [http://0.0.0.0:7001/admin](http://0.0.0.0:7001/admin)
+
+9. Create a super user by shelling into the container. Run the following:
+``` shell
+docker ps # capture container id for consvc-shepherd
+docker exec -it <CONTAINER ID> sh # interactive mode
+./manage.py createsuperuser # follow directions to create superuser
 ```

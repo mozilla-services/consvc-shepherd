@@ -18,17 +18,16 @@ Contile will then pick up these changes in one of its 5 minute periodic check of
 ## Architecture
 ```mermaid
 flowchart LR
-    AdopsUser[\fa:fa-user AdOps User/] --> Shep(Shepherd) --> DB[(Postgres DB)]
-    Shep --> GCP[Google Cloud JSON]
-    GCP --> Contile{Contile}
+    AdopsUser[\fa:fa-user AdOps User/] --> |Update allocation &<br/>settings snapshots| Shep(Shepherd) --> DB[(Postgres DB)]
+    Shep --> |Validated JSON snapshot<br/>sent to GC bucket for access.| GCP[Google Cloud JSON]
+    GCP -..- |Periodic sync for<br/>tile information| Contile{Contile}
     Contile -->|API request to get tiles| Firefox{Firefox}
 subgraph Firefox[fa:fa-firefox Firefox]
         Tab[New Tab] 
 end
 
-Tab --> FirefoxUser[\fa:fa-user Firefox User/]
+Tab --> |Display advertising<br/>tiles in new tab| FirefoxUser[\fa:fa-user Firefox User/]
 FirefoxUser[\fa:fa-user Firefox User/]
-
 ```
 
 ## Datastores
