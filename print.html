@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item affix "><a href="intro.html">Setup</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="UserGuide.html"><strong aria-hidden="true">1.</strong> User Guide</a></li><li class="chapter-item "><a href="metrics.html"><strong aria-hidden="true">2.</strong> Metrics</a></li><li class="chapter-item affix "><li class="part-title">ADR</li><li class="chapter-item "><a href="adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">3.</strong> Shepherd Metrics</a></li><li class="chapter-item affix "><li class="part-title">Scripts</li><li class="chapter-item "><a href="recoveryScript.html"><strong aria-hidden="true">4.</strong> Recovery Script</a></li></ol>
+                <ol class="chapter"><li class="chapter-item affix "><a href="intro.html">Service Overview</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="quickStart.html"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="UserGuide.html"><strong aria-hidden="true">2.</strong> User Guide</a></li><li class="chapter-item "><a href="metrics.html"><strong aria-hidden="true">3.</strong> Metrics</a></li><li class="chapter-item affix "><li class="part-title">ADR</li><li class="chapter-item "><a href="adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">4.</strong> Shepherd Metrics</a></li><li class="chapter-item affix "><li class="part-title">Scripts</li><li class="chapter-item "><a href="recoveryScript.html"><strong aria-hidden="true">5.</strong> Recovery Script</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -143,32 +143,59 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="contextual-services-shepherd"><a class="header" href="#contextual-services-shepherd">Contextual Services Shepherd</a></h1>
-<p>This is a tool to manage dynamic settings for Contextual Services projects like
-Merino and Contile. The settings managed here can be changed at runtime,
-reducing the need for deployments of the services that use it.</p>
-<h2 id="quick-start"><a class="header" href="#quick-start">Quick Start</a></h2>
-<p>To use consvc-shepherd, you'll need a Python 3.11 development environment and
-Poetry installed. To achieve this, it is recommended you use a Python virtual environment.</p>
-<p>venv is a viable option, but for ease you can use pyenv-virtualenv as a plugin for
-pyenv and virtual environments. Using virtualenv creates a <code>.python-version</code> file  in the project
-directory and if you add <code>eval &quot;$(pyenv virtualenv-init -)&quot;</code> to your  <code>./bashrc</code> or <code>./zshrc</code>,
-the environment will automatically be activated. See the <a href="https://github.com/pyenv/pyenv-virtualenv">pyenv-virtualenv</a>
-documentation for more information.</p>
+<h2 id="service-overview"><a class="header" href="#service-overview">Service Overview</a></h2>
+<p>Shepherd is a Django application that allows users to make changes to Contile's advertising settings without redeploying Contile.
+The settings managed here can be changed at runtime, eliminating the need for deployments of the services that use it.</p>
+<p>Within Shepherd, users can make changes to Advertising Partners.
+A given Partner can have multiple advertisers in numerous geolocations, each with their own distinct domain.
+Users can also define partner allocation percentages for each tile position.
+This means that given each Contile tile position, you can set the percentage of impressions that will show from each partner.</p>
+<p>Once changes have been made and the user is ready to have these changes be effective in production, a user can create a “Snapshot.”
+This records the settings and its values at that given point in time in the form of JSON.
+Once published, Shepherd uploads a JSON file to Google Cloud Storage.
+Contile will then pick up these changes in one of its 5 minute periodic check of the Google Cloud Storage bucket for an updated json file.</p>
+<h2 id="architecture"><a class="header" href="#architecture">Architecture</a></h2>
+<pre class="mermaid">flowchart LR
+    AdopsUser[\fa:fa-user AdOps User/] --&gt; |Update allocation &amp;&lt;br/&gt;settings snapshots| Shep(Shepherd) --&gt; DB[(Postgres DB)]
+    Shep --&gt; |Validated JSON snapshot&lt;br/&gt;sent to GC bucket for access.| GCP[Google Cloud JSON]
+    GCP -..- |Periodic sync for&lt;br/&gt;tile information| Contile(Contile)
+    Contile --&gt;|API request to get tiles| Firefox{Firefox}
+subgraph Firefox[fa:fa-firefox Firefox]
+        Tab[New Tab] 
+end
+
+Tab --&gt; |Display advertising&lt;br/&gt;tiles in new tab| FirefoxUser[\fa:fa-user Firefox User/]
+FirefoxUser[\fa:fa-user Firefox User/]
+</pre>
+<h2 id="datastores"><a class="header" href="#datastores">Datastores</a></h2>
+<p>Shepherd's main datastore is a Postgres database that stores all partners, advertisers and snapshots.</p>
+<p>All snapshots are uploaded as a JSON file to a Google Cloud bucket.
+A pre-defined JSON schema validates the snapshot output prior to sending the snapshot to Google Cloud.
+From there, Contile accesses the settings from the uploaded JSON file to serve Firefox users the correct advertising tiles in each new tab.</p>
+<h2 id="shepherd-service-urls"><a class="header" href="#shepherd-service-urls">Shepherd Service URLs:</a></h2>
+<p>Dev: https://shepherd-dev.topsites.nonprod.cloudops.mozgcp.net/admin/</p>
+<p>Stage: https://shepherd-stage.topsites.nonprod.cloudops.mozgcp.net/admin/</p>
+<p>Prod: https://shepherd.services.mozilla.com/admin/</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="quick-start-development-guide"><a class="header" href="#quick-start-development-guide">Quick Start Development Guide</a></h1>
+<p>To use consvc-shepherd, you'll need a Python 3.11 development environment with Poetry installed and Docker.</p>
+<p>It is recommended to use <code>pyenv</code> and the <code>pyenv-virtualenv</code> plugin your virtual environments.</p>
+<ol>
+<li>Install <code>pyenv</code> using the <a href="https://github.com/pyenv/pyenv#installation">latest documentation</a> for your platform.</li>
+<li>Follow the instructions to install the <code>pyenv-virtualenv</code> plugin.
+See the <a href="https://github.com/pyenv/pyenv-virtualenv">pyenv-virtualenv</a> documentation.</li>
+<li>Ensure you've added <code>pyenv</code> and <code>pyenv-virtualenv</code> to your PATH.</li>
+</ol>
 <p>Ex:</p>
 <pre><code class="language-shell">export PATH=&quot;$HOME/.pyenv/bin:$PATH&quot;
 eval &quot;$(pyenv init -)&quot;
 eval &quot;$(pyenv virtualenv-init -)&quot;
 </code></pre>
-<p>You also need to ensure you have Postgres installed. You can select a distribution from
-<a href="https://www.postgresql.org/download/">https://www.postgresql.org/download/</a>, use homebrew
-or their EDB installer client.  Make sure to install version 14.7, or equivalent, and have
-it running when developing for consvc-shepherd.</p>
-<p>You'll want to make sure configuration files in the <code>.env</code> file match your database setup,
-configuring the database name, user, host and password variables. See below for details.
-You can configure the database using pgAdmin, cli or configuration files.</p>
-<p>You'll need to specify some minimal configuration. Create a file <code>.env</code> and put the
-following variables in it at least, if using the docker workflow. The simplest way is to
-use <code>.env.example</code> and rename it to <code>env</code>:</p>
+<ol start="4">
+<li>To run consvc-shepherd, you'll need to specify some minimal configurations.
+Use the existing <code>.env.example</code> and rename it to <code>env</code>.
+You'll want to make sure configuration files in the <code>.env</code> file match your database setup, configuring the database name, user, host and password variables.
+It should appear as follows:</li>
+</ol>
 <pre><code class="language-shell">$ mv .env.example .env
 
 # Variables to set in file
@@ -176,54 +203,46 @@ DEBUG=true
 SECRET_KEY=keyboard-mash
 DB_NAME=postgres
 DB_USER=postgres
-DB_HOST=localhost
-DB_PASS=
+DB_HOST=db
+DB_PASS=postgres
 </code></pre>
-<p>Then, set up your virtual environment:</p>
-<pre><code class="language-shell"># Prepare a virtual environment (customize this as you see fit).
-
-# pyenv verison install
+<ol start="5">
+<li>Set up and enable your virtual environment:</li>
+</ol>
+<pre><code class="language-shell"># pyenv version install
 $ pyenv install 3.11
 
 # pyenv virtualenv
 $ pyenv virtualenv 3.11 shepherd # or whatever project name you like.
-$ pyenv local shepherd
+$ pyenv local shepherd # enables virtual env when you enter directory. 
 
-# venv
-$ python -m venv .venv
-$ source .venv/bin/activate
+# Install dependencies
+$ pip install poetry
+$ poetry install
 </code></pre>
-<p>Install your dependencies:</p>
+<ol start="6">
+<li>Install your dependencies:</li>
+</ol>
 <pre><code class="language-shell">$ poetry install
 </code></pre>
-<p>With your environment ready, you can set up the Django site:</p>
-<pre><code class="language-shell"># Set up Django
-$ ./manage.py migrate
-$ ./manage.py createsuperuser
-</code></pre>
-<p>After that is done, you can run the development server:</p>
-<pre><code class="language-shell"># Activate the virtualenv, if not already active:
-# pyenv virtualenv 
-$ pyenv local shepherd
-# venv
-$ source .venv/bin/activate
-
-# Start the app:
-$ ./manage.py runserver
-
-# To run on alternate port if in use:
-$ ./manage.py runserver localhost:8001
-</code></pre>
-<p>This will start a development server that reloads on changes to the files. You
-can access the configuration part of the site at
-<code>[http://localhost:8000/admin](http://localhost:8000/admin).</code></p>
-<h3 id="docker-set-up"><a class="header" href="#docker-set-up">Docker set up</a></h3>
-<p>Start with building and get it up with:</p>
-<pre><code>docker compose build
+<ol start="7">
+<li>
+<p><a href="https://docs.docker.com/engine/install/">Install Docker</a> if not already installed.</p>
+</li>
+<li>
+<p>Build the Docker image and start the container:</p>
+</li>
+</ol>
+<pre><code class="language-shell">docker compose build
 docker compose up
 </code></pre>
-<p>To create a user, shell into the container and run</p>
-<pre><code>./manage.py createsuperuser
+<p>The application will then be accessible at the following url: <a href="http://0.0.0.0:7001/">http://0.0.0.0:7001/</a>. The admin panel is available at <a href="http://0.0.0.0:7001/admin">http://0.0.0.0:7001/admin</a></p>
+<ol start="9">
+<li>Create a super user by shelling into the container. Run the following:</li>
+</ol>
+<pre><code class="language-shell">docker ps # capture container id for consvc-shepherd
+docker exec -it &lt;CONTAINER ID&gt; sh # interactive mode
+./manage.py createsuperuser # follow directions to create superuser
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="shepherd-user-guide"><a class="header" href="#shepherd-user-guide">Shepherd User Guide</a></h1>
 <h2 id="shepherd-urls"><a class="header" href="#shepherd-urls">Shepherd URLs:</a></h2>
@@ -248,7 +267,8 @@ docker compose up
 <p><em>For access please ask someone on the Engineering Team. For engineers, ask to be given superuser privileges. For ad operations ask to be added to the 'AdOps' Django group</em></p>
 <h2 id="using-shepherd"><a class="header" href="#using-shepherd">Using Shepherd</a></h2>
 <h3 id="adding-partners"><a class="header" href="#adding-partners">Adding Partners</a></h3>
-<p>This is restricted to the Content Discovery Engineering team. From the main admin page, under the Contile subsection click the 
+<p>This is restricted to the Content Discovery Engineering team. 
+From the main admin page, under the Contile subsection click the 
 add Partners button. Type in name of partner and click save.</p>
 <h3 id="adding-advertisers"><a class="header" href="#adding-advertisers">Adding Advertisers</a></h3>
 <p>From the main admin page under the Contile subsection:</p>
@@ -285,7 +305,8 @@ Correct them and hit save again. </li>
 </ul>
 </li>
 </ol>
-<p><em>Note that Shepherd is unable to undo snapshots, if changes need to be undone, one would have to manually revert the advertiser information and create a new snapshot.
+<p><em>Note that Shepherd is unable to undo snapshots. 
+If changes need to be undone, one would have to manually revert the advertiser information and create a new snapshot.
 For complex reverts, please contact the engineering team.</em></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="shepherd-metrics"><a class="header" href="#shepherd-metrics">Shepherd Metrics</a></h1>
 <p>This documentation describes the statsd-style metrics emitted by consvc_shepherd.</p>
