@@ -18,7 +18,8 @@
 ## Using Shepherd
 
 ### Adding Partners
-This is restricted to the Content Discovery Engineering team. From the main admin page, under the Contile subsection click the 
+This is restricted to the Content Discovery Engineering team. 
+From the main admin page, under the Contile subsection click the 
 add Partners button. Type in name of partner and click save.
 
 ### Adding Advertisers
@@ -43,5 +44,6 @@ Click the Add buttons for Settings snapshots under CONSVC_SHEPHERD:
 5. Select “Publish Settings Snapshot” from the actions dropdown and click “Go”.
    * A green status bar should appear at the top of the page stating the snapshot has been published.
 
-*Note that Shepherd is unable to undo snapshots, if changes need to be undone, one would have to manually revert the advertiser information and create a new snapshot.
+*Note that Shepherd is unable to undo snapshots. 
+If changes need to be undone, one would have to manually revert the advertiser information and create a new snapshot.
 For complex reverts, please contact the engineering team.*
