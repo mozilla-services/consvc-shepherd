@@ -20,7 +20,7 @@ Contile will then pick up these changes in one of its 5 minute periodic check of
 flowchart LR
     AdopsUser[\fa:fa-user AdOps User/] --> |Update allocation &<br/>settings snapshots| Shep(Shepherd) --> DB[(Postgres DB)]
     Shep --> |Validated JSON snapshot<br/>sent to GC bucket for access.| GCP[Google Cloud JSON]
-    GCP -..- |Periodic sync for<br/>tile information| Contile{Contile}
+    GCP -..- |Periodic sync for<br/>tile information| Contile(Contile)
     Contile -->|API request to get tiles| Firefox{Firefox}
 subgraph Firefox[fa:fa-firefox Firefox]
         Tab[New Tab] 

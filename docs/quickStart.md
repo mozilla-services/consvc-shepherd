@@ -35,7 +35,7 @@ DB_PASS=postgres
 5. Set up and enable your virtual environment:
 
 ```shell
-# pyenv verison install
+# pyenv version install
 $ pyenv install 3.11
 
 # pyenv virtualenv
