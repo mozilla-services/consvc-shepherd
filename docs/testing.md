@@ -11,16 +11,26 @@ Due to their narrow scope, unit tests are fundamental to thorough test coverage.
 Our test coverage minimum is set to 95%. 
 A coverage report is printed to the shell showing the test results and possible exceptions.
 
-To execute unit tests, use: `make test`
+Unit tests are written and executed with `pytest` and are located in the `consvc_shepherd/tests/`
+directory. The name of individual test files should match those of the files they are testing.
+Ex. `models.py` should be `test_models.py`. 
 
-Unit tests are written and executed with pytest and are located in the `consvc_shepherd/tests`
-directory.
+To execute unit tests, use: `make test`. By default, these tests run in CI during each push 
+to an active PR and during the merge process.
+
+## Testing a Django App
 
 Django provides a number of tools, API methods, and classes to test web and Django-specific behavior.
 These allow you to simulate requests, insert test data, and inspect your application's output.
+See the most recent [Django test docs][django-test-docs] for reference.
 
-All tests require you to import the `TestCase` base class from`django.test`.
-Any test class created should inherit from `TestCase`.
+To write a test, import the `TestCase` base class from`django.test` and pass it to your test class.
+This creates a clean database before tests are run and each test function is run in its own transaction.
+You can also use the `Client` from `django.test` to simulate user interactions at the view level.
+Any test class created should generally inherit from `TestCase`.
+
+Common set up and tear down methods are defined (as shown below), allowing you to pre-define forms,
+models and data for testing.
 
 For example:
 ```python
@@ -50,3 +60,5 @@ class MyTests(TestCase):
         ...
 
 ```
+
+[django-test-docs]: https://docs.djangoproject.com/en/4.2/topics/testing/tools/
