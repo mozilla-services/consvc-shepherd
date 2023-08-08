@@ -1,9 +1,9 @@
 ## Creating and Publishing a Snapshot
-Click the Add buttons for Settings snapshots under CONSVC_SHEPHERD:
+Click the Add buttons for Settings or Allocation settings snapshots under CONSVC_SHEPHERD:
 
 1. Input a name 
    * recommendation is to have the name relate to the changes done to the advertiser (ex. Added Advertiser X Y and Z or Added Black Friday URLs to X) The name has a 128 Character limit.
-2. Select settings type. At this time, this would be the Partner name.
+2. Select settings type. At this time, this would be the Partner name. *NOTE*: _This only applies to settings snapshots, allocation snapshots do not have a type field._
 3. Hit Save. A Snapshot has been saved. 
 4. To publish it, click the checkbox that corresponds to the snapshot. 
 5. Select “Publish Settings Snapshot” from the actions dropdown and click “Go”.
