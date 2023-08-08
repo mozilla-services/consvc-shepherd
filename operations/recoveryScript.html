@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Quick Start - Shepherd</title>
+        <title>Recover Snapshot - Shepherd</title>
 
 
         <!-- Custom HTML head -->
@@ -12,21 +12,21 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
 
-        <link rel="icon" href="favicon.svg">
-        <link rel="shortcut icon" href="favicon.png">
-        <link rel="stylesheet" href="css/variables.css">
-        <link rel="stylesheet" href="css/general.css">
-        <link rel="stylesheet" href="css/chrome.css">
-        <link rel="stylesheet" href="css/print.css" media="print">
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="fonts/fonts.css">
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="highlight.css">
-        <link rel="stylesheet" href="tomorrow-night.css">
-        <link rel="stylesheet" href="ayu-highlight.css">
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
@@ -34,7 +34,7 @@
     <body>
         <!-- Provide site root to javascript -->
         <script>
-            var path_to_root = "";
+            var path_to_root = "../";
             var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
         </script>
 
@@ -80,7 +80,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item affix "><a href="intro.html">Service Overview</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item expanded "><a href="quickStart.html" class="active"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="UserGuide.html"><strong aria-hidden="true">2.</strong> User Guide</a></li><li class="chapter-item "><a href="metrics.html"><strong aria-hidden="true">3.</strong> Metrics</a></li><li class="chapter-item "><a href="operations/index.html"><strong aria-hidden="true">4.</strong> Operations and Runbooks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="operations/rollback.html"><strong aria-hidden="true">4.1.</strong> Rollback</a></li><li class="chapter-item "><a href="operations/recoveryScript.html"><strong aria-hidden="true">4.2.</strong> Recover Snapshot</a></li></ol></li><li class="chapter-item "><li class="part-title">ADR</li><li class="chapter-item "><a href="adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">5.</strong> Shepherd Metrics</a></li></ol>
+                <ol class="chapter"><li class="chapter-item affix "><a href="../intro.html">Service Overview</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="../quickStart.html"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="../UserGuide.html"><strong aria-hidden="true">2.</strong> User Guide</a></li><li class="chapter-item "><a href="../metrics.html"><strong aria-hidden="true">3.</strong> Metrics</a></li><li class="chapter-item expanded "><a href="../operations/index.html"><strong aria-hidden="true">4.</strong> Operations and Runbooks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../operations/rollback.html"><strong aria-hidden="true">4.1.</strong> Rollback</a></li><li class="chapter-item expanded "><a href="../operations/recoveryScript.html" class="active"><strong aria-hidden="true">4.2.</strong> Recover Snapshot</a></li></ol></li><li class="chapter-item "><li class="part-title">ADR</li><li class="chapter-item "><a href="../adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">5.</strong> Shepherd Metrics</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -112,7 +112,7 @@
                     <h1 class="menu-title">Shepherd</h1>
 
                     <div class="right-buttons">
-                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
 
@@ -141,84 +141,26 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="quick-start-development-guide"><a class="header" href="#quick-start-development-guide">Quick Start Development Guide</a></h1>
-<p>To use consvc-shepherd, you'll need a Python 3.11 development environment with Poetry installed and Docker.</p>
-<p>It is recommended to use <code>pyenv</code> and the <code>pyenv-virtualenv</code> plugin your virtual environments.</p>
+                        <h2 id="recover-snapshot"><a class="header" href="#recover-snapshot">Recover Snapshot</a></h2>
+<p>The script is used as a last resort to revert data in Shepherd back to a specific snapshot.
+You would need to:</p>
 <ol>
-<li>Install <code>pyenv</code> using the <a href="https://github.com/pyenv/pyenv#installation">latest documentation</a> for your platform.</li>
-<li>Follow the instructions to install the <code>pyenv-virtualenv</code> plugin.
-See the <a href="https://github.com/pyenv/pyenv-virtualenv">pyenv-virtualenv</a> documentation.</li>
-<li>Ensure you've added <code>pyenv</code> and <code>pyenv-virtualenv</code> to your PATH.</li>
+<li>Log into Shepherd Admin as a superuser.</li>
+<li>Delete the partner model instance which will also delete all its child instances.</li>
+<li>Run <code>python3 main.py &lt;SHEPHERD URL&gt; &lt;PATH TO JSON FILE&gt; &lt;PATH TO FIREFOX PROFILE&gt;</code>
+This will add advertisers and advertiser urls based on the values from the
+json file you provide it.</li>
 </ol>
-<p>Ex:</p>
-<pre><code class="language-shell">export PATH=&quot;$HOME/.pyenv/bin:$PATH&quot;
-eval &quot;$(pyenv init -)&quot;
-eval &quot;$(pyenv virtualenv-init -)&quot;
-</code></pre>
-<ol start="4">
-<li>To run consvc-shepherd, you'll need to specify some minimal configurations.
-Use the existing <code>.env.example</code> and rename it to <code>env</code>.
-You'll want to make sure configuration files in the <code>.env</code> file match your database setup, configuring the database name, user, host and password variables.
-It should appear as follows:</li>
-</ol>
-<pre><code class="language-shell">$ mv .env.example .env
-
-# Variables to set in file
-DEBUG=true
-SECRET_KEY=keyboard-mash
-DB_NAME=postgres
-DB_USER=postgres
-DB_HOST=db
-DB_PASS=postgres
-</code></pre>
-<ol start="5">
-<li>Set up and enable your virtual environment:</li>
-</ol>
-<pre><code class="language-shell"># pyenv version install
-$ pyenv install 3.11
-
-# pyenv virtualenv
-$ pyenv virtualenv 3.11 shepherd # or whatever project name you like.
-$ pyenv local shepherd # enables virtual env when you enter directory. 
-
-# Install dependencies
-$ pip install poetry
-$ poetry install
-</code></pre>
-<ol start="6">
-<li>Install your dependencies:</li>
-</ol>
-<pre><code class="language-shell">$ poetry install
-</code></pre>
-<ol start="7">
-<li>
-<p><a href="https://docs.docker.com/engine/install/">Install Docker</a> if not already installed.</p>
-</li>
-<li>
-<p>Build the Docker image and start the container:</p>
-</li>
-</ol>
-<pre><code class="language-shell">docker compose build
-docker compose up
-</code></pre>
-<p>The application will then be accessible at the following url: <a href="http://0.0.0.0:7001/">http://0.0.0.0:7001/</a>. The admin panel is available at <a href="http://0.0.0.0:7001/admin">http://0.0.0.0:7001/admin</a></p>
-<ol start="9">
-<li>Create a super user by shelling into the container. Run the following:</li>
-</ol>
-<pre><code class="language-shell">docker ps # capture container id for consvc-shepherd
-docker exec -it &lt;CONTAINER ID&gt; sh # interactive mode
-./manage.py createsuperuser # follow directions to create superuser
-</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="intro.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../operations/rollback.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="UserGuide.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../adr/0000-metrics-client-for-shepherd.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -228,11 +170,11 @@ docker exec -it &lt;CONTAINER ID&gt; sh # interactive mode
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="intro.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../operations/rollback.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="UserGuide.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../adr/0000-metrics-client-for-shepherd.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
@@ -247,17 +189,17 @@ docker exec -it &lt;CONTAINER ID&gt; sh # interactive mode
         </script>
 
 
-        <script src="elasticlunr.min.js"></script>
-        <script src="mark.min.js"></script>
-        <script src="searcher.js"></script>
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
 
-        <script src="clipboard.min.js"></script>
-        <script src="highlight.js"></script>
-        <script src="book.js"></script>
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
-        <script src="mermaid.min.js"></script>
-        <script src="mermaid-init.js"></script>
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
 
 
     </body>

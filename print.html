@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item affix "><a href="intro.html">Service Overview</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="quickStart.html"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="UserGuide.html"><strong aria-hidden="true">2.</strong> User Guide</a></li><li class="chapter-item "><a href="metrics.html"><strong aria-hidden="true">3.</strong> Metrics</a></li><li class="chapter-item affix "><li class="part-title">ADR</li><li class="chapter-item "><a href="adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">4.</strong> Shepherd Metrics</a></li><li class="chapter-item affix "><li class="part-title">Scripts</li><li class="chapter-item "><a href="recoveryScript.html"><strong aria-hidden="true">5.</strong> Recovery Script</a></li></ol>
+                <ol class="chapter"><li class="chapter-item affix "><a href="intro.html">Service Overview</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="quickStart.html"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="UserGuide.html"><strong aria-hidden="true">2.</strong> User Guide</a></li><li class="chapter-item "><a href="metrics.html"><strong aria-hidden="true">3.</strong> Metrics</a></li><li class="chapter-item "><a href="operations/index.html"><strong aria-hidden="true">4.</strong> Operations and Runbooks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="operations/rollback.html"><strong aria-hidden="true">4.1.</strong> Rollback</a></li><li class="chapter-item "><a href="operations/recoveryScript.html"><strong aria-hidden="true">4.2.</strong> Recover Snapshot</a></li></ol></li><li class="chapter-item "><li class="part-title">ADR</li><li class="chapter-item "><a href="adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">5.</strong> Shepherd Metrics</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -394,6 +394,30 @@ in the emitted metric name, so in this example, the test is looking for
 <p><code>MetricsMock</code> has other useful helper methods, such as
 <a href="https://markus.readthedocs.io/en/latest/testing.html#markus.testing.MetricsMock.print_records">print_records()</a> to see all captured metrics. This can help
 when determining what metrics code is emitting.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="operations-and-runbooks"><a class="header" href="#operations-and-runbooks">Operations and Runbooks</a></h1>
+<p>This is where we put all our operational documentation.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="how-to-rollback-changes"><a class="header" href="#how-to-rollback-changes">How to Rollback Changes</a></h1>
+<p>Note: We use &quot;roll-forward&quot; strategy for rolling back changes in production.</p>
+<ol>
+<li>Depending on the severity of the problem, decide if this warrants
+<a href="https://mozilla-hub.atlassian.net/wiki/spaces/MIR/overview">kicking off an incident</a>;</li>
+<li>Identify the problematic commit and create a revert PR.
+If it is the latest commit, you can revert the change with:
+<pre><code>git revert HEAD~1
+</code></pre>
+</li>
+<li>Create a revert PR and go through normal review process to merge PR.</li>
+</ol>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="recover-snapshot"><a class="header" href="#recover-snapshot">Recover Snapshot</a></h2>
+<p>The script is used as a last resort to revert data in Shepherd back to a specific snapshot.
+You would need to:</p>
+<ol>
+<li>Log into Shepherd Admin as a superuser.</li>
+<li>Delete the partner model instance which will also delete all its child instances.</li>
+<li>Run <code>python3 main.py &lt;SHEPHERD URL&gt; &lt;PATH TO JSON FILE&gt; &lt;PATH TO FIREFOX PROFILE&gt;</code>
+This will add advertisers and advertiser urls based on the values from the
+json file you provide it.</li>
+</ol>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="statsd-client-library-for-shepherd"><a class="header" href="#statsd-client-library-for-shepherd">StatsD Client Library for Shepherd</a></h1>
 <ul>
 <li>Status: Accepted</li>
@@ -559,22 +583,6 @@ markus.configure([
 <li><a href="https://github.com/statsd">Statsd - Original Protocol GitHub</a></li>
 <li><a href="https://docs.datadoghq.com/developers/dogstatsd/?tab=hostagent">DogStatsD</a></li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="scripts"><a class="header" href="#scripts">Scripts</a></h1>
-<h2 id="recoverpy"><a class="header" href="#recoverpy">recover.py</a></h2>
-<p>Precondition: Be able to log into Shepherd Admin as a superuser.</p>
-<p>The script is used as a last resort to revert data in Shepherd back to a specific snapshot.
-One would need to:</p>
-<ol>
-<li>
-<p>delete the partner model instance which will also delete all its child instances.
-Once that is completed, the script can be used. </p>
-</li>
-<li>
-<p>Run <code>python3 main.py &lt;SHEPHERD URL&gt; &lt;PATH TO JSON FILE&gt; &lt;PATH TO FIREFOX PROFILE&gt;</code>
-This will add advertisers and advertiser urls based on the values from the
-json file you provide it.</p>
-</li>
-</ol>
 
                     </main>
 
