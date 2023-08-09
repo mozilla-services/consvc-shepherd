@@ -66,5 +66,14 @@ The application will then be accessible at the following url: [http://0.0.0.0:70
 ``` shell
 docker ps # capture container id for consvc-shepherd
 docker exec -it <CONTAINER ID> sh # interactive mode
-./manage.py createsuperuser # follow directions to create superuser
+python manage.py createsuperuser # follow directions to create superuser
+```
+
+10. Create database migrations and run migrations. 
+You may have to do this periodically as you modify or create models. Shell in as above and run the following commands:
+``` shell
+docker ps # capture container id for consvc-shepherd
+docker exec -it <CONTAINER ID> sh # interactive mode
+python manage.py makemigrations 
+python manage.py migrate 
 ```
