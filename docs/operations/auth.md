@@ -13,7 +13,8 @@ There are a number of authorization and access requirements needed to be able to
 
 To be able to make changes to settings, you have to be a superuser.  An existing superuser must grant these privileges. 
 
-Locally, to create a superuser,  shell into the Docker container and run the following:
+Locally, to create a superuser, shell into the Docker container and run the following. Note that by default, the `dev@example.com` superuser will be created automatically.
+
 ``` shell
 docker ps # capture container id for consvc-shepherd
 docker exec -it <CONTAINER ID> sh # interactive mode
