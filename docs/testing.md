@@ -1,6 +1,6 @@
 # Test Strategy
 
-Shepherd's test code is in the `consvc_shepherd/tests` directory.
+Shepherd's test code is in the `consvc_shepherd/tests`, `contile/tests`, and `openidc/tests` directories.
 
 ## Unit Tests
 
@@ -11,8 +11,7 @@ Due to their narrow scope, unit tests are fundamental to thorough test coverage.
 Our test coverage minimum is set to 95%. 
 A coverage report is printed to the shell showing the test results and possible exceptions. See [coverage.py](https://coverage.readthedocs.io/en/latest/) for more details.
 
-Unit tests are written and executed with `pytest` and are located in the `consvc_shepherd/tests/`
-directory. The name of individual test files should match those of the files they are testing in the form `test*.py`.
+Unit tests are written and executed with `pytest` and are located in the test directories listed above, in the form: `*/tests/`. The name of individual test files should match those of the files they are testing in the form `test*.py`.
 Ex. `models.py` should be `test_models.py`. 
 
 To execute unit tests, use: `make test`. By default, these tests run in CI during each push 
