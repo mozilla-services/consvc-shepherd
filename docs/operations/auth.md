@@ -3,23 +3,12 @@
 There are a number of authorization and access requirements needed to be able to access Shepherd.
 
 1. Shepherd Google Access Group
-   *  Not being part of the group would result in a Google access denied warning when attempting visiting any of the Shepherd URLs
+   *  Not being part of the group would result in a Google access denied warning when attempting visiting any of the Shepherd URLs.
 2. Shepherd Django Roles
-   * Not having these roles would result in being presented the "Django Administration" login page
+   * Not having these roles would result in being presented the "Django Administration" login page.
+   * You can create a new admin user though the Users panel in Django Admin.
    
 *For access please ask someone on the Engineering Team. For engineers, ask to be given superuser privileges. For ad operations ask to be added to the 'AdOps' Django group*
-
-## Django Admin
-
-To be able to make changes to settings, you have to be a superuser.  An existing superuser must grant these privileges. 
-
-Locally, to create a superuser, shell into the Docker container and run the following. Note that by default, the `dev@example.com` superuser will be created automatically.
-
-``` shell
-docker ps # capture container id for consvc-shepherd
-docker exec -it <CONTAINER ID> sh # interactive mode
-./manage.py createsuperuser # follow directions to create superuser
-```
 
 ## Shepherd URLs:
 
