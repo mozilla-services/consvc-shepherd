@@ -33,8 +33,6 @@ though you can check the Django test documentation for other test classes. `Simp
 Define all your test methods within an individual class, based on the functionality you are testing. Common set up and tear down methods are defined (as shown below), allowing you to pre-define forms,
 models and data for testing.
 
-`setUpTestData()` is called once at the beginning of the test run for class-level setup. You'd use this to create objects that aren't going to be modified or changed in any of the test methods.
-
 `setUp()` is called before every test function to set up any objects that may be modified by the test (every test function will get a "fresh" version of these objects).
 
 For example:
@@ -43,12 +41,6 @@ from django.test import TestCase
 
 class MyTests(TestCase):
     @classmethod
-    def setUpTestData(cls):
-        # Set up data for the whole TestCase
-        # setUpTestData: Run once to set up non-modified data for all class methods.
-        cls.foo = Foo.objects.create(bar="Test")
-        ...
-    
     def setUp(self):
         # Setup run before every test method.
         # setUp: Run once for every test method to setup clean data.
@@ -68,40 +60,5 @@ class MyTests(TestCase):
         ...
 
 ```
-
-### Test Models
-
-To ensure models properly validate data passed to them, explicitly testing for fields and labels is a best practice.
-
-Create the models you wish to test using `objects.create` and run assertions against the model and expected behavior.
-
-Example:
-```python
-class FooModelTest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        # Set up non-modified objects used by all test methods
-        Foo.objects.create(first='foo', last='bar')
-
-    def test_name_label(self):
-        foo = Foo.objects.get(id=1)
-        field_label = foo._meta.get_field('first').verbose_name
-        self.assertEqual(field_label, 'first')
-```
-### Test Forms
-
-When testing forms, it's generally sufficient to ensure that the forms have the desired fields, along with any custom logic related to their validation.
-
-Create an instance of your form to test. Form fields of type `forms.Form` can be accessed via `form.fields["field_name"]`.
-
-### Test Views
-
-Use the Django test `Client` to validate view behavior, which simulates `GET` and `POST` requests to observe and validate responses. 
-The `Client` belongs to `TestCase`'s derived class, therefore you can do the following:
-
-```python
-response = self.client.get('/url/to/resource/')
-```
-`response.context` is the context variable passed to the template by the view, which generally contains the most valuable information when testing.
 
 [django-test-docs]: https://docs.djangoproject.com/en/4.2/topics/testing/tools/
