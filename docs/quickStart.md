@@ -62,9 +62,11 @@ docker compose up
 
 The application will then be accessible at the following url: [http://0.0.0.0:7001/](http://0.0.0.0:7001/). The admin panel is available at [http://0.0.0.0:7001/admin](http://0.0.0.0:7001/admin)
 
-9. Create a super user by shelling into the container. Run the following:
+9. Create database migrations and run migrations. 
+You may have to do this periodically as you modify or create models. Shell in as above and run the following commands:
 ``` shell
 docker ps # capture container id for consvc-shepherd
 docker exec -it <CONTAINER ID> sh # interactive mode
-./manage.py createsuperuser # follow directions to create superuser
+python manage.py makemigrations 
+python manage.py migrate 
 ```
