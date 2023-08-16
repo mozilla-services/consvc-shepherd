@@ -80,7 +80,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item affix "><a href="intro.html">Service Overview</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item expanded "><a href="quickStart.html" class="active"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="UserGuide.html"><strong aria-hidden="true">2.</strong> User Guide</a></li><li class="chapter-item "><a href="metrics.html"><strong aria-hidden="true">3.</strong> Metrics</a></li><li class="chapter-item "><a href="operations/index.html"><strong aria-hidden="true">4.</strong> Operations and Runbooks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="operations/rollback.html"><strong aria-hidden="true">4.1.</strong> Rollback</a></li><li class="chapter-item "><a href="operations/recoveryScript.html"><strong aria-hidden="true">4.2.</strong> Recover Snapshot</a></li></ol></li><li class="chapter-item "><li class="part-title">ADR</li><li class="chapter-item "><a href="adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">5.</strong> Shepherd Metrics</a></li></ol>
+                <ol class="chapter"><li class="chapter-item affix "><a href="intro.html">Service Overview</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item expanded "><a href="quickStart.html" class="active"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="metrics.html"><strong aria-hidden="true">2.</strong> Metrics</a></li><li class="chapter-item "><a href="operations/index.html"><strong aria-hidden="true">3.</strong> Operations and Runbooks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="operations/auth.html"><strong aria-hidden="true">3.1.</strong> Authentication and Authorization</a></li><li class="chapter-item "><a href="operations/addPartnersAndAdvertisers.html"><strong aria-hidden="true">3.2.</strong> Add Partners and Advertisers</a></li><li class="chapter-item "><a href="operations/createSovAllocations.html"><strong aria-hidden="true">3.3.</strong> Create SOV Allocations</a></li><li class="chapter-item "><a href="operations/createPublishSnapshots.html"><strong aria-hidden="true">3.4.</strong> Create and Publish Snapshots</a></li><li class="chapter-item "><a href="operations/rollback.html"><strong aria-hidden="true">3.5.</strong> Rollback</a></li><li class="chapter-item "><a href="operations/recoveryScript.html"><strong aria-hidden="true">3.6.</strong> Recover Snapshot</a></li></ol></li><li class="chapter-item "><li class="part-title">ADR</li><li class="chapter-item "><a href="adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">4.</strong> Shepherd Metrics</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -203,11 +203,13 @@ docker compose up
 </code></pre>
 <p>The application will then be accessible at the following url: <a href="http://0.0.0.0:7001/">http://0.0.0.0:7001/</a>. The admin panel is available at <a href="http://0.0.0.0:7001/admin">http://0.0.0.0:7001/admin</a></p>
 <ol start="9">
-<li>Create a super user by shelling into the container. Run the following:</li>
+<li>Create database migrations and run migrations. 
+You may have to do this periodically as you modify or create models. Shell in as above and run the following commands:</li>
 </ol>
 <pre><code class="language-shell">docker ps # capture container id for consvc-shepherd
 docker exec -it &lt;CONTAINER ID&gt; sh # interactive mode
-./manage.py createsuperuser # follow directions to create superuser
+python manage.py makemigrations 
+python manage.py migrate 
 </code></pre>
 
                     </main>
@@ -218,7 +220,7 @@ docker exec -it &lt;CONTAINER ID&gt; sh # interactive mode
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="UserGuide.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="metrics.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -232,7 +234,7 @@ docker exec -it &lt;CONTAINER ID&gt; sh # interactive mode
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="UserGuide.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="metrics.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

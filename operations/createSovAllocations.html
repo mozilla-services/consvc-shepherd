@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Operations and Runbooks - Shepherd</title>
+        <title>Create SOV Allocations - Shepherd</title>
 
 
         <!-- Custom HTML head -->
@@ -80,7 +80,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item affix "><a href="../intro.html">Service Overview</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="../quickStart.html"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="../metrics.html"><strong aria-hidden="true">2.</strong> Metrics</a></li><li class="chapter-item expanded "><a href="../operations/index.html" class="active"><strong aria-hidden="true">3.</strong> Operations and Runbooks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../operations/auth.html"><strong aria-hidden="true">3.1.</strong> Authentication and Authorization</a></li><li class="chapter-item "><a href="../operations/addPartnersAndAdvertisers.html"><strong aria-hidden="true">3.2.</strong> Add Partners and Advertisers</a></li><li class="chapter-item "><a href="../operations/createSovAllocations.html"><strong aria-hidden="true">3.3.</strong> Create SOV Allocations</a></li><li class="chapter-item "><a href="../operations/createPublishSnapshots.html"><strong aria-hidden="true">3.4.</strong> Create and Publish Snapshots</a></li><li class="chapter-item "><a href="../operations/rollback.html"><strong aria-hidden="true">3.5.</strong> Rollback</a></li><li class="chapter-item "><a href="../operations/recoveryScript.html"><strong aria-hidden="true">3.6.</strong> Recover Snapshot</a></li></ol></li><li class="chapter-item "><li class="part-title">ADR</li><li class="chapter-item "><a href="../adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">4.</strong> Shepherd Metrics</a></li></ol>
+                <ol class="chapter"><li class="chapter-item affix "><a href="../intro.html">Service Overview</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="../quickStart.html"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="../metrics.html"><strong aria-hidden="true">2.</strong> Metrics</a></li><li class="chapter-item expanded "><a href="../operations/index.html"><strong aria-hidden="true">3.</strong> Operations and Runbooks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../operations/auth.html"><strong aria-hidden="true">3.1.</strong> Authentication and Authorization</a></li><li class="chapter-item "><a href="../operations/addPartnersAndAdvertisers.html"><strong aria-hidden="true">3.2.</strong> Add Partners and Advertisers</a></li><li class="chapter-item expanded "><a href="../operations/createSovAllocations.html" class="active"><strong aria-hidden="true">3.3.</strong> Create SOV Allocations</a></li><li class="chapter-item "><a href="../operations/createPublishSnapshots.html"><strong aria-hidden="true">3.4.</strong> Create and Publish Snapshots</a></li><li class="chapter-item "><a href="../operations/rollback.html"><strong aria-hidden="true">3.5.</strong> Rollback</a></li><li class="chapter-item "><a href="../operations/recoveryScript.html"><strong aria-hidden="true">3.6.</strong> Recover Snapshot</a></li></ol></li><li class="chapter-item "><li class="part-title">ADR</li><li class="chapter-item "><a href="../adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">4.</strong> Shepherd Metrics</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -141,18 +141,25 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="operations-and-runbooks"><a class="header" href="#operations-and-runbooks">Operations and Runbooks</a></h1>
-<p>This is where we put all our operational documentation.</p>
+                        <h2 id="create-and-manage-sov-share-of-voice-allocation-settings"><a class="header" href="#create-and-manage-sov-share-of-voice-allocation-settings">Create and Manage SOV (Share-of-Voice) Allocation Settings</a></h2>
+<p>This is restricted to the Content Discovery Engineering team or AdOps.</p>
+<ol>
+<li>a. From the main CONSVC_SHEPHERD subsection in the admin panel, click the add button next to Allocation settings. 
+b. Using the main UI, click  '% Allocation' then click 'Add New Position'</li>
+<li>Enter the numeric position of the tile in the Position field. If editing an existing allocation, simply click on the tile number you want to edit.</li>
+<li>Select the matching partner and enter the SOV allocation percentage from 0 - 100%.</li>
+<li>If adding an additional position, select 'Add another Partner' (admin) or 'Add Partner' (UI) and enter that Partner's allocation percentage.</li>
+</ol>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../metrics.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../operations/addPartnersAndAdvertisers.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="../operations/auth.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../operations/createPublishSnapshots.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -162,11 +169,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../metrics.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../operations/addPartnersAndAdvertisers.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="../operations/auth.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../operations/createPublishSnapshots.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

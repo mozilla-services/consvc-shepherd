@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>User Guide - Shepherd</title>
+        <title>Create and Publish Snapshots - Shepherd</title>
 
 
         <!-- Custom HTML head -->
@@ -12,21 +12,21 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
 
-        <link rel="icon" href="favicon.svg">
-        <link rel="shortcut icon" href="favicon.png">
-        <link rel="stylesheet" href="css/variables.css">
-        <link rel="stylesheet" href="css/general.css">
-        <link rel="stylesheet" href="css/chrome.css">
-        <link rel="stylesheet" href="css/print.css" media="print">
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="fonts/fonts.css">
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="highlight.css">
-        <link rel="stylesheet" href="tomorrow-night.css">
-        <link rel="stylesheet" href="ayu-highlight.css">
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
@@ -34,7 +34,7 @@
     <body>
         <!-- Provide site root to javascript -->
         <script>
-            var path_to_root = "";
+            var path_to_root = "../";
             var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
         </script>
 
@@ -80,7 +80,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item affix "><a href="intro.html">Service Overview</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="quickStart.html"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item expanded "><a href="UserGuide.html" class="active"><strong aria-hidden="true">2.</strong> User Guide</a></li><li class="chapter-item "><a href="metrics.html"><strong aria-hidden="true">3.</strong> Metrics</a></li><li class="chapter-item "><a href="operations/index.html"><strong aria-hidden="true">4.</strong> Operations and Runbooks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="operations/rollback.html"><strong aria-hidden="true">4.1.</strong> Rollback</a></li><li class="chapter-item "><a href="operations/recoveryScript.html"><strong aria-hidden="true">4.2.</strong> Recover Snapshot</a></li></ol></li><li class="chapter-item "><li class="part-title">ADR</li><li class="chapter-item "><a href="adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">5.</strong> Shepherd Metrics</a></li></ol>
+                <ol class="chapter"><li class="chapter-item affix "><a href="../intro.html">Service Overview</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="../quickStart.html"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="../metrics.html"><strong aria-hidden="true">2.</strong> Metrics</a></li><li class="chapter-item expanded "><a href="../operations/index.html"><strong aria-hidden="true">3.</strong> Operations and Runbooks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../operations/auth.html"><strong aria-hidden="true">3.1.</strong> Authentication and Authorization</a></li><li class="chapter-item "><a href="../operations/addPartnersAndAdvertisers.html"><strong aria-hidden="true">3.2.</strong> Add Partners and Advertisers</a></li><li class="chapter-item "><a href="../operations/createSovAllocations.html"><strong aria-hidden="true">3.3.</strong> Create SOV Allocations</a></li><li class="chapter-item expanded "><a href="../operations/createPublishSnapshots.html" class="active"><strong aria-hidden="true">3.4.</strong> Create and Publish Snapshots</a></li><li class="chapter-item "><a href="../operations/rollback.html"><strong aria-hidden="true">3.5.</strong> Rollback</a></li><li class="chapter-item "><a href="../operations/recoveryScript.html"><strong aria-hidden="true">3.6.</strong> Recover Snapshot</a></li></ol></li><li class="chapter-item "><li class="part-title">ADR</li><li class="chapter-item "><a href="../adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">4.</strong> Shepherd Metrics</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -112,7 +112,7 @@
                     <h1 class="menu-title">Shepherd</h1>
 
                     <div class="right-buttons">
-                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
 
@@ -141,59 +141,15 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="shepherd-user-guide"><a class="header" href="#shepherd-user-guide">Shepherd User Guide</a></h1>
-<h2 id="shepherd-urls"><a class="header" href="#shepherd-urls">Shepherd URLs:</a></h2>
-<ul>
-<li>Dev: https://shepherd-dev.topsites.nonprod.cloudops.mozgcp.net/admin</li>
-<li>Stage: https://shepherd-stage.topsites.nonprod.cloudops.mozgcp.net/admin/</li>
-<li>Prod: https://shepherd.services.mozilla.com/admin/</li>
-</ul>
-<h2 id="access-requirements"><a class="header" href="#access-requirements">Access Requirements</a></h2>
-<ol>
-<li>Shepherd Google Access Group
-<ul>
-<li>Not being part of the group would result in a Google access denied warning when attempting visiting any of the Shepherd URLs</li>
-</ul>
-</li>
-<li>Shepherd Django Roles
-<ul>
-<li>Not having these roles would result in being presented the &quot;Django Administration&quot; login page</li>
-</ul>
-</li>
-</ol>
-<p><em>For access please ask someone on the Engineering Team. For engineers, ask to be given superuser privileges. For ad operations ask to be added to the 'AdOps' Django group</em></p>
-<h2 id="using-shepherd"><a class="header" href="#using-shepherd">Using Shepherd</a></h2>
-<h3 id="adding-partners"><a class="header" href="#adding-partners">Adding Partners</a></h3>
-<p>This is restricted to the Content Discovery Engineering team. 
-From the main admin page, under the Contile subsection click the 
-add Partners button. Type in name of partner and click save.</p>
-<h3 id="adding-advertisers"><a class="header" href="#adding-advertisers">Adding Advertisers</a></h3>
-<p>From the main admin page under the Contile subsection:</p>
-<ol>
-<li>Click the Add Advertisers Button. </li>
-<li>Fill in the info required. 
-<ul>
-<li>For adding more URLs for an advertiser, there is a green “+” 
-under the Geo group dropdown. </li>
-</ul>
-</li>
-<li>Click “Save” once you’re done. 
-<ul>
-<li>Red text will appear around certain textboxes if the value violates validation requirements. 
-Correct them and hit save again. </li>
-<li>A successful save will have a green bar near the top of the page that says so.</li>
-</ul>
-</li>
-</ol>
-<h3 id="creating-and-publishing-a-snapshot"><a class="header" href="#creating-and-publishing-a-snapshot">Creating and Publishing a Snapshot</a></h3>
-<p>Click the Add buttons for Settings snapshots under CONSVC_SHEPHERD:</p>
+                        <h2 id="creating-and-publishing-a-snapshot"><a class="header" href="#creating-and-publishing-a-snapshot">Creating and Publishing a Snapshot</a></h2>
+<p>Click the Add buttons for Settings or Allocation settings snapshots under CONSVC_SHEPHERD:</p>
 <ol>
 <li>Input a name 
 <ul>
 <li>recommendation is to have the name relate to the changes done to the advertiser (ex. Added Advertiser X Y and Z or Added Black Friday URLs to X) The name has a 128 Character limit.</li>
 </ul>
 </li>
-<li>Select settings type. At this time, this would be the Partner name.</li>
+<li>Select settings type. At this time, this would be the Partner name. <em>NOTE</em>: <em>This only applies to settings snapshots, allocation snapshots do not have a type field.</em></li>
 <li>Hit Save. A Snapshot has been saved. </li>
 <li>To publish it, click the checkbox that corresponds to the snapshot. </li>
 <li>Select “Publish Settings Snapshot” from the actions dropdown and click “Go”.
@@ -210,11 +166,11 @@ For complex reverts, please contact the engineering team.</em></p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="quickStart.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../operations/createSovAllocations.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="metrics.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../operations/rollback.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -224,11 +180,11 @@ For complex reverts, please contact the engineering team.</em></p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="quickStart.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../operations/createSovAllocations.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="metrics.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../operations/rollback.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
@@ -243,17 +199,17 @@ For complex reverts, please contact the engineering team.</em></p>
         </script>
 
 
-        <script src="elasticlunr.min.js"></script>
-        <script src="mark.min.js"></script>
-        <script src="searcher.js"></script>
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
 
-        <script src="clipboard.min.js"></script>
-        <script src="highlight.js"></script>
-        <script src="book.js"></script>
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
-        <script src="mermaid.min.js"></script>
-        <script src="mermaid-init.js"></script>
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
 
 
     </body>
