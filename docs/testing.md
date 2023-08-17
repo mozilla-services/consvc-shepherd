@@ -8,7 +8,6 @@ The unit layer is suitable for testing complex behavior at a small scale,
 with fine-grained control over the inputs. 
 Due to their narrow scope, unit tests are fundamental to thorough test coverage.
 
-Our test coverage minimum is set to 95%. 
 A coverage report is printed to the shell showing the test results and possible exceptions. See [coverage.py](https://coverage.readthedocs.io/en/latest/) for more details.
 
 Unit tests are written and executed with `pytest` and are located in the test directories listed above, in the form: `*/tests/`. The name of individual test files should match those of the files they are testing in the form `test*.py`.
@@ -21,44 +20,6 @@ to an active PR and during the merge process.
 
 Django provides a number of tools, API methods, and classes to test web and Django-specific behavior.
 These allow you to simulate requests, insert test data, and inspect your application's output.
-See the most recent [Django test docs][django-test-docs] for reference.
-
-To write a test, import the `TestCase` base class from `django.test` and pass it to your test class. 
-This creates a clean database before tests are run and each test function is run in its own transaction. 
-
-You can also use the `Client` from `django.test` to simulate user interactions at the view level.
-Any test class created should generally inherit from `TestCase`, 
-though you can check the Django test documentation for other test classes. `SimpleTestCase` can also be used in instances where tests don't use the database or test client.
-
-Define all your test methods within an individual class, based on the functionality you are testing. Common set up and tear down methods are defined (as shown below), allowing you to pre-define forms,
-models and data for testing.
-
-`setUp()` is called before every test function to set up any objects that may be modified by the test (every test function will get a "fresh" version of these objects).
-
-For example:
-```python
-from django.test import TestCase
-
-class MyTests(TestCase):
-    @classmethod
-    def setUp(self):
-        # Setup run before every test method.
-        # setUp: Run once for every test method to setup clean data.
-        pass
-
-    def tearDown(self):
-        # Clean up run after every test method.
-        # tearDown: Run once for every test method to clean data after run.
-        pass
-
-    def test1(self):
-        # Some test using self.foo
-        ...
-
-    def test2(self):
-        # Some other test using self.foo
-        ...
-
-```
+See the most recent [Django test docs][django-test-docs] for reference. Also, see existing shepherd tests for examples.
 
 [django-test-docs]: https://docs.djangoproject.com/en/4.2/topics/testing/tools/
