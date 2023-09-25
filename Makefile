@@ -73,3 +73,7 @@ doc-preview: doc  ##  Preview Merino docs via the default browser
 .PHONY: dev
 dev: $(INSTALL_STAMP)  ##  Run shepherd locally and reload automatically
 	$(POETRY) run python manage.py runserver
+
+.PHONY: local_test
+local_test: $(INSTALL_STAMP)
+	docker-compose -f docker-compose.test.yml up --abort-on-container-exit
