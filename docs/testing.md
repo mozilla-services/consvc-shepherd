@@ -13,7 +13,7 @@ Unit tests are written and executed with `pytest` and are located in the test di
 
 ## Local Test Execution
 
-To execute unit tests in the local Docker container, run: `make local_test`.
+To execute unit tests in the local Docker container, run: `make local-test`.
 
 ## Note on CI Test Execution
 By default, unit tests run automatically in CI during each push to an active PR and during the merge process. 
