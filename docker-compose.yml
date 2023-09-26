@@ -23,7 +23,6 @@ services:
     command: bash -c "/app/bin/wait-for-it.sh db:5432 -- python /app/manage.py migrate && python /app/manage.py runserver 0.0.0.0:7001 "
     links:
       - db
-
     volumes:
       - .:/app
     ports:
