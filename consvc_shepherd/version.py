@@ -1,4 +1,5 @@
 """Versioning utility module"""
+
 import json
 import pathlib
 from dataclasses import dataclass

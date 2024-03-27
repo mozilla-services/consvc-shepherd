@@ -1,4 +1,5 @@
 """Views module for consvc_shepherd."""
+
 import json
 from typing import Any
 

@@ -1,4 +1,5 @@
 """OpenIDC authentication middleware module for the consvc_shepherd service."""
+
 import logging
 
 from django.conf import settings

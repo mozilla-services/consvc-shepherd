@@ -23,7 +23,7 @@ markus = {extras = ["datadog"], version = "^4.2.0"}
 
 [tool.poetry.group.dev.dependencies]
 bandit = {extras = ["toml"], version = "^1.7.4"}
-black = "^22.12.0"
+black = "^24.3.0"
 coverage = "^6.5.0"
 factory-boy = "^3.2.1"
 flake8 = "^6.0.0"

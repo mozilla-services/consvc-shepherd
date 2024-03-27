@@ -1,4 +1,5 @@
 """Unit tests for the version.py utility module."""
+
 import json
 import pathlib
 
