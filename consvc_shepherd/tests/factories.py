@@ -1,4 +1,5 @@
 """Factory test module for consvc_shepherd."""
+
 import factory
 from django.contrib.auth import get_user_model
 from faker import Factory as FakerFactory

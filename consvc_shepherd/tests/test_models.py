@@ -1,4 +1,5 @@
 """Tests for consvc_shepherd Models."""
+
 from django.test import TestCase
 
 from consvc_shepherd.models import AllocationSetting, Partner, PartnerAllocation

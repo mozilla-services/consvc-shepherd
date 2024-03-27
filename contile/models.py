@@ -1,4 +1,5 @@
 """Models for consvc_shepherd/contile."""
+
 from typing import Any
 
 from django.core.exceptions import ValidationError

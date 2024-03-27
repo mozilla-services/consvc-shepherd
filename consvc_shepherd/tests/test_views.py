@@ -1,4 +1,5 @@
 """Views test module for consvc_shepherd."""
+
 from django.test import TestCase, override_settings
 
 from consvc_shepherd.models import (

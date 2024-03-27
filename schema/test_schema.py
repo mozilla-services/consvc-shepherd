@@ -1,4 +1,5 @@
 """Schema validation and testing module for supported schemas."""
+
 import json
 from typing import Any
 from unittest import TestCase
