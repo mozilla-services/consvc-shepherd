@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static %}
+{% load sponsored_by %}
+
+{% block extrastyle %}
+    <link rel="stylesheet" href="{% static "preview/css/preview.css" %}">
+{% endblock %}
+
+{% block content %}
+<div id="preview">
+    <h1>MARS Ads Preview</h1>
+
+    <form>
+        <label for="country">Country</label>&nbsp;
+        <select name="country" id="country">
+            {% for aCountry in countries %}
+                {% if aCountry.code == country %}
+                <option value="{{ aCountry.code }}" selected="selected">{{ aCountry.name }}</option>
+                {% else %}
+                <option value="{{ aCountry.code }}">{{ aCountry.name }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+
+        <span id="region-container">
+            <label for="region">Region</label>&nbsp;
+            <select name="region" id="region"></select>
+        </span>
+
+        <br/><br/>
+
+        <input type="submit" value="Reload"/>
+    </form>
+
+    <h2>Tiles</h2>
+    <div class="tiles">
+        {% for tile in tiles %}
+            <div class="tile">
+                <div class="tile-outer">
+                    <img class="tile-image" src="{{ tile.image_url }}" alt="{{ tile.name }}"/>
+                </div>
+                <div class="tile-title">
+                    <span>{{ tile.name }}</span>
+                    <span class="sponsored-label">Sponsored</span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <h2>SPOCs</h2>
+    <div class="spocs">
+        {% for spoc in spocs %}
+            <div class="spoc">
+                <img class="spoc-image" src="{{ spoc.image_src }}" alt="{{ spoc.title }}"/>
+                <div class="spoc-meta">
+                    <div class="spoc-info">
+                        <div class="spoc-domain clamp">{{ spoc.domain }}</div>
+                        <div class="spoc-title clamp">{{ spoc.title }}</div>
+                        <div class="spoc-excerpt clamp">{{ spoc.excerpt }}</div>
+                    </div>
+                    <div class="spoc-context">{{ spoc | sponsored_by:country }}</div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+{{ regions|json_script:"regions-data" }}
+<script>
+    const regions = JSON.parse(document.getElementById('regions-data').textContent);
+    const countrySelect = document.getElementById("country");
+    const regionContainer = document.getElementById("region-container");
+    const regionSelect = document.getElementById("region");
+
+    function updateRegions(country) {
+       let regionsForCountry = regions[country];
+
+       if (regionsForCountry === undefined) {
+           regionContainer.style.display = "none";
+           regionsForCountry = [];
+       } else {
+           regionContainer.style.display = "";
+       }
+
+       let regionOptions = regionsForCountry.map((region) => {
+          let option = document.createElement("option");
+          option.setAttribute("value", region.code);
+          option.innerText = region.name;
+
+          if (region.code === "{{ region }}") {
+            option.setAttribute("selected", "selected");
+          }
+
+          return option;
+       });
+
+       regionSelect.replaceChildren(...regionOptions);
+    }
+
+    countrySelect.addEventListener("change", function(e) {
+        updateRegions(e.target.value);
+    });
+
+    updateRegions("{{ country }}");
+</script>
+
+{% endblock %}

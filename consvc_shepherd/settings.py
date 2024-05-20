@@ -188,6 +188,8 @@ SENTRY_MODE = env("SENTRY_MODE", default="disabled")
 SENTRY_TRACE_SAMPLE_RATE = env("SENTRY_TRACE_SAMPLE_RATE", default=0)
 SENTRY_ENV = env("SENTRY_ENV", default=None)
 
+MARS_URL = env("MARS_URL", default="https://mars.prod.ads.prod.webservices.mozgcp.net")
+
 sentry_sdk.init(
     dsn=SENTRY_DSN,
     integrations=[

@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import include, path
 
 from consvc_shepherd.models import AllocationSetting
+from consvc_shepherd.preview import PreviewView
 from consvc_shepherd.views import (
     AllocationCreateView,
     AllocationSettingList,
@@ -38,6 +39,7 @@ urlpatterns = [
         AllocationCreateView.as_view(),
     ),
     path("allocation/<int:pk>/", AllocationUpdateView.as_view()),
+    path("preview", PreviewView.as_view()),
     path("", TableOverview.as_view()),
 ]
 
