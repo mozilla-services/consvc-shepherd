@@ -21,7 +21,7 @@ psycopg2-binary = "^2.9.5"
 jsonschema = "^4.17.3"
 markus = {extras = ["datadog"], version = "^4.2.0"}
 pyyaml = "^6.0.1"
-requests = "^2.31.0"
+requests = "^2.32.0"
 
 [tool.poetry.group.dev.dependencies]
 bandit = {extras = ["toml"], version = "^1.7.4"}
@@ -37,7 +37,7 @@ pytest-django = "^4.5.2"
 pytest-cov = "^4.0.0"
 selenium = "^4.8.0"
 mypy = "^1.2.0"
-types-requests = "^2.31.0"
+types-requests = "^2.32.0"
 types-mock = "^5.1.0"
 
 [build-system]
