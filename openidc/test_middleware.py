@@ -1,6 +1,6 @@
 """Tests related to the verification of OpenIDCAuthMiddleware."""
 
-import mock  # type: ignore [import]
+import mock
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
