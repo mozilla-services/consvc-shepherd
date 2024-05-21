@@ -2,12 +2,33 @@
 
 import uuid
 from dataclasses import dataclass
-from typing import Optional, TypedDict
+from typing import TypedDict
 
 import requests
 from django.views.generic import TemplateView
 
 from consvc_shepherd.settings import MARS_URL
+
+LOCALIZATIONS = {
+    "Sponsored": {
+        "US": "Sponsored",
+        "CA": "Sponsored",
+        "DE": "Gesponsert",
+        "ES": "Patrocinado",
+        "FR": "Sponsorisé",
+        "GB": "Sponsored",
+        "IT": "Sponsorizzato",
+    },
+    "Sponsored by": {
+        "US": "Sponsored by {sponsor}",
+        "CA": "Sponsored by {sponsor}",
+        "DE": "Werbung von {sponsor}",
+        "ES": "Patrocinado por {sponsor}",
+        "FR": "Sponsorisé par {sponsor}",
+        "GB": "Sponsored by {sponsor}",
+        "IT": "Sponsorizzata da {sponsor}",
+    },
+}
 
 
 class Region(TypedDict):
@@ -28,8 +49,7 @@ class Spoc:
     title: str
     domain: str
     excerpt: str
-    sponsor: str
-    sponsored_by_override: Optional[str]
+    sponsored_by: str
 
 
 @dataclass(frozen=True)
@@ -38,6 +58,7 @@ class Tile:
 
     image_url: str
     name: str
+    sponsored: str
 
 
 COUNTRIES: list[Region] = [
@@ -143,8 +164,7 @@ def get_spocs(country: str, region: str) -> list[Spoc]:
             title=spoc["title"],
             domain=spoc["domain"],
             excerpt=spoc["excerpt"],
-            sponsor=spoc["sponsor"],
-            sponsored_by_override=spoc.get("sponsored_by_override"),
+            sponsored_by=localized_sponsored_by(spoc, country),
         )
         for spoc in r.json().get("spocs", [])
     ]
@@ -167,9 +187,20 @@ def get_tiles(country: str, region: str) -> list[Tile]:
         Tile(
             image_url=tile["image_url"],
             name=tile["name"],
+            sponsored=LOCALIZATIONS["Sponsored"][country],
         )
         for tile in r.json().get("tiles", [])
     ]
+
+
+def localized_sponsored_by(spoc: dict[str, str], country: str) -> str:
+    """Render the localized 'Sponsored by ...' text for a SPOC"""
+    if (override := spoc.get("sponsored_by_override")) is not None:
+        return override
+
+    return LOCALIZATIONS["Sponsored by"][country].format(
+        sponsor=spoc.get("sponsor"),
+    )
 
 
 class PreviewView(TemplateView):

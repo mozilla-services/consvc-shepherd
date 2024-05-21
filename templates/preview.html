@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load static %}
-{% load sponsored_by %}
 
 {% block extrastyle %}
     <link rel="stylesheet" href="{% static "preview/css/preview.css" %}">
@@ -41,7 +40,7 @@
                 </div>
                 <div class="tile-title">
                     <span>{{ tile.name }}</span>
-                    <span class="sponsored-label">Sponsored</span>
+                    <span class="sponsored-label">{{ tile.sponsored }}</span>
                 </div>
             </div>
         {% endfor %}
@@ -58,7 +57,7 @@
                         <div class="spoc-title clamp">{{ spoc.title }}</div>
                         <div class="spoc-excerpt clamp">{{ spoc.excerpt }}</div>
                     </div>
-                    <div class="spoc-context">{{ spoc | sponsored_by:country }}</div>
+                    <div class="spoc-context">{{ spoc.sponsored_by }}</div>
                 </div>
             </div>
         {% endfor %}
