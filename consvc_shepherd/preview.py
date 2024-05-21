@@ -1,5 +1,6 @@
 """Ads Preview page"""
 
+import uuid
 from dataclasses import dataclass
 from typing import Optional, TypedDict
 
@@ -123,12 +124,15 @@ REGIONS: dict[str, list[Region]] = {
 
 def get_spocs(country: str, region: str) -> list[Spoc]:
     """Load SPOCs from MARS for given country and region"""
+    # Generate a unique pocket ID per request to avoid frequency capping
+    pocket_id = uuid.uuid4()
+
     body = {
-        "pocket_id": "{03267ad1-0074-4aa6-8e0c-ec18e0906bfe}",
-        "consumer_key": "40249-e88c401e1b1f2242d9e441c4",
+        "pocket_id": f"{{{pocket_id}}}",  # produces "{uuid}"
         "version": 2,
         "country": country,
         "region": region,
+        # Omit placements to use server-side defaults
     }
 
     r = requests.post(f"{MARS_URL}/spocs", json=body, timeout=30)
