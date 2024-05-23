@@ -1,5 +1,4 @@
 """Ads Preview page"""
-
 import uuid
 from dataclasses import dataclass
 from typing import TypedDict
@@ -7,8 +6,10 @@ from typing import TypedDict
 import requests
 from django.views.generic import TemplateView
 
-from consvc_shepherd.settings import MARS_URL
-
+# Localized strings from https://hg.mozilla.org/l10n-central/
+#
+# See e.g. https://hg.mozilla.org/l10n-central/es-ES/file/tip/browser/browser/newtab/newtab.ftl
+# for Spanish (Spain).
 LOCALIZATIONS = {
     "Sponsored": {
         "US": "Sponsored",
@@ -42,6 +43,16 @@ class Region(TypedDict):
 
 
 @dataclass(frozen=True)
+class Environment:
+    """Represents a Site in Kevel. Some environments have more than one site configured."""
+
+    code: str
+    name: str
+    mars_url: str
+    spoc_site_id: int
+
+
+@dataclass(frozen=True)
 class Spoc:
     """Model for a SPOC loaded from MARS"""
 
@@ -60,6 +71,28 @@ class Tile:
     name: str
     sponsored: str
 
+
+# Ad environments. Note that these differ from MARS or Shepherd environments.
+ENVIRONMENTS: list[Environment] = [
+    Environment(
+        code="dev",
+        name="Dev",
+        mars_url="https://mars.stage.ads.nonprod.webservices.mozgcp.net",
+        spoc_site_id=1276332,
+    ),
+    Environment(
+        code="preview",
+        name="Preview",
+        mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
+        spoc_site_id=1084367,
+    ),
+    Environment(
+        code="production",
+        name="Production",
+        mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
+        spoc_site_id=1070098,
+    ),
+]
 
 COUNTRIES: list[Region] = [
     Region(code="US", name="United States"),
@@ -143,20 +176,21 @@ REGIONS: dict[str, list[Region]] = {
 }
 
 
-def get_spocs(country: str, region: str) -> list[Spoc]:
+def get_spocs(env: Environment, country: str, region: str) -> list[Spoc]:
     """Load SPOCs from MARS for given country and region"""
     # Generate a unique pocket ID per request to avoid frequency capping
     pocket_id = uuid.uuid4()
 
     body = {
         "pocket_id": f"{{{pocket_id}}}",  # produces "{uuid}"
+        "site": env.spoc_site_id,
         "version": 2,
         "country": country,
         "region": region,
         # Omit placements to use server-side defaults
     }
 
-    r = requests.post(f"{MARS_URL}/spocs", json=body, timeout=30)
+    r = requests.post(f"{env.mars_url}/spocs", json=body, timeout=30)
 
     return [
         Spoc(
@@ -170,7 +204,7 @@ def get_spocs(country: str, region: str) -> list[Spoc]:
     ]
 
 
-def get_tiles(country: str, region: str) -> list[Tile]:
+def get_tiles(env: Environment, country: str, region: str) -> list[Tile]:
     """Load Sponsored Tiles from MARS for given country and region"""
     params = {
         "country": country,
@@ -181,7 +215,7 @@ def get_tiles(country: str, region: str) -> list[Tile]:
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:126.0) Gecko/20100101 Firefox/126.0",
     }
 
-    r = requests.get(f"{MARS_URL}/v1/tiles", params=params, headers=headers, timeout=30)
+    r = requests.get(f"{env.mars_url}/v1/tiles", params=params, headers=headers, timeout=30)
 
     return [
         Tile(
@@ -203,6 +237,14 @@ def localized_sponsored_by(spoc: dict[str, str], country: str) -> str:
     )
 
 
+def find_env_by_code(env_code: str) -> Environment:
+    for env in ENVIRONMENTS:
+        if env.code == env_code:
+            return env
+
+    raise ValueError(f"Unknown environment '{env_code}'")
+
+
 class PreviewView(TemplateView):
     """View class for /preview"""
 
@@ -210,16 +252,21 @@ class PreviewView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         """Render ad previews"""
+        env_code = request.GET.get("env", "production")
         country = request.GET.get("country", "US")
         region = request.GET.get("region", "CA")
 
+        env = find_env_by_code(env_code)
+
         context = {
+            "environments": ENVIRONMENTS,
             "countries": COUNTRIES,
             "regions": REGIONS,
+            "environment": env_code,
             "country": country,
             "region": region,
-            "spocs": get_spocs(country, region),
-            "tiles": get_tiles(country, region),
+            "spocs": get_spocs(env, country, region),
+            "tiles": get_tiles(env, country, region),
         }
 
         return self.render_to_response(context)

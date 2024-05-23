@@ -10,6 +10,17 @@
     <h1>MARS Ads Preview</h1>
 
     <form>
+        <label for="env">Environment</label>&nbsp;
+        <select name="env" id="env">
+            {% for anEnv in environments %}
+                {% if anEnv.code == environment %}
+                <option value="{{ anEnv.code }}" selected="selected">{{ anEnv.name }}</option>
+                {% else %}
+                <option value="{{ anEnv.code }}">{{ anEnv.name }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+
         <label for="country">Country</label>&nbsp;
         <select name="country" id="country">
             {% for aCountry in countries %}

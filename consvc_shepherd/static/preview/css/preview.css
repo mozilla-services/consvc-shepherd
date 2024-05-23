@@ -20,8 +20,8 @@
     font-weight: bold;
 }
 
-#region-container {
-    margin-left: 20px;
+#preview select {
+    margin-right: 20px;
 }
 
 .tiles, .spocs {
