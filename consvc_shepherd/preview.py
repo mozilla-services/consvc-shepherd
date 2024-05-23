@@ -1,4 +1,5 @@
 """Ads Preview page"""
+
 import uuid
 from dataclasses import dataclass
 from typing import TypedDict
@@ -215,7 +216,9 @@ def get_tiles(env: Environment, country: str, region: str) -> list[Tile]:
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:126.0) Gecko/20100101 Firefox/126.0",
     }
 
-    r = requests.get(f"{env.mars_url}/v1/tiles", params=params, headers=headers, timeout=30)
+    r = requests.get(
+        f"{env.mars_url}/v1/tiles", params=params, headers=headers, timeout=30
+    )
 
     return [
         Tile(
@@ -238,6 +241,7 @@ def localized_sponsored_by(spoc: dict[str, str], country: str) -> str:
 
 
 def find_env_by_code(env_code: str) -> Environment:
+    """Find an environment by code, raise an exception if no environment is found"""
     for env in ENVIRONMENTS:
         if env.code == env_code:
             return env
