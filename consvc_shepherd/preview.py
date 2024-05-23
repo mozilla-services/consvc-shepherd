@@ -45,7 +45,7 @@ class Region(TypedDict):
 
 @dataclass(frozen=True)
 class Environment:
-    """Represents a Site in Kevel. Some environments have more than one site configured."""
+    """Represents an Ads environment, not to be confused with a MARS or Shepherd environment."""
 
     code: str
     name: str
