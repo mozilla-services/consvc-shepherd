@@ -44,7 +44,7 @@
 
     <h2>Tiles</h2>
     <div class="tiles">
-        {% for tile in tiles %}
+        {% for tile in ads.tiles %}
             <div class="tile">
                 <div class="tile-outer">
                     <img class="tile-image" src="{{ tile.image_url }}" alt="{{ tile.name }}"/>
@@ -59,7 +59,7 @@
 
     <h2>SPOCs</h2>
     <div class="spocs">
-        {% for spoc in spocs %}
+        {% for spoc in ads.spocs %}
             <div class="spoc">
                 <img class="spoc-image" src="{{ spoc.image_src }}" alt="{{ spoc.title }}"/>
                 <div class="spoc-meta">

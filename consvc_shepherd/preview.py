@@ -93,6 +93,24 @@ ENVIRONMENTS: list[Environment] = [
         mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
         spoc_site_id=1070098,
     ),
+    Environment(
+        code="unified_dev",
+        name="Dev unified API",
+        mars_url="https://mars.stage.ads.nonprod.webservices.mozgcp.net",
+        spoc_site_id=0,
+    ),
+    Environment(
+        code="unified_preview",
+        name="Preview unified API",
+        mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
+        spoc_site_id=0,
+    ),
+    Environment(
+        code="unified_prod",
+        name="Prod unified API",
+        mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
+        spoc_site_id=0,
+    ),
 ]
 
 COUNTRIES: list[Region] = [
@@ -230,6 +248,67 @@ def get_tiles(env: Environment, country: str, region: str) -> list[Tile]:
     ]
 
 
+def get_unified(env: Environment) -> dict[str, list[Spoc]|list[Tile]]:
+    """Load Ads from MARS unified api"""
+    user_context_id = uuid.uuid4()
+
+    # request different placements for some environments
+    if env.code == "unified_dev":
+        placements = [{
+            "placement": "newtab_spocs",
+            "count": 10
+        }, {
+            "placement": "newtab_tiles",
+            "count": 3
+        }]
+    elif env.code == "unified_preview":
+        placements = [{
+            "placement": "newtab_spocs_preview",
+            "count": 10
+        }, {
+            "placement": "newtab_tiles_preview",
+            "count": 3
+        }]
+    elif env.code == "unified_prod":
+        placements = [{
+            "placement": "newtab_spocs",
+            "count": 10
+        }, {
+            "placement": "newtab_tiles",
+            "count": 3
+        }]
+    else:
+        placements = []
+
+
+    # load spocs & tiles, then map them to the same shape
+    body = {
+        "user_context_id": f"{user_context_id}", # UUID -> str
+        "placements": placements,
+    }
+
+    r = requests.post(f"{env.mars_url}/v1/ads", json=body, timeout=30)
+
+    print(r.json())
+
+    # map to tile or spoc based on placement name
+    return {
+        "spocs": [],
+        "tiles": [],
+    }
+
+
+def get_ads(env: Environment, country: str, region: str) -> dict[str, list[Spoc]|list[Tile]]:
+    """Based on Environment, either load spocs & tiles individually or from a single request"""
+    if env.code.startswith("unified_"):
+        return get_unified(env)
+    else:
+        return {
+            "spocs": get_spocs(env, country, region),
+            "tiles": get_tiles(env, country, region),
+        }
+
+
 def localized_sponsored_by(spoc: dict[str, str], country: str) -> str:
     """Render the localized 'Sponsored by ...' text for a SPOC"""
     if (override := spoc.get("sponsored_by_override")) is not None:
@@ -269,8 +348,7 @@ class PreviewView(TemplateView):
             "environment": env_code,
             "country": country,
             "region": region,
-            "spocs": get_spocs(env, country, region),
-            "tiles": get_tiles(env, country, region),
+            "ads": get_ads(env, country, region),
         }
 
         return self.render_to_response(context)
