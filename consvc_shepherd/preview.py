@@ -50,7 +50,7 @@ class Environment:
     code: str
     name: str
     mars_url: str
-    spoc_site_id: int|None
+    spoc_site_id: int | None
 
 
 @dataclass(frozen=True)
@@ -242,7 +242,7 @@ def get_tiles(env: Environment, country: str, region: str) -> list[Tile]:
     ]
 
 
-def get_unified(env: Environment, country: str) -> dict[str, list[Spoc]|list[Tile]]:
+def get_unified(env: Environment, country: str) -> dict[str, list[Spoc] | list[Tile]]:
     """Load Ads from MARS unified api"""
     user_context_id = uuid.uuid4()
 
@@ -253,14 +253,11 @@ def get_unified(env: Environment, country: str) -> dict[str, list[Spoc]|list[Til
 
     # load spocs & tiles, then map them to the same shape
     body = {
-        "user_context_id": f"{user_context_id}", # UUID -> str
-        "placements": [{
-            "placement": spocs_placement,
-            "count": 10
-        }, {
-            "placement": tiles_placement,
-            "count": 3
-        }]
+        "user_context_id": f"{user_context_id}",  # UUID -> str
+        "placements": [
+            {"placement": spocs_placement, "count": 10},
+            {"placement": tiles_placement, "count": 3},
+        ],
     }
 
     r = requests.post(f"{env.mars_url}/v1/ads", json=body, timeout=30)
@@ -291,7 +288,9 @@ def get_unified(env: Environment, country: str) -> dict[str, list[Spoc]|list[Til
     }
 
 
-def get_ads(env: Environment, country: str, region: str) -> dict[str, list[Spoc]|list[Tile]]:
+def get_ads(
+    env: Environment, country: str, region: str
+) -> dict[str, list[Spoc] | list[Tile]]:
     """Based on Environment, either load spocs & tiles individually or from a single request"""
     if env.code.startswith("unified_"):
         return get_unified(env, country)
