@@ -50,7 +50,7 @@ class Environment:
     code: str
     name: str
     mars_url: str
-    spoc_site_id: int
+    spoc_site_id: int|None
 
 
 @dataclass(frozen=True)
@@ -97,19 +97,13 @@ ENVIRONMENTS: list[Environment] = [
         code="unified_dev",
         name="Dev unified API",
         mars_url="https://mars.stage.ads.nonprod.webservices.mozgcp.net",
-        spoc_site_id=0,
-    ),
-    Environment(
-        code="unified_preview",
-        name="Preview unified API",
-        mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
-        spoc_site_id=0,
+        spoc_site_id=None,
     ),
     Environment(
         code="unified_prod",
         name="Prod unified API",
         mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
-        spoc_site_id=0,
+        spoc_site_id=None,
     ),
 ]
 
@@ -248,60 +242,59 @@ def get_tiles(env: Environment, country: str, region: str) -> list[Tile]:
     ]
 
 
-def get_unified(env: Environment) -> dict[str, list[Spoc]|list[Tile]]:
+def get_unified(env: Environment, country: str) -> dict[str, list[Spoc]|list[Tile]]:
     """Load Ads from MARS unified api"""
     user_context_id = uuid.uuid4()
 
-    # request different placements for some environments
-    if env.code == "unified_dev":
-        placements = [{
-            "placement": "newtab_spocs",
-            "count": 10
-        }, {
-            "placement": "newtab_tiles",
-            "count": 3
-        }]
-    elif env.code == "unified_preview":
-        placements = [{
-            "placement": "newtab_spocs_preview",
-            "count": 10
-        }, {
-            "placement": "newtab_tiles_preview",
-            "count": 3
-        }]
-    elif env.code == "unified_prod":
-        placements = [{
-            "placement": "newtab_spocs",
-            "count": 10
-        }, {
-            "placement": "newtab_tiles",
-            "count": 3
-        }]
-    else:
-        placements = []
-
+    # placement names will vary for preview and experiemnt environments, whereas
+    # dev & prod have the same placements served by different kevel networks
+    spocs_placement = "newtab_spocs"
+    tiles_placement = "newtab_tiles"
 
     # load spocs & tiles, then map them to the same shape
     body = {
         "user_context_id": f"{user_context_id}", # UUID -> str
-        "placements": placements,
+        "placements": [{
+            "placement": spocs_placement,
+            "count": 10
+        }, {
+            "placement": tiles_placement,
+            "count": 3
+        }]
     }
 
     r = requests.post(f"{env.mars_url}/v1/ads", json=body, timeout=30)
 
-    print(r.json())
+    tiles = [
+        Tile(
+            image_url=tile["image_url"],
+            name=tile["sponsor"],
+            sponsored=LOCALIZATIONS["Sponsored"][country],
+        )
+        for tile in r.json().get(tiles_placement, [])
+    ]
 
-    # map to tile or spoc based on placement name
+    spocs = [
+        Spoc(
+            image_src=spoc["image_url"],
+            title=spoc["title"],
+            domain=spoc["domain"],
+            excerpt=spoc["excerpt"],
+            sponsored_by=localized_sponsored_by(spoc, country),
+        )
+        for spoc in r.json().get(spocs_placement, [])
+    ]
+
     return {
-        "spocs": [],
-        "tiles": [],
+        "spocs": spocs,
+        "tiles": tiles,
     }
 
 
 def get_ads(env: Environment, country: str, region: str) -> dict[str, list[Spoc]|list[Tile]]:
     """Based on Environment, either load spocs & tiles individually or from a single request"""
     if env.code.startswith("unified_"):
-        return get_unified(env)
+        return get_unified(env, country)
     else:
         return {
             "spocs": get_spocs(env, country, region),
