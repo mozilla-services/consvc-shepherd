@@ -76,6 +76,7 @@ class Tile:
 @dataclass(frozen=True)
 class Ads:
     """Model for all the sets of ads that can be rendered in the preview template"""
+
     tiles: list[Tile]
     spocs: list[Spoc]
 
@@ -295,9 +296,7 @@ def get_unified(env: Environment, country: str) -> Ads:
     )
 
 
-def get_ads(
-    env: Environment, country: str, region: str
-) -> Ads:
+def get_ads(env: Environment, country: str, region: str) -> Ads:
     """Based on Environment, either load spocs & tiles individually or from a single request"""
     if env.code.startswith("unified_"):
         return get_unified(env, country)
