@@ -73,6 +73,13 @@ class Tile:
     sponsored: str
 
 
+@dataclass(frozen=True)
+class Ads:
+    """Model for all the sets of ads that can be rendered in the preview template"""
+    tiles: list[Tile]
+    spocs: list[Spoc]
+
+
 # Ad environments. Note that these differ from MARS or Shepherd environments.
 ENVIRONMENTS: list[Environment] = [
     Environment(
@@ -95,13 +102,13 @@ ENVIRONMENTS: list[Environment] = [
     ),
     Environment(
         code="unified_dev",
-        name="Dev unified API",
+        name="Dev Unified API",
         mars_url="https://mars.stage.ads.nonprod.webservices.mozgcp.net",
         spoc_site_id=None,
     ),
     Environment(
         code="unified_prod",
-        name="Prod unified API",
+        name="Prod Unified API",
         mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
         spoc_site_id=None,
     ),
@@ -242,11 +249,11 @@ def get_tiles(env: Environment, country: str, region: str) -> list[Tile]:
     ]
 
 
-def get_unified(env: Environment, country: str) -> dict[str, list[Spoc] | list[Tile]]:
+def get_unified(env: Environment, country: str) -> Ads:
     """Load Ads from MARS unified api"""
     user_context_id = uuid.uuid4()
 
-    # placement names will vary for preview and experiemnt environments, whereas
+    # placement names will vary for preview and experiment environments, whereas
     # dev & prod have the same placements served by different kevel networks
     spocs_placement = "newtab_spocs"
     tiles_placement = "newtab_tiles"
@@ -282,23 +289,23 @@ def get_unified(env: Environment, country: str) -> dict[str, list[Spoc] | list[T
         for spoc in r.json().get(spocs_placement, [])
     ]
 
-    return {
-        "spocs": spocs,
-        "tiles": tiles,
-    }
+    return Ads(
+        spocs=spocs,
+        tiles=tiles,
+    )
 
 
 def get_ads(
     env: Environment, country: str, region: str
-) -> dict[str, list[Spoc] | list[Tile]]:
+) -> Ads:
     """Based on Environment, either load spocs & tiles individually or from a single request"""
     if env.code.startswith("unified_"):
         return get_unified(env, country)
     else:
-        return {
-            "spocs": get_spocs(env, country, region),
-            "tiles": get_tiles(env, country, region),
-        }
+        return Ads(
+            spocs=get_spocs(env, country, region),
+            tiles=get_tiles(env, country, region),
+        )
 
 
 def localized_sponsored_by(spoc: dict[str, str], country: str) -> str:
