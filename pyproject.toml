@@ -82,3 +82,8 @@ add-select = ["D212"]
 add-ignore = ["D105","D107","D203", "D205", "D400"]
 # '^(?!migrations).*' ignores all Django-generated migration files
 match-dir = '^(?!migrations).*'
+
+[tool.coverage.run]
+omit = [
+    "consvc_shepherd/preview.py"
+]

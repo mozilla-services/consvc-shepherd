@@ -50,7 +50,7 @@ class Environment:
     code: str
     name: str
     mars_url: str
-    spoc_site_id: int
+    spoc_site_id: int | None
 
 
 @dataclass(frozen=True)
@@ -73,6 +73,14 @@ class Tile:
     sponsored: str
 
 
+@dataclass(frozen=True)
+class Ads:
+    """Model for all the sets of ads that can be rendered in the preview template"""
+
+    tiles: list[Tile]
+    spocs: list[Spoc]
+
+
 # Ad environments. Note that these differ from MARS or Shepherd environments.
 ENVIRONMENTS: list[Environment] = [
     Environment(
@@ -92,6 +100,18 @@ ENVIRONMENTS: list[Environment] = [
         name="Production",
         mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
         spoc_site_id=1070098,
+    ),
+    Environment(
+        code="unified_dev",
+        name="Dev Unified API",
+        mars_url="https://mars.stage.ads.nonprod.webservices.mozgcp.net",
+        spoc_site_id=None,
+    ),
+    Environment(
+        code="unified_prod",
+        name="Prod Unified API",
+        mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
+        spoc_site_id=None,
     ),
 ]
 
@@ -230,6 +250,63 @@ def get_tiles(env: Environment, country: str, region: str) -> list[Tile]:
     ]
 
 
+def get_unified(env: Environment, country: str) -> Ads:
+    """Load Ads from MARS unified api"""
+    user_context_id = uuid.uuid4()
+
+    # placement names will vary for preview and experiment environments, whereas
+    # dev & prod have the same placements served by different kevel networks
+    spocs_placement = "newtab_spocs"
+    tiles_placement = "newtab_tiles"
+
+    # load spocs & tiles, then map them to the same shape
+    body = {
+        "user_context_id": f"{user_context_id}",  # UUID -> str
+        "placements": [
+            {"placement": spocs_placement, "count": 10},
+            {"placement": tiles_placement, "count": 3},
+        ],
+    }
+
+    r = requests.post(f"{env.mars_url}/v1/ads", json=body, timeout=30)
+
+    tiles = [
+        Tile(
+            image_url=tile["image_url"],
+            name=tile["sponsor"],
+            sponsored=LOCALIZATIONS["Sponsored"][country],
+        )
+        for tile in r.json().get(tiles_placement, [])
+    ]
+
+    spocs = [
+        Spoc(
+            image_src=spoc["image_url"],
+            title=spoc["title"],
+            domain=spoc["domain"],
+            excerpt=spoc["excerpt"],
+            sponsored_by=localized_sponsored_by(spoc, country),
+        )
+        for spoc in r.json().get(spocs_placement, [])
+    ]
+
+    return Ads(
+        spocs=spocs,
+        tiles=tiles,
+    )
+
+
+def get_ads(env: Environment, country: str, region: str) -> Ads:
+    """Based on Environment, either load spocs & tiles individually or from a single request"""
+    if env.code.startswith("unified_"):
+        return get_unified(env, country)
+    else:
+        return Ads(
+            spocs=get_spocs(env, country, region),
+            tiles=get_tiles(env, country, region),
+        )
+
+
 def localized_sponsored_by(spoc: dict[str, str], country: str) -> str:
     """Render the localized 'Sponsored by ...' text for a SPOC"""
     if (override := spoc.get("sponsored_by_override")) is not None:
@@ -269,8 +346,7 @@ class PreviewView(TemplateView):
             "environment": env_code,
             "country": country,
             "region": region,
-            "spocs": get_spocs(env, country, region),
-            "tiles": get_tiles(env, country, region),
+            "ads": get_ads(env, country, region),
         }
 
         return self.render_to_response(context)
