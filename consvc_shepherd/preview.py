@@ -273,7 +273,7 @@ def get_unified(env: Environment, country: str) -> Ads:
     tiles = [
         Tile(
             image_url=tile["image_url"],
-            name=tile["sponsor"],
+            name=tile["name"],
             sponsored=LOCALIZATIONS["Sponsored"][country],
         )
         for tile in r.json().get(tiles_placement, [])
