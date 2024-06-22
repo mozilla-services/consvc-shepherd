@@ -74,18 +74,18 @@
         {% endfor %}
     </div>
 
-    <h2>Sponsored Topsites</h2>
+    <h2>Direct Sold Tiles</h2>
     <div class="spocs">
-        {% for sponsored_topsite in ads.sponsored_topsites %}
+        {% for direct_sold_tile in ads.direct_sold_tiles %}
             <div class="spoc">
-                <img class="spoc-image" src="{{ sponsored_topsite.image_src }}" alt="{{ sponsored_topsite.title }}"/>
+                <img class="spoc-image" src="{{ direct_sold_tile.image_src }}" alt="{{ direct_sold_tile.title }}"/>
                 <div class="spoc-meta">
                     <div class="spoc-info">
-                        <div class="spoc-domain clamp">{{ sponsored_topsite.domain }}</div>
-                        <div class="spoc-title clamp">{{ sponsored_topsite.title }}</div>
-                        <div class="spoc-exerpt clamp">{{ sponsored_topsite.excerpt }}</div>
+                        <div class="spoc-domain clamp">{{ direct_sold_tile.domain }}</div>
+                        <div class="spoc-title clamp">{{ direct_sold_tile.title }}</div>
+                        <div class="spoc-exerpt clamp">{{ direct_sold_tile.excerpt }}</div>
                     </div>
-                    <div class="spoc-context">{{ spoc.sponsored_by }}</div>
+                    <div class="spoc-context">{{ direct_sold_tile.sponsored_by }}</div>
                 </div>
             </div>
         {% endfor %}
