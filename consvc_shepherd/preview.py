@@ -65,6 +65,11 @@ class Spoc:
     excerpt: str
     sponsored_by: str
 
+@dataclass(frozen=True)
+class DirectSoldTile(Spoc):
+    """Model for a Direct Sold Tile aka Sponsored Topsite loaded from MARS"""
+
+    pass
 
 @dataclass(frozen=True)
 class Tile:
@@ -75,22 +80,12 @@ class Tile:
     sponsored: str
 
 @dataclass(frozen=True)
-class SponsoredTopsite:
-    """Model for a Sponsored Topsite (aka Direct Sold Tile) loaded from MARS"""
-
-    image_src: str
-    title: str
-    domain: str
-    excerpt: str
-    sponsored_by: str
-
-@dataclass(frozen=True)
 class Ads:
     """Model for all the sets of ads that can be rendered in the preview template"""
 
     tiles: list[Tile]
     spocs: list[Spoc]
-    sponsored_topsites: list[SponsoredTopsite]
+    direct_sold_tiles: list[DirectSoldTile]
 
 # Ad environments. Note that these differ from MARS or Shepherd environments.
 ENVIRONMENTS: list[Environment] = [
@@ -260,8 +255,8 @@ def get_tiles(env: Environment, country: str, region: str) -> list[Tile]:
         for tile in r.json().get("tiles", [])
     ]
 
-def get_sponsored_topsites(env: Environment, country: str, region: str) -> list[SponsoredTopsite]:
-    """Load Sponsored Topsites / Direct Sold tiles from MARS for given country and region"""
+def get_direct_sold_tiles(env: Environment, country: str, region: str) -> list[DirectSoldTile]:
+    """Load Direct Sold Tiles (aka Sponsored Topsites) from MARS for given country and region"""
     # Generate a unique pocket ID per request to avoid frequency capping
     pocket_id = uuid.uuid4()
 
@@ -285,7 +280,7 @@ def get_sponsored_topsites(env: Environment, country: str, region: str) -> list[
     print(f'json from get_sponsored_topsites /spocs {r.json()}', file=sys.stderr)
 
     return [
-        SponsoredTopsite(
+        DirectSoldTile(
             image_src=spoc["image_src"],
             title=spoc["title"],
             domain=spoc["domain"],
@@ -339,7 +334,7 @@ def get_unified(env: Environment, country: str) -> Ads:
     return Ads(
         spocs=spocs,
         tiles=tiles,
-        sponsored_topsites=[]
+        direct_sold_tiles=[]
     )
 
 
@@ -351,7 +346,7 @@ def get_ads(env: Environment, country: str, region: str) -> Ads:
         return Ads(
             spocs=get_spocs(env, country, region),
             tiles=get_tiles(env, country, region),
-            sponsored_topsites=get_sponsored_topsites(env, country, region)
+            direct_sold_tiles=get_direct_sold_tiles(env, country, region)
         )
 
 
