@@ -7,7 +7,6 @@ from typing import TypedDict
 import requests
 from django.views.generic import TemplateView
 
-import sys
 
 # Localized strings from https://hg.mozilla.org/l10n-central/
 #
@@ -65,11 +64,13 @@ class Spoc:
     excerpt: str
     sponsored_by: str
 
+
 @dataclass(frozen=True)
 class DirectSoldTile(Spoc):
     """Model for a Direct Sold Tile aka Sponsored Topsite loaded from MARS"""
 
     pass
+
 
 @dataclass(frozen=True)
 class Tile:
@@ -79,6 +80,7 @@ class Tile:
     name: str
     sponsored: str
 
+
 @dataclass(frozen=True)
 class Ads:
     """Model for all the sets of ads that can be rendered in the preview template"""
@@ -86,6 +88,7 @@ class Ads:
     tiles: list[Tile]
     spocs: list[Spoc]
     direct_sold_tiles: list[DirectSoldTile]
+
 
 # Ad environments. Note that these differ from MARS or Shepherd environments.
 ENVIRONMENTS: list[Environment] = [
@@ -266,7 +269,7 @@ def get_direct_sold_tiles(env: Environment, country: str, region: str) -> list[D
         "version": 2,
         "country": country,
         "region": region,
-        "placements":  [
+        "placements": [
             {
                 "name": "sponsored-topsites",
                 "zone_ids": [307565],
@@ -276,8 +279,6 @@ def get_direct_sold_tiles(env: Environment, country: str, region: str) -> list[D
     }
 
     r = requests.post(f"{env.mars_url}/spocs", json=body, timeout=30)
-    print(f'json from get_sponsored_topsites /spocs response status {r.status_code}', file=sys.stderr)
-    print(f'json from get_sponsored_topsites /spocs {r.json()}', file=sys.stderr)
 
     return [
         DirectSoldTile(
