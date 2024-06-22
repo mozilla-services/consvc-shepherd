@@ -1,7 +1,6 @@
-version: "3"
-
 services:
   db:
+    container_name: consvc-shepherd-db
     tty: true
     restart: always
     image: postgres:14.0
@@ -14,6 +13,7 @@ services:
       - "5432:5432"
 
   app:
+    container_name: consvc-shepherd-app
     tty: true
     env_file:
       - .env
@@ -32,5 +32,3 @@ services:
 
 volumes:
   db_volume:
-
-

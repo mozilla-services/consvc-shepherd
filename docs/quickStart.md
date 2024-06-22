@@ -16,12 +16,12 @@ eval "$(pyenv virtualenv-init -)"
 ```
 
 4. To run consvc-shepherd, you'll need to specify some minimal configurations.
-Use the existing `.env.example` and rename it to `env`.
+Use the existing `.env.example` and copy it to `.env`.
 You'll want to make sure configuration files in the `.env` file match your database setup, configuring the database name, user, host and password variables.
 It should appear as follows:
 
 ```shell
-$ mv .env.example .env
+$ cp .env.example .env
 
 # Variables to set in file
 DEBUG=true
@@ -40,15 +40,13 @@ $ pyenv install 3.11
 
 # pyenv virtualenv
 $ pyenv virtualenv 3.11 shepherd # or whatever project name you like.
-$ pyenv local shepherd # enables virtual env when you enter directory. 
-
-# Install dependencies
-$ pip install poetry
-$ poetry install
+$ pyenv local shepherd # enables virtual env when you enter directory.
 ```
 
 6. Install your dependencies:
+
 ```shell
+$ pip install poetry
 $ poetry install
 ```
 
@@ -56,17 +54,15 @@ $ poetry install
 
 8. Build the Docker image and start the container:
 ```shell
-docker compose build
-docker compose up
+docker-compose up --build
 ```
 
 The application will then be accessible at the following url: [http://0.0.0.0:7001/](http://0.0.0.0:7001/). The admin panel is available at [http://0.0.0.0:7001/admin](http://0.0.0.0:7001/admin)
 
-9. Create database migrations and run migrations. 
+9. Create database migrations and run migrations.
 You may have to do this periodically as you modify or create models. Shell in as above and run the following commands:
 ``` shell
-docker ps # capture container id for consvc-shepherd
-docker exec -it <CONTAINER ID> sh # interactive mode
-python manage.py makemigrations 
-python manage.py migrate 
+docker exec -it consvc-shepherd-app sh # interactive mode
+python manage.py makemigrations
+python manage.py migrate
 ```
