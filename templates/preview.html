@@ -73,6 +73,23 @@
             </div>
         {% endfor %}
     </div>
+
+    <h2>Sponsored Topsites</h2>
+    <div class="spocs">
+        {% for sponsored_topsite in ads.sponsored_topsites %}
+            <div class="spoc">
+                <img class="spoc-image" src="{{ sponsored_topsite.image_src }}" alt="{{ sponsored_topsite.title }}"/>
+                <div class="spoc-meta">
+                    <div class="spoc-info">
+                        <div class="spoc-domain clamp">{{ sponsored_topsite.domain }}</div>
+                        <div class="spoc-title clamp">{{ sponsored_topsite.title }}</div>
+                        <div class="spoc-exerpt clamp">{{ sponsored_topsite.excerpt }}</div>
+                    </div>
+                    <div class="spoc-context">{{ spoc.sponsored_by }}</div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 </div>
 
 {{ regions|json_script:"regions-data" }}
