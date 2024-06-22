@@ -7,7 +7,6 @@ from typing import TypedDict
 import requests
 from django.views.generic import TemplateView
 
-
 # Localized strings from https://hg.mozilla.org/l10n-central/
 #
 # See e.g. https://hg.mozilla.org/l10n-central/es-ES/file/tip/browser/browser/newtab/newtab.ftl
@@ -258,7 +257,10 @@ def get_tiles(env: Environment, country: str, region: str) -> list[Tile]:
         for tile in r.json().get("tiles", [])
     ]
 
-def get_direct_sold_tiles(env: Environment, country: str, region: str) -> list[DirectSoldTile]:
+
+def get_direct_sold_tiles(
+    env: Environment, country: str, region: str
+) -> list[DirectSoldTile]:
     """Load Direct Sold Tiles (aka Sponsored Topsites) from MARS for given country and region"""
     # Generate a unique pocket ID per request to avoid frequency capping
     pocket_id = uuid.uuid4()
@@ -273,9 +275,9 @@ def get_direct_sold_tiles(env: Environment, country: str, region: str) -> list[D
             {
                 "name": "sponsored-topsites",
                 "zone_ids": [307565],
-                "ad_types": [2401, 3617]
+                "ad_types": [2401, 3617],
             }
-        ]
+        ],
     }
 
     r = requests.post(f"{env.mars_url}/spocs", json=body, timeout=30)
@@ -332,11 +334,7 @@ def get_unified(env: Environment, country: str) -> Ads:
         for spoc in r.json().get(spocs_placement, [])
     ]
 
-    return Ads(
-        spocs=spocs,
-        tiles=tiles,
-        direct_sold_tiles=[]
-    )
+    return Ads(spocs=spocs, tiles=tiles, direct_sold_tiles=[])
 
 
 def get_ads(env: Environment, country: str, region: str) -> Ads:
@@ -347,7 +345,7 @@ def get_ads(env: Environment, country: str, region: str) -> Ads:
         return Ads(
             spocs=get_spocs(env, country, region),
             tiles=get_tiles(env, country, region),
-            direct_sold_tiles=get_direct_sold_tiles(env, country, region)
+            direct_sold_tiles=get_direct_sold_tiles(env, country, region),
         )
 
 
