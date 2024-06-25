@@ -1,5 +1,7 @@
 """Views test module for consvc_shepherd."""
 
+from unittest import mock
+
 from django.test import TestCase, override_settings
 
 from consvc_shepherd.models import (
@@ -8,6 +10,7 @@ from consvc_shepherd.models import (
     PartnerAllocation,
     SettingsSnapshot,
 )
+from consvc_shepherd.preview import Ads, DirectSoldTile, Spoc, Tile
 from contile.models import Partner
 
 
@@ -142,3 +145,49 @@ class TestAllocationSettingsListView(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(AllocationSettingsSnapshot.objects.count(), 1)
+
+
+@override_settings(DEBUG=True)
+class TestPreviewView(TestCase):
+    """Test of PreviewView."""
+
+    def createMockAds(self):
+        """Create some mock ads data to assert against in the preview view"""
+        tile = Tile(
+            image_url="https://picsum.photos/48",
+            name="Expandia",
+            sponsored="Sponsored",
+        )
+        spoc = Spoc(
+            image_src="https://picsum.photos/296/148",
+            title="Play Forge of Fiefdoms Now for Free",
+            domain="play.forgeoffiefdoms.com",
+            excerpt="If you like to play, this fief-building game is a must-have.",
+            sponsored_by="Forge of Fiefdoms",
+        )
+        directSoldTile = DirectSoldTile(
+            image_src="https://picsum.photos/296/148",
+            title="Don't Borrow From The Bank If You Own a Home, Do This Instead (It's Genius)",
+            domain="lendgogo.com",
+            excerpt="Get cash for your home's equity without affecting your current mortgage rate.",
+            sponsored_by="Lendgogo",
+        )
+        return Ads(
+            tiles=[tile],
+            spocs=[spoc],
+            direct_sold_tiles=[directSoldTile],
+        )
+
+    def test_preview_view(self):
+        """Test that the preview view shows data returned from get_ads request"""
+        with mock.patch(
+            "consvc_shepherd.preview.get_ads", return_value=self.createMockAds()
+        ):
+            response = self.client.get("/preview")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.context["ads"].tiles), 1)
+            self.assertContains(response, "Expandia")
+            self.assertEqual(len(response.context["ads"].spocs), 1)
+            self.assertContains(response, "Forge of Fiefdoms")
+            self.assertEqual(len(response.context["ads"].direct_sold_tiles), 1)
+            self.assertContains(response, "Lendgogo")
