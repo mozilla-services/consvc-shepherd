@@ -3,6 +3,7 @@
 import uuid
 from dataclasses import dataclass
 from typing import TypedDict
+from urllib.parse import parse_qs, urlparse, urlencode, urlunparse
 
 import requests
 from django.views.generic import TemplateView
@@ -65,15 +66,8 @@ class Spoc:
 
 
 @dataclass(frozen=True)
-class DirectSoldTile(Spoc):
-    """Model for a Direct Sold Tile aka Sponsored Topsite loaded from MARS"""
-
-    pass
-
-
-@dataclass(frozen=True)
 class Tile:
-    """Model for a Sponsored Tile loaded from MARS"""
+    """General Tile Model for Sponsored Tiles and Direct Sold Tiles loaded from MARS"""
 
     image_url: str
     name: str
@@ -86,7 +80,6 @@ class Ads:
 
     tiles: list[Tile]
     spocs: list[Spoc]
-    direct_sold_tiles: list[DirectSoldTile]
 
 
 # Ad environments. Note that these differ from MARS or Shepherd environments.
@@ -260,7 +253,7 @@ def get_tiles(env: Environment, country: str, region: str) -> list[Tile]:
 
 def get_direct_sold_tiles(
     env: Environment, country: str, region: str
-) -> list[DirectSoldTile]:
+) -> list[Tile]:
     """Load Direct Sold Tiles (aka Sponsored Topsites) from MARS for given country and region"""
     # Generate a unique pocket ID per request to avoid frequency capping
     pocket_id = uuid.uuid4()
@@ -283,14 +276,12 @@ def get_direct_sold_tiles(
     r = requests.post(f"{env.mars_url}/spocs", json=body, timeout=30)
 
     return [
-        DirectSoldTile(
-            image_src=spoc["image_src"],
-            title=spoc["title"],
-            domain=spoc["domain"],
-            excerpt=spoc["excerpt"],
-            sponsored_by=localized_sponsored_by(spoc, country),
+        Tile(
+            image_url=resize_direct_sold_tile_image_url(tile["image_src"], 48, 48),
+            name=tile["sponsor"],
+            sponsored=LOCALIZATIONS["Sponsored"][country],
         )
-        for spoc in r.json().get("sponsored-topsites", [])
+        for tile in r.json().get("sponsored-topsites", [])
     ]
 
 
@@ -334,7 +325,7 @@ def get_unified(env: Environment, country: str) -> Ads:
         for spoc in r.json().get(spocs_placement, [])
     ]
 
-    return Ads(spocs=spocs, tiles=tiles, direct_sold_tiles=[])
+    return Ads(spocs=spocs, tiles=tiles)
 
 
 def get_ads(env: Environment, country: str, region: str) -> Ads:
@@ -344,8 +335,7 @@ def get_ads(env: Environment, country: str, region: str) -> Ads:
     else:
         return Ads(
             spocs=get_spocs(env, country, region),
-            tiles=get_tiles(env, country, region),
-            direct_sold_tiles=get_direct_sold_tiles(env, country, region),
+            tiles=get_tiles(env, country, region) + get_direct_sold_tiles(env, country, region),
         )
 
 
@@ -367,6 +357,16 @@ def find_env_by_code(env_code: str) -> Environment:
 
     raise ValueError(f"Unknown environment '{env_code}'")
 
+def resize_direct_sold_tile_image_url(img_url: str, w: int, h: int) -> str:
+    """Modifies an image url query parameters to the requested size"""
+    new_resize_query = {'resize': ['w{}-h{}'.format(w, h)]}
+
+    parsed_url = urlparse(img_url)
+    parsed_query = parse_qs(parsed_url[4])
+    parsed_query.update(new_resize_query)
+    new_query_string = urlencode(parsed_query, doseq=True)
+    parsed_url = parsed_url._replace(query = new_query_string)
+    return urlunparse(parsed_url)
 
 class PreviewView(TemplateView):
     """View class for /preview"""
