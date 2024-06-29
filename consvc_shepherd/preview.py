@@ -3,7 +3,7 @@
 import uuid
 from dataclasses import dataclass
 from typing import TypedDict
-from urllib.parse import parse_qs, urlparse, urlencode, urlunparse
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 import requests
 from django.views.generic import TemplateView
@@ -33,6 +33,7 @@ LOCALIZATIONS = {
     },
 }
 
+DIRECT_SOLD_TILE_AD_TYPE = 3120
 
 class Region(TypedDict):
     """Represents a supported country or region within a country
@@ -52,6 +53,7 @@ class Environment:
     name: str
     mars_url: str
     spoc_site_id: int | None
+    direct_sold_tile_zone_id: int | None
 
 
 @dataclass(frozen=True)
@@ -89,30 +91,35 @@ ENVIRONMENTS: list[Environment] = [
         name="Dev",
         mars_url="https://mars.stage.ads.nonprod.webservices.mozgcp.net",
         spoc_site_id=1276332,
+        direct_sold_tile_zone_id=None
     ),
     Environment(
         code="preview",
         name="Preview",
         mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
         spoc_site_id=1084367,
+        direct_sold_tile_zone_id=None,
     ),
     Environment(
         code="production",
         name="Production",
         mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
         spoc_site_id=1070098,
+        direct_sold_tile_zone_id=280143
     ),
     Environment(
         code="unified_dev",
         name="Dev Unified API",
         mars_url="https://mars.stage.ads.nonprod.webservices.mozgcp.net",
         spoc_site_id=None,
+        direct_sold_tile_zone_id=None,
     ),
     Environment(
         code="unified_prod",
         name="Prod Unified API",
         mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
         spoc_site_id=None,
+        direct_sold_tile_zone_id=None,
     ),
 ]
 
@@ -213,6 +220,8 @@ def get_spocs(env: Environment, country: str, region: str) -> list[Spoc]:
     }
 
     r = requests.post(f"{env.mars_url}/spocs", json=body, timeout=30)
+    print('spocs from /spocs')
+    print(r.json())
 
     return [
         Spoc(
@@ -241,6 +250,9 @@ def get_tiles(env: Environment, country: str, region: str) -> list[Tile]:
         f"{env.mars_url}/v1/tiles", params=params, headers=headers, timeout=30
     )
 
+    print('tiles from /v1/tiles')
+    print(r.json())
+
     return [
         Tile(
             image_url=tile["image_url"],
@@ -254,9 +266,11 @@ def get_tiles(env: Environment, country: str, region: str) -> list[Tile]:
 def get_direct_sold_tiles(
     env: Environment, country: str, region: str
 ) -> list[Tile]:
-    """Load Direct Sold Tiles (aka Sponsored Topsites) from MARS for given country and region"""
+    """Request Direct Sold Tiles (aka Sponsored Topsites) from MARS for given country and region"""
     # Generate a unique pocket ID per request to avoid frequency capping
     pocket_id = uuid.uuid4()
+
+    direct_sold_tiles_placement="sponsored-topsites"
 
     body = {
         "pocket_id": f"{{{pocket_id}}}",  # produces "{uuid}"
@@ -266,14 +280,17 @@ def get_direct_sold_tiles(
         "region": region,
         "placements": [
             {
-                "name": "sponsored-topsites",
-                "zone_ids": [307565],
-                "ad_types": [2401, 3617],
+                "name": direct_sold_tiles_placement,
+                "zone_ids": [env.direct_sold_tile_zone_id],
+                "ad_types": [DIRECT_SOLD_TILE_AD_TYPE],
             }
         ],
     }
 
     r = requests.post(f"{env.mars_url}/spocs", json=body, timeout=30)
+
+    print('direct sold tiles aka sponsored-topsites from /spocs')
+    print(r.json())
 
     return [
         Tile(

@@ -10,7 +10,7 @@ from consvc_shepherd.models import (
     PartnerAllocation,
     SettingsSnapshot,
 )
-from consvc_shepherd.preview import Ads, DirectSoldTile, Spoc, Tile
+from consvc_shepherd.preview import Ads, Spoc, Tile
 from contile.models import Partner
 
 
@@ -155,27 +155,24 @@ class TestPreviewView(TestCase):
         """Create some mock ads data to assert against in the preview view"""
         tile = Tile(
             image_url="https://picsum.photos/48",
-            name="Expandia",
+            name="ACME",
+            sponsored="Sponsored",
+        )
+        direct_sold_tile = Tile(
+            image_url="https://picsum.photos/48",
+            name="Zombocom",
             sponsored="Sponsored",
         )
         spoc = Spoc(
             image_src="https://picsum.photos/296/148",
-            title="Play Forge of Fiefdoms Now for Free",
-            domain="play.forgeoffiefdoms.com",
-            excerpt="If you like to play, this fief-building game is a must-have.",
-            sponsored_by="Forge of Fiefdoms",
-        )
-        directSoldTile = DirectSoldTile(
-            image_src="https://picsum.photos/296/148",
-            title="Don't Borrow From The Bank If You Own a Home, Do This Instead (It's Genius)",
-            domain="lendgogo.com",
-            excerpt="Get cash for your home's equity without affecting your current mortgage rate.",
-            sponsored_by="Lendgogo",
+            title="Play Anvil of the Ages Now for Free",
+            domain="play.anviloftheages.com",
+            excerpt="If you like to play games, then you should play this game.",
+            sponsored_by="Anvil of the Ages",
         )
         return Ads(
-            tiles=[tile],
+            tiles=[tile, direct_sold_tile],
             spocs=[spoc],
-            direct_sold_tiles=[directSoldTile],
         )
 
     def test_preview_view(self):
@@ -185,9 +182,8 @@ class TestPreviewView(TestCase):
         ):
             response = self.client.get("/preview")
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.context["ads"].tiles), 1)
-            self.assertContains(response, "Expandia")
+            self.assertEqual(len(response.context["ads"].tiles), 2)
+            self.assertContains(response, "ACME")
+            self.assertContains(response, "Zombocom")
             self.assertEqual(len(response.context["ads"].spocs), 1)
-            self.assertContains(response, "Forge of Fiefdoms")
-            self.assertEqual(len(response.context["ads"].direct_sold_tiles), 1)
-            self.assertContains(response, "Lendgogo")
+            self.assertContains(response, "Anvil of the Ages")
