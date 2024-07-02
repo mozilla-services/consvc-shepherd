@@ -341,10 +341,11 @@ def get_ads(env: Environment, country: str, region: str) -> Ads:
     if env.code.startswith("unified_"):
         return get_unified(env, country)
     else:
+        tiles = get_tiles(env, country, region)
+        direct_sold_tiles = get_direct_sold_tiles(env, country, region)
         return Ads(
             spocs=get_spocs(env, country, region),
-            tiles=get_tiles(env, country, region)
-            + get_direct_sold_tiles(env, country, region),
+            tiles=tiles + direct_sold_tiles,
         )
 
 
@@ -368,7 +369,7 @@ def find_env_by_code(env_code: str) -> Environment:
 
 
 def resize_direct_sold_tile_image_url(img_url: str, w: int, h: int) -> str:
-    """Modifies an image url query parameters to the requested size"""
+    """Modify an image url query parameters to the requested size"""
     new_resize_query = {"resize": ["w{}-h{}".format(w, h)]}
 
     parsed_url = urlparse(img_url)

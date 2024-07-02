@@ -1,3 +1,5 @@
+"""Unit tests for the preview page functionalities"""
+
 from unittest import mock
 
 from django.test import TestCase, override_settings
@@ -33,6 +35,7 @@ PROGRESS_QUEST_TILE: Tile = Tile(
 
 @override_settings(DEBUG=True)
 class TestGetAds(TestCase):
+    """Test the fetching of various ads on the preview page"""
 
     def mock_get_tiles(self, *args) -> list[Tile]:
         """Mock out the function that wraps 'GET /v1/tiles' request within get_ads"""
@@ -100,6 +103,6 @@ class TestGetAds(TestCase):
                 spoc_site_id=1234567,
                 direct_sold_tile_zone_id=424242,
             )
-            ads = get_ads(mockUnifiedEnv, "US", "CA")
+            get_ads(mockUnifiedEnv, "US", "CA")
 
             mock_get_unified.assert_called_once_with(mockUnifiedEnv, "US")
