@@ -37,7 +37,7 @@ PROGRESS_QUEST_TILE: Tile = Tile(
 class TestGetAds(TestCase):
     """Test the fetching of various ads on the preview page"""
 
-    def mock_get_tiles(self, *args) -> list[Tile]:
+    def mock_get_amp_tiles(self, *args) -> list[Tile]:
         """Mock out the function that wraps 'GET /v1/tiles' request within get_ads"""
         return [ACME_TILE, ZOMBOCOM_TILE]
 
@@ -55,8 +55,9 @@ class TestGetAds(TestCase):
             "consvc_shepherd.preview.get_spocs", side_effect=self.mock_get_spocs
         ) as mock_get_spocs:
             with mock.patch(
-                "consvc_shepherd.preview.get_tiles", side_effect=self.mock_get_tiles
-            ) as mock_get_tiles:
+                "consvc_shepherd.preview.get_amp_tiles",
+                side_effect=self.mock_get_amp_tiles,
+            ) as mock_get_amp_tiles:
                 with mock.patch(
                     "consvc_shepherd.preview.get_direct_sold_tiles",
                     side_effect=self.mock_get_direct_sold_tiles,
@@ -72,7 +73,7 @@ class TestGetAds(TestCase):
 
                     # Function calls
                     mock_get_spocs.assert_called_once_with(mockEnv, "US", "CA")
-                    mock_get_tiles.assert_called_once_with(mockEnv, "US", "CA")
+                    mock_get_amp_tiles.assert_called_once_with(mockEnv, "US", "CA")
                     mock_get_direct_sold_tiles.assert_called_once_with(
                         mockEnv, "US", "CA"
                     )

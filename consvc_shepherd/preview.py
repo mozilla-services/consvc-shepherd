@@ -92,21 +92,22 @@ ENVIRONMENTS: list[Environment] = [
         name="Dev",
         mars_url="https://mars.stage.ads.nonprod.webservices.mozgcp.net",
         spoc_site_id=1276332,
-        direct_sold_tile_zone_id=317832,  # In Kevel > Network: MozAds-Dev, Site: Firefox Experiments corollary, Zone: Tiles"
+        direct_sold_tile_zone_id=317828,  # In Kevel > Network: MozAds-Dev, Site: Firefox Production corollary, Zone: Tiles
     ),
     Environment(
         code="preview",
         name="Preview",
         mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
         spoc_site_id=1084367,
-        direct_sold_tile_zone_id=317828,  # In Kevel > Newtork: MozAds-Dev, Site: Firefox Production corollary, Zone: Tiles
+        direct_sold_tile_zone_id=None,  # In Kevel > Network: Pocket, Site: Firefox Staging, Zone: Tiles
+        # The above zone doesn't actually exist in Kevel yet, so we need to udpate this value once we create the zone.
     ),
     Environment(
         code="production",
         name="Production",
         mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
         spoc_site_id=1070098,
-        direct_sold_tile_zone_id=280143,  # In Kevel > Network: Pocket, Site: Firefox Production,  Zone: Tiles
+        direct_sold_tile_zone_id=280143,  # In Kevel > Network: Pocket, Site: Firefox Production, Zone: Tiles
     ),
     Environment(
         code="unified_dev",
@@ -234,7 +235,7 @@ def get_spocs(env: Environment, country: str, region: str) -> list[Spoc]:
     ]
 
 
-def get_tiles(env: Environment, country: str, region: str) -> list[Tile]:
+def get_amp_tiles(env: Environment, country: str, region: str) -> list[Tile]:
     """Load Sponsored Tiles from MARS for given country and region"""
     params = {
         "country": country,
@@ -261,6 +262,9 @@ def get_tiles(env: Environment, country: str, region: str) -> list[Tile]:
 
 def get_direct_sold_tiles(env: Environment, country: str, region: str) -> list[Tile]:
     """Request Direct Sold Tiles (aka Sponsored Topsites) from MARS for given country and region"""
+    if env.direct_sold_tile_zone_id is None:
+        return []
+
     # Generate a unique pocket ID per request to avoid frequency capping
     pocket_id = uuid.uuid4()
 
@@ -341,11 +345,11 @@ def get_ads(env: Environment, country: str, region: str) -> Ads:
     if env.code.startswith("unified_"):
         return get_unified(env, country)
     else:
-        tiles = get_tiles(env, country, region)
+        amp_tiles = get_amp_tiles(env, country, region)
         direct_sold_tiles = get_direct_sold_tiles(env, country, region)
         return Ads(
             spocs=get_spocs(env, country, region),
-            tiles=tiles + direct_sold_tiles,
+            tiles=amp_tiles + direct_sold_tiles,
         )
 
 
