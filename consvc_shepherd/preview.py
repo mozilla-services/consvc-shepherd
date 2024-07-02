@@ -35,6 +35,7 @@ LOCALIZATIONS = {
 
 DIRECT_SOLD_TILE_AD_TYPE = 3120
 
+
 class Region(TypedDict):
     """Represents a supported country or region within a country
 
@@ -91,21 +92,21 @@ ENVIRONMENTS: list[Environment] = [
         name="Dev",
         mars_url="https://mars.stage.ads.nonprod.webservices.mozgcp.net",
         spoc_site_id=1276332,
-        direct_sold_tile_zone_id=None
+        direct_sold_tile_zone_id=317832,  # In Kevel > Network: MozAds-Dev, Site: Firefox Experiments corollary, Zone: Tiles"
     ),
     Environment(
         code="preview",
         name="Preview",
         mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
         spoc_site_id=1084367,
-        direct_sold_tile_zone_id=None,
+        direct_sold_tile_zone_id=317828,  # In Kevel > Newtork: MozAds-Dev, Site: Firefox Production corollary, Zone: Tiles
     ),
     Environment(
         code="production",
         name="Production",
         mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
         spoc_site_id=1070098,
-        direct_sold_tile_zone_id=280143
+        direct_sold_tile_zone_id=280143,  # In Kevel > Network: Pocket, Site: Firefox Production,  Zone: Tiles
     ),
     Environment(
         code="unified_dev",
@@ -220,8 +221,6 @@ def get_spocs(env: Environment, country: str, region: str) -> list[Spoc]:
     }
 
     r = requests.post(f"{env.mars_url}/spocs", json=body, timeout=30)
-    print('spocs from /spocs')
-    print(r.json())
 
     return [
         Spoc(
@@ -250,9 +249,6 @@ def get_tiles(env: Environment, country: str, region: str) -> list[Tile]:
         f"{env.mars_url}/v1/tiles", params=params, headers=headers, timeout=30
     )
 
-    print('tiles from /v1/tiles')
-    print(r.json())
-
     return [
         Tile(
             image_url=tile["image_url"],
@@ -263,14 +259,12 @@ def get_tiles(env: Environment, country: str, region: str) -> list[Tile]:
     ]
 
 
-def get_direct_sold_tiles(
-    env: Environment, country: str, region: str
-) -> list[Tile]:
+def get_direct_sold_tiles(env: Environment, country: str, region: str) -> list[Tile]:
     """Request Direct Sold Tiles (aka Sponsored Topsites) from MARS for given country and region"""
     # Generate a unique pocket ID per request to avoid frequency capping
     pocket_id = uuid.uuid4()
 
-    direct_sold_tiles_placement="sponsored-topsites"
+    direct_sold_tiles_placement = "sponsored-topsites"
 
     body = {
         "pocket_id": f"{{{pocket_id}}}",  # produces "{uuid}"
@@ -288,9 +282,6 @@ def get_direct_sold_tiles(
     }
 
     r = requests.post(f"{env.mars_url}/spocs", json=body, timeout=30)
-
-    print('direct sold tiles aka sponsored-topsites from /spocs')
-    print(r.json())
 
     return [
         Tile(
@@ -352,7 +343,8 @@ def get_ads(env: Environment, country: str, region: str) -> Ads:
     else:
         return Ads(
             spocs=get_spocs(env, country, region),
-            tiles=get_tiles(env, country, region) + get_direct_sold_tiles(env, country, region),
+            tiles=get_tiles(env, country, region)
+            + get_direct_sold_tiles(env, country, region),
         )
 
 
@@ -374,16 +366,18 @@ def find_env_by_code(env_code: str) -> Environment:
 
     raise ValueError(f"Unknown environment '{env_code}'")
 
+
 def resize_direct_sold_tile_image_url(img_url: str, w: int, h: int) -> str:
     """Modifies an image url query parameters to the requested size"""
-    new_resize_query = {'resize': ['w{}-h{}'.format(w, h)]}
+    new_resize_query = {"resize": ["w{}-h{}".format(w, h)]}
 
     parsed_url = urlparse(img_url)
     parsed_query = parse_qs(parsed_url[4])
     parsed_query.update(new_resize_query)
     new_query_string = urlencode(parsed_query, doseq=True)
-    parsed_url = parsed_url._replace(query = new_query_string)
+    parsed_url = parsed_url._replace(query=new_query_string)
     return urlunparse(parsed_url)
+
 
 class PreviewView(TemplateView):
     """View class for /preview"""
