@@ -3,7 +3,7 @@
 import uuid
 from dataclasses import dataclass
 from typing import TypedDict
-from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
+from urllib.parse import SplitResult, quote, urlunsplit
 
 import requests
 from django.views.generic import TemplateView
@@ -99,8 +99,7 @@ ENVIRONMENTS: list[Environment] = [
         name="Preview",
         mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
         spoc_site_id=1084367,
-        direct_sold_tile_zone_id=None,  # In Kevel > Network: Pocket, Site: Firefox Staging, Zone: Tiles
-        # The above zone doesn't actually exist in Kevel yet, so we need to udpate this value once we create the zone.
+        direct_sold_tile_zone_id=319618,  # In Kevel > Network: Pocket, Site: Firefox Staging, Zone: Tiles
     ),
     Environment(
         code="production",
@@ -286,10 +285,9 @@ def get_direct_sold_tiles(env: Environment, country: str, region: str) -> list[T
     }
 
     r = requests.post(f"{env.mars_url}/spocs", json=body, timeout=30)
-
     return [
         Tile(
-            image_url=resize_direct_sold_tile_image_url(tile["image_src"], 48, 48),
+            image_url=create_image_url(tile["raw_image_src"], 48, 48),
             name=tile["sponsor"],
             sponsored=LOCALIZATIONS["Sponsored"][country],
         )
@@ -372,16 +370,23 @@ def find_env_by_code(env_code: str) -> Environment:
     raise ValueError(f"Unknown environment '{env_code}'")
 
 
-def resize_direct_sold_tile_image_url(img_url: str, w: int, h: int) -> str:
-    """Modify an image url query parameters to the requested size"""
-    new_resize_query = {"resize": ["w{}-h{}".format(w, h)]}
-
-    parsed_url = urlparse(img_url)
-    parsed_query = parse_qs(parsed_url[4])
-    parsed_query.update(new_resize_query)
-    new_query_string = urlencode(parsed_query, doseq=True)
-    parsed_url = parsed_url._replace(query=new_query_string)
-    return urlunparse(parsed_url)
+def create_image_url(raw_image_src: str, w: int, h: int) -> str:
+    """Modify an image url query parameters to the requested size.
+    This function is intended to create image urls in the same way as FF newtab.
+    See: https://hg.mozilla.org/mozilla-central/file/tip/browser/components/newtab/lib/TopSitesFeed.sys.mjs#l1058
+    """
+    size_path = "{}x{}".format(w, h)
+    filters_path = "filters:format(jpeg):quality(60):no_upscale():strip_exif()"
+    encoded_url = quote(raw_image_src)
+    url_parts = SplitResult(
+        "https",
+        "img-getpocket.cdn.mozilla.net",
+        size_path + "/" + filters_path + "/" + encoded_url,
+        "",
+        "",
+    )
+    image_url = urlunsplit(url_parts)
+    return image_url
 
 
 class PreviewView(TemplateView):
