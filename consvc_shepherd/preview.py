@@ -33,7 +33,8 @@ LOCALIZATIONS = {
     },
 }
 
-DIRECT_SOLD_TILE_AD_TYPE = 3120
+DIRECT_SOLD_TILE_AD_TYPES = [3120]
+SPOC_AD_TYPES = [2401, 3617]
 
 
 class Region(TypedDict):
@@ -54,7 +55,8 @@ class Environment:
     name: str
     mars_url: str
     spoc_site_id: int | None
-    direct_sold_tile_zone_id: int | None
+    spoc_zone_ids: list[int]
+    direct_sold_tile_zone_ids: list[int]
 
 
 @dataclass(frozen=True)
@@ -92,35 +94,46 @@ ENVIRONMENTS: list[Environment] = [
         name="Dev",
         mars_url="https://mars.stage.ads.nonprod.webservices.mozgcp.net",
         spoc_site_id=1276332,
-        direct_sold_tile_zone_id=317828,  # In Kevel > Network: MozAds-Dev, Site: Firefox Production corollary, Zone: Tiles
+        spoc_zone_ids=[307565],
+        direct_sold_tile_zone_ids=[
+            317828
+        ],  # In Kevel > Network: MozAds-Dev, Site: Firefox Production corollary, Zone: Tiles
     ),
     Environment(
         code="preview",
         name="Preview",
         mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
         spoc_site_id=1084367,
-        direct_sold_tile_zone_id=319618,  # In Kevel > Network: Pocket, Site: Firefox Staging, Zone: Tiles
+        spoc_zone_ids=[],
+        direct_sold_tile_zone_ids=[
+            319618
+        ],  # In Kevel > Network: Pocket, Site: Firefox Staging, Zone: Tiles
     ),
     Environment(
         code="production",
         name="Production",
         mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
         spoc_site_id=1070098,
-        direct_sold_tile_zone_id=280143,  # In Kevel > Network: Pocket, Site: Firefox Production, Zone: Tiles
+        spoc_zone_ids=[217995],
+        direct_sold_tile_zone_ids=[
+            280143
+        ],  # In Kevel > Network: Pocket, Site: Firefox Production, Zone: Tiles
     ),
     Environment(
         code="unified_dev",
         name="Dev Unified API",
         mars_url="https://mars.stage.ads.nonprod.webservices.mozgcp.net",
         spoc_site_id=None,
-        direct_sold_tile_zone_id=None,
+        spoc_zone_ids=[],
+        direct_sold_tile_zone_ids=[],
     ),
     Environment(
         code="unified_prod",
         name="Prod Unified API",
         mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
         spoc_site_id=None,
-        direct_sold_tile_zone_id=None,
+        spoc_zone_ids=[],
+        direct_sold_tile_zone_ids=[],
     ),
 ]
 
@@ -206,8 +219,10 @@ REGIONS: dict[str, list[Region]] = {
 }
 
 
-def get_spocs(env: Environment, country: str, region: str) -> list[Spoc]:
-    """Load SPOCs from MARS for given country and region"""
+def get_spocs_and_direct_sold_tiles(
+    env: Environment, country: str, region: str
+) -> tuple[list[Tile], list[Spoc]]:
+    """Load SPOCs and direct sold tiles from MARS for given country and region"""
     # Generate a unique pocket ID per request to avoid frequency capping
     pocket_id = uuid.uuid4()
 
@@ -217,12 +232,33 @@ def get_spocs(env: Environment, country: str, region: str) -> list[Spoc]:
         "version": 2,
         "country": country,
         "region": region,
-        # Omit placements to use server-side defaults
+        "placements": [
+            {
+                "name": "sponsored-topsite",
+                "zone_ids": env.direct_sold_tile_zone_ids,
+                "ad_types": DIRECT_SOLD_TILE_AD_TYPES,
+            },
+            {
+                "name": "spocs",
+                "zone_ids": env.spoc_zone_ids,
+                "ad_types": SPOC_AD_TYPES,
+            },
+        ],
     }
 
     r = requests.post(f"{env.mars_url}/spocs", json=body, timeout=30)
+    json = r.json()
 
-    return [
+    tiles = [
+        Tile(
+            image_url=create_image_url(tile["raw_image_src"], 48, 48),
+            name=tile["sponsor"],
+            sponsored=LOCALIZATIONS["Sponsored"][country],
+        )
+        for tile in json.get("sponsored-topsite", [])
+    ]
+
+    spocs = [
         Spoc(
             image_src=spoc["image_src"],
             title=spoc["title"],
@@ -230,8 +266,10 @@ def get_spocs(env: Environment, country: str, region: str) -> list[Spoc]:
             excerpt=spoc["excerpt"],
             sponsored_by=localized_sponsored_by(spoc, country),
         )
-        for spoc in r.json().get("spocs", [])
+        for spoc in json.get("spocs", [])
     ]
+
+    return (tiles, spocs)
 
 
 def get_amp_tiles(env: Environment, country: str, region: str) -> list[Tile]:
@@ -256,42 +294,6 @@ def get_amp_tiles(env: Environment, country: str, region: str) -> list[Tile]:
             sponsored=LOCALIZATIONS["Sponsored"][country],
         )
         for tile in r.json().get("tiles", [])
-    ]
-
-
-def get_direct_sold_tiles(env: Environment, country: str, region: str) -> list[Tile]:
-    """Request Direct Sold Tiles (aka Sponsored Topsites) from MARS for given country and region"""
-    if env.direct_sold_tile_zone_id is None:
-        return []
-
-    # Generate a unique pocket ID per request to avoid frequency capping
-    pocket_id = uuid.uuid4()
-
-    direct_sold_tiles_placement = "sponsored-topsites"
-
-    body = {
-        "pocket_id": f"{{{pocket_id}}}",  # produces "{uuid}"
-        "site": env.spoc_site_id,
-        "version": 2,
-        "country": country,
-        "region": region,
-        "placements": [
-            {
-                "name": direct_sold_tiles_placement,
-                "zone_ids": [env.direct_sold_tile_zone_id],
-                "ad_types": [DIRECT_SOLD_TILE_AD_TYPE],
-            }
-        ],
-    }
-
-    r = requests.post(f"{env.mars_url}/spocs", json=body, timeout=30)
-    return [
-        Tile(
-            image_url=create_image_url(tile["raw_image_src"], 48, 48),
-            name=tile["sponsor"],
-            sponsored=LOCALIZATIONS["Sponsored"][country],
-        )
-        for tile in r.json().get("sponsored-topsites", [])
     ]
 
 
@@ -344,10 +346,14 @@ def get_ads(env: Environment, country: str, region: str) -> Ads:
         return get_unified(env, country)
     else:
         amp_tiles = get_amp_tiles(env, country, region)
-        direct_sold_tiles = get_direct_sold_tiles(env, country, region)
+        spocs_and_direct_sold_tiles = get_spocs_and_direct_sold_tiles(
+            env, country, region
+        )
+        print("spocs and direct sold tiles")
+        print(spocs_and_direct_sold_tiles)
         return Ads(
-            spocs=get_spocs(env, country, region),
-            tiles=amp_tiles + direct_sold_tiles,
+            tiles=amp_tiles + spocs_and_direct_sold_tiles[0],
+            spocs=spocs_and_direct_sold_tiles[1],
         )
 
 
@@ -385,8 +391,7 @@ def create_image_url(raw_image_src: str, w: int, h: int) -> str:
         "",
         "",
     )
-    image_url = urlunsplit(url_parts)
-    return image_url
+    return urlunsplit(url_parts)
 
 
 class PreviewView(TemplateView):
