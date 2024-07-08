@@ -261,7 +261,7 @@ def get_unified(env: Environment, country: str) -> Ads:
 
     # specify Firefox user-agent header so that newtab_tiles are filled
     headers = {
-        'user-agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:129.0) Gecko/20100101 Firefox/129.0'
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:129.0) Gecko/20100101 Firefox/129.0"
     }
 
     # load spocs & tiles, then map them to the same shape
