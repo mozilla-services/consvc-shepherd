@@ -349,8 +349,7 @@ def get_ads(env: Environment, country: str, region: str) -> Ads:
         spocs_and_direct_sold_tiles = get_spocs_and_direct_sold_tiles(
             env, country, region
         )
-        print("spocs and direct sold tiles")
-        print(spocs_and_direct_sold_tiles)
+
         return Ads(
             tiles=amp_tiles + spocs_and_direct_sold_tiles[0],
             spocs=spocs_and_direct_sold_tiles[1],
