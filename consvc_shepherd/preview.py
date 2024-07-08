@@ -259,6 +259,11 @@ def get_unified(env: Environment, country: str) -> Ads:
     spocs_placement = "newtab_spocs"
     tiles_placement = "newtab_tiles"
 
+    # specify Firefox user-agent header so that newtab_tiles are filled
+    headers = {
+        'user-agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:129.0) Gecko/20100101 Firefox/129.0'
+    }
+
     # load spocs & tiles, then map them to the same shape
     body = {
         "user_context_id": f"{user_context_id}",  # UUID -> str
@@ -268,8 +273,7 @@ def get_unified(env: Environment, country: str) -> Ads:
         ],
     }
 
-    r = requests.post(f"{env.mars_url}/v1/ads", json=body, timeout=30)
-
+    r = requests.post(f"{env.mars_url}/v1/ads", headers=headers, json=body, timeout=30)
     tiles = [
         Tile(
             image_url=tile["image_url"],
