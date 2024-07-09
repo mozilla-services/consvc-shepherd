@@ -157,11 +157,11 @@ eval &quot;$(pyenv virtualenv-init -)&quot;
 </code></pre>
 <ol start="4">
 <li>To run consvc-shepherd, you'll need to specify some minimal configurations.
-Use the existing <code>.env.example</code> and rename it to <code>env</code>.
+Use the existing <code>.env.example</code> and copy it to <code>.env</code>.
 You'll want to make sure configuration files in the <code>.env</code> file match your database setup, configuring the database name, user, host and password variables.
 It should appear as follows:</li>
 </ol>
-<pre><code class="language-shell">$ mv .env.example .env
+<pre><code class="language-shell">$ cp .env.example .env
 
 # Variables to set in file
 DEBUG=true
@@ -179,16 +179,13 @@ $ pyenv install 3.11
 
 # pyenv virtualenv
 $ pyenv virtualenv 3.11 shepherd # or whatever project name you like.
-$ pyenv local shepherd # enables virtual env when you enter directory. 
-
-# Install dependencies
-$ pip install poetry
-$ poetry install
+$ pyenv local shepherd # enables virtual env when you enter directory.
 </code></pre>
 <ol start="6">
 <li>Install your dependencies:</li>
 </ol>
-<pre><code class="language-shell">$ poetry install
+<pre><code class="language-shell">$ pip install poetry
+$ poetry install
 </code></pre>
 <ol start="7">
 <li>
@@ -198,18 +195,16 @@ $ poetry install
 <p>Build the Docker image and start the container:</p>
 </li>
 </ol>
-<pre><code class="language-shell">docker compose build
-docker compose up
+<pre><code class="language-shell">docker-compose up --build
 </code></pre>
 <p>The application will then be accessible at the following url: <a href="http://0.0.0.0:7001/">http://0.0.0.0:7001/</a>. The admin panel is available at <a href="http://0.0.0.0:7001/admin">http://0.0.0.0:7001/admin</a></p>
 <ol start="9">
-<li>Create database migrations and run migrations. 
+<li>Create database migrations and run migrations.
 You may have to do this periodically as you modify or create models. Shell in as above and run the following commands:</li>
 </ol>
-<pre><code class="language-shell">docker ps # capture container id for consvc-shepherd
-docker exec -it &lt;CONTAINER ID&gt; sh # interactive mode
-python manage.py makemigrations 
-python manage.py migrate 
+<pre><code class="language-shell">docker exec -it consvc-shepherd-app sh # interactive mode
+python manage.py makemigrations
+python manage.py migrate
 </code></pre>
 
                     </main>
