@@ -3,6 +3,7 @@
 import uuid
 from dataclasses import dataclass
 from typing import TypedDict
+from urllib.parse import SplitResult, quote, urlunsplit
 
 import requests
 from django.views.generic import TemplateView
@@ -32,6 +33,9 @@ LOCALIZATIONS = {
     },
 }
 
+DIRECT_SOLD_TILE_AD_TYPES = [3120]
+SPOC_AD_TYPES = [2401, 3617]
+
 
 class Region(TypedDict):
     """Represents a supported country or region within a country
@@ -51,6 +55,8 @@ class Environment:
     name: str
     mars_url: str
     spoc_site_id: int | None
+    spoc_zone_ids: list[int]
+    direct_sold_tile_zone_ids: list[int]
 
 
 @dataclass(frozen=True)
@@ -66,7 +72,7 @@ class Spoc:
 
 @dataclass(frozen=True)
 class Tile:
-    """Model for a Sponsored Tile loaded from MARS"""
+    """General Tile Model for Sponsored Tiles and Direct Sold Tiles loaded from MARS"""
 
     image_url: str
     name: str
@@ -88,30 +94,46 @@ ENVIRONMENTS: list[Environment] = [
         name="Dev",
         mars_url="https://mars.stage.ads.nonprod.webservices.mozgcp.net",
         spoc_site_id=1276332,
+        spoc_zone_ids=[307565],
+        direct_sold_tile_zone_ids=[
+            317828
+        ],  # In Kevel > Network: MozAds-Dev, Site: Firefox Production corollary, Zone: Tiles
     ),
     Environment(
         code="preview",
         name="Preview",
         mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
         spoc_site_id=1084367,
+        spoc_zone_ids=[],
+        direct_sold_tile_zone_ids=[
+            319618
+        ],  # In Kevel > Network: Pocket, Site: Firefox Staging, Zone: Tiles
     ),
     Environment(
         code="production",
         name="Production",
         mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
         spoc_site_id=1070098,
+        spoc_zone_ids=[217995],
+        direct_sold_tile_zone_ids=[
+            280143
+        ],  # In Kevel > Network: Pocket, Site: Firefox Production, Zone: Tiles
     ),
     Environment(
         code="unified_dev",
         name="Dev Unified API",
         mars_url="https://mars.stage.ads.nonprod.webservices.mozgcp.net",
         spoc_site_id=None,
+        spoc_zone_ids=[],
+        direct_sold_tile_zone_ids=[],
     ),
     Environment(
         code="unified_prod",
         name="Prod Unified API",
         mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
         spoc_site_id=None,
+        spoc_zone_ids=[],
+        direct_sold_tile_zone_ids=[],
     ),
 ]
 
@@ -197,8 +219,10 @@ REGIONS: dict[str, list[Region]] = {
 }
 
 
-def get_spocs(env: Environment, country: str, region: str) -> list[Spoc]:
-    """Load SPOCs from MARS for given country and region"""
+def get_spocs_and_direct_sold_tiles(
+    env: Environment, country: str, region: str
+) -> tuple[list[Tile], list[Spoc]]:
+    """Load SPOCs and direct sold tiles from MARS for given country and region"""
     # Generate a unique pocket ID per request to avoid frequency capping
     pocket_id = uuid.uuid4()
 
@@ -208,12 +232,33 @@ def get_spocs(env: Environment, country: str, region: str) -> list[Spoc]:
         "version": 2,
         "country": country,
         "region": region,
-        # Omit placements to use server-side defaults
+        "placements": [
+            {
+                "name": "sponsored-topsite",
+                "zone_ids": env.direct_sold_tile_zone_ids,
+                "ad_types": DIRECT_SOLD_TILE_AD_TYPES,
+            },
+            {
+                "name": "spocs",
+                "zone_ids": env.spoc_zone_ids,
+                "ad_types": SPOC_AD_TYPES,
+            },
+        ],
     }
 
     r = requests.post(f"{env.mars_url}/spocs", json=body, timeout=30)
+    json = r.json()
 
-    return [
+    tiles = [
+        Tile(
+            image_url=create_image_url(tile["raw_image_src"], 48, 48),
+            name=tile["sponsor"],
+            sponsored=LOCALIZATIONS["Sponsored"][country],
+        )
+        for tile in json.get("sponsored-topsite", [])
+    ]
+
+    spocs = [
         Spoc(
             image_src=spoc["image_src"],
             title=spoc["title"],
@@ -221,11 +266,13 @@ def get_spocs(env: Environment, country: str, region: str) -> list[Spoc]:
             excerpt=spoc["excerpt"],
             sponsored_by=localized_sponsored_by(spoc, country),
         )
-        for spoc in r.json().get("spocs", [])
+        for spoc in json.get("spocs", [])
     ]
 
+    return (tiles, spocs)
 
-def get_tiles(env: Environment, country: str, region: str) -> list[Tile]:
+
+def get_amp_tiles(env: Environment, country: str, region: str) -> list[Tile]:
     """Load Sponsored Tiles from MARS for given country and region"""
     params = {
         "country": country,
@@ -290,10 +337,7 @@ def get_unified(env: Environment, country: str) -> Ads:
         for spoc in r.json().get(spocs_placement, [])
     ]
 
-    return Ads(
-        spocs=spocs,
-        tiles=tiles,
-    )
+    return Ads(spocs=spocs, tiles=tiles)
 
 
 def get_ads(env: Environment, country: str, region: str) -> Ads:
@@ -301,9 +345,14 @@ def get_ads(env: Environment, country: str, region: str) -> Ads:
     if env.code.startswith("unified_"):
         return get_unified(env, country)
     else:
+        amp_tiles = get_amp_tiles(env, country, region)
+        spocs_and_direct_sold_tiles = get_spocs_and_direct_sold_tiles(
+            env, country, region
+        )
+
         return Ads(
-            spocs=get_spocs(env, country, region),
-            tiles=get_tiles(env, country, region),
+            tiles=amp_tiles + spocs_and_direct_sold_tiles[0],
+            spocs=spocs_and_direct_sold_tiles[1],
         )
 
 
@@ -324,6 +373,24 @@ def find_env_by_code(env_code: str) -> Environment:
             return env
 
     raise ValueError(f"Unknown environment '{env_code}'")
+
+
+def create_image_url(raw_image_src: str, w: int, h: int) -> str:
+    """Modify an image url query parameters to the requested size.
+    This function is intended to create image urls in the same way as FF newtab.
+    See: https://hg.mozilla.org/mozilla-central/file/tip/browser/components/newtab/lib/TopSitesFeed.sys.mjs#l1058
+    """
+    size_path = "{}x{}".format(w, h)
+    filters_path = "filters:format(jpeg):quality(60):no_upscale():strip_exif()"
+    encoded_url = quote(raw_image_src)
+    url_parts = SplitResult(
+        "https",
+        "img-getpocket.cdn.mozilla.net",
+        size_path + "/" + filters_path + "/" + encoded_url,
+        "",
+        "",
+    )
+    return urlunsplit(url_parts)
 
 
 class PreviewView(TemplateView):

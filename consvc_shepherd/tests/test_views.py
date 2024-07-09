@@ -1,5 +1,7 @@
 """Views test module for consvc_shepherd."""
 
+from unittest import mock
+
 from django.test import TestCase, override_settings
 
 from consvc_shepherd.models import (
@@ -8,6 +10,7 @@ from consvc_shepherd.models import (
     PartnerAllocation,
     SettingsSnapshot,
 )
+from consvc_shepherd.preview import Ads, Spoc, Tile
 from contile.models import Partner
 
 
@@ -142,3 +145,45 @@ class TestAllocationSettingsListView(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(AllocationSettingsSnapshot.objects.count(), 1)
+
+
+@override_settings(DEBUG=True)
+class TestPreviewView(TestCase):
+    """Test of PreviewView."""
+
+    def createMockAds(self):
+        """Create some mock ads data to assert against in the preview view"""
+        tile = Tile(
+            image_url="https://picsum.photos/48",
+            name="ACME",
+            sponsored="Sponsored",
+        )
+        direct_sold_tile = Tile(
+            image_url="https://picsum.photos/48",
+            name="Zombocom",
+            sponsored="Sponsored",
+        )
+        spoc = Spoc(
+            image_src="https://picsum.photos/296/148",
+            title="Play Anvil of the Ages Now for Free",
+            domain="play.anviloftheages.com",
+            excerpt="If you like to play games, then you should play this game.",
+            sponsored_by="Anvil of the Ages",
+        )
+        return Ads(
+            tiles=[tile, direct_sold_tile],
+            spocs=[spoc],
+        )
+
+    def test_preview_view(self):
+        """Test that the preview view shows data returned from get_ads request"""
+        with mock.patch(
+            "consvc_shepherd.preview.get_ads", return_value=self.createMockAds()
+        ):
+            response = self.client.get("/preview")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.context["ads"].tiles), 2)
+            self.assertContains(response, "ACME")
+            self.assertContains(response, "Zombocom")
+            self.assertEqual(len(response.context["ads"].spocs), 1)
+            self.assertContains(response, "Anvil of the Ages")
