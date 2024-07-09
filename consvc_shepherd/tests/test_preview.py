@@ -6,7 +6,7 @@ from django.test import TestCase, override_settings
 
 from consvc_shepherd.preview import Environment, Spoc, Tile, get_ads
 
-SPOC: Spoc = Spoc(
+SPOC = Spoc(
     image_src="https://picsum.photos/296/148",
     title="There is a Sale",
     domain="cosmetics.beauty",
@@ -14,19 +14,19 @@ SPOC: Spoc = Spoc(
     sponsored_by="Sponsored by Cosmetics",
 )
 
-ACME_TILE: Tile = Tile(
+ACME_TILE = Tile(
     image_url="https://picsum.photos/id/200/48/48",
     name="ACME",
     sponsored="Sponsored",
 )
 
-ZOMBOCOM_TILE: Tile = Tile(
+ZOMBOCOM_TILE = Tile(
     image_url="https://picsum.photos/id/237/48/48",
     name="Zombocom",
     sponsored="Sponsored",
 )
 
-PROGRESS_QUEST_TILE: Tile = Tile(
+PROGRESS_QUEST_TILE = Tile(
     image_url="https://picsum.photos/id/40/48/48",
     name="Progress Quest",
     sponsored="Sponsored",
