@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import (
     CharField,
+    DateField,
     DateTimeField,
     ForeignKey,
     IntegerField,
@@ -75,7 +76,7 @@ class AllocationSettingsSnapshot(models.Model):
     Attributes
     ----------
     name : CharField
-        Snopshot Name
+        Snapshot Name
     json_settings : JSONField
         JSON settings for snapshot
     created_by : ForeignKey
@@ -199,3 +200,91 @@ class PartnerAllocation(models.Model):
         Example: {"partner": "mozilla", "percentage": 100}
         """
         return {"partner": self.partner.name, "percentage": self.percentage}
+
+
+class BoostrDeal(models.Model):
+    # Rename to SalesDeal? Or is the reference to Boostr helpful here?
+    """Representation of AdOps sales deals pulled from Boostr"
+
+    Attributes
+    ----------
+    boostr_id : IntegerField
+        The deal's id in Boostr
+    name : CharField
+        Deal name
+    advertiser : CharField
+        Advertiser name
+    currency : CharField
+        Currency code, ie "USD"
+    amount : IntegerField
+        Amount
+    sales_representatives : CharField
+        Sales representative names as a comma separated list
+    campaign_type : CharField
+        Campaign type (CPC or CPM)
+    start_date: DateField
+        Start date
+    end_date: DateField
+        End date
+    created_on : DateTimeField
+        Date of deal record creation (shepherd DB timestamp metadata, not boostr's)
+    updated_on : DateTimeField
+        Date of deal record update (shepherd DB timestamp metadata, not boostr's)
+    """
+
+    boostr_id: IntegerField = models.IntegerField()  # add unique constraint here
+    name: CharField = models.CharField(max_length=128)
+    advertiser: CharField = models.CharField(max_length=128)
+    currency: CharField = models.CharField()  # Is there a django field for this?
+    amount: IntegerField = models.IntegerField()
+    sales_representatives: CharField = models.CharField(max_length=128)
+    campaign_type: CharField = models.CharField()
+    start_date: DateField = models.DateField()  # Or do we want datetime here?
+    end_date: DateField = models.DateField()
+
+    created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
+    updated_on: DateTimeField = models.DateTimeField(auto_now=True)
+
+
+# Looks like Products are actually many-to-many with Deals so we'll need to adjust this accordingly
+# Rename to SalesProduct?
+class BoostrProduct(models.Model):
+    """Representation of AdOps sales products that are children of deals
+
+    Attributes
+    ----------
+    boostr_id : IntegerField
+        The product's id in Boostr
+    name: CharField
+        Product name
+    campaign_type:
+        Campaign type (CPC or CPM)
+    country_code: CharField
+        2 character country code
+    start_date: DateField
+        Start date
+    end_date: DateField
+        End date
+    deal : Deal
+        Foreign key pointing to the Deal record that this product belongs to
+    created_on : DateTimeField
+        Date of deal record creation (shepherd DB timestamp metadata, not boostr's)
+    updated_on : DateTimeField
+        Date of deal record update (shepherd DB timestamp metadata, not boostr's)
+
+    """
+
+    boostr_id: IntegerField = models.IntegerField()  # add unique constraint here
+    name: CharField = models.CharField(max_length=128)
+    campaign_type: CharField = models.CharField()
+    country_code: CharField = (
+        models.CharField()
+    )  # Should this use the django models country code?
+    start_date: DateField = models.DateField()  # Or do we want datetime here?
+    end_date: DateField = models.DateField()
+    deal: ForeignKey = models.ForeignKey(
+        BoostrDeal, on_delete=models.CASCADE, null=True
+    )
+    created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
+    updated_on: DateTimeField = models.DateTimeField(auto_now=True)
+    # should this have a separate budget item too?

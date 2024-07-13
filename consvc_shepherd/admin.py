@@ -11,6 +11,8 @@ from consvc_shepherd.forms import AllocationSettingForm, AllocationSettingFormse
 from consvc_shepherd.models import (
     AllocationSetting,
     AllocationSettingsSnapshot,
+    BoostrDeal,
+    BoostrProduct,
     PartnerAllocation,
     SettingsSnapshot,
 )
@@ -217,3 +219,30 @@ class AllocationSettingAdmin(admin.ModelAdmin):
         """Delete given AllocationSetting entry."""
         super(AllocationSettingAdmin, self).delete_queryset(request, queryset)
         metrics.incr("allocation.delete")
+
+
+@admin.register(BoostrDeal)
+class BoostrDealAdmin(admin.ModelAdmin):
+    """Admin model for sales deals imported from Boostr"""
+
+    model = BoostrDeal
+    #  inlines = [BoostrProductInline]
+    list_display = [
+        "boostr_id",
+        "name",
+        "advertiser",
+        "currency",
+        "amount",
+        "sales_representatives",
+        "campaign_type",
+        "start_date",
+        "end_date",
+    ]
+    # ordering: ["start_date"]
+
+
+@admin.register(BoostrProduct)
+class BoostrProductAdmin(admin.ModelAdmin):
+    """Admin model for sales products imported from Boostr. Deals are many-to-many with products"""
+
+    pass
