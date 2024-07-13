@@ -62,7 +62,7 @@ The application will then be accessible at the following url: [http://0.0.0.0:70
 9. Create database migrations and run migrations.
 You may have to do this periodically as you modify or create models. Shell in as above and run the following commands:
 ``` shell
-docker exec -it consvc-shepherd-app sh # interactive mode
+docker exec -it consvc-shepherd-app-1 sh # interactive mode
 python manage.py makemigrations
 python manage.py migrate
 ```
