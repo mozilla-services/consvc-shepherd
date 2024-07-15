@@ -157,11 +157,13 @@ class TestPreviewView(TestCase):
             image_url="https://picsum.photos/48",
             name="ACME",
             sponsored="Sponsored",
+            url="example.com",
         )
         direct_sold_tile = Tile(
             image_url="https://picsum.photos/48",
             name="Zombocom",
             sponsored="Sponsored",
+            url="example.com",
         )
         spoc = Spoc(
             image_src="https://picsum.photos/296/148",
@@ -169,6 +171,7 @@ class TestPreviewView(TestCase):
             domain="play.anviloftheages.com",
             excerpt="If you like to play games, then you should play this game.",
             sponsored_by="Anvil of the Ages",
+            url="example.com",
         )
         return Ads(
             tiles=[tile, direct_sold_tile],
