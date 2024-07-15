@@ -246,7 +246,7 @@ def get_amp_tiles(env: Environment, country: str, region: str) -> list[Tile]:
         f"{env.mars_url}/v1/tiles", params=params, headers=headers, timeout=30
     )
 
-    print("Tiles: ",r.json().get("tiles", []))
+    print("Tiles: ", r.json().get("tiles", []))
 
     return [
         Tile(
