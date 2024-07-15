@@ -12,6 +12,7 @@ SPOC = Spoc(
     domain="cosmetics.beauty",
     excerpt="The sale has begun...",
     sponsored_by="Sponsored by Cosmetics",
+    url="example.com"
 )
 
 ACME_TILE = Tile(
