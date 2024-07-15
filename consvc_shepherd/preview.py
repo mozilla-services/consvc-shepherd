@@ -1,8 +1,8 @@
 """Ads Preview page"""
 
-import uuid
 import json
 import logging
+import uuid
 from dataclasses import dataclass
 from typing import TypedDict
 from urllib.parse import SplitResult, quote, urlunsplit
@@ -160,8 +160,7 @@ def load_regions() -> dict[str, list[Region]]:
         if country_code in data:
             country_data = data[country_code]
             region_list = []
-            for division_code, division_name in country_data["divisions"].items(
-            ):
+            for division_code, division_name in country_data["divisions"].items():
                 region_code = division_code.split("-")[1]
                 region_name = division_name.split(" (")[0]
                 region_list.append(Region(code=region_code, name=region_name))
