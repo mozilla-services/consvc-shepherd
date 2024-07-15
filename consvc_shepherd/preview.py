@@ -151,6 +151,7 @@ COUNTRIES: list[Region] = [
 
 
 def load_regions() -> dict[str, list[Region]]:
+    """Load Regions"""
     with open("./static/preview/iso-3166-2.json", "r") as file:
         data = json.load(file)
     country_codes = {country["code"] for country in COUNTRIES}
