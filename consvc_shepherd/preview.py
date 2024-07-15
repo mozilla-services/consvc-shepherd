@@ -246,8 +246,6 @@ def get_amp_tiles(env: Environment, country: str, region: str) -> list[Tile]:
         f"{env.mars_url}/v1/tiles", params=params, headers=headers, timeout=30
     )
 
-    print("Tiles: ", r.json().get("tiles", []))
-
     return [
         Tile(
             image_url=tile["image_url"],
@@ -379,7 +377,5 @@ class PreviewView(TemplateView):
             "region": region,
             "ads": get_ads(env, country, region),
         }
-
-        print(context["ads"])
 
         return self.render_to_response(context)
