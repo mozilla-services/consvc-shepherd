@@ -70,6 +70,7 @@ class Spoc:
     domain: str
     excerpt: str
     sponsored_by: str
+    url: str
 
 
 @dataclass(frozen=True)
@@ -79,6 +80,7 @@ class Tile:
     image_url: str
     name: str
     sponsored: str
+    url: str
 
 
 @dataclass(frozen=True)
@@ -208,6 +210,7 @@ def get_spocs_and_direct_sold_tiles(
         Tile(
             image_url=create_image_url(tile["raw_image_src"], 48, 48),
             name=tile["sponsor"],
+            url=tile["url"],
             sponsored=LOCALIZATIONS["Sponsored"][country],
         )
         for tile in json.get("sponsored-topsite", [])
@@ -219,6 +222,7 @@ def get_spocs_and_direct_sold_tiles(
             title=spoc["title"],
             domain=spoc["domain"],
             excerpt=spoc["excerpt"],
+            url=spoc["url"],
             sponsored_by=localized_sponsored_by(spoc, country),
         )
         for spoc in json.get("spocs", [])
@@ -242,10 +246,13 @@ def get_amp_tiles(env: Environment, country: str, region: str) -> list[Tile]:
         f"{env.mars_url}/v1/tiles", params=params, headers=headers, timeout=30
     )
 
+    print("Tiles: ",r.json().get("tiles", []))
+
     return [
         Tile(
             image_url=tile["image_url"],
             name=tile["name"],
+            url=tile["url"],
             sponsored=LOCALIZATIONS["Sponsored"][country],
         )
         for tile in r.json().get("tiles", [])
@@ -276,6 +283,7 @@ def get_unified(env: Environment, country: str) -> Ads:
         Tile(
             image_url=tile["image_url"],
             name=tile["name"],
+            url=tile["url"],
             sponsored=LOCALIZATIONS["Sponsored"][country],
         )
         for tile in r.json().get(tiles_placement, [])
@@ -287,6 +295,7 @@ def get_unified(env: Environment, country: str) -> Ads:
             title=spoc["title"],
             domain=spoc["domain"],
             excerpt=spoc["excerpt"],
+            url=spoc["url"],
             sponsored_by=localized_sponsored_by(spoc, country),
         )
         for spoc in r.json().get(spocs_placement, [])
@@ -370,5 +379,7 @@ class PreviewView(TemplateView):
             "region": region,
             "ads": get_ads(env, country, region),
         }
+
+        print(context["ads"])
 
         return self.render_to_response(context)

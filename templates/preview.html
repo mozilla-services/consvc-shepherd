@@ -45,21 +45,25 @@
     <h2>Tiles</h2>
     <div class="tiles">
         {% for tile in ads.tiles %}
+        <a href="{{ tile.url }}" target="_blank">
             <div class="tile">
                 <div class="tile-outer">
                     <img class="tile-image" src="{{ tile.image_url }}" alt="{{ tile.name }}"/>
+                    
                 </div>
                 <div class="tile-title">
                     <span>{{ tile.name }}</span>
                     <span class="sponsored-label">{{ tile.sponsored }}</span>
                 </div>
             </div>
+        </a>
         {% endfor %}
     </div>
 
     <h2>SPOCs</h2>
     <div class="spocs">
         {% for spoc in ads.spocs %}
+        <a href="{{ spoc.url }}" target="_blank">
             <div class="spoc">
                 <img class="spoc-image" src="{{ spoc.image_src }}" alt="{{ spoc.title }}"/>
                 <div class="spoc-meta">
@@ -71,6 +75,7 @@
                     <div class="spoc-context">{{ spoc.sponsored_by }}</div>
                 </div>
             </div>
+        </a>
         {% endfor %}
     </div>
 </div>
