@@ -85,6 +85,7 @@ class TestGetAds(TestCase):
                 self.assertEqual(ads.spocs[0].domain, SPOC.domain)
                 self.assertEqual(ads.spocs[0].excerpt, SPOC.excerpt)
                 self.assertEqual(ads.spocs[0].sponsored_by, SPOC.sponsored_by)
+                self.assertEqual(ads.spocs[0].url, SPOC.url)
 
                 # Tile data
                 self.assertEqual(
@@ -92,6 +93,7 @@ class TestGetAds(TestCase):
                 )
                 self.assertEqual(ads.tiles[2].name, "Progress Quest")
                 self.assertEqual(ads.tiles[2].sponsored, "Sponsored")
+                self.assertEqual(ads.tiles[2].url, "example.com")
 
     def test_get_ads_unified_env(self):
         """Test that when unified API environments are requested, the expected request wrapper functions are called"""
