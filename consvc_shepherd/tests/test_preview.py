@@ -19,21 +19,21 @@ ACME_TILE = Tile(
     image_url="https://picsum.photos/id/200/48/48",
     name="ACME",
     sponsored="Sponsored",
-    url="example.com"
+    url="example.com",
 )
 
 ZOMBOCOM_TILE = Tile(
     image_url="https://picsum.photos/id/237/48/48",
     name="Zombocom",
     sponsored="Sponsored",
-    url="example.com"
+    url="example.com",
 )
 
 PROGRESS_QUEST_TILE = Tile(
     image_url="https://picsum.photos/id/40/48/48",
     name="Progress Quest",
     sponsored="Sponsored",
-    url="example.com"
+    url="example.com",
 )
 
 
