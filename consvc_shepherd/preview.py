@@ -1,6 +1,6 @@
 """Ads Preview page"""
 
-import uuid
+import uuid, json, logging
 from dataclasses import dataclass
 from typing import TypedDict
 from urllib.parse import SplitResult, quote, urlunsplit
@@ -147,76 +147,26 @@ COUNTRIES: list[Region] = [
     Region(code="IT", name="Italy"),
 ]
 
-REGIONS: dict[str, list[Region]] = {
-    "US": [
-        Region(code="AL", name="Alabama"),
-        Region(code="AK", name="Alaska"),
-        Region(code="AZ", name="Arizona"),
-        Region(code="AR", name="Arkansas"),
-        Region(code="CA", name="California"),
-        Region(code="CO", name="Colorado"),
-        Region(code="CT", name="Connecticut"),
-        Region(code="DE", name="Delaware"),
-        Region(code="DC", name="District of Columbia"),
-        Region(code="FL", name="Florida"),
-        Region(code="GA", name="Georgia"),
-        Region(code="HI", name="Hawaii"),
-        Region(code="ID", name="Idaho"),
-        Region(code="IL", name="Illinois"),
-        Region(code="IN", name="Indiana"),
-        Region(code="IA", name="Iowa"),
-        Region(code="KS", name="Kansas"),
-        Region(code="KY", name="Kentucky"),
-        Region(code="LA", name="Louisiana"),
-        Region(code="ME", name="Maine"),
-        Region(code="MD", name="Maryland"),
-        Region(code="MA", name="Massachusetts"),
-        Region(code="MI", name="Michigan"),
-        Region(code="MN", name="Minnesota"),
-        Region(code="MS", name="Mississippi"),
-        Region(code="MO", name="Missouri"),
-        Region(code="MT", name="Montana"),
-        Region(code="NE", name="Nebraska"),
-        Region(code="NV", name="Nevada"),
-        Region(code="NH", name="New Hampshire"),
-        Region(code="NJ", name="New Jersey"),
-        Region(code="NM", name="New Mexico"),
-        Region(code="NY", name="New York"),
-        Region(code="NC", name="North Carolina"),
-        Region(code="ND", name="North Dakota"),
-        Region(code="OH", name="Ohio"),
-        Region(code="OK", name="Oklahoma"),
-        Region(code="OR", name="Oregon"),
-        Region(code="PA", name="Pennsylvania"),
-        Region(code="RI", name="Rhode Island"),
-        Region(code="SC", name="South Carolina"),
-        Region(code="SD", name="South Dakota"),
-        Region(code="TN", name="Tennessee"),
-        Region(code="TX", name="Texas"),
-        Region(code="UT", name="Utah"),
-        Region(code="VT", name="Vermont"),
-        Region(code="VA", name="Virginia"),
-        Region(code="WA", name="Washington"),
-        Region(code="WV", name="West Virginia"),
-        Region(code="WI", name="Wisconsin"),
-        Region(code="WY", name="Wyoming"),
-    ],
-    "CA": [
-        Region(code="AB", name="Alberta"),
-        Region(code="BC", name="British Columbia"),
-        Region(code="MB", name="Manitoba"),
-        Region(code="NB", name="New Brunswick"),
-        Region(code="NL", name="Newfoundland and Labrador"),
-        Region(code="NS", name="Nova Scotia"),
-        Region(code="ON", name="Ontario"),
-        Region(code="PE", name="Prince Edward Island"),
-        Region(code="QC", name="Quebec"),
-        Region(code="SK", name="Saskatchewan"),
-        Region(code="NT", name="Northwest Territories"),
-        Region(code="NU", name="Nunavut"),
-        Region(code="YT", name="Yukon"),
-    ],
-}
+def load_regions() -> dict[str, list[Region]]:
+    with open("./static/preview/iso-3166-2.json", 'r') as file:
+        data = json.load(file)
+    country_codes = {country['code'] for country in COUNTRIES}
+    regions = {}
+    for country_code in country_codes:
+        if country_code in data:
+            country_data = data[country_code]
+            region_list = []
+            for division_code, division_name in country_data['divisions'].items():
+                region_code = division_code.split('-')[1]
+                region_name = division_name.split(' (')[0]
+                region_list.append(Region(code=region_code, name=region_name))
+            regions[country_code] = region_list
+        else:
+            logging.error("missing region data for ", country_code)
+
+    return regions
+
+REGIONS=load_regions()
 
 
 def get_spocs_and_direct_sold_tiles(
