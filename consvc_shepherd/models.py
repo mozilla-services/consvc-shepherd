@@ -232,7 +232,7 @@ class BoostrDeal(models.Model):
         Date of deal record update (shepherd DB timestamp metadata, not boostr's)
     """
 
-    boostr_id: IntegerField = models.IntegerField()  # add unique constraint here
+    boostr_id: IntegerField = models.IntegerField(unique=True)
     name: CharField = models.CharField(max_length=128)
     advertiser: CharField = models.CharField(max_length=128)
     currency: CharField = models.CharField()  # Is there a django field for this?
@@ -245,46 +245,39 @@ class BoostrDeal(models.Model):
     created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
     updated_on: DateTimeField = models.DateTimeField(auto_now=True)
 
-
-# Looks like Products are actually many-to-many with Deals so we'll need to adjust this accordingly
 # Rename to SalesProduct?
 class BoostrProduct(models.Model):
-    """Representation of AdOps sales products that are children of deals
+    """Representation of AdOps sales products that can be assigned to deals (many to many with deals)
 
     Attributes
     ----------
     boostr_id : IntegerField
         The product's id in Boostr
-    name: CharField
-        Product name
+    full_name: CharField
+        Product's full name
     campaign_type:
         Campaign type (CPC or CPM)
-    country_code: CharField
-        2 character country code
-    start_date: DateField
-        Start date
-    end_date: DateField
-        End date
-    deal : Deal
-        Foreign key pointing to the Deal record that this product belongs to
     created_on : DateTimeField
         Date of deal record creation (shepherd DB timestamp metadata, not boostr's)
     updated_on : DateTimeField
         Date of deal record update (shepherd DB timestamp metadata, not boostr's)
-
     """
 
-    boostr_id: IntegerField = models.IntegerField()  # add unique constraint here
-    name: CharField = models.CharField(max_length=128)
-    campaign_type: CharField = models.CharField()
-    country_code: CharField = (
-        models.CharField()
-    )  # Should this use the django models country code?
-    start_date: DateField = models.DateField()  # Or do we want datetime here?
-    end_date: DateField = models.DateField()
-    deal: ForeignKey = models.ForeignKey(
-        BoostrDeal, on_delete=models.CASCADE, null=True
-    )
+    boostr_id: IntegerField = models.IntegerField(unique=True)
+    full_name: CharField = models.CharField(max_length=128)
+    campaign_type: CharField = models.CharField(max_length=128)
     created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
     updated_on: DateTimeField = models.DateTimeField(auto_now=True)
-    # should this have a separate budget item too?
+
+class BoostrDealsProduct(models.Model):
+    """Join table that represents which deals are assigned to which products"
+
+    Attributes
+    ----------
+    boostr_id : IntegerField
+        The deals_product's id in Boostr
+    created_on : DateTimeField
+        Date of creation of association between deal and product (shepherd DB timestamp metadata, not boostr's)
+    updated_on : DateTimeField
+        Date of update of association between deal and product (shepherd DB timestamp metadata, not boostr's)
+    """

@@ -245,4 +245,9 @@ class BoostrDealAdmin(admin.ModelAdmin):
 class BoostrProductAdmin(admin.ModelAdmin):
     """Admin model for sales products imported from Boostr. Deals are many-to-many with products"""
 
-    pass
+    model = BoostrProduct
+    list_display = [
+        "boostr_id",
+        "full_name",
+        "campaign_type",
+    ]
