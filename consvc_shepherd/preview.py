@@ -1,5 +1,8 @@
 """Ads Preview page"""
 
+import json
+import logging
+import traceback
 import uuid
 from dataclasses import dataclass
 from typing import TypedDict
@@ -55,8 +58,18 @@ class Environment:
     name: str
     mars_url: str
     spoc_site_id: int | None
+    spoc_site_id_mobile: int | None
     spoc_zone_ids: list[int]
     direct_sold_tile_zone_ids: list[int]
+
+
+@dataclass(frozen=True)
+class Agent:
+    """Struct for user agent"""
+
+    code: str
+    name: str
+    is_mobile: bool
 
 
 @dataclass(frozen=True)
@@ -68,6 +81,7 @@ class Spoc:
     domain: str
     excerpt: str
     sponsored_by: str
+    url: str
 
 
 @dataclass(frozen=True)
@@ -77,6 +91,7 @@ class Tile:
     image_url: str
     name: str
     sponsored: str
+    url: str
 
 
 @dataclass(frozen=True)
@@ -94,6 +109,7 @@ ENVIRONMENTS: list[Environment] = [
         name="Dev",
         mars_url="https://mars.stage.ads.nonprod.webservices.mozgcp.net",
         spoc_site_id=1276332,
+        spoc_site_id_mobile=1276332,
         spoc_zone_ids=[307565],
         direct_sold_tile_zone_ids=[
             317828
@@ -104,6 +120,7 @@ ENVIRONMENTS: list[Environment] = [
         name="Preview",
         mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
         spoc_site_id=1084367,
+        spoc_site_id_mobile=1084367,
         spoc_zone_ids=[],
         direct_sold_tile_zone_ids=[
             319618
@@ -114,6 +131,7 @@ ENVIRONMENTS: list[Environment] = [
         name="Production",
         mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
         spoc_site_id=1070098,
+        spoc_site_id_mobile=1240699,
         spoc_zone_ids=[217995],
         direct_sold_tile_zone_ids=[
             280143
@@ -124,6 +142,7 @@ ENVIRONMENTS: list[Environment] = [
         name="Dev Unified API",
         mars_url="https://mars.stage.ads.nonprod.webservices.mozgcp.net",
         spoc_site_id=None,
+        spoc_site_id_mobile=None,
         spoc_zone_ids=[],
         direct_sold_tile_zone_ids=[],
     ),
@@ -132,8 +151,22 @@ ENVIRONMENTS: list[Environment] = [
         name="Prod Unified API",
         mars_url="https://mars.prod.ads.prod.webservices.mozgcp.net",
         spoc_site_id=None,
+        spoc_site_id_mobile=None,
         spoc_zone_ids=[],
         direct_sold_tile_zone_ids=[],
+    ),
+]
+
+AGENTS: list[Agent] = [
+    Agent(
+        code="Mozilla/5.0 (Windows NT 10.0; rv:10.0) Gecko/20100101 Firefox/91.0",
+        name="Desktop",
+        is_mobile=False,
+    ),
+    Agent(
+        code="Mozilla/5.0 (Android 11; Mobile; rv:92.0) Gecko/92.0 Firefox/92.0",
+        name="Mobile",
+        is_mobile=True,
     ),
 ]
 
@@ -147,88 +180,45 @@ COUNTRIES: list[Region] = [
     Region(code="IT", name="Italy"),
 ]
 
-REGIONS: dict[str, list[Region]] = {
-    "US": [
-        Region(code="AL", name="Alabama"),
-        Region(code="AK", name="Alaska"),
-        Region(code="AZ", name="Arizona"),
-        Region(code="AR", name="Arkansas"),
-        Region(code="CA", name="California"),
-        Region(code="CO", name="Colorado"),
-        Region(code="CT", name="Connecticut"),
-        Region(code="DE", name="Delaware"),
-        Region(code="DC", name="District of Columbia"),
-        Region(code="FL", name="Florida"),
-        Region(code="GA", name="Georgia"),
-        Region(code="HI", name="Hawaii"),
-        Region(code="ID", name="Idaho"),
-        Region(code="IL", name="Illinois"),
-        Region(code="IN", name="Indiana"),
-        Region(code="IA", name="Iowa"),
-        Region(code="KS", name="Kansas"),
-        Region(code="KY", name="Kentucky"),
-        Region(code="LA", name="Louisiana"),
-        Region(code="ME", name="Maine"),
-        Region(code="MD", name="Maryland"),
-        Region(code="MA", name="Massachusetts"),
-        Region(code="MI", name="Michigan"),
-        Region(code="MN", name="Minnesota"),
-        Region(code="MS", name="Mississippi"),
-        Region(code="MO", name="Missouri"),
-        Region(code="MT", name="Montana"),
-        Region(code="NE", name="Nebraska"),
-        Region(code="NV", name="Nevada"),
-        Region(code="NH", name="New Hampshire"),
-        Region(code="NJ", name="New Jersey"),
-        Region(code="NM", name="New Mexico"),
-        Region(code="NY", name="New York"),
-        Region(code="NC", name="North Carolina"),
-        Region(code="ND", name="North Dakota"),
-        Region(code="OH", name="Ohio"),
-        Region(code="OK", name="Oklahoma"),
-        Region(code="OR", name="Oregon"),
-        Region(code="PA", name="Pennsylvania"),
-        Region(code="RI", name="Rhode Island"),
-        Region(code="SC", name="South Carolina"),
-        Region(code="SD", name="South Dakota"),
-        Region(code="TN", name="Tennessee"),
-        Region(code="TX", name="Texas"),
-        Region(code="UT", name="Utah"),
-        Region(code="VT", name="Vermont"),
-        Region(code="VA", name="Virginia"),
-        Region(code="WA", name="Washington"),
-        Region(code="WV", name="West Virginia"),
-        Region(code="WI", name="Wisconsin"),
-        Region(code="WY", name="Wyoming"),
-    ],
-    "CA": [
-        Region(code="AB", name="Alberta"),
-        Region(code="BC", name="British Columbia"),
-        Region(code="MB", name="Manitoba"),
-        Region(code="NB", name="New Brunswick"),
-        Region(code="NL", name="Newfoundland and Labrador"),
-        Region(code="NS", name="Nova Scotia"),
-        Region(code="ON", name="Ontario"),
-        Region(code="PE", name="Prince Edward Island"),
-        Region(code="QC", name="Quebec"),
-        Region(code="SK", name="Saskatchewan"),
-        Region(code="NT", name="Northwest Territories"),
-        Region(code="NU", name="Nunavut"),
-        Region(code="YT", name="Yukon"),
-    ],
-}
+
+def load_regions() -> dict[str, list[Region]]:
+    """Load Regions"""
+    with open("./static/preview/iso-3166-2.json", "r") as file:
+        data = json.load(file)
+    country_codes = {country["code"] for country in COUNTRIES}
+    regions = {}
+    for country_code in country_codes:
+        if country_code in data:
+            country_data = data[country_code]
+            region_list = []
+            for division_code, division_name in country_data["divisions"].items():
+                region_code = division_code.split("-")[1]
+                region_name = division_name.split(" (")[0]
+                region_list.append(Region(code=region_code, name=region_name))
+            regions[country_code] = region_list
+        else:
+            logging.error("missing region data for ", country_code)
+
+    return regions
+
+
+REGIONS = load_regions()
 
 
 def get_spocs_and_direct_sold_tiles(
-    env: Environment, country: str, region: str
+    env: Environment, country: str, region: str, isMobile: bool
 ) -> tuple[list[Tile], list[Spoc]]:
     """Load SPOCs and direct sold tiles from MARS for given country and region"""
     # Generate a unique pocket ID per request to avoid frequency capping
     pocket_id = uuid.uuid4()
 
+    spoc_site_id = env.spoc_site_id
+    if isMobile:
+        spoc_site_id = env.spoc_site_id_mobile
+
     body = {
         "pocket_id": f"{{{pocket_id}}}",  # produces "{uuid}"
-        "site": env.spoc_site_id,
+        "site": spoc_site_id,
         "version": 2,
         "country": country,
         "region": region,
@@ -253,6 +243,7 @@ def get_spocs_and_direct_sold_tiles(
         Tile(
             image_url=create_image_url(tile["raw_image_src"], 48, 48),
             name=tile["sponsor"],
+            url=tile["url"],
             sponsored=LOCALIZATIONS["Sponsored"][country],
         )
         for tile in json.get("sponsored-topsite", [])
@@ -264,6 +255,7 @@ def get_spocs_and_direct_sold_tiles(
             title=spoc["title"],
             domain=spoc["domain"],
             excerpt=spoc["excerpt"],
+            url=spoc["url"],
             sponsored_by=localized_sponsored_by(spoc, country),
         )
         for spoc in json.get("spocs", [])
@@ -272,7 +264,9 @@ def get_spocs_and_direct_sold_tiles(
     return (tiles, spocs)
 
 
-def get_amp_tiles(env: Environment, country: str, region: str) -> list[Tile]:
+def get_amp_tiles(
+    env: Environment, country: str, region: str, agent: str
+) -> list[Tile]:
     """Load Sponsored Tiles from MARS for given country and region"""
     params = {
         "country": country,
@@ -280,7 +274,7 @@ def get_amp_tiles(env: Environment, country: str, region: str) -> list[Tile]:
     }
 
     headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:126.0) Gecko/20100101 Firefox/126.0",
+        "User-Agent": agent,
     }
 
     r = requests.get(
@@ -291,6 +285,7 @@ def get_amp_tiles(env: Environment, country: str, region: str) -> list[Tile]:
         Tile(
             image_url=tile["image_url"],
             name=tile["name"],
+            url=tile["url"],
             sponsored=LOCALIZATIONS["Sponsored"][country],
         )
         for tile in r.json().get("tiles", [])
@@ -321,6 +316,7 @@ def get_unified(env: Environment, country: str) -> Ads:
         Tile(
             image_url=tile["image_url"],
             name=tile["name"],
+            url=tile["url"],
             sponsored=LOCALIZATIONS["Sponsored"][country],
         )
         for tile in r.json().get(tiles_placement, [])
@@ -332,6 +328,7 @@ def get_unified(env: Environment, country: str) -> Ads:
             title=spoc["title"],
             domain=spoc["domain"],
             excerpt=spoc["excerpt"],
+            url=spoc["url"],
             sponsored_by=localized_sponsored_by(spoc, country),
         )
         for spoc in r.json().get(spocs_placement, [])
@@ -340,14 +337,14 @@ def get_unified(env: Environment, country: str) -> Ads:
     return Ads(spocs=spocs, tiles=tiles)
 
 
-def get_ads(env: Environment, country: str, region: str) -> Ads:
+def get_ads(env: Environment, country: str, region: str, agent: Agent) -> Ads:
     """Based on Environment, either load spocs & tiles individually or from a single request"""
     if env.code.startswith("unified_"):
         return get_unified(env, country)
     else:
-        amp_tiles = get_amp_tiles(env, country, region)
+        amp_tiles = get_amp_tiles(env, country, region, agent.code)
         spocs_and_direct_sold_tiles = get_spocs_and_direct_sold_tiles(
-            env, country, region
+            env, country, region, agent.is_mobile
         )
 
         return Ads(
@@ -373,6 +370,15 @@ def find_env_by_code(env_code: str) -> Environment:
             return env
 
     raise ValueError(f"Unknown environment '{env_code}'")
+
+
+def find_agent_by_code(agent_code: str) -> Agent:
+    """Find an agent by code, raise an exception if no agent is found"""
+    for agent in AGENTS:
+        if agent.code == agent_code:
+            return agent
+
+    raise ValueError(f"Unknown agent '{agent_code}'")
 
 
 def create_image_url(raw_image_src: str, w: int, h: int) -> str:
@@ -403,8 +409,18 @@ class PreviewView(TemplateView):
         env_code = request.GET.get("env", "production")
         country = request.GET.get("country", "US")
         region = request.GET.get("region", "CA")
+        agent_code = request.GET.get("agent", AGENTS[0].code)
 
         env = find_env_by_code(env_code)
+        agent = find_agent_by_code(agent_code)
+
+        debugMsg = f"{' &#x1F4F1; ' if agent.is_mobile else ''}country: {country}, region: {region}<br>env: {env}<br>{agent}"
+        try:
+            ads = get_ads(env, country, region, agent)
+            debugMsg += "<br>&#x2705;ok"
+        except Exception as e:
+            ads = {}
+            debugMsg += f"<br>&#x1F480;&#x1F480;&#x1F480; <br> {e}, <br> {traceback.format_exc()}"
 
         context = {
             "environments": ENVIRONMENTS,
@@ -413,7 +429,10 @@ class PreviewView(TemplateView):
             "environment": env_code,
             "country": country,
             "region": region,
-            "ads": get_ads(env, country, region),
+            "agents": AGENTS,
+            "agent": agent_code,
+            "ads": ads,
+            "debugMsg": debugMsg,
         }
 
         return self.render_to_response(context)

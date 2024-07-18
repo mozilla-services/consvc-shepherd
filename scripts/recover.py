@@ -3,6 +3,7 @@ back to a specific snapshot.
 
 See `README.md` file in this directory for instructions.
 """
+
 import json
 import sys
 
@@ -44,7 +45,7 @@ def main():
             add_buttons = driver.find_elements(By.CLASS_NAME, "addlink")
             for elem in add_buttons:
                 adv_add_url = f"{shepherd_url}/admin/contile/advertiser/add/"
-                if (elem.get_attribute("href") == adv_add_url):
+                if elem.get_attribute("href") == adv_add_url:
                     elem.click()
                     break
 

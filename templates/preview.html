@@ -21,6 +21,19 @@
             {% endfor %}
         </select>
 
+        <br/><br/>
+        <label for="agent">User Agent </label>&nbsp;
+        <select name="agent" id="agent" style="text-overflow: ellipsis;width: 200px;">
+            {% for anAgent in agents %}
+                {% if anAgent.code == agent %}
+                    <option value="{{ anAgent.code }}" selected="selected">{{ anAgent.name }}</option>
+                {% else %}
+                    <option value="{{ anAgent.code }}">{{ anAgent.name }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+
+        <br/><br/>
         <label for="country">Country</label>&nbsp;
         <select name="country" id="country">
             {% for aCountry in countries %}
@@ -38,28 +51,33 @@
         </span>
 
         <br/><br/>
-
         <input type="submit" value="Reload"/>
+        <br/><br/>
+        
     </form>
 
     <h2>Tiles</h2>
     <div class="tiles">
         {% for tile in ads.tiles %}
+        <a href="{{ tile.url }}" style="text-decoration: none; color: inherit;" target="_blank" >
             <div class="tile">
                 <div class="tile-outer">
                     <img class="tile-image" src="{{ tile.image_url }}" alt="{{ tile.name }}"/>
+                    
                 </div>
                 <div class="tile-title">
                     <span>{{ tile.name }}</span>
                     <span class="sponsored-label">{{ tile.sponsored }}</span>
                 </div>
             </div>
+        </a>
         {% endfor %}
     </div>
 
     <h2>SPOCs</h2>
     <div class="spocs">
         {% for spoc in ads.spocs %}
+        <a href="{{ spoc.url }}" style="text-decoration: none; color: inherit;" target="_blank">
             <div class="spoc">
                 <img class="spoc-image" src="{{ spoc.image_src }}" alt="{{ spoc.title }}"/>
                 <div class="spoc-meta">
@@ -71,9 +89,20 @@
                     <div class="spoc-context">{{ spoc.sponsored_by }}</div>
                 </div>
             </div>
+        </a>
         {% endfor %}
     </div>
 </div>
+
+<br/><br/>
+<a class="btn btn-outline-secondary" data-bs-toggle="collapse" href="#debugMsg" role="button" aria-expanded="false" aria-controls="debugMsg">
+    debug info
+</a>
+<div class="collapse" id="debugMsg">
+    <div class="card card-body">
+        {{ debugMsg|safe }}
+    </div>
+  </div>
 
 {{ regions|json_script:"regions-data" }}
 <script>
@@ -112,6 +141,16 @@
     });
 
     updateRegions("{{ country }}");
+
+    function toggleDebugMsg() {
+            var debugMsg = document.getElementById('debugMsg');
+            if (debugMsg.style.display === 'none') {
+                debugMsg.style.display = 'block';
+            } else {
+                debugMsg.style.display = 'none';
+            }
+        }
+
 </script>
 
 {% endblock %}
