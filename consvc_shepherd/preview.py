@@ -242,7 +242,7 @@ def get_spocs_and_direct_sold_tiles(
     tiles = [
         Tile(
             image_url=create_image_url(tile["raw_image_src"], 48, 48),
-            name=tile["sponsor"],
+            name=tile["title"],
             url=tile["url"],
             sponsored=LOCALIZATIONS["Sponsored"][country],
         )
