@@ -24,6 +24,11 @@
     margin-right: 20px;
 }
 
+#preview a {
+    text-decoration: none;
+    color: inherit;
+}
+
 .tiles, .spocs {
     display: flex;
     flex-wrap: wrap;
@@ -78,7 +83,7 @@
     font-size: 0.9em;
 }
 
-.spoc, .spoc-info, .spoc-meta {
+.spoc, .spoc-info, .spoc-meta, .spocs a {
     display: flex;
     flex-direction: column;
 }
@@ -91,7 +96,7 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-.spoc-info, .spoc-meta {
+.spoc, .spoc-info, .spoc-meta {
     flex-grow: 1;
 }
 

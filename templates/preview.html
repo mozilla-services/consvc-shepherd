@@ -59,7 +59,7 @@
     <h2>Tiles</h2>
     <div class="tiles">
         {% for tile in ads.tiles %}
-        <a href="{{ tile.url }}" style="text-decoration: none; color: inherit;" target="_blank" >
+        <a href="{{ tile.url }}" target="_blank">
             <div class="tile">
                 <div class="tile-outer">
                     <img class="tile-image" src="{{ tile.image_url }}" alt="{{ tile.name }}"/>
@@ -77,7 +77,7 @@
     <h2>SPOCs</h2>
     <div class="spocs">
         {% for spoc in ads.spocs %}
-        <a href="{{ spoc.url }}" style="text-decoration: none; color: inherit;" target="_blank">
+        <a href="{{ spoc.url }}" target="_blank">
             <div class="spoc">
                 <img class="spoc-image" src="{{ spoc.image_src }}" alt="{{ spoc.title }}"/>
                 <div class="spoc-meta">
