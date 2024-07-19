@@ -217,7 +217,7 @@ def get_spocs_and_direct_sold_tiles(
         spoc_site_id = env.spoc_site_id_mobile
 
     body = {
-        "pocket_id": f"{{{pocket_id}}}",  # produces "{uuid}"
+        "pocket_id": f"{{{pocket_id}}}",  # Produces "{uuid}"
         "site": spoc_site_id,
         "version": 2,
         "country": country,
@@ -242,7 +242,7 @@ def get_spocs_and_direct_sold_tiles(
     tiles = [
         Tile(
             image_url=create_image_url(tile["raw_image_src"], 48, 48),
-            name=tile["sponsor"],
+            name=tile["title"],
             url=tile["url"],
             sponsored=LOCALIZATIONS["Sponsored"][country],
         )
