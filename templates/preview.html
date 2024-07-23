@@ -20,7 +20,7 @@
                 {% endif %}
             {% endfor %}
         </select>
-
+{{agent}}
         <br/><br/>
         <label for="agent">User Agent </label>&nbsp;
         <select name="agent" id="agent" style="text-overflow: ellipsis;width: 200px;">
@@ -73,8 +73,9 @@
         </a>
         {% endfor %}
     </div>
-
+{{ads.spocs}}
     <h2>SPOCs</h2>
+    <div id="desktopSpocs">
     <div class="spocs">
         {% for spoc in ads.spocs %}
         <a href="{{ spoc.url }}" target="_blank">
@@ -91,6 +92,31 @@
             </div>
         </a>
         {% endfor %}
+    </div>
+</div>
+    <div id="mobileSpocs">
+        <div class="spocs" style="display: flex;gap: 20px;height: 150px;">
+            {% for spoc in ads.spocs %}
+            <div style="display: flex;flex-direction: row;  width: 450px; height: 150px;">
+            <a href="{{ spoc.url }}" target="_blank" style="flex-direction: row; width: inherit;">
+                <div class="spoc" style="display: flex; flex-direction: unset;">
+                    <img class="spoc-image" style="width: auto;height: 80%; border-radius: 20px; margin: auto 0; margin-left: 20px; aspect-ratio: 1/1; object-fit: cover;" src="{{ spoc.image_src }}" alt="{{ spoc.title }}"/>
+                    <div style="flex-direction: column; padding: 20px; flex: 1;">
+                        <div class="spoc-meta" style="display: flex; flex-direction: column; justify-content: space-between;flex: 1;padding: unset;">
+                            <div class="spoc-info">                            
+                                <div class="spoc-title clamp">{{ spoc.title }}</div>                            
+                            </div>
+                            <div style="display: flex; flex-direction: column; justify-content: space-between;flex: 1;margin-top: auto;">
+                            <div class="spoc-context">{{ spoc.sponsored_by }}<br>{{ spoc.sponsor }}</div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </a>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </div>
 
@@ -110,6 +136,7 @@
     const countrySelect = document.getElementById("country");
     const regionContainer = document.getElementById("region-container");
     const regionSelect = document.getElementById("region");
+    const userAgentDropDown =document.getElementById("agent")
 
     function updateRegions(country) {
        let regionsForCountry = regions[country];
@@ -140,6 +167,10 @@
         updateRegions(e.target.value);
     });
 
+    userAgentDropDown.addEventListener("change",function(e){
+        toggleUserAgent(e.target);
+    });
+
     updateRegions("{{ country }}");
 
     function toggleDebugMsg() {
@@ -150,7 +181,16 @@
                 debugMsg.style.display = 'none';
             }
         }
+    
+    function toggleUserAgent(userAgentDropDown){
 
+        //const userAgentDropDown =document.getElementById("agent")
+    const selectedUserAgentOption = userAgentDropDown.options[userAgentDropDown.selectedIndex]
+    const userAgent = selectedUserAgentOption.textContent || selectedUserAgentOption.innerText
+
+    console.log(userAgent)
+    document.getElementById('desktopSpocs').display= 'none'
+    }
 </script>
 
 {% endblock %}

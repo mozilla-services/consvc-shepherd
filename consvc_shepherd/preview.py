@@ -81,6 +81,7 @@ class Spoc:
     domain: str
     excerpt: str
     sponsored_by: str
+    sponsor: str
     url: str
 
 
@@ -256,7 +257,8 @@ def get_spocs_and_direct_sold_tiles(
             domain=spoc["domain"],
             excerpt=spoc["excerpt"],
             url=spoc["url"],
-            sponsored_by=localized_sponsored_by(spoc, country),
+            sponsored_by=localized_sponsored_by(spoc, country, isMobile),
+            sponsor=spoc["sponsor"],
         )
         for spoc in json.get("spocs", [])
     ]
@@ -280,7 +282,7 @@ def get_amp_tiles(
     r = requests.get(
         f"{env.mars_url}/v1/tiles", params=params, headers=headers, timeout=30
     )
-
+    print("showing results")
     return [
         Tile(
             image_url=tile["image_url"],
@@ -292,7 +294,7 @@ def get_amp_tiles(
     ]
 
 
-def get_unified(env: Environment, country: str) -> Ads:
+def get_unified(env: Environment, country: str, isMobile: bool = False) -> Ads:
     """Load Ads from MARS unified api"""
     user_context_id = uuid.uuid4()
 
@@ -329,7 +331,7 @@ def get_unified(env: Environment, country: str) -> Ads:
             domain=spoc["domain"],
             excerpt=spoc["excerpt"],
             url=spoc["url"],
-            sponsored_by=localized_sponsored_by(spoc, country),
+            sponsored_by=localized_sponsored_by(spoc, country, isMobile),
         )
         for spoc in r.json().get(spocs_placement, [])
     ]
@@ -340,8 +342,10 @@ def get_unified(env: Environment, country: str) -> Ads:
 def get_ads(env: Environment, country: str, region: str, agent: Agent) -> Ads:
     """Based on Environment, either load spocs & tiles individually or from a single request"""
     if env.code.startswith("unified_"):
-        return get_unified(env, country)
+        print("unified")
+        return get_unified(env, country,agent.is_mobile)
     else:
+        print("amp")
         amp_tiles = get_amp_tiles(env, country, region, agent.code)
         spocs_and_direct_sold_tiles = get_spocs_and_direct_sold_tiles(
             env, country, region, agent.is_mobile
@@ -353,14 +357,23 @@ def get_ads(env: Environment, country: str, region: str, agent: Agent) -> Ads:
         )
 
 
-def localized_sponsored_by(spoc: dict[str, str], country: str) -> str:
+def localized_sponsored_by(spoc: dict[str, str], country: str, isMobile: bool = False) -> str:
     """Render the localized 'Sponsored by ...' text for a SPOC"""
     if (override := spoc.get("sponsored_by_override")) is not None:
         return override
-
-    return LOCALIZATIONS["Sponsored by"][country].format(
-        sponsor=spoc.get("sponsor"),
-    )
+    if isMobile:
+        print( f'mobile out: ****')
+        print( f'mobile out: {LOCALIZATIONS["Sponsored"][country].format(sponsor=spoc.get("sponsor"),)}')
+        return LOCALIZATIONS["Sponsored"][country].format(
+            sponsor=spoc.get("sponsor"),
+        )
+    else:
+        print("desktop")
+        print( f'desktop out: ')
+        return LOCALIZATIONS["Sponsored by"][country].format(
+            sponsor=spoc.get("sponsor"),
+        )
+        
 
 
 def find_env_by_code(env_code: str) -> Environment:
@@ -431,6 +444,7 @@ class PreviewView(TemplateView):
             "region": region,
             "agents": AGENTS,
             "agent": agent_code,
+            "mobile": "yes",
             "ads": ads,
             "debugMsg": debugMsg,
         }
