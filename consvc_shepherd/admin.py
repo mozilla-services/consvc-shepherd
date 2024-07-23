@@ -226,7 +226,8 @@ class BoostrDealAdmin(admin.ModelAdmin):
     """Admin model for sales deals imported from Boostr"""
 
     model = BoostrDeal
-    #  inlines = [BoostrProductInline]
+    filter_horizontal = ("products",)
+    # list_filter = ["start_date"] # need to customize freeform fields for these: "advertiser", "amount", "sales_representative",
     list_display = [
         "boostr_id",
         "name",
@@ -238,7 +239,6 @@ class BoostrDealAdmin(admin.ModelAdmin):
         "start_date",
         "end_date",
     ]
-    # ordering: ["start_date"]
 
 
 @admin.register(BoostrProduct)

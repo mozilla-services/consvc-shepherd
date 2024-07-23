@@ -12,6 +12,7 @@ from django.db.models import (
     ForeignKey,
     IntegerField,
     JSONField,
+    ManyToManyField,
 )
 
 from contile.models import Partner
@@ -202,6 +203,36 @@ class PartnerAllocation(models.Model):
         return {"partner": self.partner.name, "percentage": self.percentage}
 
 
+# Rename to SalesProduct?
+class BoostrProduct(models.Model):
+    """Representation of AdOps sales products that can be assigned to deals (many to many with deals)
+
+    Attributes
+    ----------
+    boostr_id : IntegerField
+        The product's id in Boostr
+    full_name: CharField
+        Product's full name
+    campaign_type:
+        Campaign type (CPC or CPM)
+    created_on : DateTimeField
+        Date of deal record creation (shepherd DB timestamp metadata, not boostr's)
+    updated_on : DateTimeField
+        Date of deal record update (shepherd DB timestamp metadata, not boostr's)
+    """
+
+    boostr_id: IntegerField = models.IntegerField(unique=True)
+    full_name: CharField = models.CharField(max_length=128)
+    campaign_type: CharField = models.CharField(max_length=128)
+
+    created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
+    updated_on: DateTimeField = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        """Return the string representation for a Boostr Product"""
+        return self.full_name
+
+
 class BoostrDeal(models.Model):
     # Rename to SalesDeal? Or is the reference to Boostr helpful here?
     """Representation of AdOps sales deals pulled from Boostr"
@@ -241,43 +272,7 @@ class BoostrDeal(models.Model):
     campaign_type: CharField = models.CharField()
     start_date: DateField = models.DateField()  # Or do we want datetime here?
     end_date: DateField = models.DateField()
+    products: ManyToManyField = models.ManyToManyField(BoostrProduct)
 
     created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
     updated_on: DateTimeField = models.DateTimeField(auto_now=True)
-
-# Rename to SalesProduct?
-class BoostrProduct(models.Model):
-    """Representation of AdOps sales products that can be assigned to deals (many to many with deals)
-
-    Attributes
-    ----------
-    boostr_id : IntegerField
-        The product's id in Boostr
-    full_name: CharField
-        Product's full name
-    campaign_type:
-        Campaign type (CPC or CPM)
-    created_on : DateTimeField
-        Date of deal record creation (shepherd DB timestamp metadata, not boostr's)
-    updated_on : DateTimeField
-        Date of deal record update (shepherd DB timestamp metadata, not boostr's)
-    """
-
-    boostr_id: IntegerField = models.IntegerField(unique=True)
-    full_name: CharField = models.CharField(max_length=128)
-    campaign_type: CharField = models.CharField(max_length=128)
-    created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
-    updated_on: DateTimeField = models.DateTimeField(auto_now=True)
-
-class BoostrDealsProduct(models.Model):
-    """Join table that represents which deals are assigned to which products"
-
-    Attributes
-    ----------
-    boostr_id : IntegerField
-        The deals_product's id in Boostr
-    created_on : DateTimeField
-        Date of creation of association between deal and product (shepherd DB timestamp metadata, not boostr's)
-    updated_on : DateTimeField
-        Date of update of association between deal and product (shepherd DB timestamp metadata, not boostr's)
-    """
