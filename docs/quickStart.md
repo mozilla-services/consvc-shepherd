@@ -17,7 +17,7 @@ eval "$(pyenv virtualenv-init -)"
 
 4. To run consvc-shepherd, you'll need to specify some minimal configurations.
 Use the existing `.env.example` and copy it to `.env`.
-You'll want to make sure configuration files in the `.env` file match your database setup, configuring the database name, user, host and password variables.
+You'll want to make sure configuration files in the `.env` file match your database setup, configuring the database name, user, host,password and boostr JWT token variables.
 It should appear as follows:
 
 ```shell
@@ -30,6 +30,19 @@ DB_NAME=postgres
 DB_USER=postgres
 DB_HOST=db
 DB_PASS=postgres
+BOOSTR_JWT=""
+```
+To get the BOOSTR_JWT token run the following and paste the token into the .env file:
+
+```shell
+$ curl --location 'https://app.boostr.com/api/user_token' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "auth": {
+        "email": "get-from-Ads-Engr-1password",
+        "password": "get-from-Ads-Engr-1password"
+    }
+}'
 ```
 
 5. Set up and enable your virtual environment:
@@ -65,4 +78,9 @@ You may have to do this periodically as you modify or create models. Shell in as
 docker exec -it consvc-shepherd-app-1 sh # interactive mode
 python manage.py makemigrations
 python manage.py migrate
+```
+10. Import Boostr Deals and Products
+``` shell
+docker exec -it consvc-shepherd-app-1 sh # interactive mode you many not need this if you just completed step 9
+python sync_boostr_data.py
 ```
