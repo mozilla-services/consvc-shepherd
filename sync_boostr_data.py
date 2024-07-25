@@ -7,7 +7,7 @@ import requests
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "consvc_shepherd.settings")
 django.setup()
 
-from consvc_shepherd.models import BoostrDeal, BoostrProduct
+from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct
 
 def sync_boostr_data()-> None:
     env = environ.Env()
@@ -19,7 +19,7 @@ def sync_boostr_data()-> None:
         "Authorization": f"Bearer {token}"
     }
 
-    # upsert_products(headers)
+    upsert_products(headers)
     upsert_deals(headers)
 
 def upsert_deals(headers: dict[str, str]) -> None:
@@ -71,7 +71,14 @@ def upsert_deals(headers: dict[str, str]) -> None:
             print(deal_products)
 
             for deal_product in deal_products:
-                boostr_deal.products.add(BoostrProduct.objects.get(boostr_id = deal_product["product"]["id"]))
+                product = BoostrProduct.objects.get(boostr_id = deal_product["product"]["id"])
+                for budget in deal_product["deal_product_budgets"]:
+                    deal_product, ok = BoostrDealProduct.objects.update_or_create(
+                        boostr_deal=boostr_deal,
+                        boostr_product=product,
+                        month=budget["month"],
+                        budget=budget["budget"],
+                    )
 
             print(f"Added {len(boostr_deal.products.all())} to deal {deal_id}")
 
