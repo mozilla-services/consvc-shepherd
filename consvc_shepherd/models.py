@@ -203,7 +203,6 @@ class PartnerAllocation(models.Model):
         return {"partner": self.partner.name, "percentage": self.percentage}
 
 
-# Rename to SalesProduct?
 class BoostrProduct(models.Model):
     """Representation of AdOps sales products that can be assigned to deals (many to many with deals)
 
@@ -228,8 +227,8 @@ class BoostrProduct(models.Model):
     """
 
     boostr_id: IntegerField = models.IntegerField(unique=True)
-    full_name: CharField = models.CharField(max_length=128)
-    campaign_type: CharField = models.CharField(max_length=128)
+    full_name: CharField = models.CharField()
+    campaign_type: CharField = models.CharField()
 
     created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
     updated_on: DateTimeField = models.DateTimeField(auto_now=True)
@@ -240,7 +239,6 @@ class BoostrProduct(models.Model):
 
 
 class BoostrDeal(models.Model):
-    # Rename to SalesDeal? Or is the reference to Boostr helpful here?
     """Representation of AdOps sales deals pulled from Boostr
 
     Attributes
@@ -252,13 +250,11 @@ class BoostrDeal(models.Model):
     advertiser : CharField
         Advertiser name
     currency : CharField
-        Currency code, ie "USD"
+        Currency symbol, eg "$"
     amount : IntegerField
         Amount
     sales_representatives : CharField
         Sales representative names as a comma separated list
-    campaign_type : CharField
-        Campaign type (CPC or CPM)
     start_date: DateField
         Start date
     end_date: DateField
@@ -270,13 +266,12 @@ class BoostrDeal(models.Model):
     """
 
     boostr_id: IntegerField = models.IntegerField(unique=True)
-    name: CharField = models.CharField(max_length=128)
-    advertiser: CharField = models.CharField(max_length=128)
-    currency: CharField = models.CharField()  # Is there a django field for this?
+    name: CharField = models.CharField()
+    advertiser: CharField = models.CharField()
+    currency: CharField = models.CharField()
     amount: IntegerField = models.IntegerField()
-    sales_representatives: CharField = models.CharField(max_length=128)
-    campaign_type: CharField = models.CharField()
-    start_date: DateField = models.DateField()  # Or do we want datetime here? Boostr UI shows these as just dates so this might be sufficient.
+    sales_representatives: CharField = models.CharField()
+    start_date: DateField = models.DateField()
     end_date: DateField = models.DateField()
     products: ManyToManyField = models.ManyToManyField(BoostrProduct, related_name='products', through='BoostrDealProduct')
 
@@ -284,8 +279,7 @@ class BoostrDeal(models.Model):
     updated_on: DateTimeField = models.DateTimeField(auto_now=True)
 
 class BoostrDealProduct(models.Model):
-    """Join table that represents which Products are part of a deal, and their budgets
-
+    """Join table that represents the monthly budgets of every Product that is part of a Deal
     Attributes
     ----------
     boostr_deal : BoostrDeal
