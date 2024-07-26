@@ -575,6 +575,20 @@ django = "*"
 typing-extensions = "*"
 
 [[package]]
+name = "djangorestframework"
+version = "3.15.2"
+description = "Web APIs for Django, made easy."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "djangorestframework-3.15.2-py3-none-any.whl", hash = "sha256:2b8871b062ba1aefc2de01f773875441a961fefbf79f5eed1e32b2f096944b20"},
+    {file = "djangorestframework-3.15.2.tar.gz", hash = "sha256:36fe88cd2d6c6bec23dca9804bab2ba5517a8bb9d8f47ebc68981b56840107ad"},
+]
+
+[package.dependencies]
+django = ">=4.2"
+
+[[package]]
 name = "dockerflow"
 version = "2022.8.0"
 description = "Python tools and helpers for Mozilla's Dockerflow"
@@ -1984,4 +1998,4 @@ h11 = ">=0.9.0,<1"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "c5b6902d35b4db4917c55ad83c93c0bcea5af0cc588961147c63170f364b37f9"
+content-hash = "02403cdcb3453351317bf02fc2c16dd92a012f0de82ec889038f48715cc8fdee"

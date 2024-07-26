@@ -22,6 +22,7 @@ jsonschema = "^4.17.3"
 markus = {extras = ["datadog"], version = "^4.2.0"}
 pyyaml = "^6.0.1"
 requests = "^2.32.0"
+djangorestframework = "^3.15.2"
 
 [tool.poetry.group.dev.dependencies]
 bandit = {extras = ["toml"], version = "^1.7.4"}
