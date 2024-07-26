@@ -80,6 +80,8 @@ INSTALLED_APPS: list[str] = [
     "django.contrib.staticfiles",
     "django_countries",
     "dockerflow.django",
+    "rest_framework",
+    "api",
 ]
 
 MIDDLEWARE: list = [
@@ -93,6 +95,14 @@ MIDDLEWARE: list = [
     "openidc.middleware.OpenIDCAuthMiddleware",
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE' : 20,
+    
+}
 ROOT_URLCONF: str = "consvc_shepherd.urls"
 
 TEMPLATES: list[dict[str, Any]] = [
