@@ -236,8 +236,8 @@ class BoostrDealAdmin(admin.ModelAdmin):
     inlines = [
         BoostrDealProductInline,
     ]
-    # filter_horizontal = ("products",)
-    # list_filter = ["start_date"] # need to customize freeform fields for these: "advertiser", "amount", "sales_representative",
+    search_fields = ["boostr_id", "name", "advertiser", "sales_representatives"]
+    list_filter = ["currency", "start_date", ("products", admin.RelatedOnlyFieldListFilter)]
     list_display = [
         "boostr_id",
         "name",
