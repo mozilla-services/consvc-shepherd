@@ -245,7 +245,6 @@ class BoostrDealAdmin(admin.ModelAdmin):
         "currency",
         "amount",
         "sales_representatives",
-        "campaign_type",
         "start_date",
         "end_date",
     ]
