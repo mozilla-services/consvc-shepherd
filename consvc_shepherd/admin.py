@@ -12,6 +12,7 @@ from consvc_shepherd.models import (
     AllocationSetting,
     AllocationSettingsSnapshot,
     BoostrDeal,
+    BoostrDealProduct,
     BoostrProduct,
     PartnerAllocation,
     SettingsSnapshot,
@@ -220,13 +221,22 @@ class AllocationSettingAdmin(admin.ModelAdmin):
         super(AllocationSettingAdmin, self).delete_queryset(request, queryset)
         metrics.incr("allocation.delete")
 
+class BoostrDealProductInline(admin.StackedInline):
+    """BoostrProductBudgetInline is for displaying products and their budgets in the Deal form"""
+
+    model = BoostrDealProduct
+    extra = 0
 
 @admin.register(BoostrDeal)
 class BoostrDealAdmin(admin.ModelAdmin):
     """Admin model for sales deals imported from Boostr"""
 
     model = BoostrDeal
-    filter_horizontal = ("products",)
+    date_hierarchy = "start_date"
+    inlines = [
+        BoostrDealProductInline,
+    ]
+    # filter_horizontal = ("products",)
     # list_filter = ["start_date"] # need to customize freeform fields for these: "advertiser", "amount", "sales_representative",
     list_display = [
         "boostr_id",

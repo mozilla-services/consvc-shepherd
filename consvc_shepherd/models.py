@@ -219,6 +219,12 @@ class BoostrProduct(models.Model):
         Date of deal record creation (shepherd DB timestamp metadata, not boostr's)
     updated_on : DateTimeField
         Date of deal record update (shepherd DB timestamp metadata, not boostr's)
+
+    Methods
+    -------
+    __str__(self)
+        Return the string representation for a Boostr Product
+
     """
 
     boostr_id: IntegerField = models.IntegerField(unique=True)
@@ -235,7 +241,7 @@ class BoostrProduct(models.Model):
 
 class BoostrDeal(models.Model):
     # Rename to SalesDeal? Or is the reference to Boostr helpful here?
-    """Representation of AdOps sales deals pulled from Boostr"
+    """Representation of AdOps sales deals pulled from Boostr
 
     Attributes
     ----------
@@ -270,9 +276,32 @@ class BoostrDeal(models.Model):
     amount: IntegerField = models.IntegerField()
     sales_representatives: CharField = models.CharField(max_length=128)
     campaign_type: CharField = models.CharField()
-    start_date: DateField = models.DateField()  # Or do we want datetime here?
+    start_date: DateField = models.DateField()  # Or do we want datetime here? Boostr UI shows these as just dates so this might be sufficient.
     end_date: DateField = models.DateField()
-    products: ManyToManyField = models.ManyToManyField(BoostrProduct)
+    products: ManyToManyField = models.ManyToManyField(BoostrProduct, related_name='products', through='BoostrDealProduct')
 
     created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
     updated_on: DateTimeField = models.DateTimeField(auto_now=True)
+
+class BoostrDealProduct(models.Model):
+    """Join table that represents which Products are part of a deal, and their budgets
+
+    Attributes
+    ----------
+    boostr_deal : BoostrDeal
+        Foreign key pointer to BoostrDeal, with related name of deals
+    boostr_product : Partner
+        Foreign key pointing to BoostrProduct instance, with related name of products
+    budget : IntegerField
+        How much of the deal's overall budget is allocated to this product and month
+    month: CharField
+        The month when this product and budget combo will run
+
+    Methods
+    -------
+    """
+
+    boostr_deal: ForeignKey = models.ForeignKey(BoostrDeal, on_delete=models.CASCADE)
+    boostr_product: ForeignKey = models.ForeignKey(BoostrProduct, on_delete=models.CASCADE)
+    budget: IntegerField = models.IntegerField()
+    month: CharField = models.CharField()

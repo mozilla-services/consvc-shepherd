@@ -67,7 +67,7 @@ $ poetry install
 
 8. Build the Docker image and start the container:
 ```shell
-docker-compose up --build
+docker compose up --build
 ```
 
 The application will then be accessible at the following url: [http://0.0.0.0:7001/](http://0.0.0.0:7001/). The admin panel is available at [http://0.0.0.0:7001/admin](http://0.0.0.0:7001/admin)
