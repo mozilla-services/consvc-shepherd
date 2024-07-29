@@ -273,13 +273,17 @@ class BoostrDeal(models.Model):
     sales_representatives: CharField = models.CharField()
     start_date: DateField = models.DateField()
     end_date: DateField = models.DateField()
-    products: ManyToManyField = models.ManyToManyField(BoostrProduct, related_name='products', through='BoostrDealProduct')
+    products: ManyToManyField = models.ManyToManyField(
+        BoostrProduct, related_name="products", through="BoostrDealProduct"
+    )
 
     created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
     updated_on: DateTimeField = models.DateTimeField(auto_now=True)
 
+
 class BoostrDealProduct(models.Model):
     """Join table that represents the monthly budgets of every Product that is part of a Deal
+
     Attributes
     ----------
     boostr_deal : BoostrDeal
@@ -290,12 +294,11 @@ class BoostrDealProduct(models.Model):
         How much of the deal's overall budget is allocated to this product and month
     month: CharField
         The month when this product and budget combo will run
-
-    Methods
-    -------
     """
 
     boostr_deal: ForeignKey = models.ForeignKey(BoostrDeal, on_delete=models.CASCADE)
-    boostr_product: ForeignKey = models.ForeignKey(BoostrProduct, on_delete=models.CASCADE)
+    boostr_product: ForeignKey = models.ForeignKey(
+        BoostrProduct, on_delete=models.CASCADE
+    )
     budget: IntegerField = models.IntegerField()
     month: CharField = models.CharField()
