@@ -142,3 +142,4 @@ dmypy.json
 book/
 mermaid-init.js
 mermaid.min.js
+.zed/settings.json
