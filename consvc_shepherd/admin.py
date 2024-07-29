@@ -221,11 +221,13 @@ class AllocationSettingAdmin(admin.ModelAdmin):
         super(AllocationSettingAdmin, self).delete_queryset(request, queryset)
         metrics.incr("allocation.delete")
 
+
 class BoostrDealProductInline(admin.StackedInline):
     """BoostrProductBudgetInline is for displaying products and their budgets in the Deal form"""
 
     model = BoostrDealProduct
     extra = 0
+
 
 @admin.register(BoostrDeal)
 class BoostrDealAdmin(admin.ModelAdmin):
@@ -237,7 +239,11 @@ class BoostrDealAdmin(admin.ModelAdmin):
         BoostrDealProductInline,
     ]
     search_fields = ["boostr_id", "name", "advertiser", "sales_representatives"]
-    list_filter = ["currency", "start_date", ("products", admin.RelatedOnlyFieldListFilter)]
+    list_filter = [
+        "currency",
+        "start_date",
+        ("products", admin.RelatedOnlyFieldListFilter),
+    ]
     list_display = [
         "boostr_id",
         "name",
