@@ -81,6 +81,6 @@ python manage.py migrate
 ```
 10. Import Boostr Deals and Products
 ``` shell
-docker exec -it consvc-shepherd-app-1 sh # interactive mode you many not need this if you just completed step 9
-python sync_boostr_data.py
+docker exec -it consvc-shepherd-app-1 sh # interactive mode
+BOOSTR_BASE_URL=https://app.boostr.com/api/ BOOSTR_EMAIL=find-me-in-1pass-ads-eng-vault@mozilla.com BOOSTR_PASSWORD=secret-from-1pass python sync_boostr_data.py
 ```

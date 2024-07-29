@@ -178,6 +178,10 @@ LOGGING: dict[str, Any] = {
             "level": env("SHEPHERD_ENV", default="DEBUG"),
         },
         "markus": {"handlers": ["console"], "level": "DEBUG"},
+        "sync_boostr_data": {
+            "handlers": ["console"],
+            "level": env("SHEPHERD_ENV", default="DEBUG"),
+        },
     },
 }
 
