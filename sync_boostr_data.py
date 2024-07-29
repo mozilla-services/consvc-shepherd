@@ -55,7 +55,6 @@ def upsert_deals(headers: dict[str, str]) -> None:
                 currency=deal["currency"],
                 amount=math.floor(float(deal["budget"])),
                 sales_representatives=','.join(str(d["email"]) for d in deal["deal_members"]),
-                campaign_type="?",
                 start_date=deal["start_date"],
                 end_date=deal["end_date"],
             )
