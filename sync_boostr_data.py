@@ -12,7 +12,7 @@ django.setup()
 from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct
 
 @dataclass(frozen=True)
-class BoostrSyncConfig():
+class BoostrSyncConfig:
     """Object to wrap up various environment configuration for the boostr snyc script"""
     base_url: str
     headers: dict[str, str]
