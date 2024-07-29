@@ -140,4 +140,5 @@ def get_campaign_type(product_full_name: str) -> str:
     return "?"
 
 
-sync_boostr_data()
+if __name__ == "__main__":
+    sync_boostr_data()
