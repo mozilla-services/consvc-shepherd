@@ -22,7 +22,7 @@ class BoostrApiError(Exception):
     '''Raise this error whenever we don't get a 200 status back from boostr'''
     pass
 
-def sync_boostr_data()-> None:
+def sync_boostr_data() -> None:
     logger = logging.getLogger("sync_boostr_data")
     try:
         config = setup_config(logger)
