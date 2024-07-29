@@ -17,7 +17,8 @@ eval "$(pyenv virtualenv-init -)"
 
 4. To run consvc-shepherd, you'll need to specify some minimal configurations.
 Use the existing `.env.example` and copy it to `.env`.
-You'll want to make sure configuration files in the `.env` file match your database setup, configuring the database name, user, host,password and boostr JWT token variables.
+You'll want to make sure the environment variables in the `.env` file match your database setup, configuring the database name, user, host, and password.
+
 It should appear as follows:
 
 ```shell
@@ -30,19 +31,6 @@ DB_NAME=postgres
 DB_USER=postgres
 DB_HOST=db
 DB_PASS=postgres
-BOOSTR_JWT=""
-```
-To get the BOOSTR_JWT token run the following and paste the token into the .env file:
-
-```shell
-$ curl --location 'https://app.boostr.com/api/user_token' \
---header 'Content-Type: application/json' \
---data-raw '{
-    "auth": {
-        "email": "get-from-Ads-Engr-1password",
-        "password": "get-from-Ads-Engr-1password"
-    }
-}'
 ```
 
 5. Set up and enable your virtual environment:
@@ -79,7 +67,11 @@ docker exec -it consvc-shepherd-app-1 sh # interactive mode
 python manage.py makemigrations
 python manage.py migrate
 ```
+
 10. Import Boostr Deals and Products
+
+If you're working with the AdOps dashboard, you may want to pull in Boostr Deals and Products.
+
 ``` shell
 docker exec -it consvc-shepherd-app-1 sh # interactive mode
 BOOSTR_BASE_URL=https://app.boostr.com/api/ BOOSTR_EMAIL=find-me-in-1pass-ads-eng-vault@mozilla.com BOOSTR_PASSWORD=secret-from-1pass python sync_boostr_data.py
