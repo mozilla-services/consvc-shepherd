@@ -75,6 +75,7 @@
     </div>
 {{ads.spocs}}
     <h2>SPOCs</h2>
+    {% if not ads.is_mobile %}
     <div id="desktop-spoc">
         <div class="spocs">
             {% for spoc in ads.spocs %}
@@ -94,6 +95,7 @@
             {% endfor %}
         </div>
     </div>
+    {% else %}
     <div id="mobile-spoc">
         <div class="spocs">
             {% for spoc in ads.spocs %}
@@ -118,6 +120,7 @@
             {% endfor %}
         </div>
     </div>
+    {% endif %}
 </div>
 
 <br/><br/>
@@ -167,10 +170,6 @@
         updateRegions(e.target.value);
     });
 
-    userAgentDropDown.addEventListener("change",function(e){
-        toggleUserAgent(e.target);
-    });
-
     updateRegions("{{ country }}");
 
     function toggleDebugMsg() {
@@ -182,20 +181,6 @@
             }
         }
     
-    function toggleUserAgent(userAgentDropDown) {
-        const selectedUserAgentOption = userAgentDropDown.options[userAgentDropDown.selectedIndex]
-        const userAgent = selectedUserAgentOption.textContent || selectedUserAgentOption.innerText
-
-        if (userAgent == 'Desktop') {
-            document.getElementById('desktop-spoc').style.display = 'block'
-            document.getElementById('mobile-spoc').style.display = 'none'
-        } else {
-            document.getElementById('mobile-spoc').style.display = 'block'
-            document.getElementById('desktop-spoc').style.display = 'none'
-        }
-    }
-
-    toggleUserAgent(userAgentDropDown);
 </script>
 
 {% endblock %}

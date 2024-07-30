@@ -12,6 +12,7 @@ SPOC = Spoc(
     domain="cosmetics.beauty",
     excerpt="The sale has begun...",
     sponsored_by="Sponsored by Cosmetics",
+    sponsor="Cosmetics",
     url="example.com",
 )
 
@@ -94,6 +95,7 @@ class TestGetAds(TestCase):
                 self.assertEqual(ads.spocs[0].domain, SPOC.domain)
                 self.assertEqual(ads.spocs[0].excerpt, SPOC.excerpt)
                 self.assertEqual(ads.spocs[0].sponsored_by, SPOC.sponsored_by)
+                self.assertEqual(ads.spocs[0].sponsor, SPOC.sponsor)
                 self.assertEqual(ads.spocs[0].url, SPOC.url)
 
                 # Tile data
