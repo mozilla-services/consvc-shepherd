@@ -354,23 +354,24 @@ def get_ads(env: Environment, country: str, region: str, agent: Agent) -> Ads:
         return Ads(
             tiles=amp_tiles + spocs_and_direct_sold_tiles[0],
             spocs=spocs_and_direct_sold_tiles[1],
-            is_mobile=agent.is_mobile
+            is_mobile=agent.is_mobile,
         )
 
 
-def localized_sponsored_by(spoc: dict[str, str], country: str, is_mobile: bool = False) -> str:
+def localized_sponsored_by(
+    spoc: dict[str, str], country: str, is_mobile: bool = False
+) -> str:
     """Render the localized 'Sponsored by ...' text for a SPOC"""
     if (override := spoc.get("sponsored_by_override")) is not None:
         return override
     if is_mobile:
-        print('mobile out: ****')
-        print(f'mobile out: {LOCALIZATIONS["Sponsored"][country].format(sponsor=spoc.get("sponsor"),)}')
+        print(
+            f'mobile out: {LOCALIZATIONS["Sponsored"][country].format(sponsor=spoc.get("sponsor"),)}'
+        )
         return LOCALIZATIONS["Sponsored"][country].format(
             sponsor=spoc.get("sponsor"),
         )
     else:
-        print("desktop")
-        print('desktop out: ')
         return LOCALIZATIONS["Sponsored by"][country].format(
             sponsor=spoc.get("sponsor"),
         )
