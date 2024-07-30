@@ -5,10 +5,10 @@ from django.db import migrations, models
 CREATE_SQL = """
 CREATE OR REPLACE VIEW revenue_overview AS
 SELECT
-	full_name AS Deal,
-	SUM(budget) AS Revenue,
-	sum(amount) AS Budget,
-	sum(amount) - SUM(budget) AS "Revenue Delta",
+	full_name AS placement,
+	SUM(budget) AS revenue,
+	sum(amount) AS budget,
+	sum(amount) - SUM(budget) AS revenue_delta,
 	consvc_shepherd_boostrdealproduct.month
 FROM
 	consvc_shepherd_boostrdealproduct
