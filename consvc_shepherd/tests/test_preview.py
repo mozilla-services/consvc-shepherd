@@ -125,4 +125,4 @@ class TestGetAds(TestCase):
             )
             get_ads(mockUnifiedEnv, "US", "CA", DEFAULT_USER_AGENT)
 
-            mock_get_unified.assert_called_once_with(mockUnifiedEnv, "US")
+            mock_get_unified.assert_called_once_with(mockUnifiedEnv, "US", False)

@@ -177,6 +177,7 @@ class TestPreviewView(TestCase):
         return Ads(
             tiles=[tile, direct_sold_tile],
             spocs=[spoc],
+            is_mobile=False,
         )
 
     def test_preview_view(self):
