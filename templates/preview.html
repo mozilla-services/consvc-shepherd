@@ -20,7 +20,6 @@
                 {% endif %}
             {% endfor %}
         </select>
-{{agent}}
         <br/><br/>
         <label for="agent">User Agent </label>&nbsp;
         <select name="agent" id="agent" style="text-overflow: ellipsis;width: 200px;">
@@ -73,7 +72,6 @@
         </a>
         {% endfor %}
     </div>
-{{ads.spocs}}
     <h2>SPOCs</h2>
     {% if not ads.is_mobile %}
     <div id="desktop-spoc">
