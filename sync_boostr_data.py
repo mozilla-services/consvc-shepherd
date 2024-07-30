@@ -12,7 +12,7 @@ django.setup()
 from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct
 
 @dataclass(frozen=True)
-class BoostrSyncConfig():
+class BoostrSyncConfig:
     """Object to wrap up various environment configuration for the boostr snyc script"""
     base_url: str
     headers: dict[str, str]
@@ -22,7 +22,7 @@ class BoostrApiError(Exception):
     '''Raise this error whenever we don't get a 200 status back from boostr'''
     pass
 
-def sync_boostr_data()-> None:
+def sync_boostr_data() -> None:
     logger = logging.getLogger("sync_boostr_data")
     try:
         config = setup_config(logger)
@@ -140,4 +140,5 @@ def get_campaign_type(product_full_name: str) -> str:
     return "?"
 
 
-sync_boostr_data()
+if __name__ == "__main__":
+    sync_boostr_data()
