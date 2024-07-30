@@ -73,7 +73,7 @@ def upsert_deals(config: BoostrSyncConfig) -> None:
         config.log.info(f"Fetched {len(deals)} deals for page {deals_params['page']}")
 
         # Paged through all available records and are getting an empty list back
-        if (len(deals) == 0):
+        if len(deals) == 0:
             config.log.info(f"Done. Fetched all the deals in {deals_params['page']-1} pages")
             break
 
