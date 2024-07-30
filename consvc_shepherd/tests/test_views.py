@@ -171,6 +171,7 @@ class TestPreviewView(TestCase):
             domain="play.anviloftheages.com",
             excerpt="If you like to play games, then you should play this game.",
             sponsored_by="Anvil of the Ages",
+            sponsor="Anvil of the Ages",
             url="example.com",
         )
         return Ads(

@@ -36,7 +36,12 @@ PROGRESS_QUEST_TILE = Tile(
     sponsored="Sponsored",
     url="example4.com",
 )
-DEFAULT_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:126.0) Gecko/20100101 Firefox/126.0"
+
+DEFAULT_USER_AGENT = Agent(
+    code="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:126.0) Gecko/20100101 Firefox/126.0",
+    name="Desktop",
+    is_mobile=False,
+)
 
 
 @override_settings(DEBUG=True)
