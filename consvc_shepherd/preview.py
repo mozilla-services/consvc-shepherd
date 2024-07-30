@@ -365,9 +365,6 @@ def localized_sponsored_by(
     if (override := spoc.get("sponsored_by_override")) is not None:
         return override
     if is_mobile:
-        print(
-            f'mobile out: {LOCALIZATIONS["Sponsored"][country].format(sponsor=spoc.get("sponsor"),)}'
-        )
         return LOCALIZATIONS["Sponsored"][country].format(
             sponsor=spoc.get("sponsor"),
         )
@@ -445,7 +442,6 @@ class PreviewView(TemplateView):
             "region": region,
             "agents": AGENTS,
             "agent": agent_code,
-            "mobile": "yes",
             "ads": ads,
             "debugMsg": debugMsg,
         }
