@@ -69,7 +69,6 @@ python manage.py migrate
 ```
 
 10. Import Boostr Deals and Products
-
 If you're working with the AdOps dashboard, you may want to pull in Boostr Deals and Products.
 
 ``` shell

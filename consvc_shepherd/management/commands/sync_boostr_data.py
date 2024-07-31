@@ -66,6 +66,7 @@ class BoostrLoader:
             f"{self.base_url}/user_token",
             json={"auth": {"email": email, "password": password}},
             headers=headers,
+            timeout=15,
         )
         if user_token_response.status_code != 201:
             raise BoostrApiError(
@@ -83,11 +84,11 @@ class BoostrLoader:
         products_response = self.session.get(
             f"{self.base_url}/products", params=products_params
         )
-        products = products_response.json()
         if products_response.status_code != 200:
             raise BoostrApiError(
                 f"Bad response status from /api/products: {products_response}"
             )
+        products = products_response.json()
         self.log.info(f"Fetched {(len(products))} products")
 
         for product in products:
@@ -124,9 +125,9 @@ class BoostrLoader:
                 )
                 break
 
-            closed_won_deals = filter(lambda d: d["stage_name"] == "Closed Won", deals)
+            closed_won_deals = [d for d in deals if (d["stage_name"] == "Closed Won")]
             for deal in closed_won_deals:
-                boostr_deal, ok = BoostrDeal.objects.update_or_create(
+                boostr_deal, _ = BoostrDeal.objects.update_or_create(
                     boostr_id=deal["id"],
                     name=deal["name"],
                     advertiser=deal["advertiser_name"],
@@ -139,6 +140,7 @@ class BoostrLoader:
                     end_date=deal["end_date"],
                 )
                 self.log.debug(f"Upserted deal: {deal['id']}")
+
                 self.upsert_deal_products(boostr_deal)
                 self.log.info(f"Upserted products and budgets for deal: {deal['id']}")
 
@@ -160,7 +162,7 @@ class BoostrLoader:
         for deal_product in deal_products:
             product = BoostrProduct.objects.get(boostr_id=deal_product["product"]["id"])
             for budget in deal_product["deal_product_budgets"]:
-                deal_product_budget, ok = BoostrDealProduct.objects.update_or_create(
+                BoostrDealProduct.objects.update_or_create(
                     boostr_deal=deal,
                     boostr_product=product,
                     month=budget["month"],
@@ -177,7 +179,10 @@ class BoostrLoader:
 
 def get_campaign_type(product_full_name: str) -> str:
     if "CPC" in product_full_name:
-        return "CPC"
+        return BoostrProduct.CampaignType.CPC
     if "CPM" in product_full_name:
-        return "CPM"
-    return "?"
+        return BoostrProduct.CampaignType.CPM
+    if "Flat Fee" in product_full_name:
+        return BoostrProduct.CampaignType.FLAT_FEE
+    else:
+        return BoostrProduct.CampaignType.NONE
