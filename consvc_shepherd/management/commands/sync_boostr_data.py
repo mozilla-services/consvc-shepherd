@@ -182,7 +182,8 @@ class BoostrLoader:
                     budget=budget["budget"],
                 )
             self.log.debug(
-                f'Upserted {len(deal_product["deal_product_budgets"])} months of budget for product: {product.boostr_id} to deal: {deal.boostr_id}'
+                f'Upserted {len(deal_product["deal_product_budgets"])} months of budget for product: '
+                f"{product.boostr_id} to deal: {deal.boostr_id}"
             )
 
     def load(self):

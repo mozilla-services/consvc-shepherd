@@ -432,9 +432,13 @@ class TestSyncBoostrData(TestCase):
         side_effect=mock_update_or_create_deal,
     )
     @mock.patch.object(BoostrLoader, "upsert_deal_products")
-    def test_upsert_deals(self, mock_upsert_deal_products, mock_update_or_create, mock_get, mock_post):
+    def test_upsert_deals(
+        self, mock_upsert_deal_products, mock_update_or_create, mock_get, mock_post
+    ):
         """Test function that calls the Boostr API for deal data and saves to our DB"""
-        self.skipTest('Currently hangs with the addition of the last upsert_deal_products mock')
+        self.skipTest(
+            "Currently hangs with the addition of the last upsert_deal_products mock"
+        )
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
         loader.upsert_deals()
         calls = [
