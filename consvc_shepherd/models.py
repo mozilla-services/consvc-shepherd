@@ -226,6 +226,8 @@ class BoostrProduct(models.Model):
     """
 
     class CampaignType(models.TextChoices):
+        """Represents the way a Boostr Product will be charged"""
+
         CPC = "CPC"
         CPM = "CPM"
         FLAT_FEE = "Flat Fee"

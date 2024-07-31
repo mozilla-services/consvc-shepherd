@@ -1,3 +1,5 @@
+"""Django admin custom command for fetching and saving Deal and Product data from Boostr to Shepherd"""
+
 import logging
 import math
 
@@ -8,9 +10,12 @@ from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct
 
 
 class Command(BaseCommand):
-    help = "Run a script that calls the Boostr API and loads Deals and Products from Boostr"
+    """Django admin custom command for fetching and saving Deal and Product data from Boostr to Shepherd"""
+
+    help = "Run a script that calls the Boostr API and saves Deals and Products from Boostr"
 
     def add_arguments(self, parser):
+        """Register expected command line arguments"""
         parser.add_argument(
             "base_url",
             type=str,
@@ -28,6 +33,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        """Handle running the command"""
         loader = BoostrLoader(
             options["base_url"], options["email"], options["password"]
         )
@@ -41,6 +47,8 @@ class BoostrApiError(Exception):
 
 
 class BoostrLoader:
+    """Wrap up interaction with the Boostr API"""
+
     base_url: str
     session: requests.Session
     log: logging.Logger
@@ -51,6 +59,7 @@ class BoostrLoader:
         self.setup_session(email, password)
 
     def setup_session(self, email: str, password: str) -> None:
+        """Authenticate with the boostr api and create and store a session on the instance"""
         headers = {
             "Accept": "application/vnd.boostr.public",
             "Content-Type": "application/json",
@@ -62,6 +71,7 @@ class BoostrLoader:
         self.session = s
 
     def authenticate(self, email: str, password: str, headers: dict[str, str]) -> str:
+        """Authenticate with the Boostr API and return jwt"""
         user_token_response = requests.post(
             f"{self.base_url}/user_token",
             json={"auth": {"email": email, "password": password}},
@@ -73,12 +83,13 @@ class BoostrLoader:
                 f"Bad response status from /api/user_token: {user_token_response}"
             )
         token = user_token_response.json()
-        return token["jwt"]
+        return str(token["jwt"])
 
     def upsert_products(self) -> None:
+        """Fetch all Boostr products and upsert them to Shepherd DB"""
         products_params = {
-            "per": 300,
-            "page": 1,
+            "per": "300",
+            "page": "1",
             "filter": "all",
         }
         products_response = self.session.get(
@@ -100,13 +111,16 @@ class BoostrLoader:
         self.log.info(f"Upserted {(len(products))} products")
 
     def upsert_deals(self) -> None:
+        """Fetch all Boostr deals and upsert the Closed Won ones to Shepherd DB"""
+        page = 0
         deals_params = {
-            "per": 300,
-            "page": 0,
+            "per": "300",
+            "page": str(page),
             "filter": "all",
         }
         while True:
-            deals_params["page"] += 1
+            page += 1
+            deals_params["page"] = str(page)
 
             deals_response = self.session.get(
                 f"{self.base_url}/deals", params=deals_params
@@ -116,13 +130,11 @@ class BoostrLoader:
                     f"Bad response status from /api/deals: {deals_response}"
                 )
             deals = deals_response.json()
-            self.log.info(f"Fetched {len(deals)} deals for page {deals_params['page']}")
+            self.log.info(f"Fetched {len(deals)} deals for page {page}")
 
             # Paged through all available records and are getting an empty list back
             if len(deals) == 0:
-                self.log.info(
-                    f"Done. Fetched all the deals in {deals_params['page']-1} pages"
-                )
+                self.log.info(f"Done. Fetched all the deals in {page - 1} pages")
                 break
 
             closed_won_deals = [d for d in deals if (d["stage_name"] == "Closed Won")]
@@ -145,6 +157,7 @@ class BoostrLoader:
                 self.log.info(f"Upserted products and budgets for deal: {deal['id']}")
 
     def upsert_deal_products(self, deal: BoostrDeal) -> None:
+        """Fetch the deal_products for a particular deal and store them in our DB with their monthly budgets"""
         deal_products_response = self.session.get(
             f"{self.base_url}/deals/{deal.boostr_id}/deal_products"
         )
@@ -169,15 +182,17 @@ class BoostrLoader:
                     budget=budget["budget"],
                 )
             self.log.debug(
-                f'Upserted {len(deal_product["deal_product_budgets"])} months of budget for product: {product.id} to deal: {deal.boostr_id}'
+                f'Upserted {len(deal_product["deal_product_budgets"])} months of budget for product: {product.boostr_id} to deal: {deal.boostr_id}'
             )
 
     def load(self):
+        """Loader entry point"""
         self.upsert_products()
         self.upsert_deals()
 
 
 def get_campaign_type(product_full_name: str) -> str:
+    """Infer a campaign type from a product's full name"""
     if "CPC" in product_full_name:
         return BoostrProduct.CampaignType.CPC
     if "CPM" in product_full_name:
