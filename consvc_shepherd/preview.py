@@ -425,7 +425,10 @@ class PreviewView(TemplateView):
         env = find_env_by_code(env_code)
         agent = find_agent_by_code(agent_code)
 
-        debugMsg = f"{' &#x1F4F1; ' if agent.is_mobile else ''}country: {country}, region: {region}<br>env: {env}<br>{agent}"
+        mobileMsg = " &#x1F4F1; " if agent.is_mobile else ""
+        debugMsg = (
+            f"{mobileMsg}country: {country}, region: {region}<br>env: {env}<br>{agent}"
+        )
         try:
             ads = get_ads(env, country, region, agent)
             debugMsg += "<br>&#x2705;ok"
