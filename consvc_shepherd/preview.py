@@ -39,7 +39,7 @@ LOCALIZATIONS = {
         "FR": "Sponsorisé par {sponsor}",
         "GB": "Sponsored by {sponsor}",
         "IT": "Sponsorizzata da {sponsor}",
-        "PL": "Sponsor {sponsor}",
+        "PL": "Sponsor: {sponsor}",
         "AT": "Werbung von {sponsor}",
         "NL": "Gesponsord door {sponsor}",
         "LU": "Sponsorisé par {sponsor}",
