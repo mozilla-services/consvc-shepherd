@@ -209,7 +209,7 @@ REGIONS = load_regions()
 
 def get_spocs_and_direct_sold_tiles(
     env: Environment, country: str, region: str, is_mobile: bool
-) -> tuple[list[Tile], list[Spoc], bool]:
+) -> tuple[list[Tile], list[Spoc]]:
     """Load SPOCs and direct sold tiles from MARS for given country and region"""
     # Generate a unique pocket ID per request to avoid frequency capping
     pocket_id = uuid.uuid4()
