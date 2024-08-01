@@ -22,6 +22,7 @@ from consvc_shepherd.models import (
 )
 from consvc_shepherd.storage import send_to_storage
 from consvc_shepherd.utils import ShepherdMetrics
+from .forms import AdsInventoryForecastForm
 
 metrics: ShepherdMetrics = ShepherdMetrics("shepherd")
 
@@ -274,24 +275,25 @@ class BoostrProductAdmin(admin.ModelAdmin):
 @admin.register(RevenueOverview)
 class RevenueOverviewAdmin(admin.ModelAdmin):
     model = RevenueOverview
-    list_display = [
-        "placement", 
-        "budget"
-    ]
+    list_display = ["placement", "budget"]
+
 
 @admin.register(Countries)
 class CountriesAdmin(admin.ModelAdmin):
     model = Countries
-    list_display = [
-        "code", 
-        "name"
-    ]
+    list_display = ["code", "name"]
+
 
 @admin.register(AdsInventoryForecast)
 class AdsInventoryForecastAdmin(admin.ModelAdmin):
     model = AdsInventoryForecast
-    list_display = [
-        "month", 
-        "country",
-        "forecast"
-    ]
+    list_display = ["formatted_month", "country", "formatted_forecast"]
+    
+    def formatted_forecast(self,obj):
+        return f"{obj.forecast:,}"
+    
+    def formatted_month(self,obj):
+        return obj.month.strftime('%B, %Y')
+    
+    formatted_forecast.short_description = 'Forecast'
+    formatted_month.short_description = 'Month & Year'
