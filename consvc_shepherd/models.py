@@ -1,5 +1,6 @@
 """Models module for consvc_shepherd."""
 
+import datetime
 import json
 from typing import Any
 
@@ -159,7 +160,8 @@ class AllocationSetting(models.Model):
         return {
             "position": self.position,
             "allocation": [
-                allocation.to_dict() for allocation in self.partner_allocations.all()  # type: ignore [attr-defined]
+                allocation.to_dict()
+                for allocation in self.partner_allocations.all()  # type: ignore [attr-defined]
             ],
         }
 
@@ -302,3 +304,53 @@ class BoostrDealProduct(models.Model):
     )
     budget: IntegerField = models.IntegerField()
     month: CharField = models.CharField()
+
+class Countries(models.Model):
+    """List of Countries we show ads in
+    
+    Attributes
+    ----------
+    """
+    code: CharField = models.CharField(max_length=2,unique=True)
+    name: CharField = models.CharField(max_length=100,default="US")
+
+    def save(self) -> None:
+        self.code = self.code.upper()
+        return super().save()
+
+class AdsInventoryForecast(models.Model):
+    """ TODO ADD Description 
+    Attributes
+    ----------
+    """
+    month: DateField = models.DateField(default=datetime.date.today)
+    country = models.ForeignKey(Countries, on_delete=models.CASCADE, default=1)
+    forecast: IntegerField = models.IntegerField(default=10)
+
+
+class RevenueOverview(models.Model):
+    """Revenue overview view table that aggreates data for reporting broken down by month and placement.
+
+    Attributes
+    ----------
+    placement : CharField
+        Name of the Boostr deal product. ?? We may need to categorize these into more general buckets for grouping ??
+    revenue : IntegerField
+        Total sum of revenue from the Boostr deals broken down by month and placement.
+    budget : IntegerField
+        How much of the deal's overall budget is allocated to this product and month
+    revenue_delta : IntegerField
+        The difference between the current budget and the projected revenue
+    month: CharField
+        The month when this product and budget combo will run
+    """
+
+    placement: CharField = models.CharField()
+    revenue: IntegerField = models.IntegerField()
+    budget: IntegerField = models.IntegerField()
+    revenue_delta: IntegerField = models.IntegerField()
+    month: DateField = models.DateField()
+
+    class Meta:
+        db_table = "revenue_overview"
+        managed = False
