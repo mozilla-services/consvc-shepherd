@@ -39,7 +39,7 @@ LOCALIZATIONS = {
         "FR": "Sponsorisé par {sponsor}",
         "GB": "Sponsored by {sponsor}",
         "IT": "Sponsorizzata da {sponsor}",
-        "PL": "Sponsorowane przez {sponsor}", #Temp translation from Google since there was nothing in the FF ftl file for Polish
+        "PL": "Sponsorowane przez {sponsor}",  # Temp translation from Google there was nothing in the FF ftl file
         "AT": "Werbung von {sponsor}",
         "NL": "Gesponsord door {sponsor}",
         "LU": "Sponsorisé par {sponsor}",
@@ -195,7 +195,7 @@ COUNTRIES: list[Region] = [
     Region(code="NL", name="Netherlands"),
     Region(code="LU", name="Luxembourg"),
     Region(code="CH", name="Switzerland"),
-    Region(code="BE", name="Belgium"), 
+    Region(code="BE", name="Belgium"),
 ]
 
 
