@@ -16,6 +16,9 @@ from consvc_shepherd.models import (
     BoostrProduct,
     PartnerAllocation,
     SettingsSnapshot,
+    RevenueOverview,
+    Countries,
+    AdsInventoryForecast,
 )
 from consvc_shepherd.storage import send_to_storage
 from consvc_shepherd.utils import ShepherdMetrics
@@ -265,4 +268,30 @@ class BoostrProductAdmin(admin.ModelAdmin):
         "boostr_id",
         "full_name",
         "campaign_type",
+    ]
+
+
+@admin.register(RevenueOverview)
+class RevenueOverviewAdmin(admin.ModelAdmin):
+    model = RevenueOverview
+    list_display = [
+        "placement", 
+        "budget"
+    ]
+
+@admin.register(Countries)
+class CountriesAdmin(admin.ModelAdmin):
+    model = Countries
+    list_display = [
+        "code", 
+        "name"
+    ]
+
+@admin.register(AdsInventoryForecast)
+class AdsInventoryForecastAdmin(admin.ModelAdmin):
+    model = AdsInventoryForecast
+    list_display = [
+        "month", 
+        "country",
+        "forecast"
     ]
