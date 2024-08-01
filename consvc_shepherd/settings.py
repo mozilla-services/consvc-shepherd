@@ -48,9 +48,12 @@ STATSD_PREFIX = env("STATSD_PREFIX", default="shepherd")
 # See: https://pypi.org/project/django-countries/#customization
 # Contile advertisers list. Simply add the ISO 3166-1 country code to add as option.
 COUNTRIES_ONLY: list[str] = [
+    "AT",
     "AU",
+    "BE",
     "BR",
     "CA",
+    "CH",
     "DE",
     "ES",
     "FR",
@@ -58,7 +61,10 @@ COUNTRIES_ONLY: list[str] = [
     "IN",
     "IT",
     "JP",
+    "LU",
     "MX",
+    "NL",
+    "PL",
     "US",
 ]
 COUNTRIES_FIRST_SORT: bool = True

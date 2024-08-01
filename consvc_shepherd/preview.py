@@ -24,6 +24,12 @@ LOCALIZATIONS = {
         "FR": "Sponsorisé",
         "GB": "Sponsored",
         "IT": "Sponsorizzato",
+        "PL": "Sponsorowane",
+        "AT": "Gesponsert",
+        "NL": "Gesponsord",
+        "LU": "Sponsorisé",
+        "CH": "Gesponsert",
+        "BE": "Gesponsord",
     },
     "Sponsored by": {
         "US": "Sponsored by {sponsor}",
@@ -33,6 +39,12 @@ LOCALIZATIONS = {
         "FR": "Sponsorisé par {sponsor}",
         "GB": "Sponsored by {sponsor}",
         "IT": "Sponsorizzata da {sponsor}",
+        "PL": "Sponsor: {sponsor}",
+        "AT": "Werbung von {sponsor}",
+        "NL": "Gesponsord door {sponsor}",
+        "LU": "Sponsorisé par {sponsor}",
+        "CH": "Werbung von {sponsor}",
+        "BE": "Gesponsord door {sponsor}",
     },
 }
 
@@ -178,6 +190,12 @@ COUNTRIES: list[Region] = [
     Region(code="FR", name="France"),
     Region(code="GB", name="United Kingdom"),
     Region(code="IT", name="Italy"),
+    Region(code="PL", name="Poland"),
+    Region(code="AT", name="Austria"),
+    Region(code="NL", name="Netherlands"),
+    Region(code="LU", name="Luxembourg"),
+    Region(code="CH", name="Switzerland"),
+    Region(code="BE", name="Belgium"),
 ]
 
 
@@ -414,7 +432,10 @@ class PreviewView(TemplateView):
         env = find_env_by_code(env_code)
         agent = find_agent_by_code(agent_code)
 
-        debugMsg = f"{' &#x1F4F1; ' if agent.is_mobile else ''}country: {country}, region: {region}<br>env: {env}<br>{agent}"
+        mobileMsg = " &#x1F4F1; " if agent.is_mobile else ""
+        debugMsg = (
+            f"{mobileMsg}country: {country}, region: {region}<br>env: {env}<br>{agent}"
+        )
         try:
             ads = get_ads(env, country, region, agent)
             debugMsg += "<br>&#x2705;ok"
