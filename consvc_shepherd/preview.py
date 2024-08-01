@@ -39,7 +39,7 @@ LOCALIZATIONS = {
         "FR": "Sponsorisé par {sponsor}",
         "GB": "Sponsored by {sponsor}",
         "IT": "Sponsorizzata da {sponsor}",
-        "PL": "Sponsorowane przez {sponsor}",  # Temp translation from Google there was nothing in the FF ftl file
+        "PL": "Sponsor {sponsor}",
         "AT": "Werbung von {sponsor}",
         "NL": "Gesponsord door {sponsor}",
         "LU": "Sponsorisé par {sponsor}",
