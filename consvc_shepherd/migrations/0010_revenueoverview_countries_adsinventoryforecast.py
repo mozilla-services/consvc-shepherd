@@ -6,47 +6,72 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('consvc_shepherd', '0009_revenue_overview_view'),
+        ("consvc_shepherd", "0009_revenue_overview_view"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='RevenueOverview',
+            name="RevenueOverview",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('placement', models.CharField()),
-                ('revenue', models.IntegerField()),
-                ('budget', models.IntegerField()),
-                ('revenue_delta', models.IntegerField()),
-                ('month', models.DateField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("placement", models.CharField()),
+                ("revenue", models.IntegerField()),
+                ("budget", models.IntegerField()),
+                ("revenue_delta", models.IntegerField()),
+                ("month", models.DateField()),
             ],
             options={
-                'db_table': 'revenue_overview',
-                'managed': False,
+                "db_table": "revenue_overview",
+                "managed": False,
             },
         ),
         migrations.CreateModel(
-            name='Countries',
+            name="Countries",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(max_length=2, unique=True)),
-                ('name', models.CharField(default='US', max_length=100)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("code", models.CharField(max_length=2, unique=True)),
+                ("name", models.CharField(default="US", max_length=100)),
             ],
         ),
         migrations.CreateModel(
-            name='AdsInventoryForecast',
+            name="AdsInventoryForecast",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('month', models.DateField(default=datetime.date.today)),
-                ('forecast', models.IntegerField(default=10)),
-                ('country', models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='consvc_shepherd.countries')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("month", models.DateField(default=datetime.date.today)),
+                ("forecast", models.IntegerField(default=10)),
+                (
+                    "country",
+                    models.ForeignKey(
+                        default=1,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="consvc_shepherd.countries",
+                    ),
+                ),
             ],
         ),
     ]
-
-
-#python manage.py makemigrations
-#python manage.py migrate
-#python manage.py migrate consvc_shepherd 0009
