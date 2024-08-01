@@ -258,13 +258,13 @@ def get_spocs_and_direct_sold_tiles(
             domain=spoc["domain"],
             excerpt=spoc["excerpt"],
             url=spoc["url"],
-            sponsored_by=localized_sponsored_by(spoc, country, is_mobile),
+            sponsored_by=localized_sponsor(spoc, country, is_mobile),
             sponsor=spoc.get("sponsor"),
         )
         for spoc in json.get("spocs", [])
     ]
 
-    return (tiles, spocs, is_mobile)
+    return (tiles, spocs)
 
 
 def get_amp_tiles(
@@ -331,7 +331,7 @@ def get_unified(env: Environment, country: str, is_mobile: bool = False) -> Ads:
             domain=spoc["domain"],
             excerpt=spoc["excerpt"],
             url=spoc["url"],
-            sponsored_by=localized_sponsored_by(spoc, country, is_mobile),
+            sponsored_by=localized_sponsor(spoc, country, is_mobile),
             sponsor=spoc.get("sponsor"),
         )
         for spoc in r.json().get(spocs_placement, [])
@@ -345,7 +345,6 @@ def get_ads(env: Environment, country: str, region: str, agent: Agent) -> Ads:
     if env.code.startswith("unified_"):
         return get_unified(env, country, agent.is_mobile)
     else:
-        print("amp")
         amp_tiles = get_amp_tiles(env, country, region, agent.code)
         spocs_and_direct_sold_tiles = get_spocs_and_direct_sold_tiles(
             env, country, region, agent.is_mobile
@@ -358,16 +357,14 @@ def get_ads(env: Environment, country: str, region: str, agent: Agent) -> Ads:
         )
 
 
-def localized_sponsored_by(
+def localized_sponsor(
     spoc: dict[str, str], country: str, is_mobile: bool = False
 ) -> str:
     """Render the localized 'Sponsored by ...' text for a SPOC"""
     if (override := spoc.get("sponsored_by_override")) is not None:
         return override
     if is_mobile:
-        return LOCALIZATIONS["Sponsored"][country].format(
-            sponsor=spoc.get("sponsor"),
-        )
+        return LOCALIZATIONS["Sponsored"][country]
     else:
         return LOCALIZATIONS["Sponsored by"][country].format(
             sponsor=spoc.get("sponsor"),
