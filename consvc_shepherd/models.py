@@ -305,27 +305,56 @@ class BoostrDealProduct(models.Model):
     budget: IntegerField = models.IntegerField()
     month: CharField = models.CharField()
 
+
 class Countries(models.Model):
-    """List of Countries we show ads in
-    
+    """List of Countries where we show Tiles and Native Content ads.
+
     Attributes
     ----------
+    code : CharField
+        The 2 Character ISO-3166 code for the country
+    name: CharField
+        Country name
     """
-    code: CharField = models.CharField(max_length=2,unique=True)
-    name: CharField = models.CharField(max_length=100,default="US")
 
-    def save(self) -> None:
+    code: CharField = models.CharField(max_length=2, unique=True)
+    name: CharField = models.CharField(max_length=100, default="US")
+
+    def save(self, *args, **kwargs) -> None:
         self.code = self.code.upper()
         return super().save()
 
+    def __str__(self) -> str:
+        return self.code
+
+    @classmethod
+    def get_default_country(cls):
+        country, _ = cls.objects.get_or_create(code="US", name="United States")
+        return country.pk
+
 class AdsInventoryForecast(models.Model):
-    """ TODO ADD Description 
+    """Forcasts for ad invetory by month/year and country
     Attributes
     ----------
+    month: CharField
+        The month which the inpression estimate is for. Broken down by year
+    country: ForeignKey
+        The contry this forcast is for
+    forecast: IntegerField
+        Forcasted number for the month
     """
-    month: DateField = models.DateField(default=datetime.date.today)
-    country = models.ForeignKey(Countries, on_delete=models.CASCADE, default=1)
+
+    month: DateField = models.DateField(verbose_name="Month & Year",default=datetime.date.today)
+    country: ForeignKey = models.ForeignKey(
+        to=Countries, on_delete=models.CASCADE, default=Countries.get_default_country
+    )
     forecast: IntegerField = models.IntegerField(default=10)
+    
+    class Meta:
+        ordering = ['month','country__code']
+
+    def __str__(self) -> str:
+        return f"Ads Inventory Forecast For {self.country}"
 
 
 class RevenueOverview(models.Model):
