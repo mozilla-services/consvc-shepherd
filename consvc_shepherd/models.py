@@ -294,7 +294,7 @@ class BoostrDealProduct(models.Model):
         Foreign key pointing to BoostrProduct instance, with related name of products
     budget : IntegerField
         How much of the deal's overall budget is allocated to this product and month
-    month: CharField
+    month: DateField
         The month when this product and budget combo will run
     """
 
@@ -303,7 +303,7 @@ class BoostrDealProduct(models.Model):
         BoostrProduct, on_delete=models.CASCADE
     )
     budget: IntegerField = models.IntegerField()
-    month: CharField = models.CharField()
+    month: DateField = models.DateField()
 
 
 class Countries(models.Model):
@@ -355,6 +355,7 @@ class AdsInventoryForecast(models.Model):
 
     def __str__(self) -> str:
         return f"Ads Inventory Forecast For {self.country}"
+    
 
 
 class RevenueOverview(models.Model):
