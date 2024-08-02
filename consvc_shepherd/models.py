@@ -306,7 +306,7 @@ class BoostrDealProduct(models.Model):
     month: DateField = models.DateField()
 
 
-class Countries(models.Model):
+class Country(models.Model):
     """List of Countries where we show Tiles and Native Content ads.
 
     Attributes
@@ -331,7 +331,11 @@ class Countries(models.Model):
     def get_default_country(cls):
         country, _ = cls.objects.get_or_create(code="US", name="United States")
         return country.pk
+    
+    class Meta:
+        verbose_name_plural = "countries"
 
+from django.contrib import admin
 
 class AdsInventoryForecast(models.Model):
     """Forcasts for ad invetory by month/year and country
@@ -348,11 +352,12 @@ class AdsInventoryForecast(models.Model):
     month: DateField = models.DateField(
         verbose_name="Month & Year", default=datetime.date.today
     )
+
     country: ForeignKey = models.ForeignKey(
-        to=Countries, on_delete=models.CASCADE, default=Countries.get_default_country
+        to=Country, on_delete=models.CASCADE, default=Country.get_default_country
     )
     forecast: IntegerField = models.IntegerField(default=10)
-
+    
     class Meta:
         ordering = ["month", "country__code"]
 

@@ -17,7 +17,7 @@ from consvc_shepherd.models import (
     PartnerAllocation,
     SettingsSnapshot,
     RevenueOverview,
-    Countries,
+    Country,
     AdsInventoryForecast,
 )
 from consvc_shepherd.storage import send_to_storage
@@ -273,27 +273,34 @@ class BoostrProductAdmin(admin.ModelAdmin):
 
 @admin.register(RevenueOverview)
 class RevenueOverviewAdmin(admin.ModelAdmin):
+    """Admin model for showing the Boostr deals revenue overview"""
     model = RevenueOverview
     list_display = ["month", "placement", "budget", "revenue", "revenue_delta"]
     list_filter = ["month", "placement"]
 
 
-@admin.register(Countries)
-class CountriesAdmin(admin.ModelAdmin):
-    model = Countries
+@admin.register(Country)
+class CountryAdmin(admin.ModelAdmin):
+    """Admin model for working with the countries we show ads for"""    
+    model = Country
     list_display = ["code", "name"]
+
+
+@admin.display(description="Month & Year")
+def formatted_month(obj):
+    """Function to format date into Month, Year format e.g January, 2024"""
+    return obj.month.strftime("%B, %Y")
+
+
+@admin.display(description="Forecast")
+def formatted_forecast(obj):
+    """Function to format forecast with comma seperators"""
+    return f"{obj.forecast:,}"
 
 
 @admin.register(AdsInventoryForecast)
 class AdsInventoryForecastAdmin(admin.ModelAdmin):
     model = AdsInventoryForecast
-    list_display = ["formatted_month", "country", "formatted_forecast"]
+    list_display = [formatted_month, "country", formatted_forecast]
 
-    def formatted_forecast(self, obj):
-        return f"{obj.forecast:,}"
-
-    def formatted_month(self, obj):
-        return obj.month.strftime("%B, %Y")
-
-    formatted_forecast.short_description = "Forecast"
-    formatted_month.short_description = "Month & Year"
+    date_hierarchy = "month"
