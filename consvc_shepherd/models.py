@@ -324,13 +324,14 @@ class Countries(models.Model):
         self.code = self.code.upper()
         return super().save()
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.code
 
     @classmethod
     def get_default_country(cls):
         country, _ = cls.objects.get_or_create(code="US", name="United States")
         return country.pk
+
 
 class AdsInventoryForecast(models.Model):
     """Forcasts for ad invetory by month/year and country
@@ -344,18 +345,19 @@ class AdsInventoryForecast(models.Model):
         Forcasted number for the month
     """
 
-    month: DateField = models.DateField(verbose_name="Month & Year",default=datetime.date.today)
+    month: DateField = models.DateField(
+        verbose_name="Month & Year", default=datetime.date.today
+    )
     country: ForeignKey = models.ForeignKey(
         to=Countries, on_delete=models.CASCADE, default=Countries.get_default_country
     )
     forecast: IntegerField = models.IntegerField(default=10)
-    
+
     class Meta:
-        ordering = ['month','country__code']
+        ordering = ["month", "country__code"]
 
     def __str__(self) -> str:
         return f"Ads Inventory Forecast For {self.country}"
-    
 
 
 class RevenueOverview(models.Model):
