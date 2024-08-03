@@ -51,12 +51,16 @@ def remove_countries(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("consvc_shepherd", "0012_rename_countries_country"),
+        ("consvc_shepherd", "0010_revenueoverview_countries_and_more"),
     ]
 
     operations = [
+        migrations.RenameModel(
+            old_name="Countries",
+            new_name="Country",
+        ),
         migrations.RunPython(
             create_countries,
             remove_countries,
-        )
+        ),
     ]

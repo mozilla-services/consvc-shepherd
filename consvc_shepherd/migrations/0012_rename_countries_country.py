@@ -11,9 +11,4 @@ class Migration(migrations.Migration):
         ),
     ]
 
-    operations = [
-        migrations.RenameModel(
-            old_name="Countries",
-            new_name="Country",
-        ),
-    ]
+    operations = []
