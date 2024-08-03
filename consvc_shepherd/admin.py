@@ -276,6 +276,7 @@ class BoostrProductAdmin(admin.ModelAdmin):
 @admin.register(RevenueOverview)
 class RevenueOverviewAdmin(admin.ModelAdmin):
     """Admin model for showing the Boostr deals revenue overview"""
+
     model = RevenueOverview
     list_display = ["month", "placement", "budget", "revenue", "revenue_delta"]
     list_filter = ["month", "placement"]
@@ -283,43 +284,52 @@ class RevenueOverviewAdmin(admin.ModelAdmin):
 
 @admin.register(Country)
 class CountryAdmin(admin.ModelAdmin):
-    """Admin model for working with the countries we show ads for"""    
+    """Admin model for working with the countries we show ads for"""
+
     model = Country
     list_display = ["code", "name"]
 
 
 @admin.display(description="Month & Year")
 def formatted_month(obj):
-    """Function to format date into Month, Year format e.g January, 2024"""
+    """Format date into Month, Year format e.g January, 2024"""
     return obj.month.strftime("%B, %Y")
 
 
 @admin.display(description="Forecast")
 def formatted_forecast(obj):
-    """Function to format forecast with comma seperators"""
+    """Format forecast with comma seperators"""
     return f"{obj.forecast:,}"
 
 
 @admin.display(description="Budget")
 def formatted_budget(obj):
-    """Function to format budget with comma seperators"""
+    """Format budget with comma seperators"""
     return f"{obj.budget:,}"
 
 
 @admin.register(AdsInventoryForecast)
 class AdsInventoryForecastAdmin(admin.ModelAdmin):
+    """Admin model for showing the Ads Inventory Forcast overview"""
+
     model = AdsInventoryForecast
     list_display = [formatted_month, "country", formatted_forecast]
 
     date_hierarchy = "month"
 
+
 @admin.register(AdProduct)
 class AdProductAdmin(admin.ModelAdmin):
-    model=AdProduct
+    """Admin model for showing the Ad Product overview"""
+
+    model = AdProduct
     list_display = ["name"]
+
 
 @admin.register(AdProductBudget)
 class AdProductBudgetAdmin(admin.ModelAdmin):
-    model=AdProductBudget
+    """Admin model for showing the Ad Product Budget overview"""
+
+    model = AdProductBudget
     date_hierarchy = "month"
     list_display = [formatted_month, "name", formatted_budget]

@@ -21,7 +21,8 @@ def create_countries(apps, schema_editor):
             Country(code="LU", name="Luxembourg"),
             Country(code="CH", name="Switzerland"),
             Country(code="BE", name="Belgium"),
-        ],ignore_conflicts=True
+        ],
+        ignore_conflicts=True,
     )
 
 
@@ -53,4 +54,9 @@ class Migration(migrations.Migration):
         ("consvc_shepherd", "0010_revenueoverview_countries_and_more"),
     ]
 
-    operations = [migrations.RunPython(create_countries, remove_countries,)]
+    operations = [
+        migrations.RunPython(
+            create_countries,
+            remove_countries,
+        )
+    ]

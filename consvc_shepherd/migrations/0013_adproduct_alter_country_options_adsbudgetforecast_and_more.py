@@ -7,42 +7,83 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('consvc_shepherd', '0012_rename_countries_country'),
+        ("consvc_shepherd", "0012_rename_countries_country"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='AdProduct',
+            name="AdProduct",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField()),
             ],
         ),
         migrations.AlterModelOptions(
-            name='country',
-            options={'verbose_name_plural': 'countries'},
+            name="country",
+            options={"verbose_name_plural": "countries"},
         ),
         migrations.CreateModel(
-            name='AdsBudgetForecast',
+            name="AdsBudgetForecast",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('month', models.DateField(default=datetime.date.today, verbose_name='Month & Year')),
-                ('forecast', models.IntegerField(default=10)),
-                ('country', models.ForeignKey(default=consvc_shepherd.models.Country.get_default_country, on_delete=django.db.models.deletion.CASCADE, to='consvc_shepherd.country')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "month",
+                    models.DateField(
+                        default=datetime.date.today, verbose_name="Month & Year"
+                    ),
+                ),
+                ("forecast", models.IntegerField(default=10)),
+                (
+                    "country",
+                    models.ForeignKey(
+                        default=consvc_shepherd.models.Country.get_default_country,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="consvc_shepherd.country",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['month', 'country__code'],
+                "ordering": ["month", "country__code"],
             },
         ),
         migrations.CreateModel(
-            name='AdProductBudget',
+            name="AdProductBudget",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('month', models.DateField()),
-                ('budget', models.IntegerField()),
-                ('name', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='consvc_shepherd.adproduct')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("month", models.DateField()),
+                ("budget", models.IntegerField()),
+                (
+                    "name",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="consvc_shepherd.adproduct",
+                    ),
+                ),
             ],
         ),
     ]

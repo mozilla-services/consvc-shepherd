@@ -15,8 +15,10 @@ sum(amount) - SUM(budget) AS revenue_delta,
 consvc_shepherd_boostrdealproduct.month
 FROM
 consvc_shepherd_boostrdealproduct
-LEFT JOIN consvc_shepherd_boostrproduct ON consvc_shepherd_boostrdealproduct.boostr_product_id = consvc_shepherd_boostrproduct.id
-LEFT JOIN consvc_shepherd_boostrdeal ON consvc_shepherd_boostrdealproduct.boostr_deal_id = consvc_shepherd_boostrdeal.id
+LEFT JOIN consvc_shepherd_boostrproduct ON consvc_shepherd_boostrdealproduct.boostr_product_id =
+ consvc_shepherd_boostrproduct.id
+LEFT JOIN consvc_shepherd_boostrdeal ON consvc_shepherd_boostrdealproduct.boostr_deal_id =
+ consvc_shepherd_boostrdeal.id
 GROUP BY
 full_name,
 consvc_shepherd_boostrdealproduct.month
@@ -27,34 +29,50 @@ full_name ASC
 
 DROP_SQL = "DROP VIEW IF EXISTS revenue_overview;"
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
-        ('consvc_shepherd', '0009_revenue_overview_view'),
+        ("consvc_shepherd", "0009_revenue_overview_view"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='RevenueOverview',
+            name="RevenueOverview",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('placement', models.CharField()),
-                ('revenue', models.IntegerField()),
-                ('budget', models.IntegerField()),
-                ('revenue_delta', models.IntegerField()),
-                ('month', models.DateField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("placement", models.CharField()),
+                ("revenue", models.IntegerField()),
+                ("budget", models.IntegerField()),
+                ("revenue_delta", models.IntegerField()),
+                ("month", models.DateField()),
             ],
             options={
-                'db_table': 'revenue_overview',
-                'managed': False,
+                "db_table": "revenue_overview",
+                "managed": False,
             },
         ),
         migrations.CreateModel(
-            name='Countries',
+            name="Countries",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(max_length=2, unique=True)),
-                ('name', models.CharField(default='US', max_length=100)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("code", models.CharField(max_length=2, unique=True)),
+                ("name", models.CharField(default="US", max_length=100)),
             ],
         ),
         migrations.RunSQL(
@@ -62,8 +80,8 @@ class Migration(migrations.Migration):
             reverse_sql=CREATE_SQL,
         ),
         migrations.AlterField(
-            model_name='boostrdealproduct',
-            name='month',
+            model_name="boostrdealproduct",
+            name="month",
             field=models.DateField(),
         ),
         migrations.RunSQL(
@@ -71,15 +89,35 @@ class Migration(migrations.Migration):
             reverse_sql=DROP_SQL,
         ),
         migrations.CreateModel(
-            name='AdsInventoryForecast',
+            name="AdsInventoryForecast",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('month', models.DateField(default=datetime.date.today, verbose_name='Month & Year')),
-                ('forecast', models.IntegerField(default=10)),
-                ('country', models.ForeignKey(default=consvc_shepherd.models.Country.get_default_country, on_delete=django.db.models.deletion.CASCADE, to='consvc_shepherd.countries')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "month",
+                    models.DateField(
+                        default=datetime.date.today, verbose_name="Month & Year"
+                    ),
+                ),
+                ("forecast", models.IntegerField(default=10)),
+                (
+                    "country",
+                    models.ForeignKey(
+                        default=consvc_shepherd.models.Country.get_default_country,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="consvc_shepherd.countries",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['month', 'country__code'],
+                "ordering": ["month", "country__code"],
             },
         ),
     ]

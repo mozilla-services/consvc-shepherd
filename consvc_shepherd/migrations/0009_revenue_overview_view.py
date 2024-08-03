@@ -12,8 +12,10 @@ sum(amount) - SUM(budget) AS revenue_delta,
 consvc_shepherd_boostrdealproduct.month
 FROM
 consvc_shepherd_boostrdealproduct
-LEFT JOIN consvc_shepherd_boostrproduct ON consvc_shepherd_boostrdealproduct.boostr_product_id = consvc_shepherd_boostrproduct.id
-LEFT JOIN consvc_shepherd_boostrdeal ON consvc_shepherd_boostrdealproduct.boostr_deal_id = consvc_shepherd_boostrdeal.id
+LEFT JOIN consvc_shepherd_boostrproduct ON consvc_shepherd_boostrdealproduct.boostr_product_id =
+ consvc_shepherd_boostrproduct.id
+LEFT JOIN consvc_shepherd_boostrdeal ON consvc_shepherd_boostrdealproduct.boostr_deal_id =
+ consvc_shepherd_boostrdeal.id
 GROUP BY
 full_name,
 consvc_shepherd_boostrdealproduct.month

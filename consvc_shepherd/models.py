@@ -321,6 +321,7 @@ class Country(models.Model):
     name: CharField = models.CharField(max_length=100, default="US")
 
     def save(self, *args, **kwargs) -> None:
+        """Format the country code in uppercase"""
         self.code = self.code.upper()
         return super().save()
 
@@ -329,10 +330,13 @@ class Country(models.Model):
 
     @classmethod
     def get_default_country(cls):
+        """Get the default country"""
         country, _ = cls.objects.get_or_create(code="US", name="United States")
         return country.pk
 
     class Meta:
+        """Set plural version of country"""
+
         verbose_name_plural = "countries"
 
 
@@ -358,6 +362,8 @@ class AdsInventoryForecast(models.Model):
     forecast: IntegerField = models.IntegerField(default=10)
 
     class Meta:
+        """Set ordering"""
+
         ordering = ["month", "country__code"]
 
     def __str__(self) -> str:
@@ -386,9 +392,12 @@ class AdsBudgetForecast(models.Model):
     forecast: IntegerField = models.IntegerField(default=10)
 
     class Meta:
+        """Set ordering for results"""
+
         ordering = ["month", "country__code"]
 
     def __str__(self) -> str:
+        """Generate string representation of Ad Budget Forcast model"""
         return f"Ads Inventory Forecast For {self.country}"
 
 
@@ -404,6 +413,7 @@ class AdProduct(models.Model):
     name: CharField = models.CharField()
 
     def __str__(self) -> str:
+        """Generate string representation of Ad Product model"""
         return f"{self.name}"
 
 
@@ -449,5 +459,7 @@ class RevenueOverview(models.Model):
     month: DateField = models.DateField()
 
     class Meta:
+        """Define the dp table used for this unmanaged migration"""
+
         db_table = "revenue_overview"
         managed = False
