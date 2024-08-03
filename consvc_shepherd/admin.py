@@ -19,6 +19,8 @@ from consvc_shepherd.models import (
     RevenueOverview,
     Country,
     AdsInventoryForecast,
+    AdProduct,
+    AdProductBudget,
 )
 from consvc_shepherd.storage import send_to_storage
 from consvc_shepherd.utils import ShepherdMetrics
@@ -298,9 +300,26 @@ def formatted_forecast(obj):
     return f"{obj.forecast:,}"
 
 
+@admin.display(description="Budget")
+def formatted_budget(obj):
+    """Function to format budget with comma seperators"""
+    return f"{obj.budget:,}"
+
+
 @admin.register(AdsInventoryForecast)
 class AdsInventoryForecastAdmin(admin.ModelAdmin):
     model = AdsInventoryForecast
     list_display = [formatted_month, "country", formatted_forecast]
 
     date_hierarchy = "month"
+
+@admin.register(AdProduct)
+class AdProductAdmin(admin.ModelAdmin):
+    model=AdProduct
+    list_display = ["name"]
+
+@admin.register(AdProductBudget)
+class AdProductBudgetAdmin(admin.ModelAdmin):
+    model=AdProductBudget
+    date_hierarchy = "month"
+    list_display = [formatted_month, "name", formatted_budget]
