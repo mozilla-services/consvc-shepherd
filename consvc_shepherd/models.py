@@ -331,11 +331,10 @@ class Country(models.Model):
     def get_default_country(cls):
         country, _ = cls.objects.get_or_create(code="US", name="United States")
         return country.pk
-    
+
     class Meta:
         verbose_name_plural = "countries"
 
-from django.contrib import admin
 
 class AdsInventoryForecast(models.Model):
     """Forcasts for ad invetory by month/year and country
@@ -357,12 +356,73 @@ class AdsInventoryForecast(models.Model):
         to=Country, on_delete=models.CASCADE, default=Country.get_default_country
     )
     forecast: IntegerField = models.IntegerField(default=10)
-    
+
     class Meta:
         ordering = ["month", "country__code"]
 
     def __str__(self) -> str:
         return f"Ads Inventory Forecast For {self.country}"
+
+
+class AdsBudgetForecast(models.Model):
+    """Forcasts for ad invetory by month/year and country
+    Attributes
+    ----------
+    month: CharField
+        The month which the inpression estimate is for. Broken down by year
+    country: ForeignKey
+        The contry this forcast is for
+    forecast: IntegerField
+        Forcasted number for the month
+    """
+
+    month: DateField = models.DateField(
+        verbose_name="Month & Year", default=datetime.date.today
+    )
+
+    country: ForeignKey = models.ForeignKey(
+        to=Country, on_delete=models.CASCADE, default=Country.get_default_country
+    )
+    forecast: IntegerField = models.IntegerField(default=10)
+
+    class Meta:
+        ordering = ["month", "country__code"]
+
+    def __str__(self) -> str:
+        return f"Ads Inventory Forecast For {self.country}"
+
+
+class AdProduct(models.Model):
+    """List Of Ad Products
+
+    Attributes
+    ----------
+    name : CharField
+        Name of the Ad Product.
+    """
+
+    name: CharField = models.CharField()
+
+    def __str__(self) -> str:
+        return f"{self.name}"
+
+
+class AdProductBudget(models.Model):
+    """Budget for each Ad Product
+
+    Attributes
+    ----------
+    month: DateField
+        Month
+    name : CharField
+        Name of the Ad product.
+    budget: IntegerField
+        Current month's expected budget for the Ad Product
+    """
+
+    month: DateField = models.DateField()
+    name: ForeignKey = models.ForeignKey(to=AdProduct, on_delete=models.CASCADE)
+    budget: IntegerField = models.IntegerField()
 
 
 class RevenueOverview(models.Model):
