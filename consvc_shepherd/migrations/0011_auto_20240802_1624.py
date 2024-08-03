@@ -51,7 +51,7 @@ def remove_countries(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("consvc_shepherd", "0010_revenueoverview_countries_and_more"),
+        ("consvc_shepherd", "0012_rename_countries_country"),
     ]
 
     operations = [

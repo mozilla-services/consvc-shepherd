@@ -4,14 +4,16 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('consvc_shepherd', '0011_auto_20240802_1624'),
+        (
+            "consvc_shepherd",
+            "0010_revenueoverview_countries_and_more",
+        ),
     ]
 
     operations = [
         migrations.RenameModel(
-            old_name='Countries',
-            new_name='Country',
+            old_name="Countries",
+            new_name="Country",
         ),
     ]

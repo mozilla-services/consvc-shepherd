@@ -8,7 +8,7 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("consvc_shepherd", "0012_rename_countries_country"),
+        ("consvc_shepherd", "0011_auto_20240802_1624"),
     ]
 
     operations = [
