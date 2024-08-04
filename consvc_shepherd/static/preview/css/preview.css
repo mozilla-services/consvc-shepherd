@@ -93,7 +93,7 @@
     background: white;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 8px 6px rgba(0, 0, 0, 0.10)
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .spoc, .spoc-info, .spoc-meta {
@@ -124,7 +124,7 @@
 }
 
 .spoc-title {
-    font-size: 15px;
+    font-size: 17px;
     line-height: 24px;
     font-weight: 600;
     -webkit-line-clamp: 3;
