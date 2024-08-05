@@ -7,6 +7,7 @@ CREATE OR REPLACE VIEW revenue_overview AS
 SELECT
 row_number() OVER () as id,
 full_name AS placement,
+sum(amount) AS revenue,
 sum(amount) AS budget,
 sum(amount) - SUM(budget) AS revenue_delta,
 consvc_shepherd_boostrdealproduct.month
