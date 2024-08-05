@@ -2,6 +2,9 @@
 {% load static %}
 
 {% block extrastyle %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static "preview/css/preview.css" %}">
 {% endblock %}
 
@@ -98,19 +101,13 @@
         <div class="spocs">
             {% for spoc in ads.spocs %}
             <div class="spoc-container">
-                <a href="{{ spoc.url }}" target="_blank" style="flex-direction: row; width: inherit;">
+                <a href="{{ spoc.url }}" target="_blank">
                     <div class="spoc">
                         <img class="spoc-image" src="{{ spoc.image_src }}" alt="{{ spoc.title }}"/>
-                        <div class="info-container">
-                            <div class="spoc-meta">
-                                <div class="spoc-info">
-                                    <div class="spoc-title clamp" id="mobile">{{ spoc.title }}</div>
-                                </div>
-                                <div class="spoc-sponsor-container">
-                                    <div class="spoc-context">{{ spoc.sponsored_by }}<br>{{ spoc.sponsor }}</div>
-                                </div>
-
-                            </div>
+                        <div class="spoc-meta">
+                            <div class="spoc-title clamp" id="mobile">{{ spoc.title }}</div>
+                            <div class="spoc-context">{{ spoc.sponsored_by }}</div>
+                            <div class="spoc-context">{{ spoc.sponsor }}</div>
                         </div>
                     </div>
                 </a>
@@ -177,7 +174,7 @@
                 debugMsg.style.display = 'none';
             }
         }
-    
+
 </script>
 
 {% endblock %}
