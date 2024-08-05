@@ -4,7 +4,7 @@ from unittest import mock
 
 from django.test import TestCase, override_settings
 
-from consvc_shepherd.preview import Agent, Environment, Spoc, Tile, get_ads
+from consvc_shepherd.preview import Environment, FormFactor, Spoc, Tile, get_ads
 
 SPOC = Spoc(
     image_src="https://picsum.photos/296/148",
@@ -71,19 +71,20 @@ class TestGetAds(TestCase):
                     spoc_zone_ids=[],
                     direct_sold_tile_zone_ids=[424242],
                 )
-                mockAgent = Agent(
-                    code="Mozilla/5.0 (Windows NT 10.0; rv:10.0) Gecko/20100101 Firefox/91.0",
+                mockFormFactor = FormFactor(
+                    code="desktop",
                     name="Desktop",
                     is_mobile=False,
+                    user_agent="Mozilla/5.0 (Windows NT 10.0; rv:10.0) Gecko/20100101 Firefox/91.0",
                 )
-                ads = get_ads(mockEnv, "US", "CA", mockAgent)
+                ads = get_ads(mockEnv, "US", "CA", mockFormFactor)
 
                 # Function calls
                 mock_get_amp_tiles.assert_called_once_with(
-                    mockEnv, "US", "CA", mockAgent.code
+                    mockEnv, "US", "CA", mockFormFactor.user_agent
                 )
                 mock_get_spocs_and_direct_sold_tiles.assert_called_once_with(
-                    mockEnv, "US", "CA", mockAgent.is_mobile
+                    mockEnv, "US", "CA", mockFormFactor.is_mobile
                 )
                 self.assertEqual(len(ads.spocs), 1)
                 self.assertEqual(len(ads.tiles), 3)
