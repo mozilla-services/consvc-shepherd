@@ -76,12 +76,13 @@ class Environment:
 
 
 @dataclass(frozen=True)
-class Agent:
-    """Struct for user agent"""
+class FormFactor:
+    """Represents a form factor"""
 
     code: str
     name: str
     is_mobile: bool
+    user_agent: str
 
 
 @dataclass(frozen=True)
@@ -169,16 +170,18 @@ ENVIRONMENTS: list[Environment] = [
     ),
 ]
 
-AGENTS: list[Agent] = [
-    Agent(
-        code="Mozilla/5.0 (Windows NT 10.0; rv:10.0) Gecko/20100101 Firefox/91.0",
+FORM_FACTORS: list[FormFactor] = [
+    FormFactor(
+        code="desktop",
         name="Desktop",
         is_mobile=False,
+        user_agent="Mozilla/5.0 (Windows NT 10.0; rv:10.0) Gecko/20100101 Firefox/91.0",
     ),
-    Agent(
-        code="Mozilla/5.0 (Android 11; Mobile; rv:92.0) Gecko/92.0 Firefox/92.0",
+    FormFactor(
+        code="mobile",
         name="Mobile",
         is_mobile=True,
+        user_agent="Mozilla/5.0 (Android 11; Mobile; rv:92.0) Gecko/92.0 Firefox/92.0",
     ),
 ]
 
@@ -283,7 +286,7 @@ def get_spocs_and_direct_sold_tiles(
 
 
 def get_amp_tiles(
-    env: Environment, country: str, region: str, agent: str
+    env: Environment, country: str, region: str, user_agent: str
 ) -> list[Tile]:
     """Load Sponsored Tiles from MARS for given country and region"""
     params = {
@@ -292,7 +295,7 @@ def get_amp_tiles(
     }
 
     headers = {
-        "User-Agent": agent,
+        "User-Agent": user_agent,
     }
 
     r = requests.get(
@@ -355,14 +358,16 @@ def get_unified(env: Environment, country: str) -> Ads:
     return Ads(spocs=spocs, tiles=tiles)
 
 
-def get_ads(env: Environment, country: str, region: str, agent: Agent) -> Ads:
+def get_ads(
+    env: Environment, country: str, region: str, form_factor: FormFactor
+) -> Ads:
     """Based on Environment, either load spocs & tiles individually or from a single request"""
     if env.code.startswith("unified_"):
         return get_unified(env, country)
     else:
-        amp_tiles = get_amp_tiles(env, country, region, agent.code)
+        amp_tiles = get_amp_tiles(env, country, region, form_factor.user_agent)
         spocs_and_direct_sold_tiles = get_spocs_and_direct_sold_tiles(
-            env, country, region, agent.is_mobile
+            env, country, region, form_factor.is_mobile
         )
 
         return Ads(
@@ -390,13 +395,13 @@ def find_env_by_code(env_code: str) -> Environment:
     raise ValueError(f"Unknown environment '{env_code}'")
 
 
-def find_agent_by_code(agent_code: str) -> Agent:
-    """Find an agent by code, raise an exception if no agent is found"""
-    for agent in AGENTS:
-        if agent.code == agent_code:
-            return agent
+def find_form_factor_by_code(form_factor_code: str) -> FormFactor:
+    """Find a form factor by code, raise an exception if no form factor is found"""
+    for form_factor in FORM_FACTORS:
+        if form_factor.code == form_factor_code:
+            return form_factor
 
-    raise ValueError(f"Unknown agent '{agent_code}'")
+    raise ValueError(f"Unknown form factor '{form_factor_code}'")
 
 
 def create_image_url(raw_image_src: str, w: int, h: int) -> str:
@@ -427,17 +432,15 @@ class PreviewView(TemplateView):
         env_code = request.GET.get("env", "production")
         country = request.GET.get("country", "US")
         region = request.GET.get("region", "CA")
-        agent_code = request.GET.get("agent", AGENTS[0].code)
+        form_factor_code = request.GET.get("form_factor", FORM_FACTORS[0].code)
 
         env = find_env_by_code(env_code)
-        agent = find_agent_by_code(agent_code)
+        form_factor = find_form_factor_by_code(form_factor_code)
 
-        mobileMsg = " &#x1F4F1; " if agent.is_mobile else ""
-        debugMsg = (
-            f"{mobileMsg}country: {country}, region: {region}<br>env: {env}<br>{agent}"
-        )
+        mobileMsg = " &#x1F4F1; " if form_factor.is_mobile else ""
+        debugMsg = f"{mobileMsg}country: {country}, region: {region}<br>env: {env}<br>{form_factor}"
         try:
-            ads = get_ads(env, country, region, agent)
+            ads = get_ads(env, country, region, form_factor)
             debugMsg += "<br>&#x2705;ok"
         except Exception as e:
             ads = {}
@@ -450,8 +453,8 @@ class PreviewView(TemplateView):
             "environment": env_code,
             "country": country,
             "region": region,
-            "agents": AGENTS,
-            "agent": agent_code,
+            "form_factors": FORM_FACTORS,
+            "form_factor": form_factor_code,
             "ads": ads,
             "debugMsg": debugMsg,
         }
