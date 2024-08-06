@@ -2,6 +2,9 @@
 {% load static %}
 
 {% block extrastyle %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static "preview/css/preview.css" %}">
 {% endblock %}
 
@@ -20,7 +23,6 @@
                 {% endif %}
             {% endfor %}
         </select>
-
         <br/><br/>
         <label for="form_factor">Form Factor</label>&nbsp;
         <select name="form_factor" id="form_factor">
@@ -73,25 +75,47 @@
         </a>
         {% endfor %}
     </div>
-
     <h2>SPOCs</h2>
-    <div class="spocs">
-        {% for spoc in ads.spocs %}
-        <a href="{{ spoc.url }}" target="_blank">
-            <div class="spoc">
-                <img class="spoc-image" src="{{ spoc.image_src }}" alt="{{ spoc.title }}"/>
-                <div class="spoc-meta">
-                    <div class="spoc-info">
-                        <div class="spoc-domain clamp">{{ spoc.domain }}</div>
-                        <div class="spoc-title clamp">{{ spoc.title }}</div>
-                        <div class="spoc-excerpt clamp">{{ spoc.excerpt }}</div>
+    {% if not ads.is_mobile %}
+    <div id="desktop-spoc">
+        <div class="spocs">
+            {% for spoc in ads.spocs %}
+            <a href="{{ spoc.url }}" target="_blank">
+                <div class="spoc">
+                    <img class="spoc-image" src="{{ spoc.image_src }}" alt="{{ spoc.title }}"/>
+                    <div class="spoc-meta">
+                        <div class="spoc-info">
+                            <div class="spoc-domain clamp">{{ spoc.domain }}</div>
+                            <div class="spoc-title clamp">{{ spoc.title }}</div>
+                            <div class="spoc-excerpt clamp">{{ spoc.excerpt }}</div>
+                        </div>
+                        <div class="spoc-context">{{ spoc.sponsored_by }}</div>
                     </div>
-                    <div class="spoc-context">{{ spoc.sponsored_by }}</div>
                 </div>
-            </div>
-        </a>
-        {% endfor %}
+            </a>
+            {% endfor %}
+        </div>
     </div>
+    {% else %}
+    <div id="mobile-spoc">
+        <div class="spocs">
+            {% for spoc in ads.spocs %}
+            <div class="spoc-container">
+                <a href="{{ spoc.url }}" target="_blank">
+                    <div class="spoc">
+                        <img class="spoc-image" src="{{ spoc.image_src }}" alt="{{ spoc.title }}"/>
+                        <div class="spoc-meta">
+                            <div class="spoc-title clamp" id="mobile">{{ spoc.title }}</div>
+                            <div class="spoc-context">{{ spoc.sponsored_by }}</div>
+                            <div class="spoc-context">{{ spoc.sponsor }}</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 <br/><br/>
