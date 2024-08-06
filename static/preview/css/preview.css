@@ -141,3 +141,56 @@
     line-height: 24px;
     color: var(--newtab-text-secondary-color);
 }
+
+#mobile-spoc {
+    font-family: "Roboto", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+#mobile-spoc .spoc-title {
+    font-weight: 400;
+    -webkit-line-clamp: 2;
+}
+
+#mobile-spoc .spocs {
+    display: flex;
+    gap: 20px;
+    height: auto;
+}
+
+#mobile-spoc .spoc-container {
+    width: 410px;
+    height: 145px;
+}
+
+#mobile-spoc a {
+    flex-direction: row;
+    width: inherit;
+}
+
+#mobile-spoc .spoc {
+    display: flex;
+    flex-direction: row;
+    border-radius: 10px;
+}
+
+#mobile-spoc .spoc-image {
+    width: 145px;
+    height: 105px;
+    border-radius: 10px;
+    margin: 20px;
+}
+
+#mobile-spoc .spoc-context {
+    font-size: 15px;
+    line-height: 10px;
+    margin: 0;
+}
+
+#mobile-spoc .spoc-meta {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 14px 20px 20px 0;
+}
