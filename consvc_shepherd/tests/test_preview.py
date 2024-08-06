@@ -12,7 +12,6 @@ SPOC = Spoc(
     domain="cosmetics.beauty",
     excerpt="The sale has begun...",
     sponsored_by="Sponsored by Cosmetics",
-    sponsor="Cosmetics",
     url="example.com",
 )
 
@@ -36,12 +35,7 @@ PROGRESS_QUEST_TILE = Tile(
     sponsored="Sponsored",
     url="example4.com",
 )
-
-DEFAULT_USER_AGENT = Agent(
-    code="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:126.0) Gecko/20100101 Firefox/126.0",
-    name="Desktop",
-    is_mobile=False,
-)
+DEFAULT_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:126.0) Gecko/20100101 Firefox/126.0"
 
 
 @override_settings(DEBUG=True)
@@ -101,7 +95,6 @@ class TestGetAds(TestCase):
                 self.assertEqual(ads.spocs[0].domain, SPOC.domain)
                 self.assertEqual(ads.spocs[0].excerpt, SPOC.excerpt)
                 self.assertEqual(ads.spocs[0].sponsored_by, SPOC.sponsored_by)
-                self.assertEqual(ads.spocs[0].sponsor, SPOC.sponsor)
                 self.assertEqual(ads.spocs[0].url, SPOC.url)
 
                 # Tile data
@@ -126,4 +119,4 @@ class TestGetAds(TestCase):
             )
             get_ads(mockUnifiedEnv, "US", "CA", DEFAULT_USER_AGENT)
 
-            mock_get_unified.assert_called_once_with(mockUnifiedEnv, "US", False)
+            mock_get_unified.assert_called_once_with(mockUnifiedEnv, "US")
