@@ -53,7 +53,7 @@
         </span>
 
         <br/><br/>
-        <input type="submit" value="Reload"/>
+        <input type="submit" value="Preview Ads"/>
         <br/><br/>
         
     </form>
@@ -61,7 +61,7 @@
     <h2>Tiles</h2>
     <div class="tiles">
         {% for tile in ads.tiles %}
-        <a href="{{ tile.url }}" target="_blank">
+        <a href="{{ tile.url }}" target="_blank" rel="noopener noreferrer">
             <div class="tile">
                 <div class="tile-outer">
                     <img class="tile-image" src="{{ tile.image_url }}" alt="{{ tile.name }}"/>
@@ -80,7 +80,7 @@
     <div id="desktop-spoc">
         <div class="spocs">
             {% for spoc in ads.spocs %}
-            <a href="{{ spoc.url }}" target="_blank">
+            <a href="{{ spoc.url }}" target="_blank" rel="noopener noreferrer">
                 <div class="spoc">
                     <img class="spoc-image" src="{{ spoc.image_src }}" alt="{{ spoc.title }}"/>
                     <div class="spoc-meta">
@@ -101,7 +101,7 @@
         <div class="spocs">
             {% for spoc in ads.spocs %}
             <div class="spoc-container">
-                <a href="{{ spoc.url }}" target="_blank">
+                <a href="{{ spoc.url }}" target="_blank" rel="noopener noreferrer">
                     <div class="spoc">
                         <img class="spoc-image" src="{{ spoc.image_src }}" alt="{{ spoc.title }}"/>
                         <div class="spoc-meta">

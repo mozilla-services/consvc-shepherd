@@ -366,7 +366,7 @@ def get_ads(
 ) -> Ads:
     """Based on Environment, either load spocs & tiles individually or from a single request"""
     if env.code.startswith("unified_"):
-        return get_unified(env, country, agent.is_mobile)
+        return get_unified(env, country, form_factor.is_mobile)
     else:
         amp_tiles = get_amp_tiles(env, country, region, form_factor.user_agent)
         spocs_and_direct_sold_tiles = get_spocs_and_direct_sold_tiles(
@@ -376,7 +376,7 @@ def get_ads(
         return Ads(
             tiles=amp_tiles + spocs_and_direct_sold_tiles[0],
             spocs=spocs_and_direct_sold_tiles[1],
-            is_mobile=agent.is_mobile,
+            is_mobile=form_factor.is_mobile,
         )
 
 
