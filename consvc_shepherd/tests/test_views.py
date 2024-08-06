@@ -171,13 +171,11 @@ class TestPreviewView(TestCase):
             domain="play.anviloftheages.com",
             excerpt="If you like to play games, then you should play this game.",
             sponsored_by="Anvil of the Ages",
-            sponsor="Anvil of the Ages",
             url="example.com",
         )
         return Ads(
             tiles=[tile, direct_sold_tile],
             spocs=[spoc],
-            is_mobile=False,
         )
 
     def test_preview_view(self):

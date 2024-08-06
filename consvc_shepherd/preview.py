@@ -94,7 +94,6 @@ class Spoc:
     domain: str
     excerpt: str
     sponsored_by: str
-    sponsor: str
     url: str
 
 
@@ -114,7 +113,6 @@ class Ads:
 
     tiles: list[Tile]
     spocs: list[Spoc]
-    is_mobile: bool
 
 
 # Ad environments. Note that these differ from MARS or Shepherd environments.
@@ -229,14 +227,14 @@ REGIONS = load_regions()
 
 
 def get_spocs_and_direct_sold_tiles(
-    env: Environment, country: str, region: str, is_mobile: bool
+    env: Environment, country: str, region: str, isMobile: bool
 ) -> tuple[list[Tile], list[Spoc]]:
     """Load SPOCs and direct sold tiles from MARS for given country and region"""
     # Generate a unique pocket ID per request to avoid frequency capping
     pocket_id = uuid.uuid4()
 
     spoc_site_id = env.spoc_site_id
-    if is_mobile:
+    if isMobile:
         spoc_site_id = env.spoc_site_id_mobile
 
     body = {
@@ -279,8 +277,7 @@ def get_spocs_and_direct_sold_tiles(
             domain=spoc["domain"],
             excerpt=spoc["excerpt"],
             url=spoc["url"],
-            sponsored_by=localized_sponsor(spoc, country, is_mobile),
-            sponsor=spoc.get("sponsor"),
+            sponsored_by=localized_sponsored_by(spoc, country),
         )
         for spoc in json.get("spocs", [])
     ]
@@ -304,6 +301,7 @@ def get_amp_tiles(
     r = requests.get(
         f"{env.mars_url}/v1/tiles", params=params, headers=headers, timeout=30
     )
+
     return [
         Tile(
             image_url=tile["image_url"],
@@ -315,7 +313,7 @@ def get_amp_tiles(
     ]
 
 
-def get_unified(env: Environment, country: str, is_mobile: bool = False) -> Ads:
+def get_unified(env: Environment, country: str) -> Ads:
     """Load Ads from MARS unified api"""
     user_context_id = uuid.uuid4()
 
@@ -352,13 +350,12 @@ def get_unified(env: Environment, country: str, is_mobile: bool = False) -> Ads:
             domain=spoc["domain"],
             excerpt=spoc["excerpt"],
             url=spoc["url"],
-            sponsored_by=localized_sponsor(spoc, country, is_mobile),
-            sponsor=spoc.get("sponsor"),
+            sponsored_by=localized_sponsored_by(spoc, country),
         )
         for spoc in r.json().get(spocs_placement, [])
     ]
 
-    return Ads(spocs=spocs, tiles=tiles, is_mobile=is_mobile)
+    return Ads(spocs=spocs, tiles=tiles)
 
 
 def get_ads(
@@ -366,7 +363,7 @@ def get_ads(
 ) -> Ads:
     """Based on Environment, either load spocs & tiles individually or from a single request"""
     if env.code.startswith("unified_"):
-        return get_unified(env, country, agent.is_mobile)
+        return get_unified(env, country)
     else:
         amp_tiles = get_amp_tiles(env, country, region, form_factor.user_agent)
         spocs_and_direct_sold_tiles = get_spocs_and_direct_sold_tiles(
@@ -376,22 +373,17 @@ def get_ads(
         return Ads(
             tiles=amp_tiles + spocs_and_direct_sold_tiles[0],
             spocs=spocs_and_direct_sold_tiles[1],
-            is_mobile=agent.is_mobile,
         )
 
 
-def localized_sponsor(
-    spoc: dict[str, str], country: str, is_mobile: bool = False
-) -> str:
+def localized_sponsored_by(spoc: dict[str, str], country: str) -> str:
     """Render the localized 'Sponsored by ...' text for a SPOC"""
     if (override := spoc.get("sponsored_by_override")) is not None:
         return override
-    if is_mobile:
-        return LOCALIZATIONS["Sponsored"][country]
-    else:
-        return LOCALIZATIONS["Sponsored by"][country].format(
-            sponsor=spoc.get("sponsor"),
-        )
+
+    return LOCALIZATIONS["Sponsored by"][country].format(
+        sponsor=spoc.get("sponsor"),
+    )
 
 
 def find_env_by_code(env_code: str) -> Environment:
