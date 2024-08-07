@@ -86,8 +86,6 @@ INSTALLED_APPS: list[str] = [
     "django.contrib.staticfiles",
     "django_countries",
     "dockerflow.django",
-    "rest_framework",
-    "api",
 ]
 
 MIDDLEWARE: list = [

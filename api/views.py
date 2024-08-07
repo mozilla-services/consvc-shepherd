@@ -1,4 +1,4 @@
-from rest_framework import permissions, viewsets
+""" from rest_framework import permissions, viewsets
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -17,4 +17,4 @@ class BoostrProductViewSet(viewsets.ModelViewSet):
         boostr_id = self.kwargs.get("boostr_id")
         obj = get_object_or_404(BoostrProduct, boostr_id=boostr_id)
         self.check_object_permissions(self.request,obj)
-        return obj
+        return obj """

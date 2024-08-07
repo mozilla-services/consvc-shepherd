@@ -41,8 +41,6 @@ urlpatterns = [
     path("allocation/<int:pk>/", AllocationUpdateView.as_view()),
     path("preview", PreviewView.as_view()),
     path("", TableOverview.as_view()),
-    path("api-auth/", include("rest_framework.urls")),
-    path("", include("api.urls")),
 ]
 
 admin.site.site_title = "Shepherd"
