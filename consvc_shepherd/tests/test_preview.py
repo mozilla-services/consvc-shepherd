@@ -37,10 +37,11 @@ PROGRESS_QUEST_TILE = Tile(
     url="example4.com",
 )
 
-DEFAULT_USER_AGENT = Agent(
-    code="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:126.0) Gecko/20100101 Firefox/126.0",
+DEFAULT_USER_AGENT = FormFactor(
+    code="desktop",
     name="Desktop",
     is_mobile=False,
+    user_agent="Mozilla/5.0 (Windows NT 10.0; rv:10.0) Gecko/20100101 Firefox/91.0",
 )
 
 
