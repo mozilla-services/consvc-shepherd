@@ -7,10 +7,12 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import (
     CharField,
+    DateField,
     DateTimeField,
     ForeignKey,
     IntegerField,
     JSONField,
+    ManyToManyField,
 )
 
 from contile.models import Partner
@@ -75,7 +77,7 @@ class AllocationSettingsSnapshot(models.Model):
     Attributes
     ----------
     name : CharField
-        Snopshot Name
+        Snapshot Name
     json_settings : JSONField
         JSON settings for snapshot
     created_by : ForeignKey
@@ -199,3 +201,123 @@ class PartnerAllocation(models.Model):
         Example: {"partner": "mozilla", "percentage": 100}
         """
         return {"partner": self.partner.name, "percentage": self.percentage}
+
+
+class BoostrProduct(models.Model):
+    """Representation of AdOps sales products that can be assigned to deals (many to many with deals)
+
+    Attributes
+    ----------
+    boostr_id : IntegerField
+        The product's id in Boostr
+    full_name: CharField
+        Product's full name
+    campaign_type:
+        Campaign type (CPC or CPM)
+    created_on : DateTimeField
+        Date of deal record creation (shepherd DB timestamp metadata, not boostr's)
+    updated_on : DateTimeField
+        Date of deal record update (shepherd DB timestamp metadata, not boostr's)
+
+    Methods
+    -------
+    __str__(self)
+        Return the string representation for a Boostr Product
+    """
+
+    class CampaignType(models.TextChoices):
+        """Represents the way a Boostr Product will be charged"""
+
+        CPC = "CPC"
+        CPM = "CPM"
+        FLAT_FEE = "Flat Fee"
+        NONE = "None"
+
+    boostr_id: IntegerField = models.IntegerField(unique=True)
+    full_name: CharField = models.CharField()
+    campaign_type: CharField = models.CharField(
+        choices=CampaignType.choices,
+    )
+
+    created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
+    updated_on: DateTimeField = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        """Return the string representation for a Boostr Product"""
+        return self.full_name
+
+
+class BoostrDeal(models.Model):
+    """Representation of AdOps sales deals pulled from Boostr
+
+    Attributes
+    ----------
+    boostr_id : IntegerField
+        The deal's id in Boostr
+    name : CharField
+        Deal name
+    advertiser : CharField
+        Advertiser name
+    currency : CharField
+        Currency symbol, eg "$"
+    amount : IntegerField
+        Amount
+    sales_representatives : CharField
+        Sales representative names as a comma separated list
+    start_date: DateField
+        Start date
+    end_date: DateField
+        End date
+    created_on : DateTimeField
+        Date of deal record creation (shepherd DB timestamp metadata, not boostr's)
+    updated_on : DateTimeField
+        Date of deal record update (shepherd DB timestamp metadata, not boostr's)
+
+    Methods
+    -------
+    __str__(self)
+        Return the string representation for a Boostr Product
+
+    """
+
+    boostr_id: IntegerField = models.IntegerField(unique=True)
+    name: CharField = models.CharField()
+    advertiser: CharField = models.CharField()
+    currency: CharField = models.CharField()
+    amount: IntegerField = models.IntegerField()
+    sales_representatives: CharField = models.CharField()
+    start_date: DateField = models.DateField()
+    end_date: DateField = models.DateField()
+    products: ManyToManyField = models.ManyToManyField(
+        BoostrProduct, related_name="products", through="BoostrDealProduct"
+    )
+
+    created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
+    updated_on: DateTimeField = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        """Return the string representation for a Boostr Product"""
+        return self.name
+
+
+class BoostrDealProduct(models.Model):
+    """Join table that represents the monthly budgets of every Product that is part of a Deal
+
+    Attributes
+    ----------
+    boostr_deal : BoostrDeal
+        Foreign key pointer to BoostrDeal, with related name of deals
+    boostr_product : Partner
+        Foreign key pointing to BoostrProduct instance, with related name of products
+    budget : IntegerField
+        How much of the deal's overall budget is allocated to this product and month
+    month: CharField
+        The month when this product and budget combo will run
+    """
+
+    boostr_deal: ForeignKey = models.ForeignKey(BoostrDeal, on_delete=models.CASCADE)
+    boostr_product: ForeignKey = models.ForeignKey(
+        BoostrProduct, on_delete=models.CASCADE
+    )
+    budget: IntegerField = models.IntegerField()
+    month: CharField = models.CharField()

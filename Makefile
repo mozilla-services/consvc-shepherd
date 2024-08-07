@@ -64,7 +64,7 @@ doc-install-deps:  ## Install the dependencies for doc generation
 
 .PHONY: doc
 doc: ##  Generate docs via mdBook
-	mdbook-mermaid install && mdbook clean && mdbook build  
+	mdbook-mermaid install && mdbook clean && mdbook build
 
 .PHONY: doc-preview
 doc-preview: doc  ##  Preview Merino docs via the default browser
@@ -72,8 +72,8 @@ doc-preview: doc  ##  Preview Merino docs via the default browser
 
 .PHONY: dev
 dev: $(INSTALL_STAMP)  ##  Run shepherd locally and reload automatically
-	docker-compose up
+	docker compose up
 
 .PHONY: local-test
 local-test: $(INSTALL_STAMP)
-	docker-compose -f docker-compose.test.yml up --abort-on-container-exit
+	docker compose -f docker-compose.test.yml up --abort-on-container-exit

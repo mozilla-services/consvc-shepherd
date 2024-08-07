@@ -11,6 +11,9 @@ from consvc_shepherd.forms import AllocationSettingForm, AllocationSettingFormse
 from consvc_shepherd.models import (
     AllocationSetting,
     AllocationSettingsSnapshot,
+    BoostrDeal,
+    BoostrDealProduct,
+    BoostrProduct,
     PartnerAllocation,
     SettingsSnapshot,
 )
@@ -217,3 +220,50 @@ class AllocationSettingAdmin(admin.ModelAdmin):
         """Delete given AllocationSetting entry."""
         super(AllocationSettingAdmin, self).delete_queryset(request, queryset)
         metrics.incr("allocation.delete")
+
+
+class BoostrDealProductInline(admin.StackedInline):
+    """BoostrDealProductInline is for displaying products and their budgets in the Deal form"""
+
+    model = BoostrDealProduct
+    extra = 0
+
+
+@admin.register(BoostrDeal)
+class BoostrDealAdmin(admin.ModelAdmin):
+    """Admin model for sales deals imported from Boostr"""
+
+    model = BoostrDeal
+    date_hierarchy = "start_date"
+    inlines = [
+        BoostrDealProductInline,
+    ]
+    search_fields = ["boostr_id", "name", "advertiser", "sales_representatives"]
+    search_help_text = "Search by boostr id, name, adversiter, or sales reps"
+    list_filter = [
+        "currency",
+        "start_date",
+        ("products", admin.RelatedOnlyFieldListFilter),
+    ]
+    list_display = [
+        "boostr_id",
+        "name",
+        "advertiser",
+        "currency",
+        "amount",
+        "start_date",
+        "end_date",
+        "sales_representatives",
+    ]
+
+
+@admin.register(BoostrProduct)
+class BoostrProductAdmin(admin.ModelAdmin):
+    """Admin model for sales products imported from Boostr. Deals are many-to-many with products"""
+
+    model = BoostrProduct
+    list_display = [
+        "boostr_id",
+        "full_name",
+        "campaign_type",
+    ]

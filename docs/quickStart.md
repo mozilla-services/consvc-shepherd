@@ -17,7 +17,8 @@ eval "$(pyenv virtualenv-init -)"
 
 4. To run consvc-shepherd, you'll need to specify some minimal configurations.
 Use the existing `.env.example` and copy it to `.env`.
-You'll want to make sure configuration files in the `.env` file match your database setup, configuring the database name, user, host and password variables.
+You'll want to make sure the environment variables in the `.env` file match your database setup, configuring the database name, user, host, and password.
+
 It should appear as follows:
 
 ```shell
@@ -54,7 +55,7 @@ $ poetry install
 
 8. Build the Docker image and start the container:
 ```shell
-docker-compose up --build
+docker compose up --build
 ```
 
 The application will then be accessible at the following url: [http://0.0.0.0:7001/](http://0.0.0.0:7001/). The admin panel is available at [http://0.0.0.0:7001/admin](http://0.0.0.0:7001/admin)
@@ -62,7 +63,15 @@ The application will then be accessible at the following url: [http://0.0.0.0:70
 9. Create database migrations and run migrations.
 You may have to do this periodically as you modify or create models. Shell in as above and run the following commands:
 ``` shell
-docker exec -it consvc-shepherd-app sh # interactive mode
+docker exec -it consvc-shepherd-app-1 sh # interactive mode
 python manage.py makemigrations
 python manage.py migrate
+```
+
+10. Import Boostr Deals and Products
+If you're working with the AdOps dashboard, you may want to pull in Boostr Deals and Products.
+
+``` shell
+docker exec -it consvc-shepherd-app-1 sh # interactive mode
+python manage.py sync_boostr_data https://app.boostr.com/api/ find-me-in-1pass-ads-eng-vault@mozilla.com secret-from-1pass
 ```
