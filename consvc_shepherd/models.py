@@ -2,9 +2,11 @@
 
 import datetime
 import json
+from tkinter import CASCADE
 from typing import Any
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import (
     CharField,
@@ -12,8 +14,11 @@ from django.db.models import (
     DateTimeField,
     ForeignKey,
     IntegerField,
+    PositiveIntegerField,
     JSONField,
     ManyToManyField,
+    OneToOneField,
+    TextField,
 )
 
 from contile.models import Partner
@@ -240,6 +245,17 @@ class BoostrProduct(models.Model):
         return self.full_name
 
 
+class AdOpsCampaignManager(models.Model):
+    """TODO"""
+
+    user: OneToOneField = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        if self.user.first_name and self.user.last_name:
+            return f"{self.user.first_name} {self.user.last_name}"
+        return f"{self.user.email}"
+
+
 class BoostrDeal(models.Model):
     """Representation of AdOps sales deals pulled from Boostr
 
@@ -273,6 +289,9 @@ class BoostrDeal(models.Model):
     currency: CharField = models.CharField()
     amount: IntegerField = models.IntegerField()
     sales_representatives: CharField = models.CharField()
+    campaign_manager: ForeignKey = models.ForeignKey(
+        AdOpsCampaignManager, on_delete=models.SET_NULL, null=True, blank=True
+    )
     start_date: DateField = models.DateField()
     end_date: DateField = models.DateField()
     products: ManyToManyField = models.ManyToManyField(
@@ -459,7 +478,42 @@ class RevenueOverview(models.Model):
     month: DateField = models.DateField()
 
     class Meta:
-        """Define the dp table used for this unmanaged migration"""
+        """Define the db table used for this unmanaged migration"""
 
         db_table = "revenue_overview"
         managed = False
+
+
+"""Exploring Data Model to link Kevel to Boostr deal
+The simple solution is to just include a kevel flight id. 
+But that limits future expansion when the full Kevel data model 
+is likely to be imported into Shepherd
+"""
+
+
+class AdServerLink(models.Model):
+    """TODO"""
+
+    boostr_deal: ForeignKey = models.ForeignKey(BoostrDeal, on_delete=models.CASCADE)
+    campaign_notes: TextField = models.TextField()
+
+
+class Advertiser(models.Model):
+    """TODO"""
+
+    pass
+    # AdCampaign:
+    # AdFlight
+
+
+class KevelFlight(models.Model):
+    """TODO"""
+
+    flight_id: PositiveIntegerField = models.PositiveIntegerField()
+
+
+class KevelCampaign(models.Model):
+    """TODO"""
+
+    campaign_id: PositiveIntegerField = models.PositiveIntegerField()
+    flight_id: ForeignKey = models.ForeignKey(KevelFlight, on_delete=models.CASCADE)
