@@ -21,6 +21,7 @@ from consvc_shepherd.models import (
     AdsInventoryForecast,
     AdProduct,
     AdProductBudget,
+    AdOpsCampaignManager,
 )
 from consvc_shepherd.storage import send_to_storage
 from consvc_shepherd.utils import ShepherdMetrics
@@ -243,7 +244,12 @@ class BoostrDealAdmin(admin.ModelAdmin):
     inlines = [
         BoostrDealProductInline,
     ]
-    search_fields = ["boostr_id", "name", "advertiser", "sales_representatives"]
+    search_fields = [
+        "boostr_id",
+        "name",
+        "advertiser",
+        "sales_representatives",
+    ]
     list_filter = [
         "currency",
         "start_date",
@@ -256,6 +262,7 @@ class BoostrDealAdmin(admin.ModelAdmin):
         "currency",
         "amount",
         "sales_representatives",
+        "campaign_manager",
         "start_date",
         "end_date",
     ]
@@ -333,3 +340,10 @@ class AdProductBudgetAdmin(admin.ModelAdmin):
     model = AdProductBudget
     date_hierarchy = "month"
     list_display = [formatted_month, "name", formatted_budget]
+
+
+@admin.register(AdOpsCampaignManager)
+class AdOpsCampaignManagerAdmin(admin.ModelAdmin):
+    """TODO"""
+
+    model = AdOpsCampaignManager
