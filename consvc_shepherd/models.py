@@ -3,6 +3,7 @@
 import datetime
 import json
 from typing import Any
+from weakref import proxy
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
@@ -20,7 +21,7 @@ from django.db.models import (
     TextField,
 )
 
-from contile.models import Partner
+from contile.models import Advertiser, Partner
 
 
 class SettingsSnapshot(models.Model):
@@ -497,22 +498,32 @@ class AdServerLink(models.Model):
     campaign_notes: TextField = models.TextField()
 
 
-class Advertiser(models.Model):
-    """TODO"""
-
-    pass
-    # AdCampaign:
-    # AdFlight
-
-
 class KevelFlight(models.Model):
     """TODO"""
 
-    flight_id: PositiveIntegerField = models.PositiveIntegerField()
+    flight_id: PositiveIntegerField = models.PositiveIntegerField(null=True)
+    name: CharField = models.CharField(max_length=100,default="Flight")
+    start_date: DateField = models.DateField(auto_now=True,editable=True)
+    end_date: DateField = models.DateField(auto_now=True,editable=True)
+
+    def __str__(self) -> str:
+        """Generate string representation of Ad Product model"""
+        return f"{self.name}"
+
+
+class KevelAdvertiser(Advertiser):
+    """TODO"""
+
+    # campaigns: ForeignKey = models.ForeignKey(KevelCampaign, on_delete=models.CASCADE)
+
+    class Meta:
+        proxy = True
+
 
 
 class KevelCampaign(models.Model):
     """TODO"""
-
+    advertiser: ForeignKey = models.ForeignKey(KevelAdvertiser, on_delete=models.CASCADE)
     campaign_id: PositiveIntegerField = models.PositiveIntegerField()
     flight_id: ForeignKey = models.ForeignKey(KevelFlight, on_delete=models.CASCADE)
+

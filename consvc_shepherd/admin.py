@@ -2,6 +2,7 @@
 
 import json
 
+from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
 from django.utils import dateformat, timezone
@@ -22,6 +23,9 @@ from consvc_shepherd.models import (
     AdProduct,
     AdProductBudget,
     AdOpsCampaignManager,
+    KevelAdvertiser,
+    KevelCampaign,
+    KevelFlight,
 )
 from consvc_shepherd.storage import send_to_storage
 from consvc_shepherd.utils import ShepherdMetrics
@@ -347,3 +351,43 @@ class AdOpsCampaignManagerAdmin(admin.ModelAdmin):
     """TODO"""
 
     model = AdOpsCampaignManager
+
+
+class KevelCampaignsInlineForm(forms.ModelForm):
+    """Model Form Ad Url Inline Form Model."""
+
+    class Meta:
+        """Meta class for AdvertiserUrl AdUrlInlineForm."""
+
+        model = KevelCampaign
+        fields = "__all__"
+
+
+class KevelCampaignInline(admin.TabularInline):
+    """Tabular Inline Ad Url Inline Model."""
+
+    extra = 1
+    model = KevelCampaign
+    form = KevelCampaignsInlineForm
+
+
+@admin.register(KevelAdvertiser)
+class AdvertiserListKevelAdmin(admin.ModelAdmin):
+    """Registration of AdvertiserListAdmin for Advertiser Model."""
+
+    model = KevelAdvertiser
+    exclude = ("partner",)
+    # inlines = [AdUrlInline]
+    ordering = ["name"]
+    inlines = [
+        KevelCampaignInline,
+    ]
+
+
+@admin.register(KevelFlight)
+class KevelFlightAdmin(admin.ModelAdmin):
+    """TODO"""
+    class Meta:
+        widgets = {"start_date": forms.DateField}
+        model = KevelFlight
+        fields = "__all__"
