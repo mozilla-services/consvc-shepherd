@@ -2,7 +2,6 @@
 
 import datetime
 import json
-from tkinter import CASCADE
 from typing import Any
 
 from django.contrib.auth import get_user_model
