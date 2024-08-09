@@ -327,6 +327,7 @@ class AdsInventoryForecastAdmin(admin.ModelAdmin):
     list_display = [formatted_month, "country", formatted_forecast]
 
     date_hierarchy = "month"
+    list_filter = ["month", "country"]
 
 
 @admin.register(AdProduct)
@@ -387,6 +388,7 @@ class AdvertiserListKevelAdmin(admin.ModelAdmin):
 @admin.register(KevelFlight)
 class KevelFlightAdmin(admin.ModelAdmin):
     """TODO"""
+
     class Meta:
         widgets = {"start_date": forms.DateField}
         model = KevelFlight
