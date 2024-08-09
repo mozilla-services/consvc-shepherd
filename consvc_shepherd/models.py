@@ -324,6 +324,9 @@ class BoostrDealProduct(models.Model):
     budget: IntegerField = models.IntegerField()
     month: DateField = models.DateField()
 
+    def __str__(self) -> str:
+        return f"{self.boostr_product}"
+
 
 class Country(models.Model):
     """List of Countries where we show Tiles and Native Content ads.
