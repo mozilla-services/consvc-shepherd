@@ -37,7 +37,7 @@ PROGRESS_QUEST_TILE = Tile(
     url="example4.com",
 )
 
-DEFAULT_FORM_FACTOR = FormFactor(
+DEFAULT_USER_AGENT = FormFactor(
     code="desktop",
     name="Desktop",
     is_mobile=False,
@@ -79,14 +79,14 @@ class TestGetAds(TestCase):
                     direct_sold_tile_zone_ids=[424242],
                 )
 
-                ads = get_ads(mockEnv, "US", "CA", DEFAULT_FORM_FACTOR)
+                ads = get_ads(mockEnv, "US", "CA", DEFAULT_USER_AGENT)
 
                 # Function calls
                 mock_get_amp_tiles.assert_called_once_with(
-                    mockEnv, "US", "CA", DEFAULT_FORM_FACTOR.user_agent
+                    mockEnv, "US", "CA", DEFAULT_USER_AGENT.user_agent
                 )
                 mock_get_spocs_and_direct_sold_tiles.assert_called_once_with(
-                    mockEnv, "US", "CA", DEFAULT_FORM_FACTOR.is_mobile
+                    mockEnv, "US", "CA", DEFAULT_USER_AGENT.is_mobile
                 )
                 self.assertEqual(len(ads.spocs), 1)
                 self.assertEqual(len(ads.tiles), 3)
@@ -120,8 +120,8 @@ class TestGetAds(TestCase):
                 spoc_zone_ids=[1010101],
                 direct_sold_tile_zone_ids=[424242],
             )
-            get_ads(mockUnifiedEnv, "US", "CA", DEFAULT_FORM_FACTOR)
+            get_ads(mockUnifiedEnv, "US", "CA", DEFAULT_USER_AGENT)
 
             mock_get_unified.assert_called_once_with(
-                mockUnifiedEnv, "US", DEFAULT_FORM_FACTOR.is_mobile
+                mockUnifiedEnv, "US", DEFAULT_USER_AGENT.is_mobile
             )
