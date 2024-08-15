@@ -339,9 +339,9 @@ class BoostrDealMediaPlanLineItem(models.Model):
         choices=RateTypes.choices,
         default=RateTypes.CPM,
     )
-    rate: models.DecimalField = models.DecimalField(max_digits=13, decimal_places=2)
-    quantity: models.PositiveIntegerField = models.PositiveIntegerField()
-    budget: models.DecimalField = models.DecimalField(max_digits=13, decimal_places=2)
+    rate: models.DecimalField = models.DecimalField(max_digits=13, decimal_places=2,null=True)
+    quantity: models.PositiveIntegerField = models.PositiveIntegerField(null=True)
+    budget: models.DecimalField = models.DecimalField(max_digits=13, decimal_places=2,null=True)
 
     def __str__(self) -> str:
         return f"{self.media_plan_id}"
