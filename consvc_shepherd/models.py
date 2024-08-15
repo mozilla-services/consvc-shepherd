@@ -14,7 +14,7 @@ from django.db.models import (
     JSONField,
     ManyToManyField,
 )
-
+from django.utils.translation import gettext_lazy as _
 from contile.models import Partner
 
 
@@ -159,7 +159,8 @@ class AllocationSetting(models.Model):
         return {
             "position": self.position,
             "allocation": [
-                allocation.to_dict() for allocation in self.partner_allocations.all()  # type: ignore [attr-defined]
+                allocation.to_dict()
+                for allocation in self.partner_allocations.all()  # type: ignore [attr-defined]
             ],
         }
 
@@ -280,6 +281,9 @@ class BoostrDeal(models.Model):
     created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
     updated_on: DateTimeField = models.DateTimeField(auto_now=True)
 
+    def __str__(self) -> str:
+        return f"{self.name}"
+
 
 class BoostrDealProduct(models.Model):
     """Join table that represents the monthly budgets of every Product that is part of a Deal
@@ -302,3 +306,42 @@ class BoostrDealProduct(models.Model):
     )
     budget: IntegerField = models.IntegerField()
     month: CharField = models.CharField()
+
+
+class BoostrDealMediaPlan(models.Model):
+    """TODO"""
+
+    media_plan_id: models.IntegerField = models.IntegerField()
+    name: models.CharField = models.CharField(null=True)
+    boostr_deal: ForeignKey = models.ForeignKey(BoostrDeal, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return f"{self.name}"
+
+
+class BoostrDealMediaPlanLineItem(models.Model):
+    """TODO"""
+
+    class RateTypes(models.TextChoices):
+        CPM = "CPM", _("CPM")
+        CPC = "CPC", _("CPC")
+        FLATFEE = "FF", _("Flat Fee")
+
+        @classmethod
+        def choices(cls):
+            return [(key.value, key.name) for key in cls]
+
+    media_plan_line_item_id: models.IntegerField = models.IntegerField(null=True)
+    media_plan_id: ForeignKey = models.ForeignKey(
+        BoostrDealMediaPlan, on_delete=models.CASCADE, null=True
+    )
+    rate_type: models.CharField = models.CharField(
+        choices=RateTypes.choices,
+        default=RateTypes.CPM,
+    )
+    rate: models.DecimalField = models.DecimalField(max_digits=13, decimal_places=2)
+    quantity: models.PositiveIntegerField = models.PositiveIntegerField()
+    budget: models.DecimalField = models.DecimalField(max_digits=13, decimal_places=2)
+
+    def __str__(self) -> str:
+        return f"{self.media_plan_id}"
