@@ -4,6 +4,9 @@ import json
 
 from django.conf import settings
 from django.contrib import admin, messages
+from django.db.models.fields.related import ForeignKey
+from django.forms.models import ModelChoiceField
+from django.http.request import HttpRequest
 from django.utils import dateformat, timezone
 from jsonschema import exceptions, validate
 
@@ -16,6 +19,8 @@ from consvc_shepherd.models import (
     BoostrProduct,
     PartnerAllocation,
     SettingsSnapshot,
+    BoostrDealMediaPlanLineItem,
+    BoostrDealMediaPlan,
 )
 from consvc_shepherd.storage import send_to_storage
 from consvc_shepherd.utils import ShepherdMetrics
@@ -266,3 +271,23 @@ class BoostrProductAdmin(admin.ModelAdmin):
         "full_name",
         "campaign_type",
     ]
+
+
+@admin.register(BoostrDealMediaPlanLineItem)
+class BoostrDealMediaPlanLineItemAdmin(admin.ModelAdmin):
+    """TODO"""
+
+    model = BoostrDealMediaPlanLineItem
+
+
+@admin.register(BoostrDealMediaPlan)
+class BoostrDealMediaPlanAdmin(admin.ModelAdmin):
+    """TO DO"""
+
+    model = BoostrDealMediaPlan
+    autocomplete_fields = ["boostr_deal"]
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "boostr_deal":
+            kwargs["queryset"] = BoostrDeal.objects.all().order_by("name")
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
