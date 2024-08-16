@@ -182,9 +182,6 @@ def upsert_media_plans(config: BoostrSyncConfig) -> None:
             break
 
         for media_plan in media_plans:
-            #print(f"Getting media plan id: {media_plan}")
-            # exit()
-            # continue
             try:
                 boostr_deal_instance = BoostrDeal.objects.get(
                     boostr_id=media_plan["deal_id"]
@@ -196,8 +193,6 @@ def upsert_media_plans(config: BoostrSyncConfig) -> None:
                 media_plan_id=media_plan["id"],
                 name=media_plan["name"],
                 boostr_deal=boostr_deal_instance,
-                # defaults={"boostr_deal": boostr_deal_instance},
-                # boostr_deal=media_plan["deal_id"],
             )
 
             upsert_media_plan_line_items(config, media_plan["id"])
@@ -210,9 +205,7 @@ def upsert_media_plan_line_items(config: BoostrSyncConfig, media_plan_id: int) -
         "page": 1,
         "filter": "all",
     }
-    # TODO Add the paging loop
-    #media_plan_line_items_params["page"] += 1
-    print(f"{config.base_url}media_plans/{media_plan_id}/line_items")
+
     media_plan_items_response = requests.get(
         f"{config.base_url}media_plans/{media_plan_id}/line_items",
         params=media_plan_line_items_params,
@@ -224,21 +217,19 @@ def upsert_media_plan_line_items(config: BoostrSyncConfig, media_plan_id: int) -
             f"Bad response status from /media_plans/line_itmes {media_plan_items_response}"
         )
     config.log.info(f"Fetched {(len(media_plan_line_items))} media plan line items")
-    # Paged through all available records and are getting an empty list back
+    # Getting an empty list back
     if len(media_plan_line_items) == 0:
         config.log.info(
-            f"Done. Fetched all themedia plans in {media_plan_line_items_params['page']-1} pages"
+            f"Done. Fetched all the media plans in {media_plan_line_items_params['page']-1} pages"
         )
         return
 
     for media_plan_line_item in media_plan_line_items:
-        #print(f"Getting media plan id: {media_plan_line_item}")
         try:
             media_plan_instance = BoostrDealMediaPlan.objects.get(
                 media_plan_id=media_plan_id
             )
         except BoostrDealMediaPlan.DoesNotExist:
-            print("Media plan not found")
             return
 
         BoostrDealMediaPlanLineItem.objects.update_or_create(
