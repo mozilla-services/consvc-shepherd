@@ -158,9 +158,9 @@ eval &quot;$(pyenv virtualenv-init -)&quot;
 <ol start="4">
 <li>To run consvc-shepherd, you'll need to specify some minimal configurations.
 Use the existing <code>.env.example</code> and copy it to <code>.env</code>.
-You'll want to make sure configuration files in the <code>.env</code> file match your database setup, configuring the database name, user, host and password variables.
-It should appear as follows:</li>
+You'll want to make sure the environment variables in the <code>.env</code> file match your database setup, configuring the database name, user, host, and password.</li>
 </ol>
+<p>It should appear as follows:</p>
 <pre><code class="language-shell">$ cp .env.example .env
 
 # Variables to set in file
@@ -195,16 +195,23 @@ $ poetry install
 <p>Build the Docker image and start the container:</p>
 </li>
 </ol>
-<pre><code class="language-shell">docker-compose up --build
+<pre><code class="language-shell">docker compose up --build
 </code></pre>
 <p>The application will then be accessible at the following url: <a href="http://0.0.0.0:7001/">http://0.0.0.0:7001/</a>. The admin panel is available at <a href="http://0.0.0.0:7001/admin">http://0.0.0.0:7001/admin</a></p>
 <ol start="9">
 <li>Create database migrations and run migrations.
 You may have to do this periodically as you modify or create models. Shell in as above and run the following commands:</li>
 </ol>
-<pre><code class="language-shell">docker exec -it consvc-shepherd-app sh # interactive mode
+<pre><code class="language-shell">docker exec -it consvc-shepherd-app-1 sh # interactive mode
 python manage.py makemigrations
 python manage.py migrate
+</code></pre>
+<ol start="10">
+<li>Import Boostr Deals and Products
+If you're working with the AdOps dashboard, you may want to pull in Boostr Deals and Products.</li>
+</ol>
+<pre><code class="language-shell">docker exec -it consvc-shepherd-app-1 sh # interactive mode
+python manage.py sync_boostr_data https://app.boostr.com/api/ find-me-in-1pass-ads-eng-vault@mozilla.com secret-from-1pass
 </code></pre>
 
                     </main>
