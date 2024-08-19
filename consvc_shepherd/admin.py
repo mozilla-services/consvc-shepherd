@@ -4,9 +4,10 @@ import json
 
 from django.conf import settings
 from django.contrib import admin, messages
-from django.db.models.fields.related import ForeignKey
-from django.forms.models import ModelChoiceField
-from django.http.request import HttpRequest
+
+# from django.db.models.fields.related import ForeignKey
+# from django.forms.models import ModelChoiceField
+# from django.http.request import HttpRequest
 from django.utils import dateformat, timezone
 from jsonschema import exceptions, validate
 
@@ -288,6 +289,7 @@ class BoostrDealMediaPlanAdmin(admin.ModelAdmin):
     autocomplete_fields = ["boostr_deal"]
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """TODO"""
         if db_field.name == "boostr_deal":
             kwargs["queryset"] = BoostrDeal.objects.all().order_by("name")
         return super().formfield_for_foreignkey(db_field, request, **kwargs)

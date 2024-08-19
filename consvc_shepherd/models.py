@@ -323,25 +323,32 @@ class BoostrDealMediaPlanLineItem(models.Model):
     """TODO"""
 
     class RateTypes(models.TextChoices):
+        """TODO"""
+
         CPM = "CPM", _("CPM")
         CPC = "CPC", _("CPC")
         FLATFEE = "FF", _("Flat Fee")
 
         @classmethod
         def choices(cls):
-            return [(key.value, key.name) for key in cls]
+            """TODO"""
+            return [(key.value, key.label) for key in cls]
 
     media_plan_line_item_id: models.IntegerField = models.IntegerField(null=True)
     media_plan_id: ForeignKey = models.ForeignKey(
         BoostrDealMediaPlan, on_delete=models.CASCADE, null=True
     )
     rate_type: models.CharField = models.CharField(
-        choices=RateTypes.choices,
+        choices=RateTypes.choices(),
         default=RateTypes.CPM,
     )
-    rate: models.DecimalField = models.DecimalField(max_digits=13, decimal_places=2,null=True)
+    rate: models.DecimalField = models.DecimalField(
+        max_digits=13, decimal_places=2, null=True
+    )
     quantity: models.PositiveIntegerField = models.PositiveIntegerField(null=True)
-    budget: models.DecimalField = models.DecimalField(max_digits=13, decimal_places=2,null=True)
+    budget: models.DecimalField = models.DecimalField(
+        max_digits=13, decimal_places=2, null=True
+    )
 
     def __str__(self) -> str:
         return f"{self.media_plan_id}"
