@@ -224,12 +224,21 @@ class BoostrProduct(models.Model):
     -------
     __str__(self)
         Return the string representation for a Boostr Product
-
     """
+
+    class CampaignType(models.TextChoices):
+        """Represents the way a Boostr Product will be charged"""
+
+        CPC = "CPC"
+        CPM = "CPM"
+        FLAT_FEE = "Flat Fee"
+        NONE = "None"
 
     boostr_id: IntegerField = models.IntegerField(unique=True)
     full_name: CharField = models.CharField()
-    campaign_type: CharField = models.CharField()
+    campaign_type: CharField = models.CharField(
+        choices=CampaignType.choices,
+    )
 
     created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
     updated_on: DateTimeField = models.DateTimeField(auto_now=True)
@@ -264,6 +273,12 @@ class BoostrDeal(models.Model):
         Date of deal record creation (shepherd DB timestamp metadata, not boostr's)
     updated_on : DateTimeField
         Date of deal record update (shepherd DB timestamp metadata, not boostr's)
+
+    Methods
+    -------
+    __str__(self)
+        Return the string representation for a Boostr Product
+
     """
 
     boostr_id: IntegerField = models.IntegerField(unique=True)
@@ -281,8 +296,9 @@ class BoostrDeal(models.Model):
     created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
     updated_on: DateTimeField = models.DateTimeField(auto_now=True)
 
-    def __str__(self) -> str:
-        return f"{self.name}"
+    def __str__(self):
+        """Return the string representation for a Boostr Product"""
+        return self.name
 
 
 class BoostrDealProduct(models.Model):

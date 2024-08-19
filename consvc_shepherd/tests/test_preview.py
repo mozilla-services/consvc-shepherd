@@ -4,7 +4,7 @@ from unittest import mock
 
 from django.test import TestCase, override_settings
 
-from consvc_shepherd.preview import Agent, Environment, Spoc, Tile, get_ads
+from consvc_shepherd.preview import Environment, FormFactor, Spoc, Tile, get_ads
 
 SPOC = Spoc(
     image_src="https://picsum.photos/296/148",
@@ -12,6 +12,7 @@ SPOC = Spoc(
     domain="cosmetics.beauty",
     excerpt="The sale has begun...",
     sponsored_by="Sponsored by Cosmetics",
+    sponsor="Cosmetics",
     url="example.com",
 )
 
@@ -35,7 +36,13 @@ PROGRESS_QUEST_TILE = Tile(
     sponsored="Sponsored",
     url="example4.com",
 )
-DEFAULT_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:126.0) Gecko/20100101 Firefox/126.0"
+
+DEFAULT_USER_AGENT = FormFactor(
+    code="desktop",
+    name="Desktop",
+    is_mobile=False,
+    user_agent="Mozilla/5.0 (Windows NT 10.0; rv:10.0) Gecko/20100101 Firefox/91.0",
+)
 
 
 @override_settings(DEBUG=True)
@@ -71,19 +78,20 @@ class TestGetAds(TestCase):
                     spoc_zone_ids=[],
                     direct_sold_tile_zone_ids=[424242],
                 )
-                mockAgent = Agent(
-                    code="Mozilla/5.0 (Windows NT 10.0; rv:10.0) Gecko/20100101 Firefox/91.0",
+                mockFormFactor = FormFactor(
+                    code="desktop",
                     name="Desktop",
                     is_mobile=False,
+                    user_agent="Mozilla/5.0 (Windows NT 10.0; rv:10.0) Gecko/20100101 Firefox/91.0",
                 )
-                ads = get_ads(mockEnv, "US", "CA", mockAgent)
+                ads = get_ads(mockEnv, "US", "CA", mockFormFactor)
 
                 # Function calls
                 mock_get_amp_tiles.assert_called_once_with(
-                    mockEnv, "US", "CA", mockAgent.code
+                    mockEnv, "US", "CA", mockFormFactor.user_agent
                 )
                 mock_get_spocs_and_direct_sold_tiles.assert_called_once_with(
-                    mockEnv, "US", "CA", mockAgent.is_mobile
+                    mockEnv, "US", "CA", mockFormFactor.is_mobile
                 )
                 self.assertEqual(len(ads.spocs), 1)
                 self.assertEqual(len(ads.tiles), 3)
@@ -94,6 +102,7 @@ class TestGetAds(TestCase):
                 self.assertEqual(ads.spocs[0].domain, SPOC.domain)
                 self.assertEqual(ads.spocs[0].excerpt, SPOC.excerpt)
                 self.assertEqual(ads.spocs[0].sponsored_by, SPOC.sponsored_by)
+                self.assertEqual(ads.spocs[0].sponsor, SPOC.sponsor)
                 self.assertEqual(ads.spocs[0].url, SPOC.url)
 
                 # Tile data
@@ -118,4 +127,4 @@ class TestGetAds(TestCase):
             )
             get_ads(mockUnifiedEnv, "US", "CA", DEFAULT_USER_AGENT)
 
-            mock_get_unified.assert_called_once_with(mockUnifiedEnv, "US")
+            mock_get_unified.assert_called_once_with(mockUnifiedEnv, "US", False)

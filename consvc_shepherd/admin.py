@@ -4,10 +4,6 @@ import json
 
 from django.conf import settings
 from django.contrib import admin, messages
-
-# from django.db.models.fields.related import ForeignKey
-# from django.forms.models import ModelChoiceField
-# from django.http.request import HttpRequest
 from django.utils import dateformat, timezone
 from jsonschema import exceptions, validate
 
@@ -229,7 +225,7 @@ class AllocationSettingAdmin(admin.ModelAdmin):
 
 
 class BoostrDealProductInline(admin.StackedInline):
-    """BoostrProductBudgetInline is for displaying products and their budgets in the Deal form"""
+    """BoostrDealProductInline is for displaying products and their budgets in the Deal form"""
 
     model = BoostrDealProduct
     extra = 0
@@ -245,6 +241,7 @@ class BoostrDealAdmin(admin.ModelAdmin):
         BoostrDealProductInline,
     ]
     search_fields = ["boostr_id", "name", "advertiser", "sales_representatives"]
+    search_help_text = "Search by boostr id, name, adversiter, or sales reps"
     list_filter = [
         "currency",
         "start_date",
