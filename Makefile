@@ -2,6 +2,7 @@ APP_DIRS := consvc_shepherd contile openidc schema
 COV_FAIL_UNDER := 95
 INSTALL_STAMP := .install.stamp
 POETRY := $(shell command -v poetry 2> /dev/null)
+VER :=
 
 # This will be run if no target is provided
 .DEFAULT_GOAL := help
@@ -77,3 +78,19 @@ dev: $(INSTALL_STAMP)  ##  Run shepherd locally and reload automatically
 .PHONY: local-test
 local-test: $(INSTALL_STAMP)
 	docker compose -f docker-compose.test.yml up --abort-on-container-exit
+
+.PHONY: dmem
+dmem:
+	docker exec -it consvc-shepherd-app-1 python manage.py makemigrations --empty consvc_shepherd
+
+.PHONY: dm
+dm:
+	docker exec -it consvc-shepherd-app-1 python manage.py migrate
+
+.PHONY: dmm
+dmm:
+	docker exec -it consvc-shepherd-app-1 python manage.py makemigrations
+	
+.PHONY: remove-dm
+remove-dm: 
+	docker exec -it consvc-shepherd-app-1 python manage.py migrate consvc_shepherd ${VER}
