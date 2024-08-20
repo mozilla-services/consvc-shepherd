@@ -12,12 +12,12 @@ from consvc_shepherd.models import (
     AllocationSetting,
     AllocationSettingsSnapshot,
     BoostrDeal,
+    BoostrDealMediaPlan,
+    BoostrDealMediaPlanLineItem,
     BoostrDealProduct,
     BoostrProduct,
     PartnerAllocation,
     SettingsSnapshot,
-    BoostrDealMediaPlanLineItem,
-    BoostrDealMediaPlan,
 )
 from consvc_shepherd.storage import send_to_storage
 from consvc_shepherd.utils import ShepherdMetrics

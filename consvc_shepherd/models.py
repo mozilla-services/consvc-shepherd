@@ -15,6 +15,7 @@ from django.db.models import (
     ManyToManyField,
 )
 from django.utils.translation import gettext_lazy as _
+
 from contile.models import Partner
 
 
