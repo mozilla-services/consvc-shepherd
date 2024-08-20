@@ -21,5 +21,5 @@ python manage.py sync_boostr_data https://app.boostr.com/api/ find-me-in-1pass@m
 The script takes several minutes to run. To get more detailed logging on which specific deals and products are being saved, run with `SHEPHERD_ENV=DEBUG`
 
 ```shell
-SHEPHERD_ENV=DEBUG python manage.py sync_boostr_data https://app.boostr.com/api/ find-me-in-1pass@mozilla.com find-me-in-1pass
+SHEPHERD_ENV=DEBUG python manage.py sync_boostr_data https://app.boostr.com/api find-me-in-1pass@mozilla.com find-me-in-1pass
 ```
