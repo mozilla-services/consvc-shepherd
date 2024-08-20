@@ -2,6 +2,7 @@
 
 import logging
 import math
+import time
 
 import requests
 from django.core.management.base import BaseCommand
@@ -125,6 +126,7 @@ class BoostrLoader:
             deals_response = self.session.get(
                 f"{self.base_url}/deals", params=deals_params
             )
+
             if deals_response.status_code != 200:
                 raise BoostrApiError(
                     f"Bad response status from /api/deals: {deals_response}"
@@ -153,43 +155,77 @@ class BoostrLoader:
                 )
                 self.log.debug(f"Upserted deal: {deal['id']}")
 
-                self.upsert_deal_products(boostr_deal)
+                # self.upsert_deal_products()
                 self.log.info(f"Upserted products and budgets for deal: {deal['id']}")
 
-    def upsert_deal_products(self, deal: BoostrDeal) -> None:
-        """Fetch the deal_products for a particular deal and store them in our DB with their monthly budgets"""
-        deal_products_response = self.session.get(
-            f"{self.base_url}/deals/{deal.boostr_id}/deal_products"
-        )
-
-        if deal_products_response.status_code != 200:
-            raise BoostrApiError(
-                f"Bad response status from /api/deals/{deal.boostr_id}/deal_products: {deal_products_response}"
+    def upsert_deal_products(self) -> None:
+        """Fetch the deal_products for multiple and store them in our DB with their monthly budgets"""
+        page = 0
+        deals_product_params = {
+            "per": "300",
+            "page": str(page),
+            "filter": "all",
+        }
+        while True:
+            page += 1
+            deals_product_params["page"] = str(page)
+            print(f"{self.base_url}/deal_products")
+            
+            deal_products_response = self.session.get(
+                f"{self.base_url}/deal_products", params=deals_product_params
             )
 
-        deal_products = deal_products_response.json()
-        self.log.debug(
-            f"Fetched {len(deal_products)} deal_products for deal: {deal.boostr_id}"
-        )
-
-        for deal_product in deal_products:
-            product = BoostrProduct.objects.get(boostr_id=deal_product["product"]["id"])
-            for budget in deal_product["deal_product_budgets"]:
-                BoostrDealProduct.objects.update_or_create(
-                    boostr_deal=deal,
-                    boostr_product=product,
-                    month=budget["month"],
-                    budget=budget["budget"],
+            if deal_products_response.status_code != 200:
+                raise BoostrApiError(
+                    f"Bad response status from /api/deal_products: {deal_products_response.reason} {deals_product_params}"
                 )
+
+            deal_products = deal_products_response.json()
+
+            # Paged through all available records and are getting an empty list back
+            if len(deal_products) == 0:
+                total_pages = int(deals_product_params['page'])-1
+                self.log.info(
+                    f"Done. Fetched all deal products plans in {total_pages} pages"
+                )
+                break
+        
             self.log.debug(
-                f'Upserted {len(deal_product["deal_product_budgets"])} months of budget for product: '
-                f"{product.boostr_id} to deal: {deal.boostr_id}"
+                f"Fetched {len(deal_products)} deal_products"
             )
+            
+            for deal_product in deal_products:                
+                product = BoostrProduct.objects.get(
+                    boostr_id=deal_product["product"]["id"]
+                )
+                try:    
+                    deal = BoostrDeal.objects.get(
+                        boostr_id=deal_product["deal_id"],
+                    )
+                except BoostrDeal.DoesNotExist:
+                    continue
+
+                for budget in deal_product["deal_product_budgets"]:
+                    BoostrDealProduct.objects.update_or_create(
+                        boostr_deal=deal,
+                        boostr_product=product,
+                        month=budget["month"],
+                        budget=budget["budget"],
+                    )
+                self.log.debug(
+                    f'Upserted {len(deal_product["deal_product_budgets"])} months of budget for product: '
+                    f"{product.boostr_id} to deal: {deal_product['product']['full_name']}"
+                )
 
     def load(self):
         """Loader entry point"""
+        start_time = time.time()
         self.upsert_products()
         self.upsert_deals()
+        self.upsert_deal_products()
+        end_time = time.time()
+        elapsed_time =  end_time - start_time
+        print(f"Sync took {elapsed_time:.4f} seconds to run")
 
 
 def get_campaign_type(product_full_name: str) -> str:
