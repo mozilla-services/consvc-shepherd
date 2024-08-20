@@ -170,35 +170,34 @@ class BoostrLoader:
             page += 1
             deals_product_params["page"] = str(page)
             print(f"{self.base_url}/deal_products")
-            
+
             deal_products_response = self.session.get(
                 f"{self.base_url}/deal_products", params=deals_product_params
             )
 
             if deal_products_response.status_code != 200:
                 raise BoostrApiError(
-                    f"Bad response status from /api/deal_products: {deal_products_response.reason} {deals_product_params}"
+                    f"Bad response status from /api/deal_products: \
+                    {deal_products_response.reason} {deals_product_params}"
                 )
 
             deal_products = deal_products_response.json()
 
             # Paged through all available records and are getting an empty list back
             if len(deal_products) == 0:
-                total_pages = int(deals_product_params['page'])-1
+                total_pages = int(deals_product_params["page"]) - 1
                 self.log.info(
                     f"Done. Fetched all deal products plans in {total_pages} pages"
                 )
                 break
-        
-            self.log.debug(
-                f"Fetched {len(deal_products)} deal_products"
-            )
-            
-            for deal_product in deal_products:                
+
+            self.log.debug(f"Fetched {len(deal_products)} deal_products")
+
+            for deal_product in deal_products:
                 product = BoostrProduct.objects.get(
                     boostr_id=deal_product["product"]["id"]
                 )
-                try:    
+                try:
                     deal = BoostrDeal.objects.get(
                         boostr_id=deal_product["deal_id"],
                     )
@@ -224,7 +223,7 @@ class BoostrLoader:
         self.upsert_deals()
         self.upsert_deal_products()
         end_time = time.time()
-        elapsed_time =  end_time - start_time
+        elapsed_time = end_time - start_time
         print(f"Sync took {elapsed_time:.4f} seconds to run")
 
 
