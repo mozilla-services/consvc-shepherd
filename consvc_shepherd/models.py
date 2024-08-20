@@ -345,17 +345,12 @@ class BoostrDealMediaPlanLineItem(models.Model):
         CPC = "CPC", _("CPC")
         FLATFEE = "FF", _("Flat Fee")
 
-        @classmethod
-        def choices(cls):
-            """TODO"""
-            return [(key.value, key.label) for key in cls]
-
     media_plan_line_item_id: models.IntegerField = models.IntegerField(null=True)
     media_plan_id: ForeignKey = models.ForeignKey(
         BoostrDealMediaPlan, on_delete=models.CASCADE, null=True
     )
     rate_type: models.CharField = models.CharField(
-        choices=RateTypes.choices(),
+        choices=RateTypes.choices,
         default=RateTypes.CPM,
     )
     rate: models.DecimalField = models.DecimalField(
