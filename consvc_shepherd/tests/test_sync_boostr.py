@@ -494,7 +494,7 @@ class TestSyncBoostrData(TestCase):
             end_date="2024-05-31",
         )
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
-        loader.upsert_deal_products(deal)
+        loader.upsert_deal_products()
         calls = [
             mock.call(
                 boostr_deal=deal,
@@ -551,7 +551,7 @@ class TestSyncBoostrData(TestCase):
         )
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
         with self.assertRaises(BoostrApiError):
-            loader.upsert_deal_products(deal)
+            loader.upsert_deal_products()
 
     def test_get_campaign_type(self):
         """Test function that reads a Product name and decides if the Product is CPC, CPM, Flat Fee, or None"""
