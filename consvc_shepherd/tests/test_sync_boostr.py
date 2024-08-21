@@ -539,7 +539,7 @@ class TestSyncBoostrData(TestCase):
     @mock.patch.object(requests.Session, "get", side_effect=mock_get_fail)
     def test_upsert_deal_products_fail(self, mock_get, mock_post):
         """Test that upsert_deal_products will raise an API error on non-200 status"""
-        deal = BoostrDeal(
+        """ deal = BoostrDeal(
             boostr_id=123456,
             name="Deal with Customer",
             advertiser="Customer, Inc",
@@ -548,7 +548,7 @@ class TestSyncBoostrData(TestCase):
             sales_representatives="asales@mozilla.com",
             start_date="2024-02-01",
             end_date="2024-05-31",
-        )
+        ) """
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
         with self.assertRaises(BoostrApiError):
             loader.upsert_deal_products()
