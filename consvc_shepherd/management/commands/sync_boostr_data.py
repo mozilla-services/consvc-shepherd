@@ -169,7 +169,6 @@ class BoostrLoader:
         while True:
             page += 1
             deals_product_params["page"] = str(page)
-            print(f"{self.base_url}/deal_products")
 
             deal_products_response = self.session.get(
                 f"{self.base_url}/deal_products", params=deals_product_params
@@ -224,7 +223,7 @@ class BoostrLoader:
         self.upsert_deal_products()
         end_time = time.time()
         elapsed_time = end_time - start_time
-        print(f"Sync took {elapsed_time:.4f} seconds to run")
+        self.log.info(f"Sync took {elapsed_time:.4f} seconds to run")
 
 
 def get_campaign_type(product_full_name: str) -> str:
