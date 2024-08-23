@@ -1,4 +1,4 @@
-## Sync data from Boostr and upsert it into the Shepherd DB
+# Sync data from Boostr and upsert it into the Shepherd DB
 
 Currently this is a Django admin command that can be manually run by `docker exec`-ing into a shepherd app container. The intention is that this will become a regularly running job soon.
 
