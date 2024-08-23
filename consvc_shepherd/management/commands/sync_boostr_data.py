@@ -1,13 +1,70 @@
 """Django admin custom command for fetching and saving Deal and Product data from Boostr to Shepherd"""
 
+import json
+import os
 import logging
 import math
 import time
-
+from typing import Dict, List
+from decimal import Decimal
 import requests
 from django.core.management.base import BaseCommand
-
+from dataclasses import dataclass, field
 from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct
+import environ
+env = environ.Env()
+
+@dataclass(frozen=True)
+class NewBoostrDealMediaPlanLineItem:
+    """TODO"""
+
+    media_plan_line_item_id: int
+    media_plan_id: int
+    boostr_product: int
+    rate_type: str
+    rate: Decimal
+    quantity: int
+    budget: Decimal
+
+    def __str__(self) -> str:
+        return f"{self.media_plan_id}"
+
+
+@dataclass
+class NewBoostrMediaPlan:
+    """Media Plan For Boostr Deals"""
+
+    media_plan_id: int
+    name: str
+    boostr_deal: int
+    line_items: Dict[
+        int,
+        Dict[int, List[NewBoostrDealMediaPlanLineItem]],
+    ] = field(default_factory=dict)
+
+    def __str__(self) -> str:
+        return f"{self.name}"
+
+    def add_line_item(self, line_item: NewBoostrDealMediaPlanLineItem):
+        """Add a line item to a media plan"""
+        if line_item.media_plan_line_item_id not in self.line_items:
+            self.line_items[self.boostr_deal][line_item.boostr_product].append(
+                line_item
+            )
+
+    def find_line_item(
+        self, boostr_deal: int, boostr_product: int
+    ) -> List[NewBoostrDealMediaPlanLineItem]:
+        return self.line_items.get(boostr_deal, {}).get(boostr_product, [])
+
+
+@dataclass
+class MediaPlanCollection:
+    media_plans: Dict[int, NewBoostrMediaPlan] = field(default_factory=dict)
+
+    def add_media_plan(self, boostr_plan: int, media_plan: NewBoostrMediaPlan):
+        if boostr_plan not in self.media_plans:
+            self.media_plans[boostr_plan] = media_plan
 
 
 class Command(BaseCommand):
@@ -54,6 +111,14 @@ class BoostrLoader:
     session: requests.Session
     log: logging.Logger
 
+    line_items: Dict[int, NewBoostrDealMediaPlanLineItem]
+    current_dir = os.path.dirname(__file__)
+    json_file = os.path.join(current_dir, "mediaplans.json")
+
+    with open(json_file, "r") as file:
+        mp_data = json.load(file)
+    # print(mp_data)
+
     def __init__(self, base_url: str, email: str, password: str):
         self.log = logging.getLogger("sync_boostr_data")
         self.base_url = base_url
@@ -73,6 +138,8 @@ class BoostrLoader:
 
     def authenticate(self, email: str, password: str, headers: dict[str, str]) -> str:
         """Authenticate with the Boostr API and return jwt"""
+        #bypass auth for now to avoid rate limits
+        return env("BOOSTR_JWT")
         user_token_response = requests.post(
             f"{self.base_url}/user_token",
             json={"auth": {"email": email, "password": password}},
@@ -80,6 +147,7 @@ class BoostrLoader:
             timeout=15,
         )
         if user_token_response.status_code != 201:
+
             raise BoostrApiError(
                 f"Bad response status from /api/user_token: {user_token_response}"
             )
@@ -215,12 +283,32 @@ class BoostrLoader:
                     f"{product.boostr_id} to deal: {deal_product['product']['full_name']}"
                 )
 
+    def upsert_mediaplan(self) -> None:
+        # print(self.mp_data)
+        mpc = MediaPlanCollection()
+
+        for media_plan in self.mp_data:
+            # exit(media_plan)
+            mp = NewBoostrMediaPlan(
+                media_plan_id=media_plan["id"],
+                name=media_plan["deal_name"],
+                boostr_deal=media_plan["deal_id"],
+            )
+            mpc.add_media_plan(media_plan["deal_id"], mp)
+        import pprint            
+        pprint.pprint(mpc.media_plans)
+
+    def upsert_mediaplan_lineitems(self) -> None:
+        pass
+
     def load(self):
         """Loader entry point"""
         start_time = time.time()
-        self.upsert_products()
-        self.upsert_deals()
-        self.upsert_deal_products()
+        # self.upsert_products()
+        # self.upsert_deals()
+        # self.upsert_deal_products()
+        self.upsert_mediaplan()
+        # self.upsert_mediaplan_lineitems()
         end_time = time.time()
         elapsed_time = end_time - start_time
         self.log.info(f"Sync took {elapsed_time:.4f} seconds to run")
