@@ -1,18 +1,23 @@
 """Django admin custom command for fetching and saving Deal and Product data from Boostr to Shepherd"""
 
 import json
-import os
 import logging
 import math
+import os
 import time
-from typing import Dict, List
-from decimal import Decimal
-import requests
-from django.core.management.base import BaseCommand
 from dataclasses import dataclass, field
-from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct
+from decimal import Decimal
+from typing import Dict, List
+
 import environ
+import requests
+from django.conf import settings
+from django.core.management.base import BaseCommand
+
+from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct
+
 env = environ.Env()
+
 
 @dataclass(frozen=True)
 class NewBoostrDealMediaPlanLineItem:
@@ -55,14 +60,18 @@ class NewBoostrMediaPlan:
     def find_line_item(
         self, boostr_deal: int, boostr_product: int
     ) -> List[NewBoostrDealMediaPlanLineItem]:
+        """Find a line item using the boostr id and product id"""
         return self.line_items.get(boostr_deal, {}).get(boostr_product, [])
 
 
 @dataclass
 class MediaPlanCollection:
+    """A collection for storing Media Plans"""
+
     media_plans: Dict[int, NewBoostrMediaPlan] = field(default_factory=dict)
 
     def add_media_plan(self, boostr_plan: int, media_plan: NewBoostrMediaPlan):
+        """Add a media plan to the collection"""
         if boostr_plan not in self.media_plans:
             self.media_plans[boostr_plan] = media_plan
 
@@ -138,8 +147,9 @@ class BoostrLoader:
 
     def authenticate(self, email: str, password: str, headers: dict[str, str]) -> str:
         """Authenticate with the Boostr API and return jwt"""
-        #bypass auth for now to avoid rate limits
-        return env("BOOSTR_JWT")
+        if settings.BOOSTR_AUTH_BYPASS:
+            # if we are local, bypass auth to avoid rate limits
+            return str(env("BOOSTR_JWT"))
         user_token_response = requests.post(
             f"{self.base_url}/user_token",
             json={"auth": {"email": email, "password": password}},
@@ -284,6 +294,7 @@ class BoostrLoader:
                 )
 
     def upsert_mediaplan(self) -> None:
+        """Upsert media plan lne item details into the database"""
         # print(self.mp_data)
         mpc = MediaPlanCollection()
 
@@ -295,10 +306,12 @@ class BoostrLoader:
                 boostr_deal=media_plan["deal_id"],
             )
             mpc.add_media_plan(media_plan["deal_id"], mp)
-        import pprint            
+        import pprint
+
         pprint.pprint(mpc.media_plans)
 
     def upsert_mediaplan_lineitems(self) -> None:
+        """Upsert media plan line item"""
         pass
 
     def load(self):

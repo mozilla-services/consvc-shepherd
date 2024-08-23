@@ -26,6 +26,7 @@ SECRET_KEY: str = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG", default=False)
+BOOSTR_AUTH_BYPASS = env("BOOSTR_AUTH_BYPASS", default=False)
 DEV_USER_EMAIL = "dev@example.com"
 OPENIDC_HEADER = env("OPENIDC_HEADER", default=None)
 OPENIDC_HEADER_PREFIX = env("OPENIDC_HEADER_PREFIX", default=None)
