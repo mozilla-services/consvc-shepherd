@@ -79,7 +79,7 @@ local-migrate: install
 	$(POETRY) run python manage.py migrate
 
 .PHONY: test
-test: migration-check
+test: local-migration-check
 	env DJANGO_SETTINGS_MODULE=consvc_shepherd.settings $(POETRY) run pytest --cov --cov-report=term-missing --cov-fail-under=$(COV_FAIL_UNDER)
 
 .PHONY: doc-install-deps
