@@ -69,17 +69,17 @@ format: install  ##  Sort imports and reformat code
 	$(POETRY) run isort $(APP_DIRS) --profile black
 	$(POETRY) run black $(APP_DIRS)
 
-.PHONY: migration-check
-migration-check: install
+.PHONY: local-migration-check
+local-migration-check: install
 	$(POETRY) run python manage.py makemigrations --check --dry-run --noinput
 
-.PHONY: migrate
-migrate: install
+.PHONY: local-migrate
+local-migrate: install
 	$(POETRY) run python manage.py makemigrations
 	$(POETRY) run python manage.py migrate
 
 .PHONY: test
-test: migration-check
+test: local-migration-check
 	env DJANGO_SETTINGS_MODULE=consvc_shepherd.settings $(POETRY) run pytest --cov --cov-report=term-missing --cov-fail-under=$(COV_FAIL_UNDER)
 
 .PHONY: doc-install-deps
@@ -102,18 +102,18 @@ dev: $(INSTALL_STAMP)  ##  Run shepherd locally and reload automatically
 local-test: $(INSTALL_STAMP)  ##  local test
 	docker compose -f docker-compose.test.yml up --abort-on-container-exit
 
-.PHONY: d-makemigrations-empty
-d-makemigrations-empty: ##  Run create an empty migrations file via the docker container
+.PHONY: makemigrations-empty
+makemigrations-empty: ##  Run create an empty migrations file via the docker container
 	docker exec -it consvc-shepherd-app-1 python manage.py makemigrations --empty consvc_shepherd
 
-.PHONY: d-migrate
-d-migrate: ##  Run migrate on the docker container
+.PHONY: migrate
+migrate: ##  Run migrate on the docker container
 	docker exec -it consvc-shepherd-app-1 python manage.py migrate
 
-.PHONY: d-makemigrations
-d-makemigrations: ##  Run makemigrations on the docker container
+.PHONY: makemigrations
+makemigrations: ##  Run makemigrations on the docker container
 	docker exec -it consvc-shepherd-app-1 python manage.py makemigrations
 	
-.PHONY: d-remove-migration
-d-remove-migration:  ##  Run command to undo migrations add VER= to set the migration number e.g. 0002
+.PHONY: remove-migration
+remove-migration:  ##  Run command to undo migrations add VER= to set the migration number e.g. 0002
 	docker exec -it consvc-shepherd-app-1 python manage.py migrate consvc_shepherd ${VER}
