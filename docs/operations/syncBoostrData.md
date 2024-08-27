@@ -1,4 +1,4 @@
-## Sync data from Boostr and upsert it into the Shepherd DB
+# Sync data from Boostr and upsert it into the Shepherd DB
 
 Currently this is a Django admin command that can be manually run by `docker exec`-ing into a shepherd app container. The intention is that this will become a regularly running job soon.
 
@@ -16,9 +16,30 @@ docker exec -it consvc-shepherd-app-1 sh
 python manage.py sync_boostr_data https://app.boostr.com/api/ find-me-in-1pass@mozilla.com find-me-in-1pass
 ```
 
-### Notes
+### Optional arguments
 
-The script takes several minutes to run. To get more detailed logging on which specific deals and products are being saved, run with `SHEPHERD_ENV=DEBUG`
+The script can take an optional named argument, `--max-deal-pages`, which will
+set an upper limit on the number of pages of deals that we fetch from the API.
+
+By default, the script will fetch pages of 300 deals at a time until it
+receives an empty response from the Boostr API. And if it never receives an
+empty response, the script will stop fetching after 50 deal pages by default
+(`MAX_DEAL_PAGES_DEFAULT`).
+
+We currently have about 14 pages of deals (at 300 deals per page) in our
+production Boostr account, so the default value of 50 gives us lots of overhead,
+but this parameter allows us to invoke the script with a custom value for the
+upper limit on deal pages.
+
+Usage:
+```sh
+SHEPHERD_ENV=DEBUG python manage.py sync_boostr_data https://app.boostr.com/api/ find-me-in-1pass@mozilla.com find-me-in-1pass --max-deal-pages 42
+```
+
+### Debug logs
+
+The script takes several minutes to run. To get more detailed logging on which
+specific deals and products are being saved, run with `SHEPHERD_ENV=DEBUG`
 
 ```shell
 SHEPHERD_ENV=DEBUG python manage.py sync_boostr_data https://app.boostr.com/api/ find-me-in-1pass@mozilla.com find-me-in-1pass

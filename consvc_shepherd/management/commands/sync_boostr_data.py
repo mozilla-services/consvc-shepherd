@@ -8,6 +8,8 @@ from django.core.management.base import BaseCommand
 
 from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct
 
+MAX_DEAL_PAGES_DEFAULT = 50
+
 
 class Command(BaseCommand):
     """Django admin custom command for fetching and saving Deal and Product data from Boostr to Shepherd"""
@@ -31,11 +33,22 @@ class Command(BaseCommand):
             type=str,
             help="The password for the Boostr API account (see 1password Ads Eng vault)",
         )
+        parser.add_argument(
+            "--max-deal-pages",
+            default=MAX_DEAL_PAGES_DEFAULT,
+            type=int,
+            help=f"""By default, the sync code will stop trying to fetch additional deals pages after
+                {MAX_DEAL_PAGES_DEFAULT} pages. Currently we have ~14 pages of deals in Boostr, so this default max
+                should be sufficient for a while.""",
+        )
 
     def handle(self, *args, **options):
         """Handle running the command"""
         loader = BoostrLoader(
-            options["base_url"], options["email"], options["password"]
+            options["base_url"],
+            options["email"],
+            options["password"],
+            options["max_deal_pages"],
         )
         loader.load()
 
@@ -52,10 +65,18 @@ class BoostrLoader:
     base_url: str
     session: requests.Session
     log: logging.Logger
+    max_deal_pages: int
 
-    def __init__(self, base_url: str, email: str, password: str):
+    def __init__(
+        self,
+        base_url: str,
+        email: str,
+        password: str,
+        max_deal_pages=MAX_DEAL_PAGES_DEFAULT,
+    ):
         self.log = logging.getLogger("sync_boostr_data")
         self.base_url = base_url
+        self.max_deal_pages = max_deal_pages
         self.setup_session(email, password)
 
     def setup_session(self, email: str, password: str) -> None:
@@ -118,10 +139,9 @@ class BoostrLoader:
             "page": str(page),
             "filter": "all",
         }
-        while True:
+        while page < self.max_deal_pages:
             page += 1
             deals_params["page"] = str(page)
-
             deals_response = self.session.get(
                 f"{self.base_url}/deals", params=deals_params
             )
@@ -155,6 +175,11 @@ class BoostrLoader:
 
                 self.upsert_deal_products(boostr_deal)
                 self.log.info(f"Upserted products and budgets for deal: {deal['id']}")
+            # If this is the last iteration of the loop due to the max page limit, log that we stopped
+            if page >= self.max_deal_pages:
+                self.log.info(
+                    f"Done. Stopped fetching deals after hitting max_page_limit of {page} pages."
+                )
 
     def upsert_deal_products(self, deal: BoostrDeal) -> None:
         """Fetch the deal_products for a particular deal and store them in our DB with their monthly budgets"""

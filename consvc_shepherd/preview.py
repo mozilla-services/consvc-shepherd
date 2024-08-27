@@ -322,18 +322,29 @@ def get_unified(env: Environment, country: str, is_mobile: bool = False) -> Ads:
     # placement names will vary for preview and experiment environments, whereas
     # dev & prod have the same placements served by different kevel networks
     spocs_placement = "newtab_spocs"
-    tiles_placement = "newtab_tiles"
+    tile_one_placement = "newtab_tile_1"
+    tile_two_placement = "newtab_tile_2"
+    tile_three_placement = "newtab_tile_3"
 
     # load spocs & tiles, then map them to the same shape
     body = {
         "user_context_id": f"{user_context_id}",  # UUID -> str
         "placements": [
             {"placement": spocs_placement, "count": 10},
-            {"placement": tiles_placement, "count": 3},
+            {"placement": tile_one_placement, "count": 1},
+            {"placement": tile_two_placement, "count": 1},
+            {"placement": tile_three_placement, "count": 1},
         ],
     }
 
     r = requests.post(f"{env.mars_url}/v1/ads", json=body, timeout=30)
+    r_json = r.json()
+
+    tiles_responses = (
+        r_json.get(tile_one_placement, [])
+        + r_json.get(tile_two_placement, [])
+        + r_json.get(tile_three_placement, [])
+    )
 
     tiles = [
         Tile(
@@ -342,7 +353,7 @@ def get_unified(env: Environment, country: str, is_mobile: bool = False) -> Ads:
             url=tile["url"],
             sponsored=LOCALIZATIONS["Sponsored"][country],
         )
-        for tile in r.json().get(tiles_placement, [])
+        for tile in tiles_responses
     ]
 
     spocs = [
@@ -355,7 +366,7 @@ def get_unified(env: Environment, country: str, is_mobile: bool = False) -> Ads:
             sponsored_by=localized_sponsor(spoc, country, is_mobile),
             sponsor=spoc.get("sponsor"),
         )
-        for spoc in r.json().get(spocs_placement, [])
+        for spoc in r_json.get(spocs_placement, [])
     ]
 
     return Ads(spocs=spocs, tiles=tiles, is_mobile=is_mobile)

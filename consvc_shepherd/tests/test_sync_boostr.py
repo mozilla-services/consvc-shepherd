@@ -476,6 +476,36 @@ class TestSyncBoostrData(TestCase):
     @mock.patch("requests.post", side_effect=mock_post_success)
     @mock.patch.object(requests.Session, "get", side_effect=mock_get_success)
     @mock.patch(
+        "consvc_shepherd.models.BoostrDeal.objects.update_or_create",
+        side_effect=mock_update_or_create_deal,
+    )
+    @mock.patch.object(BoostrLoader, "upsert_deal_products")
+    def test_upsert_deals_respects_max_deal_pages_limit(
+        self, mock_upsert_deal_products, mock_update_or_create, mock_get, mock_post
+    ):
+        """Test that upsert_deals respects the given max_deal_pages limit"""
+        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD, 3)
+        loader.upsert_deals()
+        assert 3 == mock_get.call_count
+
+    @mock.patch("requests.post", side_effect=mock_post_success)
+    @mock.patch.object(requests.Session, "get", side_effect=mock_get_success)
+    @mock.patch(
+        "consvc_shepherd.models.BoostrDeal.objects.update_or_create",
+        side_effect=mock_update_or_create_deal,
+    )
+    @mock.patch.object(BoostrLoader, "upsert_deal_products")
+    def test_upsert_deals_respects_default_max_deal_pages_limit(
+        self, mock_upsert_deal_products, mock_update_or_create, mock_get, mock_post
+    ):
+        """Test that upsert_deals respects the default max_deal_pages limit"""
+        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
+        loader.upsert_deals()
+        assert 50 == mock_get.call_count
+
+    @mock.patch("requests.post", side_effect=mock_post_success)
+    @mock.patch.object(requests.Session, "get", side_effect=mock_get_success)
+    @mock.patch(
         "consvc_shepherd.models.BoostrProduct.objects.get", side_effect=mock_get_product
     )
     @mock.patch("consvc_shepherd.models.BoostrDealProduct.objects.update_or_create")

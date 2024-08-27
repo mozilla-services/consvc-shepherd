@@ -277,20 +277,15 @@ class TestGetAds(TestCase):
                     spoc_zone_ids=[],
                     direct_sold_tile_zone_ids=[424242],
                 )
-                mockFormFactor = FormFactor(
-                    code="desktop",
-                    name="Desktop",
-                    is_mobile=False,
-                    user_agent="Mozilla/5.0 (Windows NT 10.0; rv:10.0) Gecko/20100101 Firefox/91.0",
-                )
-                ads = get_ads(mockEnv, "US", "CA", mockFormFactor)
+
+                ads = get_ads(mockEnv, "US", "CA", DEFAULT_USER_AGENT)
 
                 # Function calls
                 mock_get_amp_tiles.assert_called_once_with(
-                    mockEnv, "US", "CA", mockFormFactor.user_agent
+                    mockEnv, "US", "CA", DEFAULT_USER_AGENT.user_agent
                 )
                 mock_get_spocs_and_direct_sold_tiles.assert_called_once_with(
-                    mockEnv, "US", "CA", mockFormFactor.is_mobile
+                    mockEnv, "US", "CA", DEFAULT_USER_AGENT.is_mobile
                 )
                 self.assertEqual(len(ads.spocs), 1)
                 self.assertEqual(len(ads.tiles), 3)
@@ -326,4 +321,6 @@ class TestGetAds(TestCase):
             )
             get_ads(mockUnifiedEnv, "US", "CA", DEFAULT_USER_AGENT)
 
-            mock_get_unified.assert_called_once_with(mockUnifiedEnv, "US", False)
+            mock_get_unified.assert_called_once_with(
+                mockUnifiedEnv, "US", DEFAULT_USER_AGENT.is_mobile
+            )
