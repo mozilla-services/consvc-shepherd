@@ -4,7 +4,18 @@ from unittest import mock
 
 from django.test import TestCase, override_settings
 
-from consvc_shepherd.preview import Environment, FormFactor, Spoc, Tile, get_ads
+from consvc_shepherd.preview import (
+    DIRECT_SOLD_TILE_AD_TYPES,
+    LOCALIZATIONS,
+    SPOC_AD_TYPES,
+    Environment,
+    FormFactor,
+    Spoc,
+    Tile,
+    get_ads,
+    get_amp_tiles,
+    get_spocs_and_direct_sold_tiles,
+)
 
 SPOC = Spoc(
     image_src="https://picsum.photos/296/148",
@@ -43,6 +54,194 @@ DEFAULT_USER_AGENT = FormFactor(
     is_mobile=False,
     user_agent="Mozilla/5.0 (Windows NT 10.0; rv:10.0) Gecko/20100101 Firefox/91.0",
 )
+
+
+@override_settings(DEBUG=True)
+class TestGetAmpTiles(TestCase):
+    """Test the Fetching of Tiles for the Preview Page."""
+
+    def mock_amp_tiles_data(self, *args, **kwargs):
+        """Mock out the function that wraps 'GET /v1/tiles' request within get_amp_tiles"""
+        response = {
+            "tiles": [
+                {
+                    "id": 12345,
+                    "name": "Example Tile",
+                    "url": "https://www.example.com/?tag=example-tag",
+                    "click_url": ("https://www.example.com/click?version=1.0.0"),
+                    "image_url": (
+                        "https://example-cdn.com/" "example-image-id=example.jpg"
+                    ),
+                    "impression_url": (
+                        "https://example-impression-url.com/static?id="
+                        "example-impression-id"
+                    ),
+                    "image_size": 300,
+                }
+            ]
+        }
+        return mock.Mock(status_code=200, json=lambda: response)
+
+    def test_get_amp_tiles(self):
+        """Test the Retrieval of Tiles from MARS."""
+        with mock.patch(
+            "requests.get",
+            side_effect=self.mock_amp_tiles_data,
+        ) as mock_amp_tiles:
+            mockEnv = Environment(
+                code="mock",
+                name="Mock",
+                mars_url="https://mars.mock.if.you.are.connecting.to.this.the.test.broke.com",
+                spoc_site_id=1234567,
+                spoc_site_id_mobile=1234567,
+                spoc_zone_ids=[],
+                direct_sold_tile_zone_ids=[424242],
+            )
+            mockFormFactor = FormFactor(
+                code="desktop",
+                name="Desktop",
+                is_mobile=False,
+                user_agent="Mozilla/5.0 (Windows NT 10.0; rv:10.0) Gecko/20100101 Firefox/91.0",
+            )
+
+            tiles = get_amp_tiles(mockEnv, "US", "CA", mockFormFactor.user_agent)
+
+            mock_amp_tiles.assert_called()
+
+            self.assertEqual(len(tiles), 1)
+            self.assertEqual(
+                tiles[0].image_url,
+                "https://example-cdn.com/example-image-id=example.jpg",
+            )
+
+            self.assertEqual(tiles[0].name, "Example Tile")
+            self.assertEqual(tiles[0].url, "https://www.example.com/?tag=example-tag")
+            self.assertEqual(tiles[0].sponsored, LOCALIZATIONS["Sponsored"]["US"])
+
+            # Verify that requests.get was called once with the expected parameters
+            mock_amp_tiles.assert_called_once_with(
+                f"{mockEnv.mars_url}/v1/tiles",
+                params={"country": "US", "region": "CA"},
+                headers={"User-Agent": mockFormFactor.user_agent},
+                timeout=30,
+            )
+
+
+@override_settings(DEBUG=True)
+class TestGetSpocsAndDirectSoldTiles(TestCase):
+    """Test the Fetching of SPOCs and direct sold tiles for the Preview Page."""
+
+    def mock_spocs_data(self, *args, **kwargs):
+        """Mock out the function that wraps 'POST /spocs' request within get_spocs_and_direct_sold_tiles"""
+        response = {
+            "sponsored-topsite": [
+                {
+                    "raw_image_src": "image_src_1",
+                    "title": "Topsite Tile 1",
+                    "url": "https://example.com/tile1",
+                },
+            ],
+            "spocs": [
+                {
+                    "image_src": "spoc_image_src_1",
+                    "title": "Spoc 1",
+                    "domain": "example.com",
+                    "excerpt": "An example spoc.",
+                    "url": "https://example.com/spoc1",
+                    "sponsor": "Sponsor 1",
+                },
+            ],
+        }
+        return mock.Mock(status_code=200, json=lambda: response)
+
+    def test_get_spocs_and_direct_sold_tiles(self):
+        """Test the fetching of SPOCs and direct sold tiles from MARS."""
+        mockEnv = Environment(
+            code="mock",
+            name="Mock",
+            mars_url="https://mars.mock.if.you.are.connecting.to.this.the.test.broke.com",
+            spoc_site_id=1234567,
+            spoc_site_id_mobile=1234567,
+            spoc_zone_ids=[111111],
+            direct_sold_tile_zone_ids=[424242],
+        )
+
+        self._test_get_spocs_and_direct_sold_tiles_case(
+            mockEnv, "US", "CA", False, mockEnv.spoc_site_id
+        )
+
+        self._test_get_spocs_and_direct_sold_tiles_case(
+            mockEnv, "US", "CA", True, mockEnv.spoc_site_id_mobile
+        )
+
+    def _test_get_spocs_and_direct_sold_tiles_case(
+        self,
+        mockEnv: Environment,
+        country: str,
+        region: str,
+        is_mobile: bool,
+        expected_site_id: int,
+    ):
+        with mock.patch(
+            "requests.post",
+            side_effect=self.mock_spocs_data,
+        ) as mock_spocs:
+            tiles, spocs = get_spocs_and_direct_sold_tiles(
+                mockEnv, country, region, is_mobile
+            )
+
+            mock_spocs.assert_called()
+
+            self.assertEqual(len(tiles), 1)
+            self.assertEqual(len(spocs), 1)
+
+            # Check the properties of the tile
+            self.assertIsNotNone(tiles[0].image_url)
+            self.assertEqual(tiles[0].name, "Topsite Tile 1")
+            self.assertEqual(tiles[0].url, "https://example.com/tile1")
+            self.assertEqual(tiles[0].sponsored, LOCALIZATIONS["Sponsored"][country])
+
+            # Check the properties of the spoc
+            self.assertEqual(spocs[0].image_src, "spoc_image_src_1")
+            self.assertEqual(spocs[0].title, "Spoc 1")
+            self.assertEqual(spocs[0].domain, "example.com")
+            self.assertEqual(spocs[0].excerpt, "An example spoc.")
+            self.assertEqual(spocs[0].url, "https://example.com/spoc1")
+            self.assertEqual(spocs[0].sponsor, "Sponsor 1")
+            if is_mobile:
+                self.assertEqual(spocs[0].sponsored_by, "Sponsored")
+            else:
+                self.assertEqual(spocs[0].sponsored_by, "Sponsored by Sponsor 1")
+
+            # Ensure requests.post was called with the correct URL and payload
+            mock_spocs.assert_called_once_with(
+                f"{mockEnv.mars_url}/spocs",
+                json={
+                    "pocket_id": mock.ANY,  # Use mock.ANY to match any UUID
+                    "site": expected_site_id,
+                    "version": 2,
+                    "country": country,
+                    "region": region,
+                    "placements": [
+                        {
+                            "name": "sponsored-topsite",
+                            "zone_ids": mockEnv.direct_sold_tile_zone_ids,
+                            "ad_types": DIRECT_SOLD_TILE_AD_TYPES,
+                        },
+                        {
+                            "name": "spocs",
+                            "zone_ids": mockEnv.spoc_zone_ids,
+                            "ad_types": SPOC_AD_TYPES,
+                        },
+                    ],
+                },
+                timeout=30,
+            )
+
+            args, kwargs = mock_spocs.call_args
+            payload = kwargs["json"]
+            self.assertIsInstance(payload["pocket_id"], str)
+            self.assertEqual(len(payload["pocket_id"]), 38)
 
 
 @override_settings(DEBUG=True)
