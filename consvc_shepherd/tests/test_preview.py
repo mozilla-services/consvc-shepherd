@@ -15,6 +15,7 @@ from consvc_shepherd.preview import (
     get_ads,
     get_amp_tiles,
     get_spocs_and_direct_sold_tiles,
+    get_unified,
 )
 
 SPOC = Spoc(
@@ -324,3 +325,118 @@ class TestGetAds(TestCase):
             mock_get_unified.assert_called_once_with(
                 mockUnifiedEnv, "US", DEFAULT_USER_AGENT.is_mobile
             )
+
+
+@override_settings(DEBUG=True)
+class TestGetUnified(TestCase):
+    """Test the Retrieval of Ads from MARS Unified API."""
+
+    def mock_unified_data(self, *args, **kwargs):
+        """Mock out the function that wraps 'POST /v1/ads' request within get_unified"""
+        response = {
+            "newtab_spocs": [
+                {
+                    "image_url": "https://example-spoc-cdn.com/spoc-image.jpg",
+                    "title": "Example Spoc",
+                    "domain": "example.com",
+                    "excerpt": "An example spoc.",
+                    "url": "https://example.com/spoc",
+                    "sponsor": "Sponsor 1",
+                }
+            ],
+            "newtab_tile_1": [
+                {
+                    "image_url": "https://example-tile-cdn.com/tile1.jpg",
+                    "name": "Tile 1",
+                    "url": "https://example.com/tile1",
+                }
+            ],
+            "newtab_tile_2": [
+                {
+                    "image_url": "https://example-tile-cdn.com/tile2.jpg",
+                    "name": "Tile 2",
+                    "url": "https://example.com/tile2",
+                }
+            ],
+            "newtab_tile_3": [
+                {
+                    "image_url": "https://example-tile-cdn.com/tile3.jpg",
+                    "name": "Tile 3",
+                    "url": "https://example.com/tile3",
+                }
+            ],
+        }
+        return mock.Mock(status_code=200, json=lambda: response)
+
+    def test_get_unified(self):
+        """Test the Retrieval of Ads from MARS Unified API."""
+        with mock.patch(
+            "requests.post",
+            side_effect=self.mock_unified_data,
+        ) as mock_unified:
+            mockUnifiedEnv = Environment(
+                code="unified_mock",
+                name="Unified Mock",
+                mars_url="https://unified.mock.if.you.are.connecting.to.this.the.test.broke.com",
+                spoc_site_id=1234567,
+                spoc_site_id_mobile=1234567,
+                spoc_zone_ids=[1010101],
+                direct_sold_tile_zone_ids=[424242],
+            )
+
+            ads = get_unified(mockUnifiedEnv, "US", is_mobile=False)
+
+            mock_unified.assert_called()
+
+            # Verify the tiles
+            self.assertEqual(len(ads.tiles), 3)
+            self.assertEqual(
+                ads.tiles[0].image_url, "https://example-tile-cdn.com/tile1.jpg"
+            )
+            self.assertEqual(ads.tiles[0].name, "Tile 1")
+            self.assertEqual(ads.tiles[0].url, "https://example.com/tile1")
+            self.assertEqual(
+                ads.tiles[1].image_url, "https://example-tile-cdn.com/tile2.jpg"
+            )
+            self.assertEqual(ads.tiles[1].name, "Tile 2")
+            self.assertEqual(ads.tiles[1].url, "https://example.com/tile2")
+            self.assertEqual(
+                ads.tiles[2].image_url, "https://example-tile-cdn.com/tile3.jpg"
+            )
+            self.assertEqual(ads.tiles[2].name, "Tile 3")
+            self.assertEqual(ads.tiles[2].url, "https://example.com/tile3")
+
+            # Verify the spocs
+            self.assertEqual(len(ads.spocs), 1)
+            self.assertEqual(
+                ads.spocs[0].image_src, "https://example-spoc-cdn.com/spoc-image.jpg"
+            )
+            self.assertEqual(ads.spocs[0].title, "Example Spoc")
+            self.assertEqual(ads.spocs[0].domain, "example.com")
+            self.assertEqual(ads.spocs[0].excerpt, "An example spoc.")
+            self.assertEqual(ads.spocs[0].url, "https://example.com/spoc")
+            self.assertEqual(ads.spocs[0].sponsor, "Sponsor 1")
+            self.assertEqual(ads.spocs[0].sponsored_by, "Sponsored by Sponsor 1")
+
+            # Verify the is_mobile
+            self.assertFalse(ads.is_mobile)
+
+            # Verify that requests.post was called once with the expected parameters
+            mock_unified.assert_called_once_with(
+                f"{mockUnifiedEnv.mars_url}/v1/ads",
+                json={
+                    "user_context_id": mock.ANY,
+                    "placements": [
+                        {"placement": "newtab_spocs", "count": 10},
+                        {"placement": "newtab_tile_1", "count": 1},
+                        {"placement": "newtab_tile_2", "count": 1},
+                        {"placement": "newtab_tile_3", "count": 1},
+                    ],
+                },
+                timeout=30,
+            )
+
+            args, kwargs = mock_unified.call_args
+            payload = kwargs["json"]
+            self.assertIsInstance(payload["user_context_id"], str)
+            self.assertEqual(len(payload["user_context_id"]), 36)
