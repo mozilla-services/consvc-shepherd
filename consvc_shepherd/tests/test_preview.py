@@ -180,7 +180,7 @@ class TestGetSpocsAndDirectSoldTiles(TestCase):
         country: str,
         region: str,
         is_mobile: bool,
-        expected_site_id: int,
+        expected_site_id: int | None,
     ):
         with mock.patch(
             "requests.post",
