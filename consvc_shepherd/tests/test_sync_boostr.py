@@ -2,10 +2,10 @@
 
 from unittest import mock
 
-import requests
 from django.test import TestCase, override_settings
 
 from consvc_shepherd.management.commands.sync_boostr_data import (
+    BoostrApi,
     BoostrApiError,
     BoostrDeal,
     BoostrDealProduct,
@@ -21,18 +21,19 @@ class MockResponse:
     def __init__(self, json_data: object, status_code: int):
         self.json_data = json_data
         self.status_code = status_code
+        self.ok = 200 <= self.status_code < 400
 
     def json(self):
         """Mock json data"""
         return self.json_data
 
 
-def mock_post_success(*args, **kwargs) -> MockResponse:
+def mock_post_token_success(*args, **kwargs) -> MockResponse:
     """Mock successful POST /user_token requests to boostr"""
     return MockResponse({"jwt": "i.am.jwt"}, 201)
 
 
-def mock_post_fail(*args, **kwargs) -> MockResponse:
+def mock_post_token_fail(*args, **kwargs) -> MockResponse:
     """Mock failed POST /user_token requests to boostr"""
     return MockResponse({"uh": "oh"}, 401)
 
@@ -369,35 +370,31 @@ PASSWORD = "test"  # nosec
 class TestSyncBoostrData(TestCase):
     """Unit tests for functions that fetch from boostr API and store in our DB"""
 
-    @mock.patch.object(BoostrLoader, "authenticate", return_value="im.a.jwt")
+    @mock.patch.object(BoostrApi, "authenticate", return_value="im.a.jwt")
     def test_setup_session(self, mock_authenticate):
         """Test the function that sets up the headers, authenticates with boosrt, and sets up the session"""
-        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
+        boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD)
         self.assertEqual(
-            loader.session.headers["Accept"], "application/vnd.boostr.public"
+            boostr.session.headers["Accept"], "application/vnd.boostr.public"
         )
-        self.assertEqual(loader.session.headers["Content-Type"], "application/json")
-        self.assertEqual(loader.session.headers["Authorization"], "Bearer im.a.jwt")
+        self.assertEqual(boostr.session.headers["Content-Type"], "application/json")
+        self.assertEqual(boostr.session.headers["Authorization"], "Bearer im.a.jwt")
 
-    @mock.patch("requests.post", side_effect=mock_post_success)
+    @mock.patch("requests.Session.post", side_effect=mock_post_token_success)
     def test_authenticate(self, mock_post):
         """Test authenticate function that calls boostr auth and returns a JWT"""
-        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
-        headers = {
-            "Accept": "application/vnd.boostr.public",
-            "Content-Type": "application/json",
-        }
-        jwt = loader.authenticate(EMAIL, PASSWORD, headers)
+        boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD)
+        jwt = boostr.authenticate(EMAIL, PASSWORD)
         self.assertEqual(jwt, "i.am.jwt")
 
-    @mock.patch("requests.post", side_effect=mock_post_fail)
+    @mock.patch("requests.Session.post", side_effect=mock_post_token_fail)
     def test_authenticate_fail(self, mock_post):
         """Test sad path for the authenticate function"""
         with self.assertRaises(BoostrApiError):
-            BoostrLoader("fail_url", "uhoh@mozilla.com", "uhoh")
+            BoostrApi("https://fail_url.lol", "uhoh@mozilla.com", "uhoh")
 
-    @mock.patch("requests.post", side_effect=mock_post_success)
-    @mock.patch.object(requests.Session, "get", side_effect=mock_get_success)
+    @mock.patch("requests.Session.post", side_effect=mock_post_token_success)
+    @mock.patch("requests.Session.get", side_effect=mock_get_success)
     @mock.patch("consvc_shepherd.models.BoostrProduct.objects.update_or_create")
     def test_upsert_products(self, mock_update_or_create, mock_get, mock_post):
         """Test function that calls boostr API for product data and saves to our DB"""
@@ -417,16 +414,16 @@ class TestSyncBoostrData(TestCase):
         ]
         mock_update_or_create.assert_has_calls(calls)
 
-    @mock.patch("requests.post", side_effect=mock_post_success)
-    @mock.patch.object(requests.Session, "get", side_effect=mock_get_fail)
+    @mock.patch("requests.Session.post", side_effect=mock_post_token_success)
+    @mock.patch("requests.Session.get", side_effect=mock_get_fail)
     def test_upsert_products_fail(self, mock_get, mock_post):
         """Test that upsert_products will raise an API error on non-200 status"""
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
         with self.assertRaises(BoostrApiError):
             loader.upsert_products()
 
-    @mock.patch("requests.post", side_effect=mock_post_success)
-    @mock.patch.object(requests.Session, "get", side_effect=mock_get_success)
+    @mock.patch("requests.Session.post", side_effect=mock_post_token_success)
+    @mock.patch("requests.Session.get", side_effect=mock_get_success)
     @mock.patch(
         "consvc_shepherd.models.BoostrDeal.objects.update_or_create",
         side_effect=mock_update_or_create_deal,
@@ -465,16 +462,16 @@ class TestSyncBoostrData(TestCase):
         ]
         mock_update_or_create.assert_has_calls(calls)
 
-    @mock.patch("requests.post", side_effect=mock_post_success)
-    @mock.patch.object(requests.Session, "get", side_effect=mock_get_fail)
+    @mock.patch("requests.Session.post", side_effect=mock_post_token_success)
+    @mock.patch("requests.Session.get", side_effect=mock_get_fail)
     def test_upsert_deals_fail(self, mock_get, mock_post):
         """Test that upsert_deals will raise an API error on non-200 status"""
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
         with self.assertRaises(BoostrApiError):
             loader.upsert_deals()
 
-    @mock.patch("requests.post", side_effect=mock_post_success)
-    @mock.patch.object(requests.Session, "get", side_effect=mock_get_success)
+    @mock.patch("requests.Session.post", side_effect=mock_post_token_success)
+    @mock.patch("requests.Session.get", side_effect=mock_get_success)
     @mock.patch(
         "consvc_shepherd.models.BoostrDeal.objects.update_or_create",
         side_effect=mock_update_or_create_deal,
@@ -488,8 +485,8 @@ class TestSyncBoostrData(TestCase):
         loader.upsert_deals()
         assert 3 == mock_get.call_count
 
-    @mock.patch("requests.post", side_effect=mock_post_success)
-    @mock.patch.object(requests.Session, "get", side_effect=mock_get_success)
+    @mock.patch("requests.Session.post", side_effect=mock_post_token_success)
+    @mock.patch("requests.Session.get", side_effect=mock_get_success)
     @mock.patch(
         "consvc_shepherd.models.BoostrDeal.objects.update_or_create",
         side_effect=mock_update_or_create_deal,
@@ -503,8 +500,8 @@ class TestSyncBoostrData(TestCase):
         loader.upsert_deals()
         assert 50 == mock_get.call_count
 
-    @mock.patch("requests.post", side_effect=mock_post_success)
-    @mock.patch.object(requests.Session, "get", side_effect=mock_get_success)
+    @mock.patch("requests.Session.post", side_effect=mock_post_token_success)
+    @mock.patch("requests.Session.get", side_effect=mock_get_success)
     @mock.patch(
         "consvc_shepherd.models.BoostrProduct.objects.get", side_effect=mock_get_product
     )
@@ -565,8 +562,8 @@ class TestSyncBoostrData(TestCase):
         ]
         mock_update_or_create.assert_has_calls(calls)
 
-    @mock.patch("requests.post", side_effect=mock_post_success)
-    @mock.patch.object(requests.Session, "get", side_effect=mock_get_fail)
+    @mock.patch("requests.Session.post", side_effect=mock_post_token_success)
+    @mock.patch("requests.Session.get", side_effect=mock_get_fail)
     def test_upsert_deal_products_fail(self, mock_get, mock_post):
         """Test that upsert_deal_products will raise an API error on non-200 status"""
         deal = BoostrDeal(
