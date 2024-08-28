@@ -76,12 +76,13 @@ class Environment:
 
 
 @dataclass(frozen=True)
-class Agent:
-    """Struct for user agent"""
+class FormFactor:
+    """Represents a form factor"""
 
     code: str
     name: str
     is_mobile: bool
+    user_agent: str
 
 
 @dataclass(frozen=True)
@@ -93,6 +94,7 @@ class Spoc:
     domain: str
     excerpt: str
     sponsored_by: str
+    sponsor: str
     url: str
 
 
@@ -112,6 +114,7 @@ class Ads:
 
     tiles: list[Tile]
     spocs: list[Spoc]
+    is_mobile: bool
 
 
 # Ad environments. Note that these differ from MARS or Shepherd environments.
@@ -169,16 +172,18 @@ ENVIRONMENTS: list[Environment] = [
     ),
 ]
 
-AGENTS: list[Agent] = [
-    Agent(
-        code="Mozilla/5.0 (Windows NT 10.0; rv:10.0) Gecko/20100101 Firefox/91.0",
+FORM_FACTORS: list[FormFactor] = [
+    FormFactor(
+        code="desktop",
         name="Desktop",
         is_mobile=False,
+        user_agent="Mozilla/5.0 (Windows NT 10.0; rv:10.0) Gecko/20100101 Firefox/91.0",
     ),
-    Agent(
-        code="Mozilla/5.0 (Android 11; Mobile; rv:92.0) Gecko/92.0 Firefox/92.0",
+    FormFactor(
+        code="mobile",
         name="Mobile",
         is_mobile=True,
+        user_agent="Mozilla/5.0 (Android 11; Mobile; rv:92.0) Gecko/92.0 Firefox/92.0",
     ),
 ]
 
@@ -224,14 +229,14 @@ REGIONS = load_regions()
 
 
 def get_spocs_and_direct_sold_tiles(
-    env: Environment, country: str, region: str, isMobile: bool
+    env: Environment, country: str, region: str, is_mobile: bool
 ) -> tuple[list[Tile], list[Spoc]]:
     """Load SPOCs and direct sold tiles from MARS for given country and region"""
     # Generate a unique pocket ID per request to avoid frequency capping
     pocket_id = uuid.uuid4()
 
     spoc_site_id = env.spoc_site_id
-    if isMobile:
+    if is_mobile:
         spoc_site_id = env.spoc_site_id_mobile
 
     body = {
@@ -274,7 +279,8 @@ def get_spocs_and_direct_sold_tiles(
             domain=spoc["domain"],
             excerpt=spoc["excerpt"],
             url=spoc["url"],
-            sponsored_by=localized_sponsored_by(spoc, country),
+            sponsored_by=localized_sponsor(spoc, country, is_mobile),
+            sponsor=spoc.get("sponsor"),
         )
         for spoc in json.get("spocs", [])
     ]
@@ -283,7 +289,7 @@ def get_spocs_and_direct_sold_tiles(
 
 
 def get_amp_tiles(
-    env: Environment, country: str, region: str, agent: str
+    env: Environment, country: str, region: str, user_agent: str
 ) -> list[Tile]:
     """Load Sponsored Tiles from MARS for given country and region"""
     params = {
@@ -292,13 +298,12 @@ def get_amp_tiles(
     }
 
     headers = {
-        "User-Agent": agent,
+        "User-Agent": user_agent,
     }
 
     r = requests.get(
         f"{env.mars_url}/v1/tiles", params=params, headers=headers, timeout=30
     )
-
     return [
         Tile(
             image_url=tile["image_url"],
@@ -310,25 +315,36 @@ def get_amp_tiles(
     ]
 
 
-def get_unified(env: Environment, country: str) -> Ads:
+def get_unified(env: Environment, country: str, is_mobile: bool = False) -> Ads:
     """Load Ads from MARS unified api"""
     user_context_id = uuid.uuid4()
 
     # placement names will vary for preview and experiment environments, whereas
     # dev & prod have the same placements served by different kevel networks
     spocs_placement = "newtab_spocs"
-    tiles_placement = "newtab_tiles"
+    tile_one_placement = "newtab_tile_1"
+    tile_two_placement = "newtab_tile_2"
+    tile_three_placement = "newtab_tile_3"
 
     # load spocs & tiles, then map them to the same shape
     body = {
         "user_context_id": f"{user_context_id}",  # UUID -> str
         "placements": [
             {"placement": spocs_placement, "count": 10},
-            {"placement": tiles_placement, "count": 3},
+            {"placement": tile_one_placement, "count": 1},
+            {"placement": tile_two_placement, "count": 1},
+            {"placement": tile_three_placement, "count": 1},
         ],
     }
 
     r = requests.post(f"{env.mars_url}/v1/ads", json=body, timeout=30)
+    r_json = r.json()
+
+    tiles_responses = (
+        r_json.get(tile_one_placement, [])
+        + r_json.get(tile_two_placement, [])
+        + r_json.get(tile_three_placement, [])
+    )
 
     tiles = [
         Tile(
@@ -337,7 +353,7 @@ def get_unified(env: Environment, country: str) -> Ads:
             url=tile["url"],
             sponsored=LOCALIZATIONS["Sponsored"][country],
         )
-        for tile in r.json().get(tiles_placement, [])
+        for tile in tiles_responses
     ]
 
     spocs = [
@@ -347,38 +363,46 @@ def get_unified(env: Environment, country: str) -> Ads:
             domain=spoc["domain"],
             excerpt=spoc["excerpt"],
             url=spoc["url"],
-            sponsored_by=localized_sponsored_by(spoc, country),
+            sponsored_by=localized_sponsor(spoc, country, is_mobile),
+            sponsor=spoc.get("sponsor"),
         )
-        for spoc in r.json().get(spocs_placement, [])
+        for spoc in r_json.get(spocs_placement, [])
     ]
 
-    return Ads(spocs=spocs, tiles=tiles)
+    return Ads(spocs=spocs, tiles=tiles, is_mobile=is_mobile)
 
 
-def get_ads(env: Environment, country: str, region: str, agent: Agent) -> Ads:
+def get_ads(
+    env: Environment, country: str, region: str, form_factor: FormFactor
+) -> Ads:
     """Based on Environment, either load spocs & tiles individually or from a single request"""
     if env.code.startswith("unified_"):
-        return get_unified(env, country)
+        return get_unified(env, country, form_factor.is_mobile)
     else:
-        amp_tiles = get_amp_tiles(env, country, region, agent.code)
+        amp_tiles = get_amp_tiles(env, country, region, form_factor.user_agent)
         spocs_and_direct_sold_tiles = get_spocs_and_direct_sold_tiles(
-            env, country, region, agent.is_mobile
+            env, country, region, form_factor.is_mobile
         )
 
         return Ads(
             tiles=amp_tiles + spocs_and_direct_sold_tiles[0],
             spocs=spocs_and_direct_sold_tiles[1],
+            is_mobile=form_factor.is_mobile,
         )
 
 
-def localized_sponsored_by(spoc: dict[str, str], country: str) -> str:
+def localized_sponsor(
+    spoc: dict[str, str], country: str, is_mobile: bool = False
+) -> str:
     """Render the localized 'Sponsored by ...' text for a SPOC"""
     if (override := spoc.get("sponsored_by_override")) is not None:
         return override
-
-    return LOCALIZATIONS["Sponsored by"][country].format(
-        sponsor=spoc.get("sponsor"),
-    )
+    if is_mobile:
+        return LOCALIZATIONS["Sponsored"][country]
+    else:
+        return LOCALIZATIONS["Sponsored by"][country].format(
+            sponsor=spoc.get("sponsor"),
+        )
 
 
 def find_env_by_code(env_code: str) -> Environment:
@@ -390,13 +414,13 @@ def find_env_by_code(env_code: str) -> Environment:
     raise ValueError(f"Unknown environment '{env_code}'")
 
 
-def find_agent_by_code(agent_code: str) -> Agent:
-    """Find an agent by code, raise an exception if no agent is found"""
-    for agent in AGENTS:
-        if agent.code == agent_code:
-            return agent
+def find_form_factor_by_code(form_factor_code: str) -> FormFactor:
+    """Find a form factor by code, raise an exception if no form factor is found"""
+    for form_factor in FORM_FACTORS:
+        if form_factor.code == form_factor_code:
+            return form_factor
 
-    raise ValueError(f"Unknown agent '{agent_code}'")
+    raise ValueError(f"Unknown form factor '{form_factor_code}'")
 
 
 def create_image_url(raw_image_src: str, w: int, h: int) -> str:
@@ -427,17 +451,15 @@ class PreviewView(TemplateView):
         env_code = request.GET.get("env", "production")
         country = request.GET.get("country", "US")
         region = request.GET.get("region", "CA")
-        agent_code = request.GET.get("agent", AGENTS[0].code)
+        form_factor_code = request.GET.get("form_factor", FORM_FACTORS[0].code)
 
         env = find_env_by_code(env_code)
-        agent = find_agent_by_code(agent_code)
+        form_factor = find_form_factor_by_code(form_factor_code)
 
-        mobileMsg = " &#x1F4F1; " if agent.is_mobile else ""
-        debugMsg = (
-            f"{mobileMsg}country: {country}, region: {region}<br>env: {env}<br>{agent}"
-        )
+        mobileMsg = " &#x1F4F1; " if form_factor.is_mobile else ""
+        debugMsg = f"{mobileMsg}country: {country}, region: {region}<br>env: {env}<br>{form_factor}"
         try:
-            ads = get_ads(env, country, region, agent)
+            ads = get_ads(env, country, region, form_factor)
             debugMsg += "<br>&#x2705;ok"
         except Exception as e:
             ads = {}
@@ -450,8 +472,8 @@ class PreviewView(TemplateView):
             "environment": env_code,
             "country": country,
             "region": region,
-            "agents": AGENTS,
-            "agent": agent_code,
+            "form_factors": FORM_FACTORS,
+            "form_factor": form_factor_code,
             "ads": ads,
             "debugMsg": debugMsg,
         }
