@@ -2,6 +2,7 @@
 
 import logging
 import math
+from time import sleep
 from typing import Any
 
 import requests
@@ -10,6 +11,7 @@ from django.core.management.base import BaseCommand
 from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct
 
 MAX_DEAL_PAGES_DEFAULT = 50
+RATE_LIMIT_REQUEST_INTERVAL_SECS = 0.7
 
 
 class Command(BaseCommand):
@@ -92,6 +94,7 @@ class BoostrApi:
         """Make POST requests to Boostr that uses the session, pass through headers and json data,
         check status, and return parsed json
         """
+        sleep(RATE_LIMIT_REQUEST_INTERVAL_SECS)
         response = self.session.post(
             f"{self.base_url}/{path}",
             json=json,
@@ -109,6 +112,7 @@ class BoostrApi:
         """Make GET requests to Boostr that use the session, pass through headers and query params,
         check status, and return parsed json
         """
+        sleep(RATE_LIMIT_REQUEST_INTERVAL_SECS)
         response = self.session.get(
             f"{self.base_url}/{path}", params=params, headers=headers, timeout=15
         )
