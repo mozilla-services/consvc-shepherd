@@ -2,6 +2,8 @@
 
 import logging
 import math
+from time import sleep
+from typing import Any
 
 import requests
 from django.core.management.base import BaseCommand
@@ -9,6 +11,7 @@ from django.core.management.base import BaseCommand
 from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct
 
 MAX_DEAL_PAGES_DEFAULT = 50
+RATE_LIMIT_REQUEST_INTERVAL_SECS = 0.7
 
 
 class Command(BaseCommand):
@@ -59,24 +62,14 @@ class BoostrApiError(Exception):
     pass
 
 
-class BoostrLoader:
-    """Wrap up interaction with the Boostr API"""
+class BoostrApi:
+    """Wrap up interactions with the Boostr API into a convenient class that handles the session, rate limits, etc"""
 
     base_url: str
     session: requests.Session
-    log: logging.Logger
-    max_deal_pages: int
 
-    def __init__(
-        self,
-        base_url: str,
-        email: str,
-        password: str,
-        max_deal_pages=MAX_DEAL_PAGES_DEFAULT,
-    ):
-        self.log = logging.getLogger("sync_boostr_data")
+    def __init__(self, base_url: str, email: str, password: str):
         self.base_url = base_url
-        self.max_deal_pages = max_deal_pages
         self.setup_session(email, password)
 
     def setup_session(self, email: str, password: str) -> None:
@@ -85,26 +78,63 @@ class BoostrLoader:
             "Accept": "application/vnd.boostr.public",
             "Content-Type": "application/json",
         }
-        token = self.authenticate(email, password, headers)
+        self.session = requests.Session()
+        self.session.headers.update(headers)
+        token = self.authenticate(email, password)
         headers["Authorization"] = f"Bearer {token}"
-        s = requests.Session()
-        s.headers.update(headers)
-        self.session = s
+        self.session.headers.update(headers)
 
-    def authenticate(self, email: str, password: str, headers: dict[str, str]) -> str:
+    def authenticate(self, email: str, password: str) -> str:
         """Authenticate with the Boostr API and return jwt"""
-        user_token_response = requests.post(
-            f"{self.base_url}/user_token",
-            json={"auth": {"email": email, "password": password}},
+        post_data = {"auth": {"email": email, "password": password}}
+        token = self.post("user_token", post_data)
+        return str(token["jwt"])
+
+    def post(self, path: str, json={}, headers={}) -> Any:
+        """Make POST requests to Boostr that uses the session, pass through headers and json data,
+        check status, and return parsed json
+        """
+        sleep(RATE_LIMIT_REQUEST_INTERVAL_SECS)
+        response = self.session.post(
+            f"{self.base_url}/{path}",
+            json=json,
             headers=headers,
             timeout=15,
         )
-        if user_token_response.status_code != 201:
+        if not response.ok:
             raise BoostrApiError(
-                f"Bad response status from /api/user_token: {user_token_response}"
+                f"Bad response status {response.status_code} from /{path}: {response}"
             )
-        token = user_token_response.json()
-        return str(token["jwt"])
+        json = response.json()
+        return json
+
+    def get(self, path: str, params={}, headers={}):
+        """Make GET requests to Boostr that use the session, pass through headers and query params,
+        check status, and return parsed json
+        """
+        sleep(RATE_LIMIT_REQUEST_INTERVAL_SECS)
+        response = self.session.get(
+            f"{self.base_url}/{path}", params=params, headers=headers, timeout=15
+        )
+        if not response.ok:
+            raise BoostrApiError(
+                f"Bad response status {response.status_code} from /{path}: {response}"
+            )
+        json = response.json()
+        return json
+
+
+class BoostrLoader:
+    """Wrap up interaction with the Boostr API"""
+
+    boostr: BoostrApi
+    log: logging.Logger
+    max_deal_pages: int
+
+    def __init__(self, base_url: str, email: str, password: str, max_deal_pages=50):
+        self.log = logging.getLogger("sync_boostr_data")
+        self.boostr = BoostrApi(base_url, email, password)
+        self.max_deal_pages = max_deal_pages
 
     def upsert_products(self) -> None:
         """Fetch all Boostr products and upsert them to Shepherd DB"""
@@ -113,14 +143,7 @@ class BoostrLoader:
             "page": "1",
             "filter": "all",
         }
-        products_response = self.session.get(
-            f"{self.base_url}/products", params=products_params
-        )
-        if products_response.status_code != 200:
-            raise BoostrApiError(
-                f"Bad response status from /api/products: {products_response}"
-            )
-        products = products_response.json()
+        products = self.boostr.get("products", params=products_params)
         self.log.info(f"Fetched {(len(products))} products")
 
         for product in products:
@@ -142,14 +165,8 @@ class BoostrLoader:
         while page < self.max_deal_pages:
             page += 1
             deals_params["page"] = str(page)
-            deals_response = self.session.get(
-                f"{self.base_url}/deals", params=deals_params
-            )
-            if deals_response.status_code != 200:
-                raise BoostrApiError(
-                    f"Bad response status from /api/deals: {deals_response}"
-                )
-            deals = deals_response.json()
+
+            deals = self.boostr.get("deals", params=deals_params)
             self.log.info(f"Fetched {len(deals)} deals for page {page}")
 
             # Paged through all available records and are getting an empty list back
@@ -183,16 +200,8 @@ class BoostrLoader:
 
     def upsert_deal_products(self, deal: BoostrDeal) -> None:
         """Fetch the deal_products for a particular deal and store them in our DB with their monthly budgets"""
-        deal_products_response = self.session.get(
-            f"{self.base_url}/deals/{deal.boostr_id}/deal_products"
-        )
+        deal_products = self.boostr.get(f"deals/{deal.boostr_id}/deal_products")
 
-        if deal_products_response.status_code != 200:
-            raise BoostrApiError(
-                f"Bad response status from /api/deals/{deal.boostr_id}/deal_products: {deal_products_response}"
-            )
-
-        deal_products = deal_products_response.json()
         self.log.debug(
             f"Fetched {len(deal_products)} deal_products for deal: {deal.boostr_id}"
         )
