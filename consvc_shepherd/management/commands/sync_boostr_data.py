@@ -4,6 +4,7 @@ import json
 import logging
 import math
 import os
+import pprint
 import time
 from dataclasses import dataclass, field
 from decimal import Decimal
@@ -17,6 +18,7 @@ from django.core.management.base import BaseCommand
 from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct
 
 env = environ.Env()
+MAX_DEAL_PAGES_DEFAULT = 50
 
 
 @dataclass(frozen=True)
@@ -24,15 +26,17 @@ class NewBoostrDealMediaPlanLineItem:
     """TODO"""
 
     media_plan_line_item_id: int
-    media_plan_id: int
+    # media_plan_id: int
+    boostr_deal: int
     boostr_product: int
     rate_type: str
     rate: Decimal
-    quantity: int
+    quantity: Decimal
     budget: Decimal
+    month: str
 
     def __str__(self) -> str:
-        return f"{self.media_plan_id}"
+        return f"{self.boostr_product}"
 
 
 @dataclass
@@ -52,7 +56,11 @@ class NewBoostrMediaPlan:
 
     def add_line_item(self, line_item: NewBoostrDealMediaPlanLineItem):
         """Add a line item to a media plan"""
-        if line_item.media_plan_line_item_id not in self.line_items:
+        # if line_item.media_plan_line_item_id not in self.line_items:
+        if self.boostr_deal not in self.line_items:
+            self.line_items[self.boostr_deal] = {}
+        if line_item.boostr_product not in self.line_items[self.boostr_deal]:
+            self.line_items[self.boostr_deal][line_item.boostr_product] = []
             self.line_items[self.boostr_deal][line_item.boostr_product].append(
                 line_item
             )
@@ -135,16 +143,43 @@ class BoostrLoader:
     line_items: Dict[int, NewBoostrDealMediaPlanLineItem]
     current_dir = os.path.dirname(__file__)
     json_file = os.path.join(current_dir, "mediaplans.json")
+    li_json_file = os.path.join(current_dir, "mp_lineitems.json")
+    mpc = MediaPlanCollection()
 
     with open(json_file, "r") as file:
         mp_data = json.load(file)
-    # print(mp_data)
 
-    def __init__(self, base_url: str, email: str, password: str):
+    try:
+        with open(li_json_file, "r") as file:
+            li_mp_data = json.load(file)
+            # pprint.pprint(li_mp_data)
+    except Exception:
+        li_mp_data = []
+
+    def __init__(
+        self,
+        base_url: str,
+        email: str,
+        password: str,
+        max_deal_pages=MAX_DEAL_PAGES_DEFAULT,
+    ):
         self.log = logging.getLogger("sync_boostr_data")
         self.base_url = base_url
         self.max_deal_pages = max_deal_pages
         self.setup_session(email, password)
+
+    def append_json_file(self, new_data: str, json_file: str):
+        """Append JSON to file to save API response for later use"""
+        try:
+            with open(json_file, "r") as file:
+                li_mp_data = json.load(file)
+        except Exception:
+            li_mp_data = []
+
+        li_mp_data.extend(new_data)
+
+        with open(json_file, "w") as file:
+            json.dump(li_mp_data, file, indent=4)
 
     def setup_session(self, email: str, password: str) -> None:
         """Authenticate with the boostr api and create and store a session on the instance"""
@@ -170,7 +205,6 @@ class BoostrLoader:
             timeout=15,
         )
         if user_token_response.status_code != 201:
-
             raise BoostrApiError(
                 f"Bad response status from /api/user_token: {user_token_response}"
             )
@@ -313,7 +347,6 @@ class BoostrLoader:
     def upsert_mediaplan(self) -> None:
         """Upsert media plan lne item details into the database"""
         # print(self.mp_data)
-        mpc = MediaPlanCollection()
 
         for media_plan in self.mp_data:
             # exit(media_plan)
@@ -322,14 +355,71 @@ class BoostrLoader:
                 name=media_plan["deal_name"],
                 boostr_deal=media_plan["deal_id"],
             )
-            mpc.add_media_plan(media_plan["deal_id"], mp)
-        import pprint
+            if media_plan["id"]:  # != 265115:
+                self.mpc.add_media_plan(media_plan["deal_id"], mp)
+                self.upsert_mediaplan_lineitems(mp)
 
-        pprint.pprint(mpc.media_plans)
+        # pprint.pprint(self.mpc.media_plans)
 
-    def upsert_mediaplan_lineitems(self) -> None:
+    def upsert_mediaplan_lineitems(self, media_plan: NewBoostrMediaPlan) -> None:
         """Upsert media plan line item"""
-        pass
+        page = 0
+        deals_params = {
+            "per": "300",
+            "page": str(page),
+            "filter": "all",
+        }
+
+        page += 1
+        deals_params["page"] = str(page)
+
+        media_plan_response = self.session.get(
+            f"{self.base_url}/media_plans/{media_plan.media_plan_id}/line_items",
+            params=deals_params,
+        )
+        if media_plan_response.status_code == 429:
+            print(media_plan_response.headers)
+            retry_after = int(media_plan_response.headers.get("Retry-After", 60)) + 1
+
+            time.sleep(retry_after)
+            self.upsert_mediaplan_lineitems(media_plan)
+        pprint.pprint(media_plan_response.json())
+        self.append_json_file(media_plan_response.json(), self.li_json_file)
+        # return
+        """ for li in self.li_mp_data:
+            if media_plan.media_plan_id == 265115:
+                pprint.pprint(li["product"]["id"])
+                for month in li["line_item_monthlies"]:
+                    mpli = NewBoostrDealMediaPlanLineItem(
+                        media_plan_line_item_id=li["id"],
+                        boostr_deal=media_plan.boostr_deal,
+                        boostr_product=li["product"]["id"],
+                        rate_type=li["rate_type"]["name"],
+                        rate=li["rate"],
+                        quantity=month["quantity"],
+                        budget=month["budget"],
+                        month=month["month"],
+                    )
+                    media_plan.add_line_item(mpli)
+                    print(f"did: {mpli.boostr_deal}****")
+                    bdeal = BoostrDeal.objects.get(boostr_id=mpli.boostr_deal)
+                    bprod = BoostrProduct.objects.get(boostr_id=mpli.boostr_product)
+                    qs = BoostrDealProduct.objects.filter(
+                        month=mpli.month, boostr_deal_id=bdeal, boostr_product_id=bprod
+                    )
+                for obj in qs:
+                    pprint.pprint((obj))
+                    qs.update(
+                        quantity=mpli.quantity, rate=mpli.rate, rate_type=mpli.rate_type
+                    )
+                      BoostrDealProduct.objects.filter
+                        (month=mpli.month,boostr_deal_id=mpli.boostr_deal,boostr_product_id=mpli.boostr_product).update(
+                        quantity = mpli.quantity,
+                        rate = mpli.rate,
+                        rate_type = mpli.rate_type
+                    ) """
+
+        # pprint.pprint(media_plan)
 
     def load(self):
         """Loader entry point"""
