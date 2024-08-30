@@ -160,8 +160,7 @@ class AllocationSetting(models.Model):
         return {
             "position": self.position,
             "allocation": [
-                allocation.to_dict()
-                for allocation in self.partner_allocations.all()  # type: ignore [attr-defined]
+                allocation.to_dict() for allocation in self.partner_allocations.all()  # type: ignore [attr-defined]
             ],
         }
 
@@ -317,12 +316,29 @@ class BoostrDealProduct(models.Model):
         The month when this product and budget combo will run
     """
 
+    class RateTypes(models.TextChoices):
+        """TODO"""
+
+        CPM = "CPM", _("CPM")
+        CPC = "CPC", _("CPC")
+        FLATFEE = "FF", _("Flat Fee")
+
     boostr_deal: ForeignKey = models.ForeignKey(BoostrDeal, on_delete=models.CASCADE)
     boostr_product: ForeignKey = models.ForeignKey(
         BoostrProduct, on_delete=models.CASCADE
     )
     budget: IntegerField = models.IntegerField()
     month: CharField = models.CharField()
+    rate_type: models.CharField = models.CharField(
+        choices=RateTypes.choices,
+        null=True,
+    )
+    rate: models.DecimalField = models.DecimalField(
+        max_digits=13, decimal_places=2, null=True
+    )
+    quantity: models.DecimalField = models.DecimalField(
+        max_digits=13, decimal_places=2, null=True
+    )
 
 
 class BoostrDealMediaPlan(models.Model):
