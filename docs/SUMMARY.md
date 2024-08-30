@@ -14,6 +14,7 @@
   - [Create and Publish Snapshots](./operations/createPublishSnapshots.md)
   - [Rollback](./operations/rollback.md)
   - [Recover Snapshot](./operations/recoveryScript.md)
+  - [Sync Data from Boostr](./operations/syncBoostrData.md)
 
 
 # ADR
