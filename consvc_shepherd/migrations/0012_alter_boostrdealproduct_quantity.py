@@ -6,13 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('consvc_shepherd', '0011_boostrdealproduct_quantity_boostrdealproduct_rate_and_more'),
+        (
+            "consvc_shepherd",
+            "0011_boostrdealproduct_quantity_boostrdealproduct_rate_and_more",
+        ),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='boostrdealproduct',
-            name='quantity',
+            model_name="boostrdealproduct",
+            name="quantity",
             field=models.DecimalField(decimal_places=2, max_digits=13, null=True),
         ),
     ]
