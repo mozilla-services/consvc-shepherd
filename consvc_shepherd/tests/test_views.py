@@ -157,13 +157,13 @@ class TestPreviewView(TestCase):
             image_url="https://picsum.photos/48",
             name="ACME",
             sponsored="Sponsored",
-            url="example.com",
+            url="example1.com",
         )
         direct_sold_tile = Tile(
-            image_url="https://picsum.photos/48",
+            image_url="https://picsum.photos/49",
             name="Zombocom",
             sponsored="Sponsored",
-            url="example.com",
+            url="example2.com",
         )
         spoc = Spoc(
             image_src="https://picsum.photos/296/148",
@@ -172,7 +172,7 @@ class TestPreviewView(TestCase):
             excerpt="If you like to play games, then you should play this game.",
             sponsored_by="Anvil of the Ages",
             sponsor="Anvil of the Ages",
-            url="example.com",
+            url="example3.com",
         )
         return Ads(
             tiles=[tile, direct_sold_tile],
@@ -187,8 +187,63 @@ class TestPreviewView(TestCase):
         ):
             response = self.client.get("/preview")
             self.assertEqual(response.status_code, 200)
+
             self.assertEqual(len(response.context["ads"].tiles), 2)
-            self.assertContains(response, "ACME")
-            self.assertContains(response, "Zombocom")
             self.assertEqual(len(response.context["ads"].spocs), 1)
+
+            # Check whether the headings and titles are present in the file
+            self.assertContains(
+                response, '<h1 class="fs-1 text-white text-center"> Shepherd </h1>'
+            )
+            self.assertContains(response, "Admin")
+            self.assertContains(response, "Adm Filter")
+            self.assertContains(response, "Preview")
+            self.assertContains(response, "<h1>MARS Ads Preview</h1>")
+            self.assertContains(response, "Preview")
+
+            # Check whether the labels are present in the file
+            self.assertContains(response, '<label for="env">Environment</label>')
+            self.assertContains(
+                response, '<label for="form_factor">Form Factor</label>'
+            )
+            self.assertContains(response, '<label for="country">Country</label>')
+            self.assertContains(response, '<label for="region">Region</label>')
+
+            # Check whether the form fields and options are present in the file
+            self.assertContains(response, '<select name="env" id="env">')
+            self.assertContains(
+                response, '<select name="form_factor" id="form_factor">'
+            )
+            self.assertContains(response, '<select name="country" id="country">')
+            self.assertContains(response, '<select name="region" id="region">')
+
+            self.assertContains(
+                response,
+                '<option value="production" selected="selected">Production</option>',
+            )
+            self.assertContains(
+                response, '<option value="desktop" selected="selected">Desktop</option>'
+            )
+            self.assertContains(
+                response,
+                '<option value="US" selected="selected">United States</option>',
+            )
+
+            # Check the tiles section
+            self.assertContains(response, "ACME")
+            self.assertContains(response, "https://picsum.photos/48")
+            self.assertContains(response, "example1.com")
+
+            self.assertContains(response, "Zombocom")
+            self.assertContains(response, "https://picsum.photos/49")
+            self.assertContains(response, "example2.com")
+
+            # Check the SPOCs section
+            self.assertContains(response, "https://picsum.photos/296/148")
+            self.assertContains(response, "Play Anvil of the Ages Now for Free")
+            self.assertContains(response, "play.anviloftheages.com")
+            self.assertContains(
+                response, "If you like to play games, then you should play this game."
+            )
             self.assertContains(response, "Anvil of the Ages")
+            self.assertContains(response, "example3.com")
