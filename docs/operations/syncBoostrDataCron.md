@@ -1,6 +1,6 @@
 # Boostr Data Sync Cron
 
-The Boostr data sync process documented in the [SyncBoostrData.md](syncBoostrDataCron.md) document is orchestrated by a [Kubernetetes Cronjob](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/) that is maintained in the [topsites](https://github.com/mozilla-services/cloudops-infra/tree/master/projects/topsites) project of the 
+The Boostr data sync process documented in the [SyncBoostrData.md](syncBoostrData.md) document is orchestrated by a [Kubernetetes Cronjob](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/) that is maintained in the [topsites](https://github.com/mozilla-services/cloudops-infra/tree/master/projects/topsites) project of the 
 [Cloud Ops Infra](https://github.com/mozilla-services/cloudops-infra/tree/master) repository. 
 
 ### How it runs
