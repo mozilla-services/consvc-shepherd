@@ -49,7 +49,7 @@ k9s
 ```
 type :pods, then press enter on the keyboard
 ```
-8. Select the latest runnning cronjob `shepherd-boostr-sync` pod. Note that the cronjob spins up a new pod each time it runs but does not destroy older pods was the process has completed.
+8. Select the latest runnning cronjob `shepherd-boostr-sync` pod. Note that the cronjob spins up a new pod each time it runs but does not destroy older pods once the process has completed.
 
 9. Access the logs for the pod
 ```
