@@ -53,5 +53,5 @@ type :pods, then press enter on the keyboard
 
 9. Access the logs for the pod
 ```
-pres l on the keyboard
+press l on the keyboard
 ```
