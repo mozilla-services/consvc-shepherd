@@ -2,12 +2,11 @@
 
 import logging
 import math
+from pathlib import Path
 from time import sleep
 from typing import Any
 
-from pathlib import Path
 import environ
-
 import requests
 from django.core.management.base import BaseCommand
 
