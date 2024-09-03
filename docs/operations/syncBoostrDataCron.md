@@ -19,7 +19,7 @@ The process SRE has recommended for storing/using secrets is as follows:
 1. Use 1Password  to store your secrets 
 2. Create secrets in secrets.yaml and optionally expose them as environment variables in the resource or service that needs it.
 3. Share the 1Password secret with SRE using an individual's corporate email.
-4. SRE will store these secrets in GCP. and they will be available to the Jenkins processes that build Shepherd.
+4. SRE will store these secrets in sops and use some custom tooling to make them available to helm.
 5. As a result of the above, the values for the secret variables and environment variables created in #2 are set and available in the resource/service (container, pod etc) where the environment variabls are used.
 
 
