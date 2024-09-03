@@ -12,10 +12,18 @@ The CronJob spins up a new pod on a configurable schedule using the latest conta
 
 ### A Note on Secrets
 
-Secrets such as the email and password used to access the Boostr API are stored in 1Pass, BUT the CronJob resource does not retrieve the secrets from 1Pass. Instead, they are stored somewhere by SRE and pulled dynamically by the deployment processes established by SRE. Please contact the [SRE](https://mozilla.enterprise.slack.com/archives/C019WG3TTM2) team for more info on this process.
+Secrets such as the email and password used to access the Boostr API are stored in 1Pass, BUT the CronJob resource does not retrieve the secrets from 1Pass. Instead, they are stored GCP by SRE and pulled dynamically by the deployment processes established by SRE. Please contact the [SRE](https://mozilla.enterprise.slack.com/archives/C019WG3TTM2) team for more info on this process.
+
+The process SRE has recommended for storing/using secrets is as follows:
+
+1. Use 1Password  to store your secrets 
+2. Create secrets in secrets.yaml and optionally expose them as environment variables in the resource or service that needs it.
+3. Share the 1Password secret with SRE using an individual's corporate email.
+4. SRE will store these secrets in GCP. and they will be available to the Jenkins processes that build Shepherd.
+5. As a result of the above, the values for the secret variables and environment variables created in #2 are set and available in the resource/service (container, pod etc) where the environment variabls are used.
 
 
-### Debugging and troubleshooting
+### Debugging, troubleshooting and viewing logs
 
 Debugging involves accessing the `shepherd-boostr-sync` pods that are created by the cronjob resource and inspecting the logs. 
 
@@ -54,4 +62,18 @@ type :pods, then press enter on the keyboard
 9. Access the logs for the pod
 ```
 press l on the keyboard
+```
+
+Below are steps for viewing logs through the GCP console
+
+1. Access the topsites project
+```
+https://console.cloud.google.com/logs/query;project=moz-fx-topsites-prod-6d32
+```
+
+2. Use the query input field to search for logs for the shepherd-boostr-sync pods
+```
+resource.labels.namespace_name="dev-topsites"
+resource.labels.container_name="shepherd"
+resource.labels.pod_name:"shepherd-boostr-sync"
 ```

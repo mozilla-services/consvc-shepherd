@@ -40,7 +40,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """Handle running the command"""
-
         env = environ.Env()
         BASE_DIR = Path(__file__).resolve().parent.parent
         environ.Env.read_env(BASE_DIR / ".env")
