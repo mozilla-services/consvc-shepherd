@@ -231,15 +231,26 @@ class TestPreviewView(TestCase):
 
             # Check the tiles section
             self.assertContains(response, "ACME")
-            self.assertContains(response, "https://picsum.photos/48")
+            self.assertContains(
+                response,
+                '<img class="tile-image" src="https://picsum.photos/48" alt="ACME"/>',
+            )
             self.assertContains(response, "example1.com")
 
             self.assertContains(response, "Zombocom")
-            self.assertContains(response, "https://picsum.photos/49")
+            self.assertContains(
+                response,
+                '<img class="tile-image" src="https://picsum.photos/49" alt="Zombocom"/>',
+            )
             self.assertContains(response, "example2.com")
 
             # Check the SPOCs section
-            self.assertContains(response, "https://picsum.photos/296/148")
+            self.assertContains(
+                response,
+                '<img class="spoc-image" '
+                'src="https://picsum.photos/296/148" '
+                'alt="Play Anvil of the Ages Now for Free"/>',
+            )
             self.assertContains(response, "Play Anvil of the Ages Now for Free")
             self.assertContains(response, "play.anviloftheages.com")
             self.assertContains(
