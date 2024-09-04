@@ -161,6 +161,9 @@ class BoostrApi:
 
     def authenticate(self, email: str, password: str) -> str:
         """Authenticate with the Boostr API and return jwt"""
+        if settings.BOOSTR_AUTH_BYPASS:
+            # if we are local, bypass auth to avoid rate limits
+            return str(env("BOOSTR_JWT"))
         post_data = {"auth": {"email": email, "password": password}}
         token = self.post("user_token", post_data)
         return str(token["jwt"])
@@ -330,6 +333,7 @@ class BoostrLoader:
             "page": str(page),
             "filter": "all",
         }
+
         while True:
             page += 1
             deals_product_params["page"] = str(page)
@@ -390,6 +394,10 @@ class BoostrLoader:
 
         page += 1
         deals_params["page"] = str(page)
+
+        if self.li_mp_data:
+            exit("There is data")
+        exit("There is no data")
 
         media_plans = self.boostr.get(
             f"media_plans/{media_plan.media_plan_id}/line_items", params=deals_params
