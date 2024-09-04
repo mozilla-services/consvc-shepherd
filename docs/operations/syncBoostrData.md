@@ -14,7 +14,7 @@ docker exec -it consvc-shepherd-app-1 sh
 4. Find the base url of the Boostr API that you want to hit. For production Boostr, this is "https://app.boostr.com/api/".
 5. Run the script, providing base url as a positional arg.
 ```sh
-python manage.py sync_boostr_data https://app.boostr.com/api/ find-me-in-1pass@mozilla.com find-me-in-1pass
+python manage.py sync_boostr_data https://app.boostr.com/api/
 ```
 
 ### Optional arguments
@@ -34,7 +34,7 @@ upper limit on deal pages.
 
 Usage:
 ```sh
-SHEPHERD_ENV=DEBUG python manage.py sync_boostr_data https://app.boostr.com/api/ find-me-in-1pass@mozilla.com find-me-in-1pass --max-deal-pages 42
+python manage.py sync_boostr_data
 ```
 
 ### Debug logs
@@ -43,5 +43,5 @@ The script takes several minutes to run. To get more detailed logging on which
 specific deals and products are being saved, run with `SHEPHERD_ENV=DEBUG`
 
 ```shell
-SHEPHERD_ENV=DEBUG python manage.py sync_boostr_data https://app.boostr.com/api/ find-me-in-1pass@mozilla.com find-me-in-1pass
+SHEPHERD_ENV=DEBUG python manage.py sync_boostr_data
 ```
