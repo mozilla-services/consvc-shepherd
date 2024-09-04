@@ -1,17 +1,18 @@
 # Sync data from Boostr and upsert it into the Shepherd DB
 
-Currently this is a Django admin command that can be manually run by `docker exec`-ing into a shepherd app container. The intention is that this will become a regularly running job soon.
+Currently this is a Django admin command that can be manually run by `docker exec`-ing into a shepherd app container. This job is ran regularly by the Kubernetes cron schedule documented in [SyncBoostrDataCron.md](syncBoostrDataCron.md)
 
 ### Instructions to run
 
-1. Exec into the consvc-shepherd container:
+1. Find the credentials for the Boostr API in the 1Password vault
+2. Set the credentials by copying .env.example to .env, and setting the BOOSTR_API_EMAIL and BOOSTR_API_PASS variables
+3. Exec into the consvc-shepherd container:
 
 ```sh
 docker exec -it consvc-shepherd-app-1 sh
 ```
-2. Find the credentials for the Boostr API in the 1Password vault
-3. Find the base url of the Boostr API that you want to hit. For production Boostr, this is "https://app.boostr.com/api/".
-4. Run the script, providing base url, email, and password as positional args.
+4. Find the base url of the Boostr API that you want to hit. For production Boostr, this is "https://app.boostr.com/api/".
+5. Run the script, providing base url as a positional arg.
 ```sh
 python manage.py sync_boostr_data https://app.boostr.com/api/ find-me-in-1pass@mozilla.com find-me-in-1pass
 ```
