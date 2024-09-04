@@ -21,6 +21,7 @@ from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct
 
 env = environ.Env()
 MAX_DEAL_PAGES_DEFAULT = 50
+RATE_LIMIT_REQUEST_INTERVAL_SECS = 0.7
 
 
 @dataclass(frozen=True)
@@ -266,7 +267,6 @@ class BoostrLoader:
             "page": "1",
             "filter": "all",
         }
-
         products = self.boostr.get("products", params=products_params)
         self.log.info(f"Fetched {(len(products))} products")
 
