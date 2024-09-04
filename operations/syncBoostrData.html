@@ -80,7 +80,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item affix "><a href="../intro.html">Service Overview</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="../quickStart.html"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="../metrics.html"><strong aria-hidden="true">2.</strong> Metrics</a></li><li class="chapter-item expanded "><a href="../operations/index.html"><strong aria-hidden="true">3.</strong> Operations and Runbooks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../operations/auth.html"><strong aria-hidden="true">3.1.</strong> Authentication and Authorization</a></li><li class="chapter-item "><a href="../operations/addAdvertisers.html"><strong aria-hidden="true">3.2.</strong> Add Advertisers</a></li><li class="chapter-item "><a href="../operations/addAdvertiserPaths.html"><strong aria-hidden="true">3.3.</strong> Add Advertiser Paths</a></li><li class="chapter-item "><a href="../operations/addPartners.html"><strong aria-hidden="true">3.4.</strong> Add Partners</a></li><li class="chapter-item "><a href="../operations/createSovAllocations.html"><strong aria-hidden="true">3.5.</strong> Create SOV Allocations</a></li><li class="chapter-item "><a href="../operations/createPublishSnapshots.html"><strong aria-hidden="true">3.6.</strong> Create and Publish Snapshots</a></li><li class="chapter-item "><a href="../operations/rollback.html"><strong aria-hidden="true">3.7.</strong> Rollback</a></li><li class="chapter-item "><a href="../operations/recoveryScript.html"><strong aria-hidden="true">3.8.</strong> Recover Snapshot</a></li><li class="chapter-item expanded "><a href="../operations/syncBoostrData.html" class="active"><strong aria-hidden="true">3.9.</strong> Sync Data from Boostr</a></li></ol></li><li class="chapter-item "><li class="part-title">ADR</li><li class="chapter-item "><a href="../adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">4.</strong> Shepherd Metrics</a></li></ol>
+                <ol class="chapter"><li class="chapter-item affix "><a href="../intro.html">Service Overview</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="../quickStart.html"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="../metrics.html"><strong aria-hidden="true">2.</strong> Metrics</a></li><li class="chapter-item expanded "><a href="../operations/index.html"><strong aria-hidden="true">3.</strong> Operations and Runbooks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../operations/auth.html"><strong aria-hidden="true">3.1.</strong> Authentication and Authorization</a></li><li class="chapter-item "><a href="../operations/addAdvertisers.html"><strong aria-hidden="true">3.2.</strong> Add Advertisers</a></li><li class="chapter-item "><a href="../operations/addAdvertiserPaths.html"><strong aria-hidden="true">3.3.</strong> Add Advertiser Paths</a></li><li class="chapter-item "><a href="../operations/addPartners.html"><strong aria-hidden="true">3.4.</strong> Add Partners</a></li><li class="chapter-item "><a href="../operations/createSovAllocations.html"><strong aria-hidden="true">3.5.</strong> Create SOV Allocations</a></li><li class="chapter-item "><a href="../operations/createPublishSnapshots.html"><strong aria-hidden="true">3.6.</strong> Create and Publish Snapshots</a></li><li class="chapter-item "><a href="../operations/rollback.html"><strong aria-hidden="true">3.7.</strong> Rollback</a></li><li class="chapter-item "><a href="../operations/recoveryScript.html"><strong aria-hidden="true">3.8.</strong> Recover Snapshot</a></li><li class="chapter-item expanded "><a href="../operations/syncBoostrData.html" class="active"><strong aria-hidden="true">3.9.</strong> Sync Data from Boostr</a></li><li class="chapter-item "><a href="../operations/syncBoostrDataCron.html"><strong aria-hidden="true">3.10.</strong> Sync Data from Boostr Cron Job</a></li></ol></li><li class="chapter-item "><li class="part-title">ADR</li><li class="chapter-item "><a href="../adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">4.</strong> Shepherd Metrics</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -142,17 +142,18 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="sync-data-from-boostr-and-upsert-it-into-the-shepherd-db"><a class="header" href="#sync-data-from-boostr-and-upsert-it-into-the-shepherd-db">Sync data from Boostr and upsert it into the Shepherd DB</a></h1>
-<p>Currently this is a Django admin command that can be manually run by <code>docker exec</code>-ing into a shepherd app container. The intention is that this will become a regularly running job soon.</p>
+<p>Currently this is a Django admin command that can be manually run by <code>docker exec</code>-ing into a shepherd app container. This job is ran regularly by the Kubernetes cron schedule documented in <a href="syncBoostrDataCron.html">SyncBoostrDataCron.md</a></p>
 <h3 id="instructions-to-run"><a class="header" href="#instructions-to-run">Instructions to run</a></h3>
 <ol>
+<li>Find the credentials for the Boostr API in the 1Password vault</li>
+<li>Set the credentials by copying .env.example to .env, and setting the BOOSTR_API_EMAIL and BOOSTR_API_PASS variables</li>
 <li>Exec into the consvc-shepherd container:</li>
 </ol>
 <pre><code class="language-sh">docker exec -it consvc-shepherd-app-1 sh
 </code></pre>
-<ol start="2">
-<li>Find the credentials for the Boostr API in the 1Password vault</li>
+<ol start="4">
 <li>Find the base url of the Boostr API that you want to hit. For production Boostr, this is &quot;https://app.boostr.com/api/&quot;.</li>
-<li>Run the script, providing base url, email, and password as positional args.</li>
+<li>Run the script, providing base url as a positional arg.</li>
 </ol>
 <pre><code class="language-sh">python manage.py sync_boostr_data https://app.boostr.com/api/ find-me-in-1pass@mozilla.com find-me-in-1pass
 </code></pre>
@@ -184,7 +185,7 @@ specific deals and products are being saved, run with <code>SHEPHERD_ENV=DEBUG</
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="../adr/0000-metrics-client-for-shepherd.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../operations/syncBoostrDataCron.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -198,7 +199,7 @@ specific deals and products are being saved, run with <code>SHEPHERD_ENV=DEBUG</
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="../adr/0000-metrics-client-for-shepherd.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../operations/syncBoostrDataCron.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

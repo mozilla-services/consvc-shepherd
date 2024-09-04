@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item affix "><a href="intro.html">Service Overview</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="quickStart.html"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="metrics.html"><strong aria-hidden="true">2.</strong> Metrics</a></li><li class="chapter-item "><a href="operations/index.html"><strong aria-hidden="true">3.</strong> Operations and Runbooks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="operations/auth.html"><strong aria-hidden="true">3.1.</strong> Authentication and Authorization</a></li><li class="chapter-item "><a href="operations/addAdvertisers.html"><strong aria-hidden="true">3.2.</strong> Add Advertisers</a></li><li class="chapter-item "><a href="operations/addAdvertiserPaths.html"><strong aria-hidden="true">3.3.</strong> Add Advertiser Paths</a></li><li class="chapter-item "><a href="operations/addPartners.html"><strong aria-hidden="true">3.4.</strong> Add Partners</a></li><li class="chapter-item "><a href="operations/createSovAllocations.html"><strong aria-hidden="true">3.5.</strong> Create SOV Allocations</a></li><li class="chapter-item "><a href="operations/createPublishSnapshots.html"><strong aria-hidden="true">3.6.</strong> Create and Publish Snapshots</a></li><li class="chapter-item "><a href="operations/rollback.html"><strong aria-hidden="true">3.7.</strong> Rollback</a></li><li class="chapter-item "><a href="operations/recoveryScript.html"><strong aria-hidden="true">3.8.</strong> Recover Snapshot</a></li><li class="chapter-item "><a href="operations/syncBoostrData.html"><strong aria-hidden="true">3.9.</strong> Sync Data from Boostr</a></li></ol></li><li class="chapter-item "><li class="part-title">ADR</li><li class="chapter-item "><a href="adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">4.</strong> Shepherd Metrics</a></li></ol>
+                <ol class="chapter"><li class="chapter-item affix "><a href="intro.html">Service Overview</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="quickStart.html"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="metrics.html"><strong aria-hidden="true">2.</strong> Metrics</a></li><li class="chapter-item "><a href="operations/index.html"><strong aria-hidden="true">3.</strong> Operations and Runbooks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="operations/auth.html"><strong aria-hidden="true">3.1.</strong> Authentication and Authorization</a></li><li class="chapter-item "><a href="operations/addAdvertisers.html"><strong aria-hidden="true">3.2.</strong> Add Advertisers</a></li><li class="chapter-item "><a href="operations/addAdvertiserPaths.html"><strong aria-hidden="true">3.3.</strong> Add Advertiser Paths</a></li><li class="chapter-item "><a href="operations/addPartners.html"><strong aria-hidden="true">3.4.</strong> Add Partners</a></li><li class="chapter-item "><a href="operations/createSovAllocations.html"><strong aria-hidden="true">3.5.</strong> Create SOV Allocations</a></li><li class="chapter-item "><a href="operations/createPublishSnapshots.html"><strong aria-hidden="true">3.6.</strong> Create and Publish Snapshots</a></li><li class="chapter-item "><a href="operations/rollback.html"><strong aria-hidden="true">3.7.</strong> Rollback</a></li><li class="chapter-item "><a href="operations/recoveryScript.html"><strong aria-hidden="true">3.8.</strong> Recover Snapshot</a></li><li class="chapter-item "><a href="operations/syncBoostrData.html"><strong aria-hidden="true">3.9.</strong> Sync Data from Boostr</a></li><li class="chapter-item "><a href="operations/syncBoostrDataCron.html"><strong aria-hidden="true">3.10.</strong> Sync Data from Boostr Cron Job</a></li></ol></li><li class="chapter-item "><li class="part-title">ADR</li><li class="chapter-item "><a href="adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">4.</strong> Shepherd Metrics</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -449,17 +449,18 @@ This will add advertisers and advertiser urls based on the values from the
 json file you provide it.</li>
 </ol>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="sync-data-from-boostr-and-upsert-it-into-the-shepherd-db"><a class="header" href="#sync-data-from-boostr-and-upsert-it-into-the-shepherd-db">Sync data from Boostr and upsert it into the Shepherd DB</a></h1>
-<p>Currently this is a Django admin command that can be manually run by <code>docker exec</code>-ing into a shepherd app container. The intention is that this will become a regularly running job soon.</p>
+<p>Currently this is a Django admin command that can be manually run by <code>docker exec</code>-ing into a shepherd app container. This job is ran regularly by the Kubernetes cron schedule documented in <a href="operations/syncBoostrDataCron.html">SyncBoostrDataCron.md</a></p>
 <h3 id="instructions-to-run"><a class="header" href="#instructions-to-run">Instructions to run</a></h3>
 <ol>
+<li>Find the credentials for the Boostr API in the 1Password vault</li>
+<li>Set the credentials by copying .env.example to .env, and setting the BOOSTR_API_EMAIL and BOOSTR_API_PASS variables</li>
 <li>Exec into the consvc-shepherd container:</li>
 </ol>
 <pre><code class="language-sh">docker exec -it consvc-shepherd-app-1 sh
 </code></pre>
-<ol start="2">
-<li>Find the credentials for the Boostr API in the 1Password vault</li>
+<ol start="4">
 <li>Find the base url of the Boostr API that you want to hit. For production Boostr, this is &quot;https://app.boostr.com/api/&quot;.</li>
-<li>Run the script, providing base url, email, and password as positional args.</li>
+<li>Run the script, providing base url as a positional arg.</li>
 </ol>
 <pre><code class="language-sh">python manage.py sync_boostr_data https://app.boostr.com/api/ find-me-in-1pass@mozilla.com find-me-in-1pass
 </code></pre>
@@ -481,6 +482,83 @@ upper limit on deal pages.</p>
 <p>The script takes several minutes to run. To get more detailed logging on which
 specific deals and products are being saved, run with <code>SHEPHERD_ENV=DEBUG</code></p>
 <pre><code class="language-shell">SHEPHERD_ENV=DEBUG python manage.py sync_boostr_data https://app.boostr.com/api/ find-me-in-1pass@mozilla.com find-me-in-1pass
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="boostr-data-sync-cron"><a class="header" href="#boostr-data-sync-cron">Boostr Data Sync Cron</a></h1>
+<p>The Boostr data sync process documented in the <a href="operations/syncBoostrData.html">SyncBoostrData.md</a> document is orchestrated by a <a href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/">Kubernetetes Cronjob</a> that is maintained in the <a href="https://github.com/mozilla-services/cloudops-infra/tree/master/projects/topsites">topsites</a> project of the 
+<a href="https://github.com/mozilla-services/cloudops-infra/tree/master">Cloud Ops Infra</a> repository. </p>
+<h3 id="how-it-runs"><a class="header" href="#how-it-runs">How it runs</a></h3>
+<p>The CronJob spins up a new pod on a configurable schedule using the latest container image of the Shepherd application. It then triggers the 
+<a href="operations/consvc_shepherd/management/commands/sync_boostr_data.py">sync_boostr_data.py</a> script within the pod. Refer to <a href="operations/syncBoostrDataCron.html">SyncBoostrData.md</a> to understand more about the inner workings of the script.</p>
+<h3 id="a-note-on-secrets"><a class="header" href="#a-note-on-secrets">A Note on Secrets</a></h3>
+<p>Secrets such as the email and password used to access the Boostr API are stored in 1Pass, BUT the CronJob resource does not retrieve the secrets from 1Pass. Instead, they are stored GCP by SRE and pulled dynamically by the deployment processes established by SRE. Please contact the <a href="https://mozilla.enterprise.slack.com/archives/C019WG3TTM2">SRE</a> team for more info on this process.</p>
+<p>The process SRE has recommended for storing/using secrets is as follows:</p>
+<ol>
+<li>Use 1Password  to store your secrets </li>
+<li>Create secrets in secrets.yaml and optionally expose them as environment variables in the resource or service that needs it.</li>
+<li>Share the 1Password secret with SRE using an individual's corporate email.</li>
+<li>SRE will store these secrets in sops and use some custom tooling to make them available to helm.</li>
+<li>As a result of the above, the values for the secret variables and environment variables created in #2 are set and available in the resource/service (container, pod etc) where the environment variabls are used.</li>
+</ol>
+<h3 id="debugging-troubleshooting-and-viewing-logs"><a class="header" href="#debugging-troubleshooting-and-viewing-logs">Debugging, troubleshooting and viewing logs</a></h3>
+<p>Debugging involves accessing the <code>shepherd-boostr-sync</code> pods that are created by the cronjob resource and inspecting the logs. </p>
+<p>There are many approaches but, with tools like <a href="https://cloud.google.com/sdk/docs/install">Gcloud CLI</a>, <a href="https://kubernetes.io/docs/reference/kubectl/">kubectl</a>, and <a href="https://k9scli.io/">k9s</a> one can do the following:</p>
+<ol>
+<li>Authenticate to Gcloud</li>
+</ol>
+<pre><code>gcloud auth login
+</code></pre>
+<ol start="2">
+<li>Connect to the bastion for accessing the topsites project in Gcloud</li>
+</ol>
+<pre><code>gcloud compute ssh --zone &quot;us-central1-a&quot; &quot;bastion-us-central1&quot; --project &quot;moz-fx-bastion-nonprod-global&quot; --ssh-flag=&quot;-D&quot; --ssh-flag=&quot;5001&quot; --ssh-flag=&quot;-N&quot; --tunnel-through-iap
+</code></pre>
+<ol start="3">
+<li>Get credentials for topsites. Use  topsites-prod-v1 for produuction</li>
+</ol>
+<pre><code>gcloud container clusters get-credentials topsites-nonprod-v1 --region us-west1 --project moz-fx-topsites-nonprod-619d
+</code></pre>
+<ol start="4">
+<li>Set the local proxy</li>
+</ol>
+<pre><code>export HTTPS_PROXY=socks5://127.0.0.1:5001
+</code></pre>
+<ol start="5">
+<li>Switch to the topsites-dev namespace</li>
+</ol>
+<pre><code>kubectl config set-context --current --namespace=dev-topsites
+</code></pre>
+<ol start="6">
+<li>Login to k9s</li>
+</ol>
+<pre><code>k9s
+</code></pre>
+<ol start="7">
+<li>Access all pods</li>
+</ol>
+<pre><code>type :pods, then press enter on the keyboard
+</code></pre>
+<ol start="8">
+<li>
+<p>Select the latest runnning cronjob <code>shepherd-boostr-sync</code> pod. Note that the cronjob spins up a new pod each time it runs but does not destroy older pods once the process has completed.</p>
+</li>
+<li>
+<p>Access the logs for the pod</p>
+</li>
+</ol>
+<pre><code>press l on the keyboard
+</code></pre>
+<p>Below are steps for viewing logs through the GCP console</p>
+<ol>
+<li>Access the topsites project</li>
+</ol>
+<pre><code>https://console.cloud.google.com/logs/query;project=moz-fx-topsites-prod-6d32
+</code></pre>
+<ol start="2">
+<li>Use the query input field to search for logs for the shepherd-boostr-sync pods</li>
+</ol>
+<pre><code>resource.labels.namespace_name=&quot;dev-topsites&quot;
+resource.labels.container_name=&quot;shepherd&quot;
+resource.labels.pod_name:&quot;shepherd-boostr-sync&quot;
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="statsd-client-library-for-shepherd"><a class="header" href="#statsd-client-library-for-shepherd">StatsD Client Library for Shepherd</a></h1>
 <ul>
