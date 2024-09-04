@@ -5,6 +5,7 @@ import logging
 import math
 import os
 import pprint
+from pathlib import Path
 from time import sleep
 import time
 
@@ -100,16 +101,6 @@ class Command(BaseCommand):
             help="The base url for the Boostr API, eg. https://app.boostr.com/api/",
         )
         parser.add_argument(
-            "email",
-            type=str,
-            help="The email for the Boostr API account to authenticate with (see 1password Ads Eng vault)",
-        )
-        parser.add_argument(
-            "password",
-            type=str,
-            help="The password for the Boostr API account (see 1password Ads Eng vault)",
-        )
-        parser.add_argument(
             "--max-deal-pages",
             default=MAX_DEAL_PAGES_DEFAULT,
             type=int,
@@ -120,10 +111,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """Handle running the command"""
+        env = environ.Env()
+        BASE_DIR = Path(__file__).resolve().parent.parent
+        environ.Env.read_env(BASE_DIR / ".env")
+
         loader = BoostrLoader(
             options["base_url"],
-            options["email"],
-            options["password"],
+            env("BOOSTR_API_EMAIL"),
+            env("BOOSTR_API_PASS"),
             options["max_deal_pages"],
         )
         loader.load()
