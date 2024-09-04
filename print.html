@@ -462,7 +462,7 @@ json file you provide it.</li>
 <li>Find the base url of the Boostr API that you want to hit. For production Boostr, this is &quot;https://app.boostr.com/api/&quot;.</li>
 <li>Run the script, providing base url as a positional arg.</li>
 </ol>
-<pre><code class="language-sh">python manage.py sync_boostr_data https://app.boostr.com/api/ find-me-in-1pass@mozilla.com find-me-in-1pass
+<pre><code class="language-sh">python manage.py sync_boostr_data https://app.boostr.com/api/
 </code></pre>
 <h3 id="optional-arguments"><a class="header" href="#optional-arguments">Optional arguments</a></h3>
 <p>The script can take an optional named argument, <code>--max-deal-pages</code>, which will
@@ -476,12 +476,12 @@ production Boostr account, so the default value of 50 gives us lots of overhead,
 but this parameter allows us to invoke the script with a custom value for the
 upper limit on deal pages.</p>
 <p>Usage:</p>
-<pre><code class="language-sh">SHEPHERD_ENV=DEBUG python manage.py sync_boostr_data https://app.boostr.com/api/ find-me-in-1pass@mozilla.com find-me-in-1pass --max-deal-pages 42
+<pre><code class="language-sh">python manage.py sync_boostr_data
 </code></pre>
 <h3 id="debug-logs"><a class="header" href="#debug-logs">Debug logs</a></h3>
 <p>The script takes several minutes to run. To get more detailed logging on which
 specific deals and products are being saved, run with <code>SHEPHERD_ENV=DEBUG</code></p>
-<pre><code class="language-shell">SHEPHERD_ENV=DEBUG python manage.py sync_boostr_data https://app.boostr.com/api/ find-me-in-1pass@mozilla.com find-me-in-1pass
+<pre><code class="language-shell">SHEPHERD_ENV=DEBUG python manage.py sync_boostr_data
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="boostr-data-sync-cron"><a class="header" href="#boostr-data-sync-cron">Boostr Data Sync Cron</a></h1>
 <p>The Boostr data sync process documented in the <a href="operations/syncBoostrData.html">SyncBoostrData.md</a> document is orchestrated by a <a href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/">Kubernetetes Cronjob</a> that is maintained in the <a href="https://github.com/mozilla-services/cloudops-infra/tree/master/projects/topsites">topsites</a> project of the 
