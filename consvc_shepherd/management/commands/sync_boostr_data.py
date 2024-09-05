@@ -4,14 +4,15 @@ import json
 import logging
 import math
 import os
-import pprint
-from pathlib import Path
-from time import sleep
-import time
 
+import pprint
+import time
 from dataclasses import dataclass, field
 from decimal import Decimal
-from typing import Dict, List, Any
+from pathlib import Path
+from typing import Any, Dict, List
+
+from django.db.models.manager import BaseManager
 
 import environ
 import requests
@@ -329,13 +330,22 @@ class BoostrLoader:
             "filter": "all",
         }
 
-        while True:
+        while page < self.max_deal_pages:
             page += 1
             deals_product_params["page"] = str(page)
 
-            deal_products = self.boostr.get("deal_products")
-
+            deal_products = self.boostr.get(
+                "deal_products",
+                params=deals_product_params,
+            )
+            # pprint.pprint(deal_products)
+            # exit()
             self.log.debug(f"Fetched {len(deal_products)} deal_products")
+
+            # Paged through all available records and are getting an empty list back
+            if len(deal_products) == 0:
+                self.log.info(f"Done. Fetched all the deals in {page - 1} pages")
+                break
 
             for deal_product in deal_products:
                 # TODO fix get()
@@ -348,7 +358,6 @@ class BoostrLoader:
                     )
                 except BoostrDeal.DoesNotExist:
                     continue
-
                 for budget in deal_product["deal_product_budgets"]:
                     BoostrDealProduct.objects.update_or_create(
                         boostr_deal=deal,
@@ -363,7 +372,6 @@ class BoostrLoader:
 
     def upsert_mediaplan(self) -> None:
         """Upsert media plan lne item details into the database"""
-        # print(self.mp_data)
 
         for media_plan in self.mp_data:
             # exit(media_plan)
@@ -375,8 +383,6 @@ class BoostrLoader:
             if media_plan["id"]:  # != 265115:
                 self.mpc.add_media_plan(media_plan["deal_id"], mp)
                 self.upsert_mediaplan_lineitems(mp)
-
-        # pprint.pprint(self.mpc.media_plans)
 
     def upsert_mediaplan_lineitems(self, media_plan: NewBoostrMediaPlan) -> None:
         """Upsert media plan line item"""
@@ -391,19 +397,18 @@ class BoostrLoader:
         deals_params["page"] = str(page)
 
         if self.li_mp_data:
-            exit("There is data")
-        exit("There is no data")
+            media_plans = self.li_mp_data
+        else:
+            media_plans = self.boostr.get(
+                f"media_plans/{media_plan.media_plan_id}/line_items",
+                params=deals_params,
+            )
+            self.log.info(f"Fetched {len(media_plans)} media plans ")
+            self.append_json_file(media_plans, self.li_json_file)
 
-        media_plans = self.boostr.get(
-            f"media_plans/{media_plan.media_plan_id}/line_items", params=deals_params
-        )
-        self.log.info(f"Fetched {len(media_plans)} media plans ")
-
-        self.append_json_file(media_plans, self.li_json_file)
-        # return
-        """ for li in self.li_mp_data:
-            if media_plan.media_plan_id == 265115:
-                pprint.pprint(li["product"]["id"])
+        for li in media_plans:
+            if media_plan.media_plan_id:  # == 265115:
+                # pprint.pprint(li["product"]["id"])
                 for month in li["line_item_monthlies"]:
                     mpli = NewBoostrDealMediaPlanLineItem(
                         media_plan_line_item_id=li["id"],
@@ -416,23 +421,36 @@ class BoostrLoader:
                         month=month["month"],
                     )
                     media_plan.add_line_item(mpli)
-                    print(f"did: {mpli.boostr_deal}****")
-                    bdeal = BoostrDeal.objects.get(boostr_id=mpli.boostr_deal)
-                    bprod = BoostrProduct.objects.get(boostr_id=mpli.boostr_product)
+                    pprint.pprint(mpli)                    
+                    bdeal = None
+                    bprod = None
                     qs = BoostrDealProduct.objects.filter(
-                        month=mpli.month, boostr_deal_id=bdeal, boostr_product_id=bprod
+                        month=mpli.month,
+                        boostr_deal_id=bdeal,
+                        boostr_product_id=bprod,
                     )
+                    try:
+                        bdeal = BoostrDeal.objects.get(boostr_id=mpli.boostr_deal)
+                        bprod = BoostrProduct.objects.get(boostr_id=mpli.boostr_product)
+                        qs = BoostrDealProduct.objects.filter(
+                            month=mpli.month,
+                            boostr_deal_id=bdeal,
+                            boostr_product_id=bprod,
+                        )
+                    except (BoostrDeal.DoesNotExist, BoostrProduct.DoesNotExist):
+                        continue
+
                 for obj in qs:
-                    pprint.pprint((obj))
                     qs.update(
                         quantity=mpli.quantity, rate=mpli.rate, rate_type=mpli.rate_type
                     )
-                      BoostrDealProduct.objects.filter
-                        (month=mpli.month,boostr_deal_id=mpli.boostr_deal,boostr_product_id=mpli.boostr_product).update(
-                        quantity = mpli.quantity,
-                        rate = mpli.rate,
-                        rate_type = mpli.rate_type
-                    ) """
+                    BoostrDealProduct.objects.filter(
+                        month=mpli.month,
+                        boostr_deal_id=mpli.boostr_deal,
+                        boostr_product_id=mpli.boostr_product,
+                    ).update(
+                        quantity=mpli.quantity, rate=mpli.rate, rate_type=mpli.rate_type
+                    )
 
         # pprint.pprint(media_plan)
 
@@ -441,8 +459,8 @@ class BoostrLoader:
         start_time = time.time()
         # self.upsert_products()
         # self.upsert_deals()
-        # self.upsert_deal_products()
-        self.upsert_mediaplan()
+        self.upsert_deal_products()
+        # self.upsert_mediaplan()
         # self.upsert_mediaplan_lineitems()
         end_time = time.time()
         elapsed_time = end_time - start_time
