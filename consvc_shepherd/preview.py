@@ -317,7 +317,7 @@ def get_amp_tiles(
 
 def get_unified(env: Environment, country: str, is_mobile: bool = False) -> Ads:
     """Load Ads from MARS unified api"""
-    user_context_id = uuid.uuid4()
+    context_id = uuid.uuid4()
 
     # placement names will vary for preview and experiment environments, whereas
     # dev & prod have the same placements served by different kevel networks
@@ -328,7 +328,7 @@ def get_unified(env: Environment, country: str, is_mobile: bool = False) -> Ads:
 
     # load spocs & tiles, then map them to the same shape
     body = {
-        "user_context_id": f"{user_context_id}",  # UUID -> str
+        "context_id": f"{context_id}",  # UUID -> str
         "placements": [
             {"placement": spocs_placement, "count": 10},
             {"placement": tile_one_placement, "count": 1},
