@@ -4,15 +4,12 @@ import json
 import logging
 import math
 import os
-
 import pprint
 import time
 from dataclasses import dataclass, field
 from decimal import Decimal
 from pathlib import Path
 from typing import Any, Dict, List
-
-from django.db.models.manager import BaseManager
 
 import environ
 import requests
@@ -372,7 +369,6 @@ class BoostrLoader:
 
     def upsert_mediaplan(self) -> None:
         """Upsert media plan lne item details into the database"""
-
         for media_plan in self.mp_data:
             # exit(media_plan)
             mp = NewBoostrMediaPlan(
@@ -421,7 +417,7 @@ class BoostrLoader:
                         month=month["month"],
                     )
                     media_plan.add_line_item(mpli)
-                    pprint.pprint(mpli)                    
+                    pprint.pprint(mpli)
                     bdeal = None
                     bprod = None
                     qs = BoostrDealProduct.objects.filter(
