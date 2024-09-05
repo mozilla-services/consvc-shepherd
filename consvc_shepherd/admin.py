@@ -12,8 +12,6 @@ from consvc_shepherd.models import (
     AllocationSetting,
     AllocationSettingsSnapshot,
     BoostrDeal,
-    BoostrDealMediaPlan,
-    BoostrDealMediaPlanLineItem,
     BoostrDealProduct,
     BoostrProduct,
     PartnerAllocation,
@@ -269,24 +267,3 @@ class BoostrProductAdmin(admin.ModelAdmin):
         "full_name",
         "campaign_type",
     ]
-
-
-@admin.register(BoostrDealMediaPlanLineItem)
-class BoostrDealMediaPlanLineItemAdmin(admin.ModelAdmin):
-    """TODO"""
-
-    model = BoostrDealMediaPlanLineItem
-
-
-@admin.register(BoostrDealMediaPlan)
-class BoostrDealMediaPlanAdmin(admin.ModelAdmin):
-    """TO DO"""
-
-    model = BoostrDealMediaPlan
-    autocomplete_fields = ["boostr_deal"]
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        """TODO"""
-        if db_field.name == "boostr_deal":
-            kwargs["queryset"] = BoostrDeal.objects.all().order_by("name")
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
