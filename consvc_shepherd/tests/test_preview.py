@@ -425,7 +425,7 @@ class TestGetUnified(TestCase):
             mock_unified.assert_called_once_with(
                 f"{mockUnifiedEnv.mars_url}/v1/ads",
                 json={
-                    "user_context_id": mock.ANY,
+                    "context_id": mock.ANY,
                     "placements": [
                         {"placement": "newtab_spocs", "count": 10},
                         {"placement": "newtab_tile_1", "count": 1},
@@ -438,5 +438,5 @@ class TestGetUnified(TestCase):
 
             args, kwargs = mock_unified.call_args
             payload = kwargs["json"]
-            self.assertIsInstance(payload["user_context_id"], str)
-            self.assertEqual(len(payload["user_context_id"]), 36)
+            self.assertIsInstance(payload["context_id"], str)
+            self.assertEqual(len(payload["context_id"]), 36)
