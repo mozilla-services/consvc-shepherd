@@ -14,6 +14,10 @@ from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct
 
 MAX_DEAL_PAGES_DEFAULT = 50
 REQUEST_INTERVAL_SECONDS_DEFAULT = 2
+DEFAULT_OPTIONS = {
+    "request_interval_seconds": REQUEST_INTERVAL_SECONDS_DEFAULT,
+    "max_deal_pages": MAX_DEAL_PAGES_DEFAULT,
+}
 
 
 class Command(BaseCommand):
@@ -73,9 +77,13 @@ class BoostrApi:
     session: requests.Session
     request_interval_seconds: int
 
-    def __init__(self, base_url: str, email: str, password: str, options={}):
+    def __init__(
+        self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
+    ):
         self.base_url = base_url
-        self.request_interval_seconds = options["request_interval_seconds"]
+        self.request_interval_seconds = options.get(
+            "request_interval_seconds", REQUEST_INTERVAL_SECONDS_DEFAULT
+        )
         self.setup_session(email, password)
 
     def setup_session(self, email: str, password: str) -> None:
@@ -137,10 +145,12 @@ class BoostrLoader:
     log: logging.Logger
     max_deal_pages: int
 
-    def __init__(self, base_url: str, email: str, password: str, options={}):
+    def __init__(
+        self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
+    ):
         self.log = logging.getLogger("sync_boostr_data")
         self.boostr = BoostrApi(base_url, email, password, options)
-        self.max_deal_pages = options["max_deal_pages"]
+        self.max_deal_pages = options.get("max_deal_pages", MAX_DEAL_PAGES_DEFAULT)
 
     def upsert_products(self) -> None:
         """Fetch all Boostr products and upsert them to Shepherd DB"""
