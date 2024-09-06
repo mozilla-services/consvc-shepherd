@@ -16,4 +16,4 @@ A step by step guide of how the PR reviewer can verify that changes are working 
 
 ## Visuals
 
-If applicable, provide screenshots or videos here with the expected new behavior
+If applicable, provide screenshots or videos here with the expected new behavior. If not, please remove this section.
