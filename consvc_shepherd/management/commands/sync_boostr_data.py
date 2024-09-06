@@ -24,7 +24,7 @@ RATE_LIMIT_REQUEST_INTERVAL_SECS = 0.7
 
 
 @dataclass(frozen=True)
-class NewBoostrDealMediaPlanLineItem:
+class BoostrDealMediaPlanLineItem:
     """TODO"""
 
     media_plan_line_item_id: int
@@ -42,7 +42,7 @@ class NewBoostrDealMediaPlanLineItem:
 
 
 @dataclass
-class NewBoostrMediaPlan:
+class BoostrMediaPlan:
     """Media Plan For Boostr Deals"""
 
     media_plan_id: int
@@ -50,13 +50,13 @@ class NewBoostrMediaPlan:
     boostr_deal: int
     line_items: Dict[
         int,
-        Dict[int, List[NewBoostrDealMediaPlanLineItem]],
+        Dict[int, List[BoostrDealMediaPlanLineItem]],
     ] = field(default_factory=dict)
 
     def __str__(self) -> str:
         return f"{self.name}"
 
-    def add_line_item(self, line_item: NewBoostrDealMediaPlanLineItem):
+    def add_line_item(self, line_item: BoostrDealMediaPlanLineItem):
         """Add a line item to a media plan"""
         # if line_item.media_plan_line_item_id not in self.line_items:
         if self.boostr_deal not in self.line_items:
@@ -65,7 +65,7 @@ class NewBoostrMediaPlan:
             self.line_items[self.boostr_deal][line_item.boostr_product] = []
             self.line_items[self.boostr_deal][line_item.boostr_product].append(line_item)
 
-    def find_line_item(self, boostr_deal: int, boostr_product: int) -> List[NewBoostrDealMediaPlanLineItem]:
+    def find_line_item(self, boostr_deal: int, boostr_product: int) -> List[BoostrDealMediaPlanLineItem]:
         """Find a line item using the boostr id and product id"""
         return self.line_items.get(boostr_deal, {}).get(boostr_product, [])
 
@@ -74,9 +74,9 @@ class NewBoostrMediaPlan:
 class MediaPlanCollection:
     """A collection for storing Media Plans"""
 
-    media_plans: Dict[int, NewBoostrMediaPlan] = field(default_factory=dict)
+    media_plans: Dict[int, BoostrMediaPlan] = field(default_factory=dict)
 
-    def add_media_plan(self, boostr_plan: int, media_plan: NewBoostrMediaPlan):
+    def add_media_plan(self, boostr_plan: int, media_plan: BoostrMediaPlan):
         """Add a media plan to the collection"""
         if boostr_plan not in self.media_plans:
             self.media_plans[boostr_plan] = media_plan
@@ -212,7 +212,7 @@ class BoostrLoader:
     log: logging.Logger
     max_deal_pages: int
 
-    line_items: Dict[int, NewBoostrDealMediaPlanLineItem]
+    line_items: Dict[int, BoostrDealMediaPlanLineItem]
     current_dir = os.path.dirname(__file__)
     json_file = os.path.join(current_dir, "mediaplans.json")
     li_json_file = os.path.join(current_dir, "mp_lineitems.json")
@@ -286,7 +286,7 @@ class BoostrLoader:
 
             closed_won_deals = [d for d in deals if (d["stage_name"] == "Closed Won")]
             for deal in closed_won_deals:
-                boostr_deal, _ = BoostrDeal.objects.update_or_create(
+                BoostrDeal.objects.update_or_create(
                     boostr_id=deal["id"],
                     name=deal["name"],
                     advertiser=deal["advertiser_name"],
@@ -321,8 +321,6 @@ class BoostrLoader:
                 "deal_products",
                 params=deals_product_params,
             )
-            # pprint.pprint(deal_products)
-            # exit()
             self.log.debug(f"Fetched {len(deal_products)} deal_products")
 
             # Paged through all available records and are getting an empty list back
@@ -331,7 +329,6 @@ class BoostrLoader:
                 break
 
             for deal_product in deal_products:
-                # TODO fix get()
                 product = BoostrProduct.objects.get(boostr_id=deal_product["product"]["id"])
                 try:
                     deal = BoostrDeal.objects.get(
@@ -354,17 +351,16 @@ class BoostrLoader:
     def upsert_mediaplan(self) -> None:
         """Upsert media plan lne item details into the database"""
         for media_plan in self.mp_data:
-            # exit(media_plan)
-            mp = NewBoostrMediaPlan(
+            new_media_plan = BoostrMediaPlan(
                 media_plan_id=media_plan["id"],
                 name=media_plan["deal_name"],
                 boostr_deal=media_plan["deal_id"],
             )
-            if media_plan["id"]:  # != 265115:
+            if media_plan["deal_id"]:
                 self.media_plan_collection.add_media_plan(media_plan["deal_id"], mp)
-                self.upsert_mediaplan_lineitems(mp)
+                self.upsert_mediaplan_lineitems(new_media_plan)
 
-    def upsert_mediaplan_lineitems(self, media_plan: NewBoostrMediaPlan) -> None:
+    def upsert_mediaplan_lineitems(self, media_plan: BoostrMediaPlan) -> None:
         """Upsert media plan line item"""
         page = 0
         deals_params = {
@@ -387,10 +383,9 @@ class BoostrLoader:
             self.append_json_file(media_plans, self.li_json_file)
 
         for li in media_plans:
-            if media_plan.media_plan_id:  # == 265115:
-                # pprint.pprint(li["product"]["id"])
+            if media_plan.media_plan_id:
                 for month in li["line_item_monthlies"]:
-                    mpli = NewBoostrDealMediaPlanLineItem(
+                    mpli = BoostrDealMediaPlanLineItem(
                         media_plan_line_item_id=li["id"],
                         boostr_deal=media_plan.boostr_deal,
                         boostr_product=li["product"]["id"],
@@ -434,9 +429,9 @@ class BoostrLoader:
         """Loader entry point"""
         start_time = time.time()
         # self.upsert_products()
-        # self.upsert_deals()
-        self.upsert_deal_products()
-        # self.upsert_mediaplan()
+        self.upsert_deals()
+        # self.upsert_deal_products()
+        #self.upsert_mediaplan()
         # self.upsert_mediaplan_lineitems()
         end_time = time.time()
         elapsed_time = end_time - start_time
