@@ -681,10 +681,6 @@ class TestSyncBoostrData(TestCase):
         ]
         self.assertEqual(len(products), 2)
         mock_get_success.assert_has_calls(get_calls)
-        sleep_calls = (
-            [  # once for the POST /user_token under the hood, once for GET /products
-                mock.call(4),
-                mock.call(4),
-            ]
-        )
+        # once for the POST /user_token under the hood, once for GET /products
+        sleep_calls = [mock.call(4), mock.call(4)]
         mock_sleep.assert_has_calls(sleep_calls)
