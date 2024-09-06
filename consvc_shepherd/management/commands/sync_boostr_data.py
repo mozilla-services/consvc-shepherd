@@ -10,10 +10,12 @@ import environ
 import requests
 from django.core.management.base import BaseCommand
 
-from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct
+from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct, BoostrSyncStatus
 
 MAX_DEAL_PAGES_DEFAULT = 50
 RATE_LIMIT_REQUEST_INTERVAL_SECS = 0.7
+SYNC_STATUS_SUCCESS = "success"
+SYNC_STATUS_FAILURE = "failure"
 
 
 class Command(BaseCommand):
@@ -216,10 +218,22 @@ class BoostrLoader:
                 f"{product.boostr_id} to deal: {deal.boostr_id}"
             )
 
+    def update_sync_status(self, status, message=None):
+        BoostrSyncStatus.objects.update_or_create(
+            status=status,
+            message=message,
+        )
+
     def load(self):
         """Loader entry point"""
-        self.upsert_products()
-        self.upsert_deals()
+        try:
+            self.upsert_products()
+            self.upsert_deals()
+            self.log.info(f"Boostr sync process completed successfully. Updating sync_status")
+        except Exception as e:
+            self.log.error(f"Boostr sync process encountered an error: {e}. Updating sync_status")
+            self.update_sync_status(SYNC_STATUS_FAILURE, e)
+
 
 
 def get_campaign_type(product_full_name: str) -> str:

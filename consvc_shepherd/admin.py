@@ -16,6 +16,7 @@ from consvc_shepherd.models import (
     BoostrProduct,
     PartnerAllocation,
     SettingsSnapshot,
+    BoostrSyncStatus
 )
 from consvc_shepherd.storage import send_to_storage
 from consvc_shepherd.utils import ShepherdMetrics
@@ -266,4 +267,16 @@ class BoostrProductAdmin(admin.ModelAdmin):
         "boostr_id",
         "full_name",
         "campaign_type",
+    ]
+
+@admin.register(BoostrSyncStatus)
+class BoostrSyncStatusAdmin(admin.ModelAdmin):
+    """Admin model for BoostrSyncStatuss records which represent the status of each Boostr sync operation"""
+
+    model = BoostrSyncStatus
+    list_display = [
+        "id",
+        "synced_on",
+        "status",
+        "message",
     ]
