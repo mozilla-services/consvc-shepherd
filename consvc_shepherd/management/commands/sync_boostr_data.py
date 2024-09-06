@@ -230,6 +230,7 @@ class BoostrLoader:
             self.upsert_products()
             self.upsert_deals()
             self.log.info(f"Boostr sync process completed successfully. Updating sync_status")
+            self.update_sync_status(SYNC_STATUS_SUCCESS)
         except Exception as e:
             self.log.error(f"Boostr sync process encountered an error: {e}. Updating sync_status")
             self.update_sync_status(SYNC_STATUS_FAILURE, e)
