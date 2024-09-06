@@ -63,13 +63,9 @@ class NewBoostrMediaPlan:
             self.line_items[self.boostr_deal] = {}
         if line_item.boostr_product not in self.line_items[self.boostr_deal]:
             self.line_items[self.boostr_deal][line_item.boostr_product] = []
-            self.line_items[self.boostr_deal][line_item.boostr_product].append(
-                line_item
-            )
+            self.line_items[self.boostr_deal][line_item.boostr_product].append(line_item)
 
-    def find_line_item(
-        self, boostr_deal: int, boostr_product: int
-    ) -> List[NewBoostrDealMediaPlanLineItem]:
+    def find_line_item(self, boostr_deal: int, boostr_product: int) -> List[NewBoostrDealMediaPlanLineItem]:
         """Find a line item using the boostr id and product id"""
         return self.line_items.get(boostr_deal, {}).get(boostr_product, [])
 
@@ -183,9 +179,7 @@ class BoostrApi:
             self.post(path, json, headers)
 
         if not response.ok:
-            raise BoostrApiError(
-                f"Bad response status {response.status_code} from /{path}: {response}"
-            )
+            raise BoostrApiError(f"Bad response status {response.status_code} from /{path}: {response}")
         json = response.json()
         return json
 
@@ -198,9 +192,7 @@ class BoostrApi:
         if headers is None:
             headers = {}
 
-        response = self.session.get(
-            f"{self.base_url}/{path}", params=params, headers=headers, timeout=15
-        )
+        response = self.session.get(f"{self.base_url}/{path}", params=params, headers=headers, timeout=15)
         if response.status_code == 429:
             self.log.info(f"{response.headers}")
             retry_after = int(response.headers.get("Retry-After", 60)) + 1
@@ -208,9 +200,7 @@ class BoostrApi:
             return self.get(path, params, headers)
 
         if not response.ok:
-            raise BoostrApiError(
-                f"Bad response status {response.status_code} from /{path}: {response}"
-            )
+            raise BoostrApiError(f"Bad response status {response.status_code} from /{path}: {response}")
         json = response.json()
         return json
 
@@ -226,7 +216,7 @@ class BoostrLoader:
     current_dir = os.path.dirname(__file__)
     json_file = os.path.join(current_dir, "mediaplans.json")
     li_json_file = os.path.join(current_dir, "mp_lineitems.json")
-    mpc = MediaPlanCollection()
+    media_plan_collection = MediaPlanCollection()
 
     with open(json_file, "r") as file:
         mp_data = json.load(file)
@@ -302,9 +292,7 @@ class BoostrLoader:
                     advertiser=deal["advertiser_name"],
                     currency=deal["currency"],
                     amount=math.floor(float(deal["budget"])),
-                    sales_representatives=",".join(
-                        str(d["email"]) for d in deal["deal_members"]
-                    ),
+                    sales_representatives=",".join(str(d["email"]) for d in deal["deal_members"]),
                     start_date=deal["start_date"],
                     end_date=deal["end_date"],
                 )
@@ -314,9 +302,7 @@ class BoostrLoader:
                 self.log.info(f"Upserted products and budgets for deal: {deal['id']}")
             # If this is the last iteration of the loop due to the max page limit, log that we stopped
             if page >= self.max_deal_pages:
-                self.log.info(
-                    f"Done. Stopped fetching deals after hitting max_page_limit of {page} pages."
-                )
+                self.log.info(f"Done. Stopped fetching deals after hitting max_page_limit of {page} pages.")
 
     def upsert_deal_products(self) -> None:
         """Fetch the deal_products for multiple and store them in our DB with their monthly budgets"""
@@ -346,9 +332,7 @@ class BoostrLoader:
 
             for deal_product in deal_products:
                 # TODO fix get()
-                product = BoostrProduct.objects.get(
-                    boostr_id=deal_product["product"]["id"]
-                )
+                product = BoostrProduct.objects.get(boostr_id=deal_product["product"]["id"])
                 try:
                     deal = BoostrDeal.objects.get(
                         boostr_id=deal_product["deal_id"],
@@ -377,7 +361,7 @@ class BoostrLoader:
                 boostr_deal=media_plan["deal_id"],
             )
             if media_plan["id"]:  # != 265115:
-                self.mpc.add_media_plan(media_plan["deal_id"], mp)
+                self.media_plan_collection.add_media_plan(media_plan["deal_id"], mp)
                 self.upsert_mediaplan_lineitems(mp)
 
     def upsert_mediaplan_lineitems(self, media_plan: NewBoostrMediaPlan) -> None:
@@ -437,16 +421,12 @@ class BoostrLoader:
                         continue
 
                 for obj in qs:
-                    qs.update(
-                        quantity=mpli.quantity, rate=mpli.rate, rate_type=mpli.rate_type
-                    )
+                    qs.update(quantity=mpli.quantity, rate=mpli.rate, rate_type=mpli.rate_type)
                     BoostrDealProduct.objects.filter(
                         month=mpli.month,
                         boostr_deal_id=mpli.boostr_deal,
                         boostr_product_id=mpli.boostr_product,
-                    ).update(
-                        quantity=mpli.quantity, rate=mpli.rate, rate_type=mpli.rate_type
-                    )
+                    ).update(quantity=mpli.quantity, rate=mpli.rate, rate_type=mpli.rate_type)
 
         # pprint.pprint(media_plan)
 
