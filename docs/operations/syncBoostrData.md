@@ -19,6 +19,7 @@ python manage.py sync_boostr_data https://app.boostr.com/api/
 
 ### Optional arguments
 
+#### --max-deal-pages
 The script can take an optional named argument, `--max-deal-pages`, which will
 set an upper limit on the number of pages of deals that we fetch from the API.
 
@@ -34,8 +35,13 @@ upper limit on deal pages.
 
 Usage:
 ```sh
-python manage.py sync_boostr_data
+python manage.py sync_boostr_data --max-deal-pages 15
 ```
+
+#### --request-interval-seconds
+The script can take an optional named argument, `--max-deal-pages`, which will
+set an upper limit on the number of pages of deals that we fetch from the API.
+
 
 ### Debug logs
 
