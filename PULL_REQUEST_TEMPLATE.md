@@ -1,6 +1,6 @@
 ## References
 
-JIRA: [Jira-task-id](Jira-task-link)
+[Jira-task-id](Jira-task-link)
 
 ## Problem Statement
 
