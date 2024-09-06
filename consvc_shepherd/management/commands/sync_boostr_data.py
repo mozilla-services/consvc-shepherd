@@ -73,7 +73,7 @@ class BoostrApi:
     session: requests.Session
     request_interval_seconds: int
 
-    def __init__(self, base_url: str, email: str, password: str, options: dict[str, Any]):
+    def __init__(self, base_url: str, email: str, password: str, options={}):
         self.base_url = base_url
         self.request_interval_seconds = options["request_interval_seconds"]
         self.setup_session(email, password)
@@ -137,7 +137,7 @@ class BoostrLoader:
     log: logging.Logger
     max_deal_pages: int
 
-    def __init__(self, base_url: str, email: str, password: str, options: dict[str, Any]):
+    def __init__(self, base_url: str, email: str, password: str, options={}):
         self.log = logging.getLogger("sync_boostr_data")
         self.boostr = BoostrApi(base_url, email, password, options)
         self.max_deal_pages = options["max_deal_pages"]
