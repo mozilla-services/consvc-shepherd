@@ -39,9 +39,18 @@ python manage.py sync_boostr_data --max-deal-pages 15
 ```
 
 #### --request-interval-seconds
-The script can take an optional named argument, `--max-deal-pages`, which will
-set an upper limit on the number of pages of deals that we fetch from the API.
+The script can take an optional named argument, `--request-interval-seconds`, which
+controls the rate of requests to the Boostr API in order to stay under their rate limits.
+By default, the sync code will wait 2 seconds between requests.
 
+Their API's stated rate limits are 100reqs/second, which gives a much higher request rate,
+but in practice we've seen that the actual rate limit is lower, so this can be a helpful way
+to configure a successful full sync of that script.
+
+Usage:
+```sh
+python manage.py sync_boostr_data --request-interval-seconds .5
+```
 
 ### Debug logs
 
