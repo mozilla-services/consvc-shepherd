@@ -6,6 +6,8 @@ from pathlib import Path
 from time import sleep
 from typing import Any
 
+import traceback
+
 import environ
 import requests
 from django.core.management.base import BaseCommand
@@ -232,8 +234,9 @@ class BoostrLoader:
             self.log.info(f"Boostr sync process completed successfully. Updating sync_status")
             self.update_sync_status(SYNC_STATUS_SUCCESS)
         except Exception as e:
-            self.log.error(f"Boostr sync process encountered an error: {e}. Updating sync_status")
-            self.update_sync_status(SYNC_STATUS_FAILURE, e)
+            error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
+            self.log.error(f"Boostr sync process encountered an error: {error}. Updating sync_status")
+            self.update_sync_status(SYNC_STATUS_FAILURE, f"Exception: {str(e):} Trace: {traceback.format_exc()}")
 
 
 

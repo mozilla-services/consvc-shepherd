@@ -41,6 +41,10 @@ def mock_post_token_fail(*args, **kwargs) -> MockResponse:
     return MockResponse({"uh": "oh"}, 401)
 
 
+def mock_upsert_deals_exception(*args, **kwargs) -> MockResponse:
+    """Mock upsert_deals exception"""
+    raise Exception("upsert_deals mock raised an exception")
+
 def mock_get_success(*args, **kwargs) -> MockResponse:
     """Mock GET requests to boostr which handles mock responses for /products, /deals, and /deal_products"""
     if args[0].endswith("/products"):
@@ -683,3 +687,43 @@ class TestSyncBoostrData(TestCase):
         self.assertEqual(
             mock_sleep.call_count, 2
         )  # once for the POST /user_token under the hood, once for GET /products
+
+
+    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.BoostrLoader.upsert_products")
+    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.BoostrLoader.upsert_deals")
+    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
+    @mock.patch("requests.Session.post", side_effect=mock_post_success)
+    @mock.patch("requests.Session.get", side_effect=mock_get_success)
+    @mock.patch("consvc_shepherd.models.BoostrSyncStatus.objects.create")
+    def test_load_success(
+        self, mock_create, mock_get, mock_post, mock_sleep, mock_upsert_deals, mock_upsert_products
+    ):
+        """Test the load function success scenario"""
+        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
+        loader.load()
+        calls = [
+            mock.call(
+                status="success",
+                message=None,
+            ),
+        ]
+        mock_create.assert_has_calls(calls)
+
+    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.BoostrLoader.upsert_deals", side_effect=mock_upsert_deals_exception)
+    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
+    @mock.patch("requests.Session.post", side_effect=mock_post_success)
+    @mock.patch("requests.Session.get", side_effect=mock_get_success)
+    @mock.patch("consvc_shepherd.models.BoostrSyncStatus.objects.create")
+    def test_load_failure(
+        self, mock_create, mock_get, mock_post, mock_sleep, mock_upsert_products
+    ):
+        """Test the load function failure scenario"""
+        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
+        loader.load()
+        calls = [
+            mock.call(
+                status="failure",
+                message=mock.ANY,
+            ),
+        ]
+        mock_create.assert_has_calls(calls)
