@@ -13,7 +13,7 @@ from django.core.management.base import BaseCommand
 from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct
 
 MAX_DEAL_PAGES_DEFAULT = 50
-REQUEST_INTERVAL_SECONDS_DEFAULT = 2
+REQUEST_INTERVAL_SECONDS_DEFAULT = 1
 DEFAULT_OPTIONS = {
     "request_interval_seconds": REQUEST_INTERVAL_SECONDS_DEFAULT,
     "max_deal_pages": MAX_DEAL_PAGES_DEFAULT,
