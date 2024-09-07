@@ -219,7 +219,7 @@ class BoostrLoader:
             )
 
     def update_sync_status(self, status, message=None):
-        BoostrSyncStatus.objects.update_or_create(
+        BoostrSyncStatus.objects.create(
             status=status,
             message=message,
         )
