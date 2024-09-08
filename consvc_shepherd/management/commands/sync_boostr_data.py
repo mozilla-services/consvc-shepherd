@@ -2,17 +2,21 @@
 
 import logging
 import math
+import traceback
 from pathlib import Path
 from time import sleep
 from typing import Any
-
-import traceback
 
 import environ
 import requests
 from django.core.management.base import BaseCommand
 
-from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct, BoostrSyncStatus
+from consvc_shepherd.models import (
+    BoostrDeal,
+    BoostrDealProduct,
+    BoostrProduct,
+    BoostrSyncStatus,
+)
 
 MAX_DEAL_PAGES_DEFAULT = 50
 RATE_LIMIT_REQUEST_INTERVAL_SECS = 0.7
@@ -221,6 +225,7 @@ class BoostrLoader:
             )
 
     def update_sync_status(self, status, message=None):
+        """Fupdate the BoostrSyncStatus table given the status and the message"""
         BoostrSyncStatus.objects.create(
             status=status,
             message=message,

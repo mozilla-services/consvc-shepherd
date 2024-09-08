@@ -14,9 +14,9 @@ from consvc_shepherd.models import (
     BoostrDeal,
     BoostrDealProduct,
     BoostrProduct,
+    BoostrSyncStatus,
     PartnerAllocation,
     SettingsSnapshot,
-    BoostrSyncStatus
 )
 from consvc_shepherd.storage import send_to_storage
 from consvc_shepherd.utils import ShepherdMetrics
