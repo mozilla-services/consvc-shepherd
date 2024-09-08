@@ -4,7 +4,6 @@ import json
 import logging
 import math
 import os
-import pprint
 import time
 from dataclasses import dataclass, field
 from decimal import Decimal
@@ -228,13 +227,15 @@ class BoostrLoader:
     li_json_file = os.path.join(current_dir, "mp_lineitems.json")
     media_plan_collection = MediaPlanCollection()
 
-    with open(json_file, "r") as file:
-        mp_data = json.load(file)
+    try:
+        with open(json_file, "r") as file:
+            mp_data = json.load(file)
+    except Exception:
+        mp_data = []
 
     try:
         with open(li_json_file, "r") as file:
             li_mp_data = json.load(file)
-            # pprint.pprint(li_mp_data)
     except Exception:
         li_mp_data = []
 
@@ -368,7 +369,7 @@ class BoostrLoader:
                 )
 
     def upsert_mediaplan(self) -> None:
-        """Upsert media plan lne item details into the database"""
+        """Upsert media plan line item details into the database"""
         for media_plan in self.mp_data:
             new_media_plan = BoostrMediaPlan(
                 media_plan_id=media_plan["id"],
@@ -392,20 +393,19 @@ class BoostrLoader:
 
         page += 1
         deals_params["page"] = str(page)
-
         if self.li_mp_data:
-            media_plans = self.li_mp_data
+            media_plan_line_items = self.li_mp_data
         else:
-            media_plans = self.boostr.get(
+            media_plan_line_items = self.boostr.get(
                 f"media_plans/{media_plan.media_plan_id}/line_items",
                 params=deals_params,
             )
-            self.log.info(f"Fetched {len(media_plans)} media plans ")
-            self.append_json_file(media_plans, self.li_json_file)
+            self.log.info(f"Fetched {len(media_plan_line_items)} media plans ")
+            self.append_json_file(media_plan_line_items, self.li_json_file)
 
-        for li in media_plans:
+        for li in media_plan_line_items:
             if media_plan.media_plan_id:
-                for month in li["line_item_monthlies"]:
+                for month in li["line_item_monthlies"]:                    
                     mpli = BoostrDealMediaPlanLineItem(
                         media_plan_line_item_id=li["id"],
                         boostr_deal=media_plan.boostr_deal,
@@ -416,16 +416,10 @@ class BoostrLoader:
                         budget=month["budget"],
                         month=month["month"],
                     )
+
                     media_plan.add_line_item(mpli)
-                    pprint.pprint(mpli)
-                    bdeal = None
-                    bprod = None
-                    qs = BoostrDealProduct.objects.filter(
-                        month=mpli.month,
-                        boostr_deal_id=bdeal,
-                        boostr_product_id=bprod,
-                    )
                     try:
+
                         bdeal = BoostrDeal.objects.get(boostr_id=mpli.boostr_deal)
                         bprod = BoostrProduct.objects.get(boostr_id=mpli.boostr_product)
                         qs = BoostrDealProduct.objects.filter(
@@ -433,29 +427,31 @@ class BoostrLoader:
                             boostr_deal_id=bdeal,
                             boostr_product_id=bprod,
                         )
+
+                        qs.update(
+                            quantity=mpli.quantity,
+                            rate=mpli.rate,
+                            rate_type=mpli.rate_type,
+                        )
+
+                        BoostrDealProduct.objects.filter(
+                            month=mpli.month,
+                            boostr_deal_id=mpli.boostr_deal,
+                            boostr_product_id=mpli.boostr_product,
+                        ).update(
+                            quantity=mpli.quantity,
+                            rate=mpli.rate,
+                            rate_type=mpli.rate_type,
+                        ) 
                     except (BoostrDeal.DoesNotExist, BoostrProduct.DoesNotExist):
                         continue
-
-                for obj in qs:
-                    qs.update(
-                        quantity=mpli.quantity, rate=mpli.rate, rate_type=mpli.rate_type
-                    )
-                    BoostrDealProduct.objects.filter(
-                        month=mpli.month,
-                        boostr_deal_id=mpli.boostr_deal,
-                        boostr_product_id=mpli.boostr_product,
-                    ).update(
-                        quantity=mpli.quantity, rate=mpli.rate, rate_type=mpli.rate_type
-                    )
-
-        # pprint.pprint(media_plan)
 
     def load(self):
         """Loader entry point"""
         start_time = time.time()
-        # self.upsert_products()
+        self.upsert_products()
         self.upsert_deals()
-        # self.upsert_deal_products()
+        self.upsert_deal_products()
         # self.upsert_mediaplan()
         # self.upsert_mediaplan_lineitems()
         end_time = time.time()
