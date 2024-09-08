@@ -236,13 +236,19 @@ class BoostrLoader:
         try:
             self.upsert_products()
             self.upsert_deals()
-            self.log.info(f"Boostr sync process completed successfully. Updating sync_status")
+            self.log.info(
+                f"Boostr sync process completed successfully. Updating sync_status"
+            )
             self.update_sync_status(SYNC_STATUS_SUCCESS)
         except Exception as e:
             error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
-            self.log.error(f"Boostr sync process encountered an error: {error}. Updating sync_status")
-            self.update_sync_status(SYNC_STATUS_FAILURE, f"Exception: {str(e):} Trace: {traceback.format_exc()}")
-
+            self.log.error(
+                f"Boostr sync process encountered an error: {error}. Updating sync_status"
+            )
+            self.update_sync_status(
+                SYNC_STATUS_FAILURE,
+                f"Exception: {str(e):} Trace: {traceback.format_exc()}",
+            )
 
 
 def get_campaign_type(product_full_name: str) -> str:

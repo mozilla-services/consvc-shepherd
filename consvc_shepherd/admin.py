@@ -269,6 +269,7 @@ class BoostrProductAdmin(admin.ModelAdmin):
         "campaign_type",
     ]
 
+
 @admin.register(BoostrSyncStatus)
 class BoostrSyncStatusAdmin(admin.ModelAdmin):
     """Admin model for BoostrSyncStatuss records which represent the status of each Boostr sync operation"""

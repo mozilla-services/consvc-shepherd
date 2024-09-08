@@ -322,6 +322,7 @@ class BoostrDealProduct(models.Model):
     budget: IntegerField = models.IntegerField()
     month: CharField = models.CharField()
 
+
 class BoostrSyncStatus(models.Model):
     """Table for capturing the status of a Booster sync process execution
 

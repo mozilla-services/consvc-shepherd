@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('consvc_shepherd', '0010_add_boostsyncstatus_table'),
+        ("consvc_shepherd", "0010_add_boostsyncstatus_table"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='boostrsyncstatus',
-            name='synced_on',
+            model_name="boostrsyncstatus",
+            name="synced_on",
             field=models.DateTimeField(auto_now=True),
         ),
     ]
