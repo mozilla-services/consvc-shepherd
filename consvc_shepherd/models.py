@@ -233,9 +233,29 @@ class BoostrProduct(models.Model):
         FLAT_FEE = "Flat Fee"
         NONE = "None"
 
+    class Countries(models.TextChoices):
+        """Defines country choices with full names for use in model fields."""
+
+        US = "US", "United States"
+        CA = "CA", "Canada"
+        DE = "DE", "Germany"
+        ES = "ES", "Spain"
+        FR = "FR", "France"
+        GB = "GB", "United Kingdom"
+        IT = "IT", "Italy"
+        PL = "PL", "Poland"
+        AT = "AT", "Austria"
+        NL = "NL", "Netherlands"
+        LU = "LU", "Luxembourg"
+        CH = "CH", "Switzerland"
+        BE = "BE", "Belgium"
+        SP = "SP", "Spain(SP)"
+
     boostr_id: IntegerField = models.IntegerField(unique=True)
     full_name: CharField = models.CharField()
-    country: CharField = models.CharField(blank=True)
+    country: CharField = models.CharField(
+        choices=Countries.choices, default=Countries.ES
+    )
     campaign_type: CharField = models.CharField(
         choices=CampaignType.choices,
     )
