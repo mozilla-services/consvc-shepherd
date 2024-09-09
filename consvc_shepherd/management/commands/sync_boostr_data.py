@@ -239,8 +239,22 @@ def get_campaign_type(product_full_name: str) -> str:
 
 def get_country(product_full_name: str) -> str:
     """Return the country code found in the product's full name."""
-    country_codes = ["US", "UK", "DE", "FR", "CA", "IT", "SP"]
-    country_found = "SP"
+    country_codes = [
+        "US",
+        "CA",
+        "DE",
+        "ES",
+        "FR",
+        "GB",
+        "IT",
+        "PL",
+        "AT",
+        "NL",
+        "LU",
+        "CH",
+        "BE",
+    ]
+    country_found = "ES"
     for code in country_codes:
         if code in product_full_name:
             country_found = code
