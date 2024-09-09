@@ -504,7 +504,7 @@ class TestSyncBoostrData(TestCase):
         mock_sleep,
     ):
         """Test that upsert_deals respects the given max_deal_pages limit"""
-        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD, 3)
+        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD, {"max_deal_pages": 3})
         loader.upsert_deals()
         assert 3 == mock_get.call_count
 
@@ -633,12 +633,12 @@ class TestSyncBoostrData(TestCase):
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     def test_boostr_api_post(self, mock_post_success, mock_sleep):
         """Test the BoostrApi POST wrapper"""
-        boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD)
+        boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD, {"request_interval_seconds": 1})
         auth_json = {"auth": {"email": "email@mozilla.com", "password": "test"}}
         post_json = {"info": "for the server"}
         headers = {"X-Boostr-Whatever": "Stuff"}
         response = boostr.post("some-path", json=post_json, headers=headers)
-        calls = [
+        post_calls = [
             mock.call(
                 f"{BASE_URL}/user_token",
                 json=auth_json,
@@ -654,15 +654,16 @@ class TestSyncBoostrData(TestCase):
         ]
         self.assertEqual(response["data"], "wow")
         self.assertEqual(response["count"], 42)
-        mock_post_success.assert_has_calls(calls)
-        self.assertEqual(mock_sleep.call_count, len(calls))
+        mock_post_success.assert_has_calls(post_calls)
+        sleep_calls = [mock.call(1), mock.call(1)]
+        mock_sleep.assert_has_calls(sleep_calls)
 
     @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_success)
     def test_boostr_api_get(self, mock_get_success, mock_post_success, mock_sleep):
         """Test the BoostrApi GET wrapper"""
-        boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD)
+        boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD, {"request_interval_seconds": 4})
         headers = {"X-Boostr-Whatever": "Stuff"}
         products_params = {
             "per": "300",
@@ -670,7 +671,7 @@ class TestSyncBoostrData(TestCase):
             "filter": "all",
         }
         products = boostr.get("products", headers=headers, params=products_params)
-        calls = [
+        get_calls = [
             mock.call(
                 f"{BASE_URL}/products",
                 params=products_params,
@@ -679,7 +680,7 @@ class TestSyncBoostrData(TestCase):
             ),
         ]
         self.assertEqual(len(products), 2)
-        mock_get_success.assert_has_calls(calls)
-        self.assertEqual(
-            mock_sleep.call_count, 2
-        )  # once for the POST /user_token under the hood, once for GET /products
+        mock_get_success.assert_has_calls(get_calls)
+        # once for the POST /user_token under the hood, once for GET /products
+        sleep_calls = [mock.call(4), mock.call(4)]
+        mock_sleep.assert_has_calls(sleep_calls)
