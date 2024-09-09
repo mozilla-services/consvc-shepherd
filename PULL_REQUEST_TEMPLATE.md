@@ -1,14 +1,15 @@
 ## References
 
-[Jira-task-id](Jira-task-link)
+[AE-XYZ](https://mozilla-hub.atlassian.net/browse/AE-XYZ)
 
 ## Problem Statement
 
-A brief description of the bugfix or feature that has necessitated this change
+A brief description of the bugfix or feature that has necessitated this change. Provide enough context that a
+reviwer who hasn't been working in this area of the code can understand the intention of this change.
 
 ## Proposed Changes
 
-A description of what has changed in this PR
+A description of what has changed in this PR.
 
 ## Verification Steps
 
