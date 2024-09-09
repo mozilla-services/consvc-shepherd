@@ -253,6 +253,7 @@ def get_country(product_full_name: str) -> str:
         "LU",
         "CH",
         "BE",
+        "SP",
     ]
     country_found = "ES"
     for code in country_codes:
