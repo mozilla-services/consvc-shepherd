@@ -235,6 +235,7 @@ class BoostrProduct(models.Model):
 
     boostr_id: IntegerField = models.IntegerField(unique=True)
     full_name: CharField = models.CharField()
+    country: CharField = models.CharField(blank=True)
     campaign_type: CharField = models.CharField(
         choices=CampaignType.choices,
     )

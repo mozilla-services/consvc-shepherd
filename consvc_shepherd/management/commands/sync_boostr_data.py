@@ -145,8 +145,11 @@ class BoostrLoader:
         for product in products:
             BoostrProduct.objects.update_or_create(
                 boostr_id=product["id"],
-                full_name=product["full_name"],
-                campaign_type=get_campaign_type(product["full_name"]),
+                defaults={
+                    "full_name": product["full_name"],
+                    "country": get_country(product["full_name"]),
+                    "campaign_type": get_campaign_type(product["full_name"]),
+                },
             )
         self.log.info(f"Upserted {(len(products))} products")
 
@@ -232,3 +235,15 @@ def get_campaign_type(product_full_name: str) -> str:
         return BoostrProduct.CampaignType.FLAT_FEE
     else:
         return BoostrProduct.CampaignType.NONE
+
+
+def get_country(product_full_name: str) -> str:
+    """Return the country code found in the product's full name."""
+    country_codes = ["US", "UK", "DE", "FR", "CA", "IT", "SP"]
+    country_found = "SP"
+    for code in country_codes:
+        if code in product_full_name:
+            country_found = code
+            break
+
+    return country_found
