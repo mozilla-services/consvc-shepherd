@@ -265,5 +265,6 @@ class BoostrProductAdmin(admin.ModelAdmin):
     list_display = [
         "boostr_id",
         "full_name",
+        "country",
         "campaign_type",
     ]

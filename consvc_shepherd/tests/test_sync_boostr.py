@@ -325,16 +325,19 @@ BOOSTR_PRODUCTS = {
     28256: BoostrProduct(
         boostr_id=28256,
         full_name="Firefox New Tab US (CPC)",
+        country="US",
         campaign_type=BoostrProduct.CampaignType.CPC,
     ),
     212592: BoostrProduct(
         boostr_id=212592,
         full_name="Firefox 2nd Tile CA (CPM)",
+        country="CA",
         campaign_type=BoostrProduct.CampaignType.CPM,
     ),
     204410: BoostrProduct(
         boostr_id=204410,
         full_name="Firefox New Tab FR (CPM)",
+        country="SP",
         campaign_type=BoostrProduct.CampaignType.CPM,
     ),
 }
@@ -355,6 +358,7 @@ def mock_update_or_create_deal_product(
             boostr_product=BoostrProduct(
                 boostr_id=28256,
                 full_name="Firefox New Tab US (CPC)",
+                country="US",
                 campaign_type=BoostrProduct.CampaignType.CPC,
             ),
             month=kwargs["month"],
@@ -412,13 +416,19 @@ class TestSyncBoostrData(TestCase):
         calls = [
             mock.call(
                 boostr_id=212592,
-                full_name="Firefox 2nd Tile CA (CPM)",
-                campaign_type=BoostrProduct.CampaignType.CPM,
+                defaults={
+                    "full_name": "Firefox 2nd Tile CA (CPM)",
+                    "country": "CA",
+                    "campaign_type": BoostrProduct.CampaignType.CPM,
+                },
             ),
             mock.call(
                 boostr_id=28256,
-                full_name="Firefox New Tab US (CPC)",
-                campaign_type=BoostrProduct.CampaignType.CPC,
+                defaults={
+                    "full_name": "Firefox New Tab US (CPC)",
+                    "country": "US",
+                    "campaign_type": BoostrProduct.CampaignType.CPC,
+                },
             ),
         ]
         mock_update_or_create.assert_has_calls(calls)
