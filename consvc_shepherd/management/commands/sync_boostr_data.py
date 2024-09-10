@@ -275,7 +275,7 @@ def get_country(product_full_name: str) -> str:
         "BE",
         "SP",
     ]
-    country_found = "ES"
+    country_found = ""
     for code in country_codes:
         if code in product_full_name:
             country_found = code
