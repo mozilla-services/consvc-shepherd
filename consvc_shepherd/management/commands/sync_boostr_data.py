@@ -259,26 +259,31 @@ def get_campaign_type(product_full_name: str) -> str:
 
 def get_country(product_full_name: str) -> str:
     """Return the country code found in the product's full name."""
-    country_codes = [
-        "US",
-        "CA",
-        "DE",
-        "ES",
-        "FR",
-        "GB",
-        "IT",
-        "PL",
-        "AT",
-        "NL",
-        "LU",
-        "CH",
-        "BE",
-        "SP",
-    ]
-    country_found = ""
-    for code in country_codes:
-        if code in product_full_name:
-            country_found = code
-            break
+    # Mapping of common country code abbreviations to standardized ISO 3166-1 alpha-2 codes
+    country_code_map = {
+        "US": "US",
+        "CA": "CA",
+        "DE": "DE",
+        "ES": "ES",
+        "FR": "FR",
+        "GB": "GB",
+        "UK": "GB",  # Map "UK" to "GB" for United Kingdom
+        "IT": "IT",
+        "PL": "PL",
+        "AT": "AT",
+        "NL": "NL",
+        "LU": "LU",
+        "CH": "CH",
+        "BE": "BE",
+        "SP": "ES",  # Map "SP" to "ES" for Spain
+    }
 
-    return country_found
+    normalized_name = product_full_name.upper()
+    words = set(normalized_name.split())
+
+    for code in country_code_map:
+        if code in words:
+            return country_code_map[code]
+
+    # Return an empty string if no country code is found
+    return ""

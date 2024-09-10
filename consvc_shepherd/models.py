@@ -249,13 +249,10 @@ class BoostrProduct(models.Model):
         LU = "LU", "Luxembourg"
         CH = "CH", "Switzerland"
         BE = "BE", "Belgium"
-        SP = "SP", "Spain(SP)"
 
     boostr_id: IntegerField = models.IntegerField(unique=True)
     full_name: CharField = models.CharField()
-    country: CharField = models.CharField(
-        choices=Countries.choices, default=Countries.ES
-    )
+    country: CharField = models.CharField(choices=Countries.choices, blank=True)
     campaign_type: CharField = models.CharField(
         choices=CampaignType.choices,
     )
