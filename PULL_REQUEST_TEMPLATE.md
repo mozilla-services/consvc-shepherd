@@ -1,17 +1,20 @@
 ## References
 
-JIRA: [DISCO-TODO](https://mozilla-hub.atlassian.net/browse/DISCO-TODO)
+[AE-XYZ](https://mozilla-hub.atlassian.net/browse/AE-XYZ)
 
-## Description
-<!-- Detail the purpose and impact of this PR, along with any other relevant information including: change highlights, screenshots, test instructions, related documentation, etc .... -->
+## Problem Statement
 
+A brief description of the bugfix or feature that has necessitated this change. Provide enough context that a
+reviwer who hasn't been working in this area of the code can understand the intention of this change.
 
+## Proposed Changes
 
-## PR Review Checklist
+A description of what has changed in this PR.
 
-_Put an `x` in the boxes that apply_
+## Verification Steps
 
-- [ ] This PR conforms to the [Contribution Guidelines](https://github.com/mozilla-services/consvc-shepherd/blob/main/CONTRIBUTING.md).
-- [ ] The PR title starts with the JIRA issue reference, format `[DISCO-####]`, and has the same title (if applicable).
-- [ ] [Documentation](https://github.com/mozilla-services/consvc-shepherd/tree/main/docs) has been updated (if applicable).
-- [ ] Functional and performance test coverage has been expanded and maintained (if applicable).
+A step by step guide of how the PR reviewer can verify that changes are working correctly.
+
+## Visuals
+
+If applicable, provide screenshots or videos here with the expected new behavior. If not, please remove this section.

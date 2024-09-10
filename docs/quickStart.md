@@ -68,10 +68,29 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-10. Import Boostr Deals and Products
+10. Connect to the DB with `psql`
+
+While the Django Admin interface at /admin shows all the data in our DB in a human readable way, it may sometimes be
+helpful to connect directly to the Shepherd DB while developing. (The values for the DB user and DB name come from
+the `.env` file.)
+
+```sh
+docker exec -it consvc-shepherd-db-1 psql -U postgres postgres
+```
+
+11. Import Boostr Deals and Products
 If you're working with the AdOps dashboard, you may want to pull in Boostr Deals and Products.
+
+First, make sure you have the Boostr API credentials set in your `.env` file. You can find them in 1Password
+
+```
+BOOSTR_API_EMAIL=find-me-in-1password@mozilla.com
+BOOSTR_API_PASS=i-am-in-1password-too
+```
+
+Then, run the script
 
 ``` shell
 docker exec -it consvc-shepherd-app-1 sh # interactive mode
-python manage.py sync_boostr_data https://app.boostr.com/api/ find-me-in-1pass-ads-eng-vault@mozilla.com secret-from-1pass
+python manage.py sync_boostr_data https://app.boostr.com/api
 ```
