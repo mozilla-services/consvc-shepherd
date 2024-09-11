@@ -14,7 +14,6 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from . import views
 from django.contrib import admin
 from django.urls import include, path
 
@@ -42,7 +41,7 @@ urlpatterns = [
     path("allocation/<int:pk>/", AllocationUpdateView.as_view()),
     path("preview", PreviewView.as_view()),
     path("", TableOverview.as_view()),
-    path('api/v1/', include('consvc_shepherd.api.urls')),
+    path("api/v1/", include("consvc_shepherd.api.urls")),
 ]
 
 admin.site.site_title = "Shepherd"

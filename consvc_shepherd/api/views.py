@@ -1,13 +1,15 @@
-from consvc_shepherd.models import BoostrProduct
-from django.shortcuts import render
+"""Dashboard API views that produce json data"""
+
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from consvc_shepherd.models import BoostrProduct
 from consvc_shepherd.api.serializers import BoostrProductSerializer
+from consvc_shepherd.models import BoostrProduct
 
-@api_view(['GET'])
+
+@api_view(["GET"])
 def get_products(request):
+    """Fetch all BoostrProducts"""
     products = BoostrProduct.objects.all()
     serializer = BoostrProductSerializer(products, many=True)
     return Response(serializer.data)
