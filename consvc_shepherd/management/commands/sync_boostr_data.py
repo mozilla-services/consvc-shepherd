@@ -302,20 +302,17 @@ class BoostrLoader:
             for deal in closed_won_deals:
                 BoostrDeal.objects.update_or_create(
                     boostr_id=deal["id"],
-                    name=deal["name"],
-                    advertiser=deal["advertiser_name"],
-                    currency=deal["currency"],
-                    amount=math.floor(float(deal["budget"])),
-                    sales_representatives=",".join(
+                    defaults={"name":deal["name"],
+                    "advertiser":deal["advertiser_name"],
+                    "currency":deal["currency"],
+                    "amount":math.floor(float(deal["budget"])),
+                    "sales_representatives":",".join(
                         str(d["email"]) for d in deal["deal_members"]
                     ),
-                    start_date=deal["start_date"],
-                    end_date=deal["end_date"],
+                    "start_date":deal["start_date"],
+                    "end_date":deal["end_date"],}
                 )
-                self.log.debug(f"Upserted deal: {deal['id']}")
-
-                # self.upsert_deal_products()
-                self.log.info(f"Upserted products and budgets for deal: {deal['id']}")
+                self.log.debug(f"Upserted deal: {deal['id']}")                                
             # If this is the last iteration of the loop due to the max page limit, log that we stopped
             if page >= self.max_deal_pages:
                 self.log.info(
@@ -370,17 +367,33 @@ class BoostrLoader:
 
     def upsert_mediaplan(self) -> None:
         """Upsert media plan line item details into the database"""
-        for media_plan in self.mp_data:
+        page = 0
+        media_plan_params = {
+            "per": "300",
+            "page": str(page),
+            "filter": "all",
+        }
+        if settings.BOOSTR_AUTH_BYPASS and self.mp_data:
+            media_plans = self.mp_data
+        else:
+            media_plans = self.boostr.get(
+                f"media_plans",
+                params=media_plan_params,
+            )
+            self.log.info(f"Fetched {len(media_plans)} media plans ")
+            self.append_json_file(media_plans, self.json_file)
+
+        for media_plan in media_plans:
             new_media_plan = BoostrMediaPlan(
                 media_plan_id=media_plan["id"],
                 name=media_plan["deal_name"],
                 boostr_deal=media_plan["deal_id"],
             )
-            if media_plan["deal_id"]:
-                self.media_plan_collection.add_media_plan(
-                    media_plan["deal_id"], new_media_plan
-                )
-                self.upsert_mediaplan_lineitems(new_media_plan)
+            
+            self.media_plan_collection.add_media_plan(
+                media_plan["deal_id"], new_media_plan
+            )
+            self.upsert_mediaplan_lineitems(new_media_plan)
 
     def upsert_mediaplan_lineitems(self, media_plan: BoostrMediaPlan) -> None:
         """Upsert media plan line item"""
@@ -393,7 +406,7 @@ class BoostrLoader:
 
         page += 1
         deals_params["page"] = str(page)
-        if self.li_mp_data:
+        if settings.BOOSTR_AUTH_BYPASS and self.li_mp_data:
             media_plan_line_items = self.li_mp_data
         else:
             media_plan_line_items = self.boostr.get(
@@ -452,8 +465,7 @@ class BoostrLoader:
         self.upsert_products()
         self.upsert_deals()
         self.upsert_deal_products()
-        # self.upsert_mediaplan()
-        # self.upsert_mediaplan_lineitems()
+        self.upsert_mediaplan()        
         end_time = time.time()
         elapsed_time = end_time - start_time
         self.log.info(f"Sync took {elapsed_time:.4f} seconds to run")
