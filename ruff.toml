@@ -1,0 +1,13 @@
+fix = true
+show-fixes = true
+line-length = 120
+
+
+[lint]
+select = ["S","I","D202","D212"]
+ignore = ["D105","D107","D203", "D205", "D400"]
+fixable = ["ALL"]
+
+[lint.isort]
+order-by-type = true
+
