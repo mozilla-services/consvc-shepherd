@@ -345,8 +345,6 @@ class BoostrSyncStatus(models.Model):
         failure = "failure"
 
     synced_on: DateTimeField = models.DateTimeField(auto_now=True)
-    status: CharField = models.CharField(
-        choices=Status.choices
-    )
+    status: CharField = models.CharField(choices=Status.choices)
     message: CharField = models.CharField()
     created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
