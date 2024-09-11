@@ -9,6 +9,7 @@ from django.db.models import (
     CharField,
     DateField,
     DateTimeField,
+    DecimalField,
     FloatField,
     ForeignKey,
     IntegerField,
@@ -376,7 +377,7 @@ class CampaignOverview(models.Model):
     ad_ops_person: CharField = models.CharField()
     notes: CharField = models.CharField()
     kevel_flight_id: IntegerField = models.IntegerField()
-    net_spend: IntegerField = models.IntegerField()
+    net_spend: DecimalField = models.DecimalField(max_digits=12, decimal_places=2)
     impressions_sold: IntegerField = models.IntegerField()
     net_ecpm: FloatField = models.FloatField()
     seller: CharField = models.CharField()
@@ -398,6 +399,9 @@ class CampaignOverview(models.Model):
 
         verbose_name = "Campaign"
         verbose_name_plural = "Campaigns"
+
+    def __str__(self):
+        return f"Campaign {self.kevel_flight_id} - {self.ad_ops_person}"
 
 
 class CampaignOverviewSummary(CampaignOverview):

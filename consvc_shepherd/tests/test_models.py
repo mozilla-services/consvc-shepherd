@@ -112,6 +112,11 @@ class CampaignOverviewTestCase(TestCase):
         campaign.save()
         self.assertEqual(campaign.net_ecpm, (2000 / 500) * 1000)  # 4000
 
+    def test_str_method(self):
+        """Verify that the __str__ method returns the correct string representation."""
+        expected_str = "John Doe - 12345"
+        self.assertEqual(str(self.campaign), expected_str)
+
 
 class CampaignOverviewSummaryTestCase(TestCase):
     """Test case for the CampaignOverviewSummary proxy model."""
