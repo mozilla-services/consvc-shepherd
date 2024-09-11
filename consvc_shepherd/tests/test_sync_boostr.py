@@ -695,11 +695,10 @@ class TestSyncBoostrData(TestCase):
             ),
         ]
         self.assertEqual(len(products), 2)
-<<<<<<< HEAD
-        mock_get_success.assert_has_calls(calls)
-        self.assertEqual(
-            mock_sleep.call_count, 2
-        )  # once for the POST /user_token under the hood, once for GET /products
+        mock_get_success.assert_has_calls(get_calls)
+        # once for the POST /user_token under the hood, once for GET /products
+        sleep_calls = [mock.call(4), mock.call(4)]
+        mock_sleep.assert_has_calls(sleep_calls)
 
     @mock.patch(
         "consvc_shepherd.management.commands.sync_boostr_data.BoostrLoader.upsert_products"
@@ -753,9 +752,3 @@ class TestSyncBoostrData(TestCase):
                 ),
             ]
             mock_create.assert_has_calls(calls)
-=======
-        mock_get_success.assert_has_calls(get_calls)
-        # once for the POST /user_token under the hood, once for GET /products
-        sleep_calls = [mock.call(4), mock.call(4)]
-        mock_sleep.assert_has_calls(sleep_calls)
->>>>>>> main
