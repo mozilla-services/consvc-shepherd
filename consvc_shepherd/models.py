@@ -334,8 +334,19 @@ class BoostrSyncStatus(models.Model):
         The status of the symc process (success|failure)
     message: CharField = models.CharField()
         An optional error message populated when sync_status is "failure"
+    created_on : DateTimeField
+        Date of deal record creation
     """
 
+    class Status(models.TextChoices):
+        """Represents the status of a sync"""
+
+        success = "success"
+        failure = "failure"
+
     synced_on: DateTimeField = models.DateTimeField(auto_now=True)
-    status: CharField = models.CharField()
+    status: CharField = models.CharField(
+        choices=Status.choices
+    )
     message: CharField = models.CharField()
+    created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
