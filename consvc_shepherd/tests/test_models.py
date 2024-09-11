@@ -114,7 +114,7 @@ class CampaignOverviewTestCase(TestCase):
 
     def test_str_method(self):
         """Verify that the __str__ method returns the correct string representation."""
-        expected_str = "John Doe - 12345"
+        expected_str = "Campaign 12345 - John Doe"
         self.assertEqual(str(self.campaign), expected_str)
 
 
