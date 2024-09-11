@@ -22,6 +22,11 @@ MAX_DEAL_PAGES_DEFAULT = 50
 RATE_LIMIT_REQUEST_INTERVAL_SECS = 0.7
 SYNC_STATUS_SUCCESS = "success"
 SYNC_STATUS_FAILURE = "failure"
+REQUEST_INTERVAL_SECONDS_DEFAULT = 1
+DEFAULT_OPTIONS = {
+    "request_interval_seconds": REQUEST_INTERVAL_SECONDS_DEFAULT,
+    "max_deal_pages": MAX_DEAL_PAGES_DEFAULT,
+}
 
 
 class Command(BaseCommand):
@@ -34,7 +39,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "base_url",
             type=str,
-            help="The base url for the Boostr API, eg. https://app.boostr.com/api/",
+            help="The base url for the Boostr API, eg. https://app.boostr.com/api",
         )
         parser.add_argument(
             "--max-deal-pages",
@@ -43,6 +48,14 @@ class Command(BaseCommand):
             help=f"""By default, the sync code will stop trying to fetch additional deals pages after
                 {MAX_DEAL_PAGES_DEFAULT} pages. Currently we have ~14 pages of deals in Boostr, so this default max
                 should be sufficient for a while.""",
+        )
+        parser.add_argument(
+            "--request-interval-seconds",
+            default=REQUEST_INTERVAL_SECONDS_DEFAULT,
+            type=int,
+            help=f"""This parameter controls the rate of requests to the Boostr API in order to stay under their rate
+                limits. By default, the sync code will wait {REQUEST_INTERVAL_SECONDS_DEFAULT} seconds between
+                requests.""",
         )
 
     def handle(self, *args, **options):
@@ -55,7 +68,7 @@ class Command(BaseCommand):
             options["base_url"],
             env("BOOSTR_API_EMAIL"),
             env("BOOSTR_API_PASS"),
-            options["max_deal_pages"],
+            options,
         )
         loader.load()
 
@@ -71,9 +84,15 @@ class BoostrApi:
 
     base_url: str
     session: requests.Session
+    request_interval_seconds: int
 
-    def __init__(self, base_url: str, email: str, password: str):
+    def __init__(
+        self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
+    ):
         self.base_url = base_url
+        self.request_interval_seconds = options.get(
+            "request_interval_seconds", REQUEST_INTERVAL_SECONDS_DEFAULT
+        )
         self.setup_session(email, password)
 
     def setup_session(self, email: str, password: str) -> None:
@@ -98,7 +117,7 @@ class BoostrApi:
         """Make POST requests to Boostr that uses the session, pass through headers and json data,
         check status, and return parsed json
         """
-        sleep(RATE_LIMIT_REQUEST_INTERVAL_SECS)
+        sleep(self.request_interval_seconds)
         response = self.session.post(
             f"{self.base_url}/{path}",
             json=json,
@@ -116,7 +135,7 @@ class BoostrApi:
         """Make GET requests to Boostr that use the session, pass through headers and query params,
         check status, and return parsed json
         """
-        sleep(RATE_LIMIT_REQUEST_INTERVAL_SECS)
+        sleep(self.request_interval_seconds)
         response = self.session.get(
             f"{self.base_url}/{path}", params=params, headers=headers, timeout=15
         )
@@ -135,10 +154,12 @@ class BoostrLoader:
     log: logging.Logger
     max_deal_pages: int
 
-    def __init__(self, base_url: str, email: str, password: str, max_deal_pages=50):
+    def __init__(
+        self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
+    ):
         self.log = logging.getLogger("sync_boostr_data")
-        self.boostr = BoostrApi(base_url, email, password)
-        self.max_deal_pages = max_deal_pages
+        self.boostr = BoostrApi(base_url, email, password, options)
+        self.max_deal_pages = options.get("max_deal_pages", MAX_DEAL_PAGES_DEFAULT)
 
     def upsert_products(self) -> None:
         """Fetch all Boostr products and upsert them to Shepherd DB"""
@@ -153,8 +174,11 @@ class BoostrLoader:
         for product in products:
             BoostrProduct.objects.update_or_create(
                 boostr_id=product["id"],
-                full_name=product["full_name"],
-                campaign_type=get_campaign_type(product["full_name"]),
+                defaults={
+                    "full_name": product["full_name"],
+                    "country": get_country(product["full_name"]),
+                    "campaign_type": get_campaign_type(product["full_name"]),
+                },
             )
         self.log.info(f"Upserted {(len(products))} products")
 
@@ -262,3 +286,35 @@ def get_campaign_type(product_full_name: str) -> str:
         return BoostrProduct.CampaignType.FLAT_FEE
     else:
         return BoostrProduct.CampaignType.NONE
+
+
+def get_country(product_full_name: str) -> str:
+    """Return the country code found in the product's full name."""
+    # Mapping of common country code abbreviations to standardized ISO 3166-1 alpha-2 codes
+    country_code_map = {
+        "US": "US",
+        "CA": "CA",
+        "DE": "DE",
+        "ES": "ES",
+        "FR": "FR",
+        "GB": "GB",
+        "UK": "GB",  # Map "UK" to "GB" for United Kingdom
+        "IT": "IT",
+        "PL": "PL",
+        "AT": "AT",
+        "NL": "NL",
+        "LU": "LU",
+        "CH": "CH",
+        "BE": "BE",
+        "SP": "ES",  # Map "SP" to "ES" for Spain
+    }
+
+    normalized_name = product_full_name.upper()
+    words = set(normalized_name.split())
+
+    for code in country_code_map:
+        if code in words:
+            return country_code_map[code]
+
+    # Return an empty string if no country code is found
+    return ""
