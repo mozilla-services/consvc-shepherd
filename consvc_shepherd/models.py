@@ -9,6 +9,7 @@ from django.db.models import (
     CharField,
     DateField,
     DateTimeField,
+    FloatField,
     ForeignKey,
     IntegerField,
     JSONField,
@@ -339,3 +340,72 @@ class BoostrDealProduct(models.Model):
     )
     budget: IntegerField = models.IntegerField()
     month: CharField = models.CharField()
+
+
+class CampaignOverview(models.Model):
+    """Representation of AdOps CampaignOverview
+
+    Attributes
+    ----------
+    ad_ops_person : CharField
+        Ad Ops Person
+    notes : CharField
+        Notes
+    kevel_flight_id : IntegerField
+        The kevel flight id
+    net_spend : CharField
+        Net Spend
+    impressions_sold : IntegerField
+        Impression Sold
+    net_ecpm : FloatField
+        Net eCPM
+    seller : CharField
+        Seller
+    created_on : DateTimeField
+        Date of deal record creation (shepherd DB timestamp metadata, not boostr's)
+    updated_on : DateTimeField
+        Date of deal record update (shepherd DB timestamp metadata, not boostr's)
+
+    Methods
+    -------
+    __str__(self)
+        Return the string representation for a Boostr Campaign
+
+    """
+
+    ad_ops_person: CharField = models.CharField()
+    notes: CharField = models.CharField()
+    kevel_flight_id: IntegerField = models.IntegerField()
+    net_spend: IntegerField = models.IntegerField()
+    impressions_sold: IntegerField = models.IntegerField()
+    net_ecpm: FloatField = models.FloatField()
+    seller: CharField = models.CharField()
+    deal: ForeignKey = models.ForeignKey(BoostrDeal, on_delete=models.CASCADE)
+    created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
+    updated_on: DateTimeField = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        """Calculate and save the net eCPM before saving the instance."""
+        if self.impressions_sold > 0:
+            self.net_ecpm = (self.net_spend / self.impressions_sold) * 1000
+        else:
+            self.net_ecpm = None
+
+        super(CampaignOverview, self).save(*args, **kwargs)
+
+    class Meta:
+        """Metadata for the Campaign model."""
+
+        verbose_name = "Campaign"
+        verbose_name_plural = "Campaigns"
+
+
+class CampaignOverviewSummary(CampaignOverview):
+    """Proxy model for summarizing campaign overviews."""
+
+    class Meta:
+        """Metadata for the CampaignOverviewSummary proxy model."""
+
+        proxy = True
+        verbose_name = "Campaign Summary"
+        verbose_name_plural = "Campaign Summaries"

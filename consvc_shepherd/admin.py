@@ -4,7 +4,9 @@ import json
 
 from django.conf import settings
 from django.contrib import admin, messages
+from django.db.models import FloatField, OuterRef, Subquery, Sum
 from django.utils import dateformat, timezone
+from django.utils.translation import gettext_lazy as _
 from jsonschema import exceptions, validate
 
 from consvc_shepherd.forms import AllocationSettingForm, AllocationSettingFormset
@@ -14,6 +16,8 @@ from consvc_shepherd.models import (
     BoostrDeal,
     BoostrDealProduct,
     BoostrProduct,
+    CampaignOverview,
+    CampaignOverviewSummary,
     PartnerAllocation,
     SettingsSnapshot,
 )
@@ -268,3 +272,204 @@ class BoostrProductAdmin(admin.ModelAdmin):
         "country",
         "campaign_type",
     ]
+
+
+class MonthFilter(admin.SimpleListFilter):
+    """Filter for listing by month."""
+
+    title = _("month")
+    parameter_name = "month"
+
+    def lookups(self, request, model_admin):
+        """Return a list of distinct months for the filter options."""
+        months = BoostrDealProduct.objects.values_list("month", flat=True).distinct()
+        return [(month, month) for month in months]
+
+    def queryset(self, request, queryset):
+        """Filter the queryset based on the selected month."""
+        if self.value():
+            return queryset.filter(deal__boostrdealproduct__month=self.value())
+        return queryset
+
+
+class PlacementFilter(admin.SimpleListFilter):
+    """Filter for listing by placement."""
+
+    title = _("placement")
+    parameter_name = "placement"
+
+    def lookups(self, request, model_admin):
+        """Return a list of distinct placements for the filter options."""
+        placements = BoostrProduct.objects.values_list(
+            "full_name", flat=True
+        ).distinct()
+        return [(placement, placement) for placement in placements]
+
+    def queryset(self, request, queryset):
+        """Filter the queryset based on the selected placement."""
+        if self.value():
+            return queryset.filter(
+                deal__boostrdealproduct__boostr_product__full_name=self.value()
+            ).distinct()
+        return queryset
+
+
+class CountryFilter(admin.SimpleListFilter):
+    """Filter for listing by country."""
+
+    title = _("country")
+    parameter_name = "country"
+
+    def lookups(self, request, model_admin):
+        """Return a list of distinct countries for the filter options."""
+        countries = BoostrProduct.objects.values_list("country", flat=True).distinct()
+        return [(country, country) for country in countries]
+
+    def queryset(self, request, queryset):
+        """Filter the queryset based on the selected country."""
+        if self.value():
+            return queryset.filter(
+                deal__boostrdealproduct__boostr_product__country=self.value()
+            ).distinct()
+        return queryset
+
+
+@admin.register(CampaignOverview)
+class CampaignOverviewAdmin(admin.ModelAdmin):
+    """Admin model for sales products imported from Boostr. Deals are many-to-many with products"""
+
+    model = CampaignOverview
+
+    list_filter = [
+        MonthFilter,
+        CountryFilter,
+        PlacementFilter,
+        "deal__advertiser",
+    ]
+
+    readonly_fields: list[str] = [
+        "net_ecpm",
+    ]
+
+    list_display = [
+        "ad_ops_person",
+        "notes",
+        "kevel_flight_id",
+        "net_spend",
+        "impressions_sold",
+        "net_ecpm",
+        "seller",
+        "deal",
+    ]
+
+
+@admin.register(CampaignOverviewSummary)
+class CampaignSummaryAdmin(admin.ModelAdmin):
+    """Admin model for sales products imported from Boostr. Deals are many-to-many with products"""
+
+    change_list_template = "admin/campaign_summary.html"
+
+    model = CampaignOverviewSummary
+
+    list_filter = [MonthFilter, CountryFilter, PlacementFilter, "deal__advertiser"]
+
+    def changelist_view(self, request, extra_context=None):
+        """Customize the changelist view to include aggregated data based on filters."""
+        print("change list veow is called ....")
+        extra_context = extra_context or {}
+
+        # Get the selected month filter value
+        month_filter_value = request.GET.get("month", None)
+        country_filter_value = request.GET.get("country", None)
+        placement_filter_value = request.GET.get("placement", None)
+        deal__advertiser_value = request.GET.get("deal__advertiser", None)
+
+        print("month_filter_value", month_filter_value)
+
+        # Apply the filter to the queryset and perform aggregation
+        aggregated_query = BoostrDeal.objects.filter(
+            campaignoverview__impressions_sold__isnull=False
+        ).distinct()
+
+        if month_filter_value:
+            aggregated_query = aggregated_query.filter(
+                boostrdealproduct__month=month_filter_value
+            )
+
+        if country_filter_value:
+            country_subquery = BoostrProduct.objects.filter(
+                boostrdealproduct__boostr_deal=OuterRef("pk"),
+                country=country_filter_value,
+            ).values("boostrdealproduct__boostr_deal")[:1]
+            aggregated_query = aggregated_query.filter(
+                pk__in=Subquery(country_subquery)
+            )
+
+        if placement_filter_value:
+            placement_subquery = BoostrProduct.objects.filter(
+                boostrdealproduct__boostr_deal=OuterRef("pk"),
+                full_name=placement_filter_value,
+            ).values("boostrdealproduct__boostr_deal")[:1]
+            aggregated_query = aggregated_query.filter(
+                pk__in=Subquery(placement_subquery)
+            )
+
+        if deal__advertiser_value:
+            aggregated_query = aggregated_query.filter(
+                advertiser=deal__advertiser_value
+            )
+
+        latest_notes_subquery = (
+            CampaignOverview.objects.filter(deal=OuterRef("pk"))
+            .order_by("-updated_on")
+            .values("notes")[:1]
+        )
+
+        latest_seller_subquery = (
+            CampaignOverview.objects.filter(deal=OuterRef("pk"))
+            .order_by("-updated_on")
+            .values("seller")[:1]
+        )
+
+        latest_ad_ops_subquery = (
+            CampaignOverview.objects.filter(deal=OuterRef("pk"))
+            .order_by("-updated_on")
+            .values("ad_ops_person")[:1]
+        )
+
+        aggregated_data = (
+            aggregated_query.values("advertiser")  # Group by advertiser
+            .annotate(
+                total_impressions_sold=Sum(
+                    "campaignoverview__impressions_sold", output_field=FloatField()
+                ),
+                total_net_spend=Sum(
+                    "campaignoverview__net_spend", output_field=FloatField()
+                ),
+                latest_note=Subquery(latest_notes_subquery),
+                latest_seller=Subquery(latest_seller_subquery),
+                latest_ad_ops=Subquery(latest_ad_ops_subquery),
+            )
+            .values(
+                "advertiser",
+                "total_impressions_sold",
+                "total_net_spend",
+                "latest_note",
+                "latest_seller",
+                "latest_ad_ops",
+            )
+        )
+
+        # Calculate total_net_ecpm in Python
+        for item in aggregated_data:
+            if item["total_impressions_sold"] > 0:
+                item["total_net_ecpm"] = (
+                    item["total_net_spend"] / item["total_impressions_sold"]
+                ) * 1000
+            else:
+                item["total_net_ecpm"] = 0  # Or None, based on your preference
+
+        response = super().changelist_view(request, extra_context=extra_context)
+        response.context_data["summary"] = list(aggregated_data)
+
+        return response
