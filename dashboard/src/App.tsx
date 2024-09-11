@@ -34,7 +34,7 @@ function Products() {
         <h1>Welcome to The Ad Ops Dashboard</h1>
       </header>
       <div>
-        <h1>Boostr Products</h1>
+        <h2>Boostr Products</h2>
         <ul>
           {data.map((p) => (
             <li
@@ -45,7 +45,7 @@ function Products() {
                 fontSize: "20px",
               }}
             >
-              {p.name}, {p.country}, {p.campaign_type}
+              {p.name}, {p.country || "RON"}, {p.campaign_type || "None"}
             </li>
           ))}
         </ul>
