@@ -88,7 +88,6 @@ INSTALLED_APPS: list[str] = [
     "dockerflow.django",
     "rest_framework",
     "corsheaders",
-    "dashboard_api.apps.DashboardApiConfig",
 ]
 
 MIDDLEWARE: list = [
@@ -153,7 +152,6 @@ USE_TZ: bool = True
 
 STATIC_BUCKET_NAME = env("STATIC_BUCKET_NAME", default="")
 STATIC_URL: str = "static/"
-STATIC_ROOT: str = "./static"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
@@ -247,5 +245,5 @@ if STATSD_DEBUG:
 markus.configure(backends=_MARKUS_BACKENDS)
 
 CORS_ALLOWED_ORIGINS=[
-    'http://localhost:5173'
+    'http://0.0.0.0:5173'
 ]

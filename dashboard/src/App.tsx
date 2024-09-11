@@ -1,46 +1,55 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import "./App.css";
+import {
+  useQuery,
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
+import { getProducts } from "./queries";
 
-function App() {
-  const [items, setItems] = useState([]);
+// Create a client
+const queryClient = new QueryClient();
 
-  useEffect(() => {
-    try {
-      const response = axios.get("http://127.0.0.1:8000/api/v1/test_models/");
-      setItems(response.data);
-      console.log(response.data);
-    } catch (error) {
-      console.error("There was an error fetching the test items!", error);
-    }
-  }, []);
-
+export default function App() {
   return (
-    <>
-      <div className="App">
-        <header className="App-header">
-          <h1>Welcome to My App</h1>
-        </header>
-        <div>
-          <h1>Languages</h1>
-          <ul>
-            {items.map((item) => (
-              <li
-                key={item.name}
-                style={{
-                  listStyleType: "none",
-                  padding: "10px",
-                  fontSize: "20px",
-                }}
-              >
-                {item.name}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </>
+    // Provide the client to your App
+    <QueryClientProvider client={queryClient}>
+      <Products />
+    </QueryClientProvider>
   );
 }
 
-export default App;
+function Products() {
+  const { isPending, error, data } = useQuery({
+    queryKey: ["products"],
+    queryFn: getProducts,
+  });
+
+  if (isPending) return "Loading...";
+
+  if (error) return "An error has occurred: " + error.message;
+
+  return (
+    <div className="Dashboard">
+      <header className="Dashboard-header">
+        <h1>Welcome to The Ad Ops Dashboard</h1>
+      </header>
+      <div>
+        <h1>Boostr Products</h1>
+        <ul>
+          {data.map((p) => (
+            <li
+              key={p.name}
+              style={{
+                listStyleType: "none",
+                padding: "10px",
+                fontSize: "20px",
+              }}
+            >
+              {p.name}, {p.country}, {p.campaign_type}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}

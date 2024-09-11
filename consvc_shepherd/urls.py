@@ -42,7 +42,7 @@ urlpatterns = [
     path("allocation/<int:pk>/", AllocationUpdateView.as_view()),
     path("preview", PreviewView.as_view()),
     path("", TableOverview.as_view()),
-    path('api/v1/', include('dashboard_api.urls')),
+    path('api/v1/', include('consvc_shepherd.api.urls')),
 ]
 
 admin.site.site_title = "Shepherd"
