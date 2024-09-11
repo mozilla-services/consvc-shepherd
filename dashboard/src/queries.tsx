@@ -2,7 +2,7 @@ import { Product, ProductResponse } from "./types";
 
 export const getProducts = async (): Promise<Product[]> => {
   try {
-    const response = await fetch("http://localhost:8000/api/v1/products");
+    const response = await fetch("http://localhost:7001/api/v1/products");
     const json = await response.json();
     const products: Product[] = json.map((data: ProductResponse) => {
       const product: Product = {
