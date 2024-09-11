@@ -86,6 +86,9 @@ INSTALLED_APPS: list[str] = [
     "django.contrib.staticfiles",
     "django_countries",
     "dockerflow.django",
+    "rest_framework",
+    "corsheaders",
+    "dashboard_api.apps.DashboardApiConfig",
 ]
 
 MIDDLEWARE: list = [
@@ -97,6 +100,7 @@ MIDDLEWARE: list = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "dockerflow.django.middleware.DockerflowMiddleware",
     "openidc.middleware.OpenIDCAuthMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF: str = "consvc_shepherd.urls"
@@ -241,3 +245,7 @@ if STATSD_DEBUG:
         }
     )
 markus.configure(backends=_MARKUS_BACKENDS)
+
+CORS_ALLOWED_ORIGINS=[
+    'http://localhost:5173'
+]
