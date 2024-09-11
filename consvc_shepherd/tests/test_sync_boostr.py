@@ -731,12 +731,14 @@ class TestSyncBoostrData(TestCase):
         self, mock_create, mock_get, mock_post, mock_sleep, mock_upsert_products
     ):
         """Test the load function failure scenario"""
-        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
-        loader.load()
-        calls = [
-            mock.call(
-                status="failure",
-                message=mock.ANY,
-            ),
-        ]
-        mock_create.assert_has_calls(calls)
+
+        with self.assertRaises(Exception):
+            loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
+            loader.load()
+            calls = [
+                mock.call(
+                    status="failure",
+                    message=mock.ANY,
+                ),
+            ]
+            mock_create.assert_has_calls(calls)

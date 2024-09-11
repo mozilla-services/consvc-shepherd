@@ -249,6 +249,7 @@ class BoostrLoader:
                 SYNC_STATUS_FAILURE,
                 f"Exception: {str(e):} Trace: {traceback.format_exc()}",
             )
+            raise e
 
 
 def get_campaign_type(product_full_name: str) -> str:
