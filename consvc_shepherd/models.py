@@ -366,7 +366,8 @@ class BoostrSyncStatus(models.Model):
 
 
 class CampaignOverview(models.Model):
-    """Table for storing campaign metrics data pulled from BigQuery
+    """Table for storing Glean campaign metrics data pulled from BigQuery
+    https://github.com/mozilla/private-bigquery-etl/blob/main/sql/moz-fx-data-shared-prod/ads/consolidated_ad_metrics_daily_pt/view.sql
 
     Attributes
     ----------
@@ -377,11 +378,13 @@ class CampaignOverview(models.Model):
     campaign_id : CharField = models.CharField
         The Kevel campaign ID
     surface : CharField = models.CharField
-        Which firefox surface the metric comes from (mobile|desktop)
+        The Firefox surface from which the metric originates (mobile|desktop)
     country : CharField = models.CharField
-        The country the campaign was seen (e.g. US, DE, etc)
-    product: CharField = models.CharField
-        Which ad product the metric comes from (SPOCs|tiles)
+        The country in which the campaign was displayed (e.g., US, DE, etc.)
+    product : CharField = models.CharField
+        The ad product from which the metric originates (SPOCs|tiles).
+    provider : CharField = models.CharField
+        The Ad provider used
     clicks : models.IntegerField
         The number of clicks delivered
     impression : models.IntegerField
@@ -389,7 +392,7 @@ class CampaignOverview(models.Model):
     """
 
     submission_date = models.DateField()
-    flight_id = models.BigIntegerField()
+    flight_id = models.BigIntegerField(unique=True)
     campaign_id = models.BigIntegerField()
     surface = models.CharField(max_length=255)
     country = models.CharField(max_length=255)
@@ -397,3 +400,7 @@ class CampaignOverview(models.Model):
     provider = models.CharField(max_length=255)
     clicks = models.IntegerField()
     impressions = models.IntegerField()
+
+    def __str__(self):
+        """Return the string representation for all flight ids recorded"""
+        return self.flight_id
