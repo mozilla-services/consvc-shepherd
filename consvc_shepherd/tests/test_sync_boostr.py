@@ -416,16 +416,19 @@ BOOSTR_PRODUCTS = {
     28256: BoostrProduct(
         boostr_id=28256,
         full_name="Firefox New Tab US (CPC)",
+        country="US",
         campaign_type=BoostrProduct.CampaignType.CPC,
     ),
     212592: BoostrProduct(
         boostr_id=212592,
         full_name="Firefox 2nd Tile CA (CPM)",
+        country="CA",
         campaign_type=BoostrProduct.CampaignType.CPM,
     ),
     204410: BoostrProduct(
         boostr_id=204410,
         full_name="Firefox New Tab FR (CPM)",
+        country="SP",
         campaign_type=BoostrProduct.CampaignType.CPM,
     ),
 }
@@ -518,6 +521,7 @@ def mock_update_or_create_deal_product(
             boostr_product=BoostrProduct(
                 boostr_id=28256,
                 full_name="Firefox New Tab US (CPC)",
+                country="US",
                 campaign_type=BoostrProduct.CampaignType.CPC,
             ),
             month=kwargs["month"],
@@ -577,6 +581,7 @@ class TestSyncBoostrData(TestCase):
                 boostr_id=212592,
                 defaults={
                     "full_name": "Firefox 2nd Tile CA (CPM)",
+                    "country": "CA",
                     "campaign_type": BoostrProduct.CampaignType.CPM,
                 },
             ),
@@ -584,6 +589,7 @@ class TestSyncBoostrData(TestCase):
                 boostr_id=28256,
                 defaults={
                     "full_name": "Firefox New Tab US (CPC)",
+                    "country": "US",
                     "campaign_type": BoostrProduct.CampaignType.CPC,
                 },
             ),
@@ -669,7 +675,7 @@ class TestSyncBoostrData(TestCase):
         mock_sleep,
     ):
         """Test that upsert_deals respects the given max_deal_pages limit"""
-        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD, 3)
+        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD, {"max_deal_pages": 3})
         loader.upsert_deals()
         assert 3 == mock_get.call_count
 
@@ -775,12 +781,12 @@ class TestSyncBoostrData(TestCase):
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     def test_boostr_api_post(self, mock_post_success, mock_sleep):
         """Test the BoostrApi POST wrapper"""
-        boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD)
+        boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD, {"request_interval_seconds": 1})
         auth_json = {"auth": {"email": "email@mozilla.com", "password": "test"}}
         post_json = {"info": "for the server"}
         headers = {"X-Boostr-Whatever": "Stuff"}
         response = boostr.post("some-path", json=post_json, headers=headers)
-        calls = [
+        post_calls = [
             mock.call(
                 f"{BASE_URL}/user_token",
                 json=auth_json,
@@ -796,14 +802,16 @@ class TestSyncBoostrData(TestCase):
         ]
         self.assertEqual(response["data"], "wow")
         self.assertEqual(response["count"], 42)
-        mock_post_success.assert_has_calls(calls)
+        mock_post_success.assert_has_calls(post_calls)
+        sleep_calls = [mock.call(1), mock.call(1)]
+        mock_sleep.assert_has_calls(sleep_calls)
 
     @mock.patch("consvc_shepherd.management.commands.sync_boostr_data")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_success)
     def test_boostr_api_get(self, mock_get_success, mock_post_success, mock_sleep):
         """Test the BoostrApi GET wrapper"""
-        boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD)
+        boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD, {"request_interval_seconds": 4})
         headers = {"X-Boostr-Whatever": "Stuff"}
         products_params = {
             "per": "300",
@@ -811,7 +819,7 @@ class TestSyncBoostrData(TestCase):
             "filter": "all",
         }
         products = boostr.get("products", headers=headers, params=products_params)
-        calls = [
+        get_calls = [
             mock.call(
                 f"{BASE_URL}/products",
                 params=products_params,
@@ -842,13 +850,9 @@ class TestSyncBoostrData(TestCase):
         mock_add_media_plan,
         mock_upsert_mediaplan_lineitems,
     ):
-        # self.new_media_plan = mock.Mock(spec=BoostrMediaPlan)
-        # self.upsert_mediaplan_lineitems = mock.Mock()
-
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
 
-        loader.upsert_mediaplan()
-        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>", mock_upsert_mediaplan_lineitems.call_args)
+        loader.upsert_mediaplan()        
         mock_upsert_mediaplan_lineitems.assert_called_with(
             BoostrMediaPlan(
                 media_plan_id=271925,
@@ -877,7 +881,6 @@ class TestSyncBoostrData(TestCase):
     @mock.patch(
         "consvc_shepherd.models.BoostrDeal.objects.get", side_effect=mocked_get_deal
     )
-    # @mock.patch("consvc_shepherd.models.BoostrProduct")
     @mock.patch(
         "consvc_shepherd.management.commands.sync_boostr_data.BoostrDealProduct.objects.filter"
     )
