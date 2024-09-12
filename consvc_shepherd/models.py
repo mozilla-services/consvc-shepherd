@@ -356,13 +356,13 @@ class BoostrSyncStatus(models.Model):
         Date of deal record creation
     """
 
-    class Status(models.TextChoices):
+    class SyncStatus(models.TextChoices):
         """Represents the status of a sync"""
 
         success = "success"
         failure = "failure"
 
     synced_on: DateTimeField = models.DateTimeField(auto_now=True)
-    status: CharField = models.CharField(choices=Status.choices)
+    status: CharField = models.CharField(choices=SyncStatus.choices)
     message: CharField = models.CharField()
     created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
