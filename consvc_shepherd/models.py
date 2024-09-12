@@ -363,3 +363,37 @@ class BoostrSyncStatus(models.Model):
     synced_on: DateTimeField = models.DateTimeField(auto_now=True)
     status: CharField = models.CharField(choices=SyncStatus.choices)
     message: CharField = models.CharField()
+
+
+class CampaignOverview(models.Model):
+    """Table for storing campaign metrics data pulled from BigQuery
+
+    Attributes
+    ----------
+    submission_date : DateTimeField
+        The date the metric was captured
+    flight_id : CharField = models.CharField
+        The Kevel flight ID
+    campaign_id : CharField = models.CharField
+        The Kevel campaign ID
+    surface : CharField = models.CharField
+        Which firefox surface the metric comes from (mobile|desktop)
+    country : CharField = models.CharField
+        The country the campaign was seen (e.g. US, DE, etc)
+    product: CharField = models.CharField
+        Which ad product the metric comes from (SPOCs|tiles)
+    clicks : models.IntegerField
+        The number of clicks delivered
+    impression : models.IntegerField
+        The number of impressions delivered
+    """
+
+    submission_date = models.DateField()
+    flight_id = models.BigIntegerField()
+    campaign_id = models.BigIntegerField()
+    surface = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+    product = models.CharField(max_length=255)
+    provider = models.CharField(max_length=255)
+    clicks = models.IntegerField()
+    impressions = models.IntegerField()
