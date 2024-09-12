@@ -8,7 +8,7 @@ MIGRATE ?= true
 # This will be run if no target is provided
 .DEFAULT_GOAL := help
 
-.PHONY: help install isort isort-fix black black-fix flake8 bandit pydocstyle mypy lint lint-fix format local-migration-check local-migrate  test doc-install-deps doc doc-preview dev local-test makemigrations-empty migrate makemigrations remove-migration debug
+.PHONY: help install isort isort-fix black black-fix flake8 bandit pydocstyle mypy lint lint-fix format local-migration-check local-migrate  test doc-install-deps doc doc-preview dev local-test makemigrations-empty migrate makemigrations remove-migration debug ruff
 
 help: ##  show this help message
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m\033[0m\n"} /^[$$()% 0-9a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
@@ -94,20 +94,19 @@ migrate: ##  Run migrate on the docker container
 	docker exec -it consvc-shepherd-app-1 python manage.py migrate
 
 
-makemigrations: ##  Run makemigrations on the docker container set MIGRATE=false prevent automatic migration.
+makemigrations: ##  Run makemigrations on the docker container set MIGRATE= to false prevent automatic migration.
 	@echo "Making migrations..."
 	docker exec -it consvc-shepherd-app-1 python manage.py makemigrations
-	@if [ "$(MIGRATE)" = "true"]; then \
+	@if [ "$(MIGRATE)" = "true" ]; then \
 		echo "Applying migration..."; \
 		docker exec -it consvc-shepherd-app-1 python manage.py migrate; \
 	fi
 
-.PHONY: ruff
-ruff: install
+ruff: install ##  **Experimental** Run ruff linter. To fix and format files.
 	$(POETRY) run ruff check --select I --fix
 	$(POETRY) run ruff format
 
-debug: 
+debug: ##  Connect to docker container with docker debug.
 	docker debug consvc-shepherd-app-1
 
 remove-migration: install  ##  Run command to undo migrations add VER= to set the migration number e.g. 0002
@@ -135,7 +134,7 @@ remove-migration-fix: install  ##  Run command to undo migrations, delete the co
 		done; \
 		echo "Migration files removed."; \
 		echo "Generating New Migration file."; \
-		if [ "$(MIGRATE)" = "true"]; then \
+		if [ "$(MIGRATE)" = "true" ]; then \
 			docker exec -it consvc-shepherd-app-1 python manage.py makemigrations; \
 			docker exec -it consvc-shepherd-app-1 python manage.py migrate; \
 		fi; \
