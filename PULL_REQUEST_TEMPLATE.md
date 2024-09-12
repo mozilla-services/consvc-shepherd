@@ -1,11 +1,11 @@
 ## References
 
-[AE-XYZ](https://mozilla-hub.atlassian.net/browse/AE-XYZ)
+[SHEP-123](https://mozilla-hub.atlassian.net/browse/SHEP-123)
 
 ## Problem Statement
 
 A brief description of the bugfix or feature that has necessitated this change. Provide enough context that a
-reviwer who hasn't been working in this area of the code can understand the intention of this change.
+reviewer who hasn't been working in this area of the code can understand the intention of this change.
 
 ## Proposed Changes
 
