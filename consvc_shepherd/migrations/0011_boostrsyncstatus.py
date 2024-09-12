@@ -6,18 +6,31 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('consvc_shepherd', '0010_boostrproduct_country'),
+        ("consvc_shepherd", "0010_boostrproduct_country"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='BoostrSyncStatus',
+            name="BoostrSyncStatus",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('synced_on', models.DateTimeField(auto_now=True)),
-                ('status', models.CharField(choices=[('success', 'Success'), ('failure', 'Failure')])),
-                ('message', models.CharField()),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("synced_on", models.DateTimeField(auto_now=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("success", "Success"), ("failure", "Failure")]
+                    ),
+                ),
+                ("message", models.CharField()),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
             ],
         ),
     ]
