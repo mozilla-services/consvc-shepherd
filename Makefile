@@ -97,7 +97,7 @@ migrate: ##  Run migrate on the docker container
 makemigrations: ##  Run makemigrations on the docker container set MIGRATE=false prevent automatic migration.
 	@echo "Making migrations..."
 	docker exec -it consvc-shepherd-app-1 python manage.py makemigrations
-	@if [ "$(MIGRATE)" = "true"]; then \
+	@if [ "$(MIGRATE)" = "true" ]; then \
 		echo "Applying migration..."; \
 		docker exec -it consvc-shepherd-app-1 python manage.py migrate; \
 	fi
@@ -134,7 +134,7 @@ remove-migration-fix: install  ##  Run command to undo migrations, delete the co
 		done; \
 		echo "Migration files removed."; \
 		echo "Generating New Migration file."; \
-		if [ "$(MIGRATE)" = "true"]; then \
+		if [ "$(MIGRATE)" = "true" ]; then \
 			docker exec -it consvc-shepherd-app-1 python manage.py makemigrations; \
 			docker exec -it consvc-shepherd-app-1 python manage.py migrate; \
 		fi; \
