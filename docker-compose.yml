@@ -28,5 +28,19 @@ services:
     depends_on:
       - db
 
+  dashboard:
+    image: node:alpine
+    build:
+      context: ./dashboard
+    working_dir: /dashboard
+    volumes:
+      - ./dashboard:/dashboard
+      - /dashboard/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - db
+      - app
+
 volumes:
   db_volume:
