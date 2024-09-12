@@ -6,23 +6,31 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('consvc_shepherd', '0012_remove_boostrsyncstatus_created_on'),
+        ("consvc_shepherd", "0012_remove_boostrsyncstatus_created_on"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CampaignOverview',
+            name="CampaignOverview",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('submission_date', models.DateField()),
-                ('flight_id', models.BigIntegerField()),
-                ('campaign_id', models.BigIntegerField()),
-                ('surface', models.CharField(max_length=255)),
-                ('country', models.CharField(max_length=255)),
-                ('product', models.CharField(max_length=255)),
-                ('provider', models.CharField(max_length=255)),
-                ('clicks', models.IntegerField()),
-                ('impressions', models.IntegerField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("submission_date", models.DateField()),
+                ("flight_id", models.BigIntegerField()),
+                ("campaign_id", models.BigIntegerField()),
+                ("surface", models.CharField(max_length=255)),
+                ("country", models.CharField(max_length=255)),
+                ("product", models.CharField(max_length=255)),
+                ("provider", models.CharField(max_length=255)),
+                ("clicks", models.IntegerField()),
+                ("impressions", models.IntegerField()),
             ],
         ),
     ]

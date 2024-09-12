@@ -15,6 +15,7 @@ from consvc_shepherd.models import (
     BoostrDealProduct,
     BoostrProduct,
     BoostrSyncStatus,
+    CampaignOverview,
     PartnerAllocation,
     SettingsSnapshot,
 )
@@ -281,4 +282,36 @@ class BoostrSyncStatusAdmin(admin.ModelAdmin):
         "synced_on",
         "status",
         "message",
+    ]
+
+
+@admin.register(CampaignOverview)
+class CampaignOverviewAdmin(admin.ModelAdmin):
+    """Admin model for campaign data imported from BigQuery"""
+
+    model = CampaignOverview
+    search_fields = [
+        "campaign_id",
+        "flight_id",
+        "product",
+        "surface",
+        "clicks",
+        "impressions",
+    ]
+    search_help_text = (
+        "Search by campaign id, flight id, product, surface, clicks, or impressions"
+    )
+    list_filter = [
+        "campaign_id",
+        "submission_date",
+    ]
+    list_display = [
+        "submission_date",
+        "flight_id",
+        "campaign_id",
+        "surface",
+        "country",
+        "product",
+        "clicks",
+        "impressions",
     ]

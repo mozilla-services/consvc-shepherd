@@ -6,6 +6,7 @@ from typing import Any
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import (
+    BigIntegerField,
     CharField,
     DateField,
     DateTimeField,
@@ -391,16 +392,16 @@ class CampaignOverview(models.Model):
         The number of impressions delivered
     """
 
-    submission_date = models.DateField()
-    flight_id = models.BigIntegerField(unique=True)
-    campaign_id = models.BigIntegerField()
-    surface = models.CharField(max_length=255)
-    country = models.CharField(max_length=255)
-    product = models.CharField(max_length=255)
-    provider = models.CharField(max_length=255)
-    clicks = models.IntegerField()
-    impressions = models.IntegerField()
+    submission_date: DateField = models.DateTimeField()
+    flight_id: BigIntegerField = models.BigIntegerField()
+    campaign_id: BigIntegerField = models.BigIntegerField(unique=True)
+    surface: CharField = models.CharField()
+    country: CharField = models.CharField()
+    product: CharField = models.CharField()
+    provider: CharField = models.CharField()
+    clicks: IntegerField = models.IntegerField()
+    impressions: IntegerField = models.IntegerField()
 
     def __str__(self):
         """Return the string representation for all flight ids recorded"""
-        return self.flight_id
+        return f"Flight ID: {self.flight_id}"
