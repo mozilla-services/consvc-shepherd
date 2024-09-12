@@ -339,3 +339,27 @@ class BoostrDealProduct(models.Model):
     )
     budget: IntegerField = models.IntegerField()
     month: CharField = models.CharField()
+
+
+class BoostrSyncStatus(models.Model):
+    """Table for capturing the status of a Booster sync process execution
+
+    Attributes
+    ----------
+    synced_on : DateTimeField
+        Date the Boostr sync process ran
+    sync_status: CharField = models.CharField()
+        The status of the symc process (success|failure)
+    message: CharField = models.CharField()
+        An optional error message populated when sync_status is "failure"
+    """
+
+    class SyncStatus(models.TextChoices):
+        """Represents the status of a sync"""
+
+        success = "success"
+        failure = "failure"
+
+    synced_on: DateTimeField = models.DateTimeField(auto_now=True)
+    status: CharField = models.CharField(choices=SyncStatus.choices)
+    message: CharField = models.CharField()
