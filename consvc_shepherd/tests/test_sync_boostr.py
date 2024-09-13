@@ -631,7 +631,7 @@ class TestSyncBoostrData(TestCase):
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     def test_boostr_api_post(self, mock_post_success):
         """Test the BoostrApi POST wrapper"""
-        boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD, {"request_interval_seconds": 1})
+        boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD)
         auth_json = {"auth": {"email": "email@mozilla.com", "password": "test"}}
         post_json = {"info": "for the server"}
         headers = {"X-Boostr-Whatever": "Stuff"}
@@ -658,7 +658,7 @@ class TestSyncBoostrData(TestCase):
     @mock.patch("requests.Session.get", side_effect=mock_get_success)
     def test_boostr_api_get(self, mock_get_success, mock_post_success):
         """Test the BoostrApi GET wrapper"""
-        boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD, {"request_interval_seconds": 4})
+        boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD)
         headers = {"X-Boostr-Whatever": "Stuff"}
         products_params = {
             "per": "300",
