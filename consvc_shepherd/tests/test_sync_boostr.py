@@ -382,9 +382,8 @@ PASSWORD = "test"  # nosec
 class TestSyncBoostrData(TestCase):
     """Unit tests for functions that fetch from boostr API and store in our DB"""
 
-    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch.object(BoostrApi, "authenticate", return_value="im.a.jwt")
-    def test_setup_session(self, mock_sleep, mock_authenticate):
+    def test_setup_session(self, mock_authenticate):
         """Test the function that sets up the headers, authenticates with boosrt, and sets up the session"""
         boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD)
         self.assertEqual(
@@ -393,28 +392,23 @@ class TestSyncBoostrData(TestCase):
         self.assertEqual(boostr.session.headers["Content-Type"], "application/json")
         self.assertEqual(boostr.session.headers["Authorization"], "Bearer im.a.jwt")
 
-    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
-    def test_authenticate(self, mock_sleep, mock_post):
+    def test_authenticate(self, mock_post):
         """Test authenticate function that calls boostr auth and returns a JWT"""
         boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD)
         jwt = boostr.authenticate(EMAIL, PASSWORD)
         self.assertEqual(jwt, "i.am.jwt")
 
-    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_token_fail)
-    def test_authenticate_fail(self, mock_post, mock_sleep):
+    def test_authenticate_fail(self, mock_post):
         """Test sad path for the authenticate function"""
         with self.assertRaises(BoostrApiError):
             BoostrApi("fail/lol", "uhoh@mozilla.com", "uhoh")
 
-    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_success)
     @mock.patch("consvc_shepherd.models.BoostrProduct.objects.update_or_create")
-    def test_upsert_products(
-        self, mock_update_or_create, mock_get, mock_post, mock_sleep
-    ):
+    def test_upsert_products(self, mock_update_or_create, mock_get, mock_post):
         """Test function that calls boostr API for product data and saves to our DB"""
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
         loader.upsert_products()
@@ -438,16 +432,14 @@ class TestSyncBoostrData(TestCase):
         ]
         mock_update_or_create.assert_has_calls(calls)
 
-    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_fail)
-    def test_upsert_products_fail(self, mock_get, mock_post, mock_sleep):
+    def test_upsert_products_fail(self, mock_get, mock_post):
         """Test that upsert_products will raise an API error on non-200 status"""
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
         with self.assertRaises(BoostrApiError):
             loader.upsert_products()
 
-    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_success)
     @mock.patch(
@@ -461,7 +453,6 @@ class TestSyncBoostrData(TestCase):
         mock_update_or_create,
         mock_get,
         mock_post,
-        mock_sleep,
     ):
         """Test function that calls the Boostr API for deal data and saves to our DB"""
         self.skipTest(
@@ -493,16 +484,14 @@ class TestSyncBoostrData(TestCase):
         ]
         mock_update_or_create.assert_has_calls(calls)
 
-    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_fail)
-    def test_upsert_deals_fail(self, mock_get, mock_post, mock_sleep):
+    def test_upsert_deals_fail(self, mock_get, mock_post):
         """Test that upsert_deals will raise an API error on non-200 status"""
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
         with self.assertRaises(BoostrApiError):
             loader.upsert_deals()
 
-    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_success)
     @mock.patch(
@@ -516,14 +505,12 @@ class TestSyncBoostrData(TestCase):
         mock_update_or_create,
         mock_get,
         mock_post,
-        mock_sleep,
     ):
         """Test that upsert_deals respects the given max_deal_pages limit"""
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD, {"max_deal_pages": 3})
         loader.upsert_deals()
         assert 3 == mock_get.call_count
 
-    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_success)
     @mock.patch(
@@ -537,14 +524,12 @@ class TestSyncBoostrData(TestCase):
         mock_update_or_create,
         mock_get,
         mock_post,
-        mock_sleep,
     ):
         """Test that upsert_deals respects the default max_deal_pages limit"""
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
         loader.upsert_deals()
         assert 50 == mock_get.call_count
 
-    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_success)
     @mock.patch(
@@ -552,7 +537,7 @@ class TestSyncBoostrData(TestCase):
     )
     @mock.patch("consvc_shepherd.models.BoostrDealProduct.objects.update_or_create")
     def test_upsert_deal_products(
-        self, mock_update_or_create, mock_get_product, mock_get, mock_post, mock_sleep
+        self, mock_update_or_create, mock_get_product, mock_get, mock_post
     ):
         """Test function that fetches the products per month and their budget for a particular deal"""
         deal = BoostrDeal(
@@ -607,10 +592,9 @@ class TestSyncBoostrData(TestCase):
         ]
         mock_update_or_create.assert_has_calls(calls)
 
-    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_fail)
-    def test_upsert_deal_products_fail(self, mock_get, mock_post, mock_sleep):
+    def test_upsert_deal_products_fail(self, mock_get, mock_post):
         """Test that upsert_deal_products will raise an API error on non-200 status"""
         deal = BoostrDeal(
             boostr_id=123456,
@@ -644,9 +628,8 @@ class TestSyncBoostrData(TestCase):
             get_campaign_type(no_campaign_type_name), BoostrProduct.CampaignType.NONE
         )
 
-    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
-    def test_boostr_api_post(self, mock_post_success, mock_sleep):
+    def test_boostr_api_post(self, mock_post_success):
         """Test the BoostrApi POST wrapper"""
         boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD, {"request_interval_seconds": 1})
         auth_json = {"auth": {"email": "email@mozilla.com", "password": "test"}}
@@ -671,10 +654,9 @@ class TestSyncBoostrData(TestCase):
         self.assertEqual(response["count"], 42)
         mock_post_success.assert_has_calls(post_calls)
 
-    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_success)
-    def test_boostr_api_get(self, mock_get_success, mock_post_success, mock_sleep):
+    def test_boostr_api_get(self, mock_get_success, mock_post_success):
         """Test the BoostrApi GET wrapper"""
         boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD, {"request_interval_seconds": 4})
         headers = {"X-Boostr-Whatever": "Stuff"}
@@ -701,7 +683,6 @@ class TestSyncBoostrData(TestCase):
     @mock.patch(
         "consvc_shepherd.management.commands.sync_boostr_data.BoostrLoader.upsert_deals"
     )
-    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_success)
     @mock.patch("consvc_shepherd.models.BoostrSyncStatus.objects.create")
@@ -710,7 +691,6 @@ class TestSyncBoostrData(TestCase):
         mock_create,
         mock_get,
         mock_post,
-        mock_sleep,
         mock_upsert_deals,
         mock_upsert_products,
     ):
@@ -729,12 +709,11 @@ class TestSyncBoostrData(TestCase):
         "consvc_shepherd.management.commands.sync_boostr_data.BoostrLoader.upsert_deals",
         side_effect=mock_upsert_deals_exception,
     )
-    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_success)
     @mock.patch("consvc_shepherd.models.BoostrSyncStatus.objects.create")
     def test_load_failure(
-        self, mock_create, mock_get, mock_post, mock_sleep, mock_upsert_products
+        self, mock_create, mock_get, mock_post, mock_upsert_products
     ):
         """Test the load function failure scenario"""
         with self.assertRaises(Exception):
