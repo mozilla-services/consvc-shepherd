@@ -9,7 +9,7 @@ from consvc_shepherd.tests.test_sync_boostr_mock_responses import (
 
 
 class MockResponse:
-    """Mock for returning a response, used in funtions that mock requests"""
+    """Mock for returning a response, used in functions that mock requests"""
 
     def __init__(self, json_data: object, status_code: int):
         self.json_data = json_data
