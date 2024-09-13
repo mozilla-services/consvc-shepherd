@@ -3,6 +3,7 @@
 import logging
 import math
 import traceback
+import time
 from pathlib import Path
 from time import sleep
 from typing import Any
@@ -112,17 +113,27 @@ class BoostrApi:
         token = self.post("user_token", post_data)
         return str(token["jwt"])
 
-    def post(self, path: str, json={}, headers={}) -> Any:
+    def post(self, path: str, json=None, headers=None) -> Any:
         """Make POST requests to Boostr that uses the session, pass through headers and json data,
         check status, and return parsed json
         """
-        sleep(self.request_interval_seconds)
+        if json is None:
+            json = {}
+        if headers is None:
+            headers = {}
+
         response = self.session.post(
             f"{self.base_url}/{path}",
             json=json,
             headers=headers,
             timeout=15,
         )
+
+        if response.status_code == 429:
+            retry_after = int(response.headers.get("Retry-After", 60)) + 1
+            time.sleep(retry_after)
+            return self.post(path, json, headers)
+
         if not response.ok:
             raise BoostrApiError(
                 f"Bad response status {response.status_code} from /{path}: {response}"
@@ -130,14 +141,23 @@ class BoostrApi:
         json = response.json()
         return json
 
-    def get(self, path: str, params={}, headers={}):
+    def get(self, path: str, params=None, headers=None):
         """Make GET requests to Boostr that use the session, pass through headers and query params,
         check status, and return parsed json
         """
-        sleep(self.request_interval_seconds)
+        if params is None:
+            params = {}
+        if headers is None:
+            headers = {}
+
         response = self.session.get(
             f"{self.base_url}/{path}", params=params, headers=headers, timeout=15
         )
+        if response.status_code == 429:
+            retry_after = int(response.headers.get("Retry-After", 60)) + 1
+            time.sleep(retry_after)
+            return self.get(path, params, headers)
+
         if not response.ok:
             raise BoostrApiError(
                 f"Bad response status {response.status_code} from /{path}: {response}"
