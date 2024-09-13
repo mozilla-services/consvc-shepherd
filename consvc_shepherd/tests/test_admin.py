@@ -24,7 +24,7 @@ from consvc_shepherd.models import (
     BoostrDeal,
     BoostrDealProduct,
     BoostrProduct,
-    CampaignOverview,
+    Campaign,
     Partner,
     PartnerAllocation,
     SettingsSnapshot,
@@ -375,8 +375,8 @@ class AllocationSettingsSnapshotAdminTest(TestCase):
 
 
 @override_settings(DEBUG=True)
-class CampaignOverviewAdminTests(TestCase):
-    """Test case for the admin interface of CampaignOverview."""
+class CampaignAdminTests(TestCase):
+    """Test case for the admin interface of Campaign."""
 
     def setUp(self):
         """Set up test user, request, and data."""
@@ -386,7 +386,7 @@ class CampaignOverviewAdminTests(TestCase):
         self.create_test_data()
 
     def create_test_data(self):
-        """Create test data for BoostrDeal, BoostrProduct, and CampaignOverview models."""
+        """Create test data for BoostrDeal, BoostrProduct, and Campaign models."""
         self.deal1 = BoostrDeal.objects.create(
             boostr_id=1,
             name="Test Deal1",
@@ -431,38 +431,41 @@ class CampaignOverviewAdminTests(TestCase):
             month="2024-02",
         )
 
-        # Create CampaignOverview instances linked to the BoostrDeal
-        self.campaign_overview1 = CampaignOverview.objects.create(
+        # Create Campaign instances linked to the BoostrDeal
+        self.campaign_overview1 = Campaign.objects.create(
             deal=self.deal1,
             ad_ops_person="AdOps Person 1",
             notes="Notes 1",
             kevel_flight_id=1001,
             net_spend=1000,
             impressions_sold=2000,
+            start_date="2023-01-01",
+            end_date="2023-01-05",
         )
-        self.campaign_overview2 = CampaignOverview.objects.create(
+        self.campaign_overview2 = Campaign.objects.create(
             deal=self.deal2,
             ad_ops_person="AdOps Person 2",
             notes="Notes 2",
             kevel_flight_id=1002,
             net_spend=1500,
             impressions_sold=3000,
+            start_date="2023-01-01",
+            end_date="2023-01-05",
         )
 
     def test_month_filter(self):
-        """Test filtering CampaignOverview by month."""
+        """Test filtering Campaign by month."""
         response = self.client.get(
-            reverse("admin:consvc_shepherd_campaignoverviewsummary_changelist")
-            + "?month=2024-01",
+            reverse("admin:consvc_shepherd_campaign_changelist") + "?month=2024-01",
             **{"settings.OPENIDC_HEADER": "dev@example.com"},
         )
         self.assertContains(response, "AdOps Person 1")
         self.assertNotContains(response, "AdOps Person 2")
 
     def test_placement_filter(self):
-        """Test filtering CampaignOverview by placement."""
+        """Test filtering Campaign by placement."""
         response = self.client.get(
-            reverse("admin:consvc_shepherd_campaignoverviewsummary_changelist")
+            reverse("admin:consvc_shepherd_campaign_changelist")
             + "?placement=Product 2",
             **{"settings.OPENIDC_HEADER": "dev@example.com"},
         )
@@ -470,10 +473,9 @@ class CampaignOverviewAdminTests(TestCase):
         self.assertNotContains(response, "AdOps Person 1")
 
     def test_country_filter(self):
-        """Test filtering CampaignOverview by country."""
+        """Test filtering Campaign by country."""
         response = self.client.get(
-            reverse("admin:consvc_shepherd_campaignoverviewsummary_changelist")
-            + "?country=CA",
+            reverse("admin:consvc_shepherd_campaign_changelist") + "?country=CA",
             **{"settings.OPENIDC_HEADER": "dev@example.com"},
         )
         self.assertContains(response, "AdOps Person 2")
@@ -482,7 +484,7 @@ class CampaignOverviewAdminTests(TestCase):
     def test_deal_advertiser_filter(self):
         """Test changelist_view with deal advertiser filter applied."""
         response = self.client.get(
-            reverse("admin:consvc_shepherd_campaignoverviewsummary_changelist")
+            reverse("admin:consvc_shepherd_campaign_changelist")
             + "?deal__advertiser=Test Advertiser1",
             **{"settings.OPENIDC_HEADER": "dev@example.com"},
         )

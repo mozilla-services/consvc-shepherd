@@ -6,8 +6,7 @@ from django.utils import timezone
 from consvc_shepherd.models import (
     AllocationSetting,
     BoostrDeal,
-    CampaignOverview,
-    CampaignOverviewSummary,
+    Campaign,
     Partner,
     PartnerAllocation,
 )
@@ -59,12 +58,12 @@ class TestPartnerAllocationModel(TestCase):
         )
 
 
-class CampaignOverviewTestCase(TestCase):
-    """Test case for CampaignOverview model operations."""
+class CampaignTestCase(TestCase):
+    """Test case for Campaign model operations."""
 
     def setUp(self):
-        """Set up test data for CampaignOverview and related models."""
-        # Create a BoostrDeal instance to use in CampaignOverview
+        """Set up test data for Campaign and related models."""
+        # Create a BoostrDeal instance to use in Campaign
         self.deal = BoostrDeal.objects.create(
             boostr_id=1,
             name="Test Deal",
@@ -76,8 +75,8 @@ class CampaignOverviewTestCase(TestCase):
             end_date=timezone.now().date(),
         )
 
-        # Create a CampaignOverview instance
-        self.campaign = CampaignOverview.objects.create(
+        # Create a Campaign instance
+        self.campaign = Campaign.objects.create(
             ad_ops_person="John Doe",
             notes="Test notes",
             kevel_flight_id=12345,
@@ -85,10 +84,12 @@ class CampaignOverviewTestCase(TestCase):
             impressions_sold=1000,
             seller="Test Seller",
             deal=self.deal,
+            start_date=timezone.now().date(),
+            end_date=timezone.now().date(),
         )
 
     def test_model_fields(self):
-        """Test that CampaignOverview model fields are correctly set."""
+        """Test that Campaign model fields are correctly set."""
         self.assertEqual(self.campaign.ad_ops_person, "John Doe")
         self.assertEqual(self.campaign.notes, "Test notes")
         self.assertEqual(self.campaign.kevel_flight_id, 12345)
@@ -100,7 +101,7 @@ class CampaignOverviewTestCase(TestCase):
     def test_save_method(self):
         """Test the save method calculates net_ecpm correctly."""
         # Test the save method functionality
-        campaign = CampaignOverview(
+        campaign = Campaign(
             ad_ops_person="Test Person",
             notes="Test Notes",
             kevel_flight_id=11111,
@@ -108,6 +109,8 @@ class CampaignOverviewTestCase(TestCase):
             impressions_sold=500,
             seller="Test Seller",
             deal=self.deal,
+            start_date=timezone.now().date(),
+            end_date=timezone.now().date(),
         )
         campaign.save()
         self.assertEqual(campaign.net_ecpm, (2000 / 500) * 1000)  # 4000
@@ -116,16 +119,3 @@ class CampaignOverviewTestCase(TestCase):
         """Verify that the __str__ method returns the correct string representation."""
         expected_str = "Campaign 12345 - John Doe"
         self.assertEqual(str(self.campaign), expected_str)
-
-
-class CampaignOverviewSummaryTestCase(TestCase):
-    """Test case for the CampaignOverviewSummary proxy model."""
-
-    def test_proxy_model(self):
-        """Verify the proxy model's verbose names and proxy status."""
-        # Check that the proxy model uses the correct verbose names
-        self.assertEqual(CampaignOverviewSummary._meta.verbose_name, "Campaign Summary")
-        self.assertEqual(
-            CampaignOverviewSummary._meta.verbose_name_plural, "Campaign Summaries"
-        )
-        self.assertTrue(CampaignOverviewSummary._meta.proxy)

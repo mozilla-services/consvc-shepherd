@@ -343,7 +343,7 @@ class BoostrDealProduct(models.Model):
     month: CharField = models.CharField()
 
 
-class CampaignOverview(models.Model):
+class Campaign(models.Model):
     """Representation of AdOps CampaignOverview
 
     Attributes
@@ -362,6 +362,10 @@ class CampaignOverview(models.Model):
         Net eCPM
     seller : CharField
         Seller
+    start_date: DateField
+        Start date
+    end_date: DateField
+        End date
     created_on : DateTimeField
         Date of deal record creation (shepherd DB timestamp metadata, not boostr's)
     updated_on : DateTimeField
@@ -382,6 +386,8 @@ class CampaignOverview(models.Model):
     net_ecpm: FloatField = models.FloatField()
     seller: CharField = models.CharField()
     deal: ForeignKey = models.ForeignKey(BoostrDeal, on_delete=models.CASCADE)
+    start_date: DateField = models.DateField()
+    end_date: DateField = models.DateField()
     created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
     updated_on: DateTimeField = models.DateTimeField(auto_now=True)
 
@@ -392,7 +398,7 @@ class CampaignOverview(models.Model):
         else:
             self.net_ecpm = None
 
-        super(CampaignOverview, self).save(*args, **kwargs)
+        super(Campaign, self).save(*args, **kwargs)
 
     class Meta:
         """Metadata for the Campaign model."""
@@ -404,12 +410,19 @@ class CampaignOverview(models.Model):
         return f"Campaign {self.kevel_flight_id} - {self.ad_ops_person}"
 
 
-class CampaignOverviewSummary(CampaignOverview):
-    """Proxy model for summarizing campaign overviews."""
+class CampaignSummary(models.Model):
+    """Model representing a summary of campaign metrics."""
+
+    deal_id: IntegerField = models.IntegerField(primary_key=True)
+    advertiser: CharField = models.CharField(max_length=255)
+    net_spend: FloatField = models.FloatField()
+    impressions_sold: FloatField = models.FloatField()
+    net_ecpm: FloatField = models.FloatField()
 
     class Meta:
-        """Metadata for the CampaignOverviewSummary proxy model."""
+        """Metadata for the CampaignSummary model."""
 
-        proxy = True
-        verbose_name = "Campaign Summary"
+        managed = False
+        db_table = "campaign_summary_view"
+        verbose_name = "Campaign"
         verbose_name_plural = "Campaign Summaries"
