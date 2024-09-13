@@ -113,9 +113,6 @@ class TestSyncBoostrData(TestCase):
         mock_sleep,
     ):
         """Test function that calls the Boostr API for deal data and saves to our DB"""
-        self.skipTest(
-            "Currently hangs with the addition of the last upsert_deal_products mock"
-        )
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
         loader.upsert_deals()
         calls = [
@@ -126,7 +123,7 @@ class TestSyncBoostrData(TestCase):
                     "advertiser": "Neutron",
                     "currency": "$",
                     "amount": 50000,
-                    "sales_representatives": "ksales@mozilla.com,lsales@mozilla.com",
+                    "sales_representatives": "ksales@mozilla.com",
                     "start_date": "2024-04-01",
                     "end_date": "2024-06-30",
                 },
