@@ -30,7 +30,6 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("message", models.CharField()),
-                ("created_on", models.DateTimeField(auto_now_add=True)),
             ],
         ),
     ]
