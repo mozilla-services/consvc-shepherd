@@ -712,9 +712,7 @@ class TestSyncBoostrData(TestCase):
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_success)
     @mock.patch("consvc_shepherd.models.BoostrSyncStatus.objects.create")
-    def test_load_failure(
-        self, mock_create, mock_get, mock_post, mock_upsert_products
-    ):
+    def test_load_failure(self, mock_create, mock_get, mock_post, mock_upsert_products):
         """Test the load function failure scenario"""
         with self.assertRaises(Exception):
             loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
