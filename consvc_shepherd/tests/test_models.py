@@ -2,7 +2,12 @@
 
 from django.test import TestCase
 
-from consvc_shepherd.models import AllocationSetting, Partner, PartnerAllocation
+from consvc_shepherd.models import (
+    AllocationSetting,
+    DeliveredCampaign,
+    Partner,
+    PartnerAllocation,
+)
 
 
 class TestAllocationSettingModel(TestCase):
@@ -48,4 +53,34 @@ class TestPartnerAllocationModel(TestCase):
         )
         self.assertEqual(
             allocation1_adm.to_dict(), {"partner": "amp", "percentage": 85}
+        )
+
+
+class TestDeliveredCampaignModel(TestCase):
+    """Test class for DeliveredCampaign model."""
+
+    def setUp(self):
+        """Set up a DeliveredCampaign instance for testing."""
+        self.campaign = DeliveredCampaign.objects.create(
+            submission_date="2023-09-13",
+            flight_id=123456789,
+            campaign_id=987654321,
+            surface="desktop",
+            country="US",
+            product="Tiles",
+            provider="kevel",
+            clicks=100,
+            impressions=1000,
+        )
+
+    def test_campaign_creation(self):
+        """Test if the campaign is created correctly."""
+        self.assertEqual(self.campaign.flight_id, 123456789)
+        self.assertEqual(self.campaign.clicks, 100)
+        self.assertEqual(self.campaign.impressions, 1000)
+
+    def test_campaign_str(self):
+        """Test the __str__ method returns the flight IDs along with number of clicks and impressions"""
+        self.assertEqual(
+            str(self.campaign), "123456789 : 100 clicks and 1000 impressions"
         )

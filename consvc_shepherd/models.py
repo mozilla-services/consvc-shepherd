@@ -403,5 +403,5 @@ class DeliveredCampaign(models.Model):
     impressions: IntegerField = models.IntegerField()
 
     def __str__(self):
-        """Return the string representation for all flight ids recorded along with its number of clicks and impressions"""
+        """Return the string representation for flight ids and associated number of clicks and impressions"""
         return f"{self.flight_id} : {self.clicks} clicks and {self.impressions} impressions"
