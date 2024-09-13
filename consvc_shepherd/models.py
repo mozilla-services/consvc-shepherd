@@ -366,8 +366,8 @@ class BoostrSyncStatus(models.Model):
     message: CharField = models.CharField()
 
 
-class CampaignOverview(models.Model):
-    """Table for storing Glean campaign metrics data pulled from BigQuery
+class DeliveredCampaign(models.Model):
+    """Table for storing delivered campaign data pulled from BigQuery
     https://github.com/mozilla/private-bigquery-etl/blob/main/sql/moz-fx-data-shared-prod/ads/consolidated_ad_metrics_daily_pt/view.sql
 
     Attributes
@@ -393,8 +393,8 @@ class CampaignOverview(models.Model):
     """
 
     submission_date: DateField = models.DateTimeField()
-    flight_id: BigIntegerField = models.BigIntegerField()
-    campaign_id: BigIntegerField = models.BigIntegerField(unique=True)
+    flight_id: BigIntegerField = models.BigIntegerField(unique=True)
+    campaign_id: BigIntegerField = models.BigIntegerField()
     surface: CharField = models.CharField()
     country: CharField = models.CharField()
     product: CharField = models.CharField()
@@ -403,5 +403,5 @@ class CampaignOverview(models.Model):
     impressions: IntegerField = models.IntegerField()
 
     def __str__(self):
-        """Return the string representation for all flight ids recorded"""
-        return f"Flight ID: {self.flight_id}"
+        """Return the string representation for all flight ids recorded along with its number of clicks and impressions"""
+        return f"{self.flight_id} : {self.clicks} clicks and {self.impressions} impressions"

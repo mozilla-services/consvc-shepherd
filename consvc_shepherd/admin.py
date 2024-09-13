@@ -15,7 +15,7 @@ from consvc_shepherd.models import (
     BoostrDealProduct,
     BoostrProduct,
     BoostrSyncStatus,
-    CampaignOverview,
+    DeliveredCampaign,
     PartnerAllocation,
     SettingsSnapshot,
 )
@@ -285,11 +285,11 @@ class BoostrSyncStatusAdmin(admin.ModelAdmin):
     ]
 
 
-@admin.register(CampaignOverview)
-class CampaignOverviewAdmin(admin.ModelAdmin):
+@admin.register(DeliveredCampaign)
+class DeliveredCampaignsAdmin(admin.ModelAdmin):
     """Admin model for campaign data imported from BigQuery"""
 
-    model = CampaignOverview
+    model = DeliveredCampaign
     search_fields = [
         "campaign_id",
         "flight_id",
