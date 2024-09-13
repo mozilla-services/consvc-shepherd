@@ -205,15 +205,17 @@ class BoostrLoader:
             for deal in closed_won_deals:
                 boostr_deal, _ = BoostrDeal.objects.update_or_create(
                     boostr_id=deal["id"],
-                    name=deal["name"],
-                    advertiser=deal["advertiser_name"],
-                    currency=deal["currency"],
-                    amount=math.floor(float(deal["budget"])),
-                    sales_representatives=",".join(
-                        str(d["email"]) for d in deal["deal_members"]
-                    ),
-                    start_date=deal["start_date"],
-                    end_date=deal["end_date"],
+                    defaults={
+                        "name": deal["name"],
+                        "advertiser": deal["advertiser_name"],
+                        "currency": deal["currency"],
+                        "amount": math.floor(float(deal["budget"])),
+                        "sales_representatives": ",".join(
+                            str(d["email"]) for d in deal["deal_members"]
+                        ),
+                        "start_date": deal["start_date"],
+                        "end_date": deal["end_date"],
+                    },
                 )
                 self.log.debug(f"Upserted deal: {deal['id']}")
 
