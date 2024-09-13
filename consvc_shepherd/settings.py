@@ -86,6 +86,8 @@ INSTALLED_APPS: list[str] = [
     "django.contrib.staticfiles",
     "django_countries",
     "dockerflow.django",
+    "rest_framework",
+    "corsheaders",
 ]
 
 MIDDLEWARE: list = [
@@ -97,6 +99,7 @@ MIDDLEWARE: list = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "dockerflow.django.middleware.DockerflowMiddleware",
     "openidc.middleware.OpenIDCAuthMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF: str = "consvc_shepherd.urls"
@@ -149,7 +152,6 @@ USE_TZ: bool = True
 
 STATIC_BUCKET_NAME = env("STATIC_BUCKET_NAME", default="")
 STATIC_URL: str = "static/"
-STATIC_ROOT: str = "./static"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
@@ -241,3 +243,5 @@ if STATSD_DEBUG:
         }
     )
 markus.configure(backends=_MARKUS_BACKENDS)
+
+CORS_ALLOWED_ORIGINS = ["http://0.0.0.0:5173"]

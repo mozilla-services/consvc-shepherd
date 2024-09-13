@@ -2,6 +2,7 @@
 
 import logging
 import math
+import traceback
 from pathlib import Path
 from time import sleep
 from typing import Any
@@ -10,9 +11,16 @@ import environ
 import requests
 from django.core.management.base import BaseCommand
 
-from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct
+from consvc_shepherd.models import (
+    BoostrDeal,
+    BoostrDealProduct,
+    BoostrProduct,
+    BoostrSyncStatus,
+)
 
 MAX_DEAL_PAGES_DEFAULT = 50
+SYNC_STATUS_SUCCESS = "success"
+SYNC_STATUS_FAILURE = "failure"
 REQUEST_INTERVAL_SECONDS_DEFAULT = 1
 DEFAULT_OPTIONS = {
     "request_interval_seconds": REQUEST_INTERVAL_SECONDS_DEFAULT,
@@ -239,10 +247,32 @@ class BoostrLoader:
                 f"{product.boostr_id} to deal: {deal.boostr_id}"
             )
 
+    def update_sync_status(self, status, message=None):
+        """Fupdate the BoostrSyncStatus table given the status and the message"""
+        BoostrSyncStatus.objects.create(
+            status=status,
+            message=message,
+        )
+
     def load(self):
         """Loader entry point"""
-        self.upsert_products()
-        self.upsert_deals()
+        try:
+            self.upsert_products()
+            self.upsert_deals()
+            self.log.info(
+                "Boostr sync process completed successfully. Updating sync_status"
+            )
+            self.update_sync_status(SYNC_STATUS_SUCCESS)
+        except Exception as e:
+            error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
+            self.log.error(
+                f"Boostr sync process encountered an error: {error}. Updating sync_status"
+            )
+            self.update_sync_status(
+                SYNC_STATUS_FAILURE,
+                f"Exception: {str(e):} Trace: {traceback.format_exc()}",
+            )
+            raise e
 
 
 def get_campaign_type(product_full_name: str) -> str:
