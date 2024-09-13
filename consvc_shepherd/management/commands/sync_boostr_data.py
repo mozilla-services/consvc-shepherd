@@ -21,9 +21,7 @@ from consvc_shepherd.models import (
 MAX_DEAL_PAGES_DEFAULT = 50
 SYNC_STATUS_SUCCESS = "success"
 SYNC_STATUS_FAILURE = "failure"
-REQUEST_INTERVAL_SECONDS_DEFAULT = 1
 DEFAULT_OPTIONS = {
-    "request_interval_seconds": REQUEST_INTERVAL_SECONDS_DEFAULT,
     "max_deal_pages": MAX_DEAL_PAGES_DEFAULT,
 }
 
@@ -47,14 +45,6 @@ class Command(BaseCommand):
             help=f"""By default, the sync code will stop trying to fetch additional deals pages after
                 {MAX_DEAL_PAGES_DEFAULT} pages. Currently we have ~14 pages of deals in Boostr, so this default max
                 should be sufficient for a while.""",
-        )
-        parser.add_argument(
-            "--request-interval-seconds",
-            default=REQUEST_INTERVAL_SECONDS_DEFAULT,
-            type=int,
-            help=f"""This parameter controls the rate of requests to the Boostr API in order to stay under their rate
-                limits. By default, the sync code will wait {REQUEST_INTERVAL_SECONDS_DEFAULT} seconds between
-                requests.""",
         )
 
     def handle(self, *args, **options):
@@ -83,16 +73,13 @@ class BoostrApi:
 
     base_url: str
     session: requests.Session
-    request_interval_seconds: int
-
+    log: logging.Logger
     def __init__(
         self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
     ):
         self.base_url = base_url
-        self.request_interval_seconds = options.get(
-            "request_interval_seconds", REQUEST_INTERVAL_SECONDS_DEFAULT
-        )
         self.setup_session(email, password)
+        self.log = logging.getLogger("sync_boostr_data")
 
     def setup_session(self, email: str, password: str) -> None:
         """Authenticate with the boostr api and create and store a session on the instance"""
@@ -130,6 +117,9 @@ class BoostrApi:
 
         if response.status_code == 429:
             retry_after = int(response.headers.get("Retry-After", 60)) + 1
+            self.log.info(
+                f"{response.status_code}: Rate Limited - Waiting {retry_after} seconds"
+            )
             time.sleep(retry_after)
             return self.post(path, json, headers)
 
@@ -154,6 +144,9 @@ class BoostrApi:
         )
         if response.status_code == 429:
             retry_after = int(response.headers.get("Retry-After", 60)) + 1
+            self.log.info(
+                f"{response.status_code}: Rate Limited - Waiting {retry_after} seconds"
+            )
             time.sleep(retry_after)
             return self.get(path, params, headers)
 
