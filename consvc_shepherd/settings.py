@@ -193,6 +193,8 @@ LOGGING: dict[str, Any] = {
     },
 }
 
+FORM_RENDERER = "django.forms.renderers.DjangoDivFormRenderer"
+
 # Sentry Setup
 SENTRY_DSN = env("SENTRY_DSN", default=None)
 # Any of "release", "debug", or "disabled". Using "debug" will enable logging for Sentry.
