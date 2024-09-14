@@ -27,7 +27,6 @@ isort-fix: $(INSTALL_STAMP)  ##  Run isort to fix imports
 	@echo "Running isort..."
 	$(POETRY) run isort  $(APP_DIRS) --profile black
 
-
 black: $(INSTALL_STAMP)  ##  Run black
 	@echo "Running black..."
 	$(POETRY) run black --quiet --diff --check --color $(APP_DIRS)
@@ -40,13 +39,12 @@ flake8: $(INSTALL_STAMP)  ##  Run flake8
 	@echo "Running flake8..."
 	$(POETRY) run flake8 $(APP_DIRS) --max-line-length=120
 
-
 bandit: $(INSTALL_STAMP)  ##  Run bandit
 	@echo "Running bandit..."
 	$(POETRY) run bandit --quiet -r $(APP_DIRS) -c "pyproject.toml"
 
 pydocstyle: $(INSTALL_STAMP)  ##  Run pydocstyle
-	@echo "Running pydocstyle..."	
+	@echo "Running pydocstyle..."
 	$(POETRY) run pydocstyle $(APP_DIRS) --explain --config="pyproject.toml"
 
 mypy: $(INSTALL_STAMP)  ##  Run mypy
@@ -61,8 +59,7 @@ format: install  ##  Sort imports and reformat code
 	$(POETRY) run isort $(APP_DIRS) --profile black
 	$(POETRY) run black $(APP_DIRS)
 
-
-local-migration-check: install  ##  Dry run of database migrations
+local-migration-check: install
 	$(POETRY) run python manage.py makemigrations --check --dry-run --noinput
 
 local-migrate: install  ##  Create Database migrations and run migrations
@@ -85,14 +82,13 @@ dev: $(INSTALL_STAMP)  ##  Run shepherd locally and reload automatically
 	docker compose up
 
 local-test: $(INSTALL_STAMP)  ##  local test
-	docker compose -f docker-compose.test.yml up --abort-on-container-exit
+	docker compose -f docker-compose.test.yml up --build
 
 makemigrations-empty: ##  Create an empty migrations file for manual migrations
 	docker exec -it consvc-shepherd-app-1 python manage.py makemigrations --empty consvc_shepherd
 
 migrate: ##  Run migrate on the docker container
 	docker exec -it consvc-shepherd-app-1 python manage.py migrate
-
 
 makemigrations: ##  Run makemigrations on the docker container set MIGRATE=false prevent automatic migration.
 	@echo "Making migrations..."
