@@ -91,7 +91,6 @@ INSTALLED_APPS: list[str] = [
 ]
 
 MIDDLEWARE: list = [
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -100,6 +99,7 @@ MIDDLEWARE: list = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "dockerflow.django.middleware.DockerflowMiddleware",
     "openidc.middleware.OpenIDCAuthMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF: str = "consvc_shepherd.urls"
@@ -236,7 +236,7 @@ if STATSD_DEBUG:
     _MARKUS_BACKENDS.append(
         {
             "class": "markus.backends.logging.LoggingMetrics",
-            "opticoons": {
+            "options": {
                 "logger_name": "markus",
                 "leader": "METRICS",
             },
@@ -248,14 +248,4 @@ markus.configure(backends=_MARKUS_BACKENDS)
 
 CORS_ALLOWED_ORIGINS = [
     "http://0.0.0.0:5173",
-    "http://localhost:5173",
-    "http://localhost:7001",
-    "http://127.0.0.1:7001",
 ]
-
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [],
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
-    "DEFAULT_PERMISSION_CLASSES": [],
-}
