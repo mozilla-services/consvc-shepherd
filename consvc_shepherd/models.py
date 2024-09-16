@@ -407,7 +407,6 @@ class Campaign(models.Model):
     kevel_flight_id: IntegerField = models.IntegerField()
     net_spend: DecimalField = models.DecimalField(max_digits=12, decimal_places=2)
     impressions_sold: IntegerField = models.IntegerField()
-    net_ecpm: FloatField = models.FloatField()
     seller: CharField = models.CharField()
     deal: ForeignKey = models.ForeignKey(BoostrDeal, on_delete=models.CASCADE)
     start_date: DateField = models.DateField()
@@ -415,14 +414,12 @@ class Campaign(models.Model):
     created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
     updated_on: DateTimeField = models.DateTimeField(auto_now=True)
 
-    def save(self, *args, **kwargs):
-        """Calculate and save the net eCPM before saving the instance."""
+    @property
+    def net_ecpm(self):
+        """Calculate and return the net eCPM."""
         if self.impressions_sold > 0:
-            self.net_ecpm = (self.net_spend / self.impressions_sold) * 1000
-        else:
-            self.net_ecpm = None
-
-        super(Campaign, self).save(*args, **kwargs)
+            return (self.net_spend / self.impressions_sold) * 1000
+        return None
 
     class Meta:
         """Metadata for the Campaign model."""
@@ -441,7 +438,13 @@ class CampaignSummary(models.Model):
     advertiser: CharField = models.CharField(max_length=255)
     net_spend: FloatField = models.FloatField()
     impressions_sold: FloatField = models.FloatField()
-    net_ecpm: FloatField = models.FloatField()
+
+    @property
+    def net_ecpm(self):
+        """Calculate and return the net eCPM."""
+        if self.impressions_sold > 0:
+            return (self.net_spend / self.impressions_sold) * 1000
+        return None
 
     class Meta:
         """Metadata for the CampaignSummary model."""
