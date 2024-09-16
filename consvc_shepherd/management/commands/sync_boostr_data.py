@@ -249,7 +249,7 @@ class BoostrLoader:
                 f"{product.boostr_id} to deal: {deal.boostr_id}"
             )
 
-    def update_sync_status(self, status, message=None):
+    def update_sync_status(self, status, message):
         """Fupdate the BoostrSyncStatus table given the status and the message"""
         BoostrSyncStatus.objects.create(
             status=status,
@@ -264,7 +264,7 @@ class BoostrLoader:
             self.log.info(
                 "Boostr sync process completed successfully. Updating sync_status"
             )
-            self.update_sync_status(SYNC_STATUS_SUCCESS)
+            self.update_sync_status(SYNC_STATUS_SUCCESS, "Boostr sync success")
         except Exception as e:
             error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
             self.log.error(

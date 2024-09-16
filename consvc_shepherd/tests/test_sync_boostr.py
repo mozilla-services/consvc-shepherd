@@ -378,7 +378,7 @@ class TestSyncBoostrData(TestCase):
         calls = [
             mock.call(
                 status="success",
-                message=None,
+                message="Boostr sync success",
             ),
         ]
         mock_create.assert_has_calls(calls)
