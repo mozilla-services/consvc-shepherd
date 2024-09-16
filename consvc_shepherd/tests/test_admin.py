@@ -5,10 +5,10 @@ from datetime import datetime
 from typing import Any
 
 import mock
+import pytz
 from django.contrib.admin.sites import AdminSite
 from django.test import RequestFactory, TestCase, override_settings
 from django.utils import timezone
-import pytz
 from jsonschema import validate
 from markus.testing import MetricsMock
 
