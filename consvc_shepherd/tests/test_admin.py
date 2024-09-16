@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Any
 
 import mock
+import pytz
 from django.contrib.admin.sites import AdminSite
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
@@ -150,7 +151,7 @@ class SettingsSnapshotAdminTest(TestCase):
         """Test that publish snapshot action does not launch pre-existing snapshot."""
         request = mock.Mock()
         request.user = UserFactory()
-        timestamp = datetime(2022, 1, 11, 1, 15, 12)
+        timestamp = datetime(2022, 1, 11, 1, 15, 12, tzinfo=pytz.utc)
         SettingsSnapshot.objects.create(
             name="Settings Snapshot",
             settings_type=self.partner,
@@ -302,7 +303,7 @@ class AllocationSettingsSnapshotAdminTest(TestCase):
         """Test that publish snapshot action does not launch pre-existing snapshot."""
         request = mock.Mock()
         request.user = UserFactory()
-        timestamp = datetime(2023, 5, 19, 1, 15, 12)
+        timestamp = datetime(2023, 5, 19, 1, 15, 12, tzinfo=pytz.utc)
 
         AllocationSettingsSnapshot.objects.create(
             name="Settings Snapshot",
