@@ -217,15 +217,17 @@ class BoostrLoader:
             for deal in closed_won_deals:
                 boostr_deal, _ = BoostrDeal.objects.update_or_create(
                     boostr_id=deal["id"],
-                    name=deal["name"],
-                    advertiser=deal["advertiser_name"],
-                    currency=deal["currency"],
-                    amount=math.floor(float(deal["budget"])),
-                    sales_representatives=",".join(
-                        str(d["email"]) for d in deal["deal_members"]
-                    ),
-                    start_date=deal["start_date"],
-                    end_date=deal["end_date"],
+                    defaults={
+                        "name": deal["name"],
+                        "advertiser": deal["advertiser_name"],
+                        "currency": deal["currency"],
+                        "amount": math.floor(float(deal["budget"])),
+                        "sales_representatives": ",".join(
+                            str(d["email"]) for d in deal["deal_members"]
+                        ),
+                        "start_date": deal["start_date"],
+                        "end_date": deal["end_date"],
+                    },
                 )
                 self.log.debug(f"Upserted deal: {deal['id']}")
 
@@ -259,7 +261,7 @@ class BoostrLoader:
                 f"{product.boostr_id} to deal: {deal.boostr_id}"
             )
 
-    def update_sync_status(self, status, message=None):
+    def update_sync_status(self, status, message):
         """Fupdate the BoostrSyncStatus table given the status and the message"""
         BoostrSyncStatus.objects.create(
             status=status,
@@ -274,7 +276,7 @@ class BoostrLoader:
             self.log.info(
                 "Boostr sync process completed successfully. Updating sync_status"
             )
-            self.update_sync_status(SYNC_STATUS_SUCCESS)
+            self.update_sync_status(SYNC_STATUS_SUCCESS, "Boostr sync success")
         except Exception as e:
             error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
             self.log.error(

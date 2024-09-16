@@ -158,8 +158,18 @@ STATIC_URL: str = "static/"
 
 DEFAULT_AUTO_FIELD: str = "django.db.models.BigAutoField"
 
-DEFAULT_FILE_STORAGE: str = "storages.backends.gcloud.GoogleCloudStorage"
-GS_BUCKET_NAME = env("GS_BUCKET_NAME", default="")
+STORAGES: dict[str, Any] = {
+    "default": {
+        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+        "OPTIONS": {
+            "bucket_name": env("GS_BUCKET_NAME", default=""),
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
 GS_BUCKET_FILE_NAME = env("GS_BUCKET_FILE_NAME", default="settings_from_shepherd")
 ALLOCATION_FILE_NAME: str = env("ALLOCATION_FILE_NAME", default="allocation_file")
 
@@ -192,6 +202,8 @@ LOGGING: dict[str, Any] = {
         },
     },
 }
+
+FORM_RENDERER = "django.forms.renderers.DjangoDivFormRenderer"
 
 # Sentry Setup
 SENTRY_DSN = env("SENTRY_DSN", default=None)
