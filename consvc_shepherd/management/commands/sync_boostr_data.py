@@ -74,6 +74,7 @@ class BoostrApi:
     base_url: str
     session: requests.Session
     log: logging.Logger
+
     def __init__(
         self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
     ):

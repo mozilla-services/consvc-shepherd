@@ -62,7 +62,7 @@ class TestSyncBoostrData(TestCase):
         with self.assertRaises(HTTPError) as context:
             loader.upsert_deals()
         self.assertEqual(context.exception.response.status_code, 429)
-        self.assertEqual(context.exception.response.headers["Retry-After"], '5')
+        self.assertEqual(context.exception.response.headers["Retry-After"], "5")
 
     @mock.patch("requests.Session.post", side_effect=mock_post_token_fail)
     def test_authenticate_fail(self, mock_post):
