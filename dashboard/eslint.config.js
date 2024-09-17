@@ -1,13 +1,14 @@
-import js from "@eslint/js";
 import globals from "globals";
-import react from 'eslint-plugin-react'
+import js from "@eslint/js";
+import jsxA11y from "eslint-plugin-jsx-a11y";
+import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  settings: { react: { version: '18.3' } },
-  { ignores: ["dist"] },
+  { settings: { react: { version: "18.3" } } },
+  { ignores: ["dist", "node_modules", ".vite"] },
   {
     extends: [
       js.configs.recommended,
@@ -27,6 +28,7 @@ export default tseslint.config(
       react,
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
+      "jsx-ally": jsxA11y,
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
@@ -35,7 +37,7 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       ...react.configs.recommended.rules,
-      ...react.configs['jsx-runtime'].rules,
+      ...react.configs["jsx-runtime"].rules,
     },
   },
 );

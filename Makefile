@@ -24,7 +24,7 @@ isort: $(INSTALL_STAMP)  ##  Run isort in --check-only mode
 	$(POETRY) run isort --check-only $(APP_DIRS) --profile black
 
 isort-fix: $(INSTALL_STAMP)  ##  Run isort to fix imports
-	@echo "Running isort..."
+	@echo "Running isort with autofix..."
 	$(POETRY) run isort  $(APP_DIRS) --profile black
 
 black: $(INSTALL_STAMP)  ##  Run black
@@ -51,9 +51,17 @@ mypy: $(INSTALL_STAMP)  ##  Run mypy
 	@echo "Running mypy..."
 	$(POETRY) run mypy $(APP_DIRS) --config-file="pyproject.toml"
 
-lint: $(INSTALL_STAMP) isort black flake8 bandit pydocstyle mypy ##  Run various linters
+eslint: $(INSTALL_STAMP)  ##  Run eslint
+	@echo "Running eslint ..."
+	cd dashboard && npm run lint
 
-lint-fix: $(INSTALL_STAMP) isort-fix black-fix flake8 bandit pydocstyle mypy ##  Run various linters and fix errors to pass CircleCi checks
+eslint-fix: $(INSTALL_STAMP)  ##  Format code with eslint
+	@echo "Running eslint with autofix..."
+	cd dashboard && npm run lint:fix
+
+lint: $(INSTALL_STAMP) isort black flake8 bandit pydocstyle mypy eslint ##  Run various linters
+
+lint-fix: $(INSTALL_STAMP) isort-fix black-fix eslint-fix flake8 bandit pydocstyle mypy ##  Run various linters and fix errors to pass CircleCi checks
 
 format: install  ##  Sort imports and reformat code
 	$(POETRY) run isort $(APP_DIRS) --profile black
@@ -82,7 +90,7 @@ dev: $(INSTALL_STAMP)  ##  Run shepherd locally and reload automatically
 	docker compose up
 
 local-test: $(INSTALL_STAMP)  ##  local test
-	docker compose -f docker-compose.test-python.yml up --abort-on-container-exit && docker compose -f docker-compose.test-js.yml up --abort-on-container-exit
+	docker compose -f docker-compose.test-python.yml up --abort-on-container-exit && docker compose -f docker-compose.test-ts.yml up --abort-on-container-exit
 
 makemigrations-empty: ##  Create an empty migrations file for manual migrations
 	docker exec -it consvc-shepherd-app-1 python manage.py makemigrations --empty consvc_shepherd
