@@ -3,6 +3,7 @@
 from unittest import mock
 
 from django.test import TestCase, override_settings
+from requests import HTTPError
 
 from consvc_shepherd.management.commands.sync_boostr_data import (
     BoostrApi,
@@ -13,6 +14,7 @@ from consvc_shepherd.management.commands.sync_boostr_data import (
     get_campaign_type,
 )
 from consvc_shepherd.tests.test_sync_boostr_mocks import (
+    mock_get_error_429,
     mock_get_fail,
     mock_get_product,
     mock_get_success,
@@ -47,6 +49,20 @@ class TestSyncBoostrData(TestCase):
         boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD)
         jwt = boostr.authenticate(EMAIL, PASSWORD)
         self.assertEqual(jwt, "i.am.jwt")
+
+    # @mock.patch("requests.Session.get", side_effect=mock_get_error_429)
+    @mock.patch(
+        "consvc_shepherd.management.commands.sync_boostr_data.BoostrApi.get",
+        side_effect=mock_get_error_429,
+    )
+    @mock.patch("requests.Session.post", side_effect=mock_post_success)
+    def test429(self, mock_post, mock_get):
+        """Test authenticate function that calls boostr auth and returns a JWT"""
+        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
+        with self.assertRaises(HTTPError) as context:
+            loader.upsert_deals()
+        self.assertEqual(context.exception.response.status_code, 429)
+        self.assertEqual(context.exception.response.headers["Retry-After"], '5')
 
     @mock.patch("requests.Session.post", side_effect=mock_post_token_fail)
     def test_authenticate_fail(self, mock_post):
