@@ -82,7 +82,7 @@ dev: $(INSTALL_STAMP)  ##  Run shepherd locally and reload automatically
 	docker compose up
 
 local-test: $(INSTALL_STAMP)  ##  local test
-	docker compose -f docker-compose.test.yml up --build
+	docker compose -f docker-compose.test-python.yml up --abort-on-container-exit && docker compose -f docker-compose.test-js.yml up --abort-on-container-exit
 
 makemigrations-empty: ##  Create an empty migrations file for manual migrations
 	docker exec -it consvc-shepherd-app-1 python manage.py makemigrations --empty consvc_shepherd

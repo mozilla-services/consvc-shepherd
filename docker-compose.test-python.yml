@@ -26,17 +26,5 @@ services:
     depends_on:
       - db
 
-  dashboard:
-    tty: true
-    build:
-      context: ./dashboard
-      dockerfile: ./Dockerfile
-    command: npm run test
-    ports:
-      - "5173:5173"
-    depends_on:
-      - db
-      - app
-
 volumes:
   db_volume:

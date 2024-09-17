@@ -1,15 +1,3 @@
-// export default {
-//     preset: 'ts-jest',
-//     testEnvironment: 'jest-environment-jsdom',
-//     transform: {
-//         "^.+\\.tsx?$": "ts-jest"
-//     // process `*.tsx` files with `ts-jest`
-//     },
-//     moduleNameMapper: {
-//         '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/test/__ mocks __/fileMock.js',
-//     },
-// }
-
 /** @type {import('ts-jest').JestConfigWithTsJest} **/
 export default {
   roots: ["<rootDir>/src"],
@@ -18,7 +6,6 @@ export default {
     "!src/**/*.d.ts",
     "!src/mocks/**",
   ],
-  // preset: "ts-jest",
   testEnvironment: "jest-environment-jsdom",
   modulePaths: ["<rootDir>/src"],
   transform: {
@@ -34,11 +21,6 @@ export default {
         },
       },
     ],
-    // "^.+\\.(ts|js|tsx|jsx)$": "@swc/jest",
-    // "^.+\\.(ts|js|tsx|jsx)$": "ts-jest",
-    // "^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
-    // "^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)":
-    //   "<rootDir>/config/jest/fileTransform.js",
   },
   transformIgnorePatterns: [
     "[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|cjs|ts|tsx)$",
@@ -50,8 +32,6 @@ export default {
     "^.+\\.module\\.(css|sass|scss)$": "identity-obj-proxy",
   },
   moduleFileExtensions: [
-    // Place tsx and ts to beginning as suggestion from Jest team
-    // https://jestjs.io/docs/configuration#modulefileextensions-arraystring
     "tsx",
     "ts",
     "web.js",
