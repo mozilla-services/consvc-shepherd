@@ -9,6 +9,8 @@ from django.db.models import (
     CharField,
     DateField,
     DateTimeField,
+    DecimalField,
+    FloatField,
     ForeignKey,
     IntegerField,
     JSONField,
@@ -363,3 +365,91 @@ class BoostrSyncStatus(models.Model):
     synced_on: DateTimeField = models.DateTimeField(auto_now=True)
     status: CharField = models.CharField(choices=SyncStatus.choices)
     message: CharField = models.CharField()
+
+
+class Campaign(models.Model):
+    """Representation of AdOps CampaignOverview
+
+    Attributes
+    ----------
+    ad_ops_person : CharField
+        Ad Ops Person
+    notes : CharField
+        Notes
+    kevel_flight_id : IntegerField
+        The kevel flight id
+    net_spend : CharField
+        Net Spend
+    impressions_sold : IntegerField
+        Impression Sold
+    net_ecpm : FloatField
+        Net eCPM
+    seller : CharField
+        Seller
+    start_date: DateField
+        Start date
+    end_date: DateField
+        End date
+    created_on : DateTimeField
+        Date of deal record creation (shepherd DB timestamp metadata, not boostr's)
+    updated_on : DateTimeField
+        Date of deal record update (shepherd DB timestamp metadata, not boostr's)
+
+    Methods
+    -------
+    __str__(self)
+        Return the string representation for a Boostr Campaign
+
+    """
+
+    ad_ops_person: CharField = models.CharField()
+    notes: CharField = models.CharField()
+    kevel_flight_id: IntegerField = models.IntegerField()
+    net_spend: DecimalField = models.DecimalField(max_digits=12, decimal_places=2)
+    impressions_sold: IntegerField = models.IntegerField()
+    seller: CharField = models.CharField()
+    deal: ForeignKey = models.ForeignKey(BoostrDeal, on_delete=models.CASCADE)
+    start_date: DateField = models.DateField()
+    end_date: DateField = models.DateField()
+    created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
+    updated_on: DateTimeField = models.DateTimeField(auto_now=True)
+
+    @property
+    def net_ecpm(self):
+        """Calculate and return the net eCPM."""
+        if self.impressions_sold and self.impressions_sold > 0:
+            return (self.net_spend / self.impressions_sold) * 1000
+        return None
+
+    class Meta:
+        """Metadata for the Campaign model."""
+
+        verbose_name = "Campaign"
+        verbose_name_plural = "Campaigns"
+
+    def __str__(self):
+        return f"Campaign {self.kevel_flight_id} - {self.ad_ops_person}"
+
+
+class CampaignSummary(models.Model):
+    """Model representing a summary of campaign metrics."""
+
+    deal_id: IntegerField = models.IntegerField(primary_key=True)
+    advertiser: CharField = models.CharField(max_length=255)
+    net_spend: FloatField = models.FloatField()
+    impressions_sold: FloatField = models.FloatField()
+
+    @property
+    def net_ecpm(self):
+        """Calculate and return the net eCPM."""
+        if self.impressions_sold > 0:
+            return (self.net_spend / self.impressions_sold) * 1000
+        return None
+
+    class Meta:
+        """Metadata for the CampaignSummary model."""
+
+        managed = False
+        db_table = "campaign_summary_view"
+        verbose_name = "Campaign"
+        verbose_name_plural = "Campaign Summaries"
