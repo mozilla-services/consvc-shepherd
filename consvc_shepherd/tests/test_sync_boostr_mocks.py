@@ -1,6 +1,8 @@
 """MockResponse utility class for testing the sync script's interactions with the Boostr API"""
 
-from consvc_shepherd.models import BoostrDeal, BoostrProduct
+import requests
+
+from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct
 from consvc_shepherd.tests.test_sync_boostr_mock_responses import (
     MOCK_DEAL_PRODUCTS_RESPONSE,
     MOCK_DEALS_RESPONSE,
@@ -65,6 +67,14 @@ def mock_get_fail(*args, **kwargs) -> MockResponse:
     return MockResponse({"uh": "oh"}, 400)
 
 
+def mock_get_error_429(*args, **kwargs) -> requests.Response:
+    """Mock 429 error returned when rate limited"""
+    mock_response = requests.Response()
+    mock_response.status_code = 429
+    mock_response.headers["Retry-After"] = "5"
+    raise requests.HTTPError(response=mock_response)
+
+
 def mock_update_or_create_deal(*args, **kwargs) -> tuple[BoostrDeal, bool]:
     """Mock out the DB for saving deals"""
     return (
@@ -107,3 +117,23 @@ BOOSTR_PRODUCTS = {
 def mock_get_product(*args, **kwargs) -> BoostrProduct:
     """Mock out retrieving a product from the DB"""
     return BOOSTR_PRODUCTS[kwargs["boostr_id"]]
+
+
+def mock_update_or_create_deal_product(
+    *args, **kwargs
+) -> tuple[BoostrDealProduct, bool]:
+    """Mock out the DB for saving deal products"""
+    return (
+        BoostrDealProduct(
+            boostr_deal=kwargs["deal"],
+            boostr_product=BoostrProduct(
+                boostr_id=28256,
+                full_name="Firefox New Tab US (CPC)",
+                country="US",
+                campaign_type=BoostrProduct.CampaignType.CPC,
+            ),
+            month=kwargs["month"],
+            budget=kwargs["budget"],
+        ),
+        True,
+    )
