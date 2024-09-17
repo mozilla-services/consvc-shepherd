@@ -417,7 +417,7 @@ class Campaign(models.Model):
     @property
     def net_ecpm(self):
         """Calculate and return the net eCPM."""
-        if self.impressions_sold > 0:
+        if self.impressions_sold and self.impressions_sold > 0:
             return (self.net_spend / self.impressions_sold) * 1000
         return None
 
