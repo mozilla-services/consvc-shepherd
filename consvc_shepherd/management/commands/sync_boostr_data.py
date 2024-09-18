@@ -148,7 +148,8 @@ class BoostrApi:
                 if current_retry < max_retry:
                     retry_after = int(response.headers.get("Retry-After", 60)) + 1
                     self.log.info(
-                        f"{response.status_code}: Rate Limited - Waiting {retry_after} seconds. Current retry: {current_retry}"
+                        f"{response.status_code}: Rate Limited - Waiting {retry_after} seconds. \
+                        Current retry: {current_retry}"
                     )
                     time.sleep(retry_after)
                     current_retry += 1
