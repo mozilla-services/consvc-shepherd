@@ -19,8 +19,10 @@ from consvc_shepherd.models import (
 )
 
 MAX_DEAL_PAGES_DEFAULT = 50
+MAX_SLEEP_SECONDS = 60
 SYNC_STATUS_SUCCESS = "success"
 SYNC_STATUS_FAILURE = "failure"
+HTTP_TOO_MANY_REQUESTS = 429
 DEFAULT_OPTIONS = {
     "max_deal_pages": MAX_DEAL_PAGES_DEFAULT,
 }
@@ -104,20 +106,17 @@ class BoostrApi:
         """Make POST requests to Boostr that uses the session, pass through headers and json data,
         check status, and return parsed json
         """
-        if json is None:
-            json = {}
-        if headers is None:
-            headers = {}
-
         response = self.session.post(
             f"{self.base_url}/{path}",
-            json=json,
-            headers=headers,
+            json=json or {},
+            headers=headers or {},
             timeout=15,
         )
 
-        if response.status_code == 429:
-            retry_after = int(response.headers.get("Retry-After", 60)) + 1
+        if response.status_code == HTTP_TOO_MANY_REQUESTS:
+            retry_after = (
+                int(response.headers.get("Retry-After", default=MAX_SLEEP_SECONDS)) + 1
+            )
             self.log.info(
                 f"{response.status_code}: Rate Limited - Waiting {retry_after} seconds"
             )
@@ -135,18 +134,15 @@ class BoostrApi:
         """Make GET requests to Boostr that use the session, pass through headers and query params,
         check status, and return parsed json
         """
-        if params is None:
-            params = {}
-        if headers is None:
-            headers = {}
-
         try:
             response = self.session.get(
-                f"{self.base_url}/{path}", params=params, headers=headers, timeout=15
+                f"{self.base_url}/{path}", params=params or {}, headers=headers or {}, timeout=15
             )
-            if response.status_code == 429:
+            if response.status_code == HTTP_TOO_MANY_REQUESTS:
                 if current_retry < max_retry:
-                    retry_after = int(response.headers.get("Retry-After", 60)) + 1
+                    retry_after = (
+                        int(response.headers.get("Retry-After", MAX_SLEEP_SECONDS)) + 1
+                    )
                     self.log.info(
                         f"{response.status_code}: Rate Limited - Waiting {retry_after} seconds. \
                         Current retry: {current_retry}"
@@ -159,7 +155,7 @@ class BoostrApi:
         except requests.exceptions.RequestException as e:
             if current_retry < max_retry:
                 self.log.info(f"{e}: Read timeout Current Retry: {current_retry}")
-                time.sleep(60)
+                time.sleep(MAX_SLEEP_SECONDS)
                 current_retry += 1
                 return self.get(path, params, headers, max_retry, current_retry)
             else:
