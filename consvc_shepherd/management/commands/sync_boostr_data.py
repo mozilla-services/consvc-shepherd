@@ -136,7 +136,10 @@ class BoostrApi:
         """
         try:
             response = self.session.get(
-                f"{self.base_url}/{path}", params=params or {}, headers=headers or {}, timeout=15
+                f"{self.base_url}/{path}",
+                params=params or {},
+                headers=headers or {},
+                timeout=15,
             )
             if response.status_code == HTTP_TOO_MANY_REQUESTS:
                 if current_retry < max_retry:

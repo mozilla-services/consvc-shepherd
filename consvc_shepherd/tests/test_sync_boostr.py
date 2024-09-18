@@ -4,7 +4,6 @@ from unittest import mock
 
 from django.test import TestCase, override_settings
 from requests import HTTPError
-import requests
 
 from consvc_shepherd.management.commands.sync_boostr_data import (
     BoostrApi,
