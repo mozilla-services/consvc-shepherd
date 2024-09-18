@@ -4,7 +4,7 @@ line-length = 120
 
 
 [lint]
-select = ["S","I","D202","D212"]
+select = ["S","I","B","D202","D212"]
 ignore = ["D105","D107","D203", "D205", "D400"]
 fixable = ["ALL"]
 
