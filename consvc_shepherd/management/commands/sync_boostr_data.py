@@ -131,7 +131,7 @@ class BoostrApi:
         json = response.json()
         return json
 
-    def get(self, path: str, params=None, headers=None):
+    def get(self, path: str, params=None, headers=None, max_retry=5, current_retry=0):
         """Make GET requests to Boostr that use the session, pass through headers and query params,
         check status, and return parsed json
         """
@@ -140,17 +140,29 @@ class BoostrApi:
         if headers is None:
             headers = {}
 
-        response = self.session.get(
-            f"{self.base_url}/{path}", params=params, headers=headers, timeout=15
-        )
-        if response.status_code == 429:
-            retry_after = int(response.headers.get("Retry-After", 60)) + 1
-            self.log.info(
-                f"{response.status_code}: Rate Limited - Waiting {retry_after} seconds"
+        try:
+            response = self.session.get(
+                f"{self.base_url}/{path}", params=params, headers=headers, timeout=15
             )
-            time.sleep(retry_after)
-            return self.get(path, params, headers)
-
+            if response.status_code == 429:
+                if current_retry < max_retry:
+                    retry_after = int(response.headers.get("Retry-After", 60)) + 1
+                    self.log.info(
+                        f"{response.status_code}: Rate Limited - Waiting {retry_after} seconds. Current retry: {current_retry}"
+                    )
+                    time.sleep(retry_after)
+                    current_retry += 1
+                    return self.get(path, params, headers, max_retry, current_retry)
+                else:
+                    raise BoostrApiError("Maximum Retries Reached")
+        except requests.exceptions.RequestException as e:
+            if current_retry < max_retry:
+                self.log.info(f"{e}: Read timeout Current Retry: {current_retry}")
+                time.sleep(60)
+                current_retry += 1
+                return self.get(path, params, headers, max_retry, current_retry)
+            else:
+                raise BoostrApiError("Maximum Retries Reached")
         if not response.ok:
             raise BoostrApiError(
                 f"Bad response status {response.status_code} from /{path}: {response}"
