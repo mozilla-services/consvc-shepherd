@@ -256,4 +256,8 @@ if STATSD_DEBUG:
     )
 markus.configure(backends=_MARKUS_BACKENDS)
 
-CORS_ALLOWED_ORIGINS = ["http://0.0.0.0:5173"]
+# CORS_ORIGIN_ALLOW_ALL=True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://0.0.0.0:5173",
+]

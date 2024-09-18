@@ -4,7 +4,9 @@ import json
 
 from django.conf import settings
 from django.contrib import admin, messages
+from django.db.models import Subquery
 from django.utils import dateformat, timezone
+from django.utils.translation import gettext_lazy as _
 from jsonschema import exceptions, validate
 
 from consvc_shepherd.forms import AllocationSettingForm, AllocationSettingFormset
@@ -15,6 +17,8 @@ from consvc_shepherd.models import (
     BoostrDealProduct,
     BoostrProduct,
     BoostrSyncStatus,
+    Campaign,
+    CampaignSummary,
     PartnerAllocation,
     SettingsSnapshot,
 )
@@ -268,6 +272,124 @@ class BoostrProductAdmin(admin.ModelAdmin):
         "full_name",
         "country",
         "campaign_type",
+    ]
+
+
+class MonthFilter(admin.SimpleListFilter):
+    """Filter for listing by month."""
+
+    title = _("month")
+    parameter_name = "month"
+
+    def lookups(self, request, model_admin):
+        """Return a list of distinct months for the filter options."""
+        months = BoostrDealProduct.objects.values_list("month", flat=True).distinct()
+        return [(month, month) for month in months]
+
+    def queryset(self, request, queryset):
+        """Filter the queryset based on the selected month."""
+        if self.value():
+            subquery = BoostrDealProduct.objects.filter(month=self.value()).values(
+                "boostr_deal_id"
+            )
+            queryset = queryset.filter(deal_id__in=Subquery(subquery))
+            return queryset
+
+        return queryset
+
+
+class PlacementFilter(admin.SimpleListFilter):
+    """Filter for listing by placement."""
+
+    title = _("placement")
+    parameter_name = "placement"
+
+    def lookups(self, request, model_admin):
+        """Return a list of distinct placements for the filter options."""
+        placements = BoostrProduct.objects.values_list(
+            "full_name", flat=True
+        ).distinct()
+        return [(placement, placement) for placement in placements]
+
+    def queryset(self, request, queryset):
+        """Filter the queryset based on the selected placement."""
+        if self.value():
+            subquery = BoostrDealProduct.objects.filter(
+                boostr_product__full_name=self.value()
+            ).values(
+                "boostr_deal"
+            )  # Assuming 'boostr_deal_id' is the correct field
+
+            queryset = queryset.filter(deal_id__in=Subquery(subquery))
+            return queryset
+
+
+class CountryFilter(admin.SimpleListFilter):
+    """Filter for listing by country."""
+
+    title = _("country")
+    parameter_name = "country"
+
+    def lookups(self, request, model_admin):
+        """Return a list of distinct countries for the filter options."""
+        countries = BoostrProduct.objects.values_list("country", flat=True).distinct()
+        return [(country, country) for country in countries]
+
+    def queryset(self, request, queryset):
+        """Filter the queryset based on the selected country."""
+        if self.value():
+            subquery = BoostrDealProduct.objects.filter(
+                boostr_product__country=self.value()
+            ).values("boostr_deal")
+
+            queryset = queryset.filter(deal_id__in=Subquery(subquery))
+            return queryset
+
+
+@admin.register(Campaign)
+class CampaignAdmin(admin.ModelAdmin):
+    """Admin model for sales products imported from Boostr. Deals are many-to-many with products"""
+
+    model = Campaign
+
+    list_filter = [
+        MonthFilter,
+        CountryFilter,
+        PlacementFilter,
+        "deal__advertiser",
+    ]
+
+    readonly_fields: list[str] = [
+        "net_ecpm",
+    ]
+
+    list_display = [
+        "ad_ops_person",
+        "notes",
+        "kevel_flight_id",
+        "net_spend",
+        "impressions_sold",
+        "net_ecpm",
+        "seller",
+        "deal",
+        "start_date",
+        "end_date",
+    ]
+
+
+@admin.register(CampaignSummary)
+class CampaignSummaryAdmin(admin.ModelAdmin):
+    """Admin model for showing the Boostr deals revenue overview"""
+
+    model = CampaignSummary
+
+    list_display = ["advertiser", "net_spend", "impressions_sold", "net_ecpm"]
+
+    list_filter = [
+        MonthFilter,
+        CountryFilter,
+        PlacementFilter,
+        "advertiser",
     ]
 
 

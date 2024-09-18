@@ -8,6 +8,7 @@ import mock
 import pytz
 from django.contrib.admin.sites import AdminSite
 from django.test import RequestFactory, TestCase, override_settings
+from django.urls import reverse
 from django.utils import timezone
 from jsonschema import validate
 from markus.testing import MetricsMock
@@ -21,11 +22,15 @@ from consvc_shepherd.admin import (
 from consvc_shepherd.models import (
     AllocationSetting,
     AllocationSettingsSnapshot,
+    BoostrDeal,
+    BoostrDealProduct,
+    BoostrProduct,
+    Campaign,
     Partner,
     PartnerAllocation,
     SettingsSnapshot,
 )
-from consvc_shepherd.tests.factories import UserFactory
+from consvc_shepherd.tests.factories import AdminUserFactory, UserFactory
 from contile.models import Advertiser, AdvertiserUrl
 
 
@@ -368,3 +373,121 @@ class AllocationSettingsSnapshotAdminTest(TestCase):
         allocation_setting_2 = AllocationSetting.objects.get(position=2)
         self.admin.delete_queryset(request, allocation_setting_2)
         self.assertEqual(AllocationSetting.objects.all().count(), 1)
+
+
+@override_settings(DEBUG=True)
+class CampaignAdminTests(TestCase):
+    """Test case for the admin interface of Campaign."""
+
+    def setUp(self):
+        """Set up test user, request, and data."""
+        self.request_factory = RequestFactory()
+        self.admin_user = AdminUserFactory()
+
+        self.create_test_data()
+
+    def create_test_data(self):
+        """Create test data for BoostrDeal, BoostrProduct, and Campaign models."""
+        self.deal1 = BoostrDeal.objects.create(
+            boostr_id=1,
+            name="Test Deal1",
+            advertiser="Test Advertiser1",
+            currency="$",
+            amount=10000,
+            sales_representatives="Rep1, Rep2",
+            start_date="2024-01-01",
+            end_date="2024-12-31",
+        )
+
+        self.deal2 = BoostrDeal.objects.create(
+            boostr_id=2,
+            name="Test Deal2",
+            advertiser="Test Advertiser2",
+            currency="$",
+            amount=10000,
+            sales_representatives="Rep1, Rep2",
+            start_date="2024-01-01",
+            end_date="2024-12-31",
+        )
+
+        # Create BoostrProduct instances
+        self.product1 = BoostrProduct.objects.create(
+            boostr_id=1, full_name="Product 1", country="US", campaign_type="CPC"
+        )
+        self.product2 = BoostrProduct.objects.create(
+            boostr_id=2, full_name="Product 2", country="CA", campaign_type="CPM"
+        )
+
+        # Create BoostrDealProduct instances linking to the products
+        self.deal_product1 = BoostrDealProduct.objects.create(
+            boostr_deal=self.deal1,
+            boostr_product=self.product1,
+            budget=5000,
+            month="2024-01",
+        )
+        self.deal_product2 = BoostrDealProduct.objects.create(
+            boostr_deal=self.deal2,
+            boostr_product=self.product2,
+            budget=5000,
+            month="2024-02",
+        )
+
+        # Create Campaign instances linked to the BoostrDeal
+        self.campaign_overview1 = Campaign.objects.create(
+            deal=self.deal1,
+            ad_ops_person="AdOps Person 1",
+            notes="Notes 1",
+            kevel_flight_id=1001,
+            net_spend=1000,
+            impressions_sold=2000,
+            start_date="2023-01-01",
+            end_date="2023-01-05",
+        )
+        self.campaign_overview2 = Campaign.objects.create(
+            deal=self.deal2,
+            ad_ops_person="AdOps Person 2",
+            notes="Notes 2",
+            kevel_flight_id=1002,
+            net_spend=1500,
+            impressions_sold=3000,
+            start_date="2023-01-01",
+            end_date="2023-01-05",
+        )
+
+    def test_month_filter(self):
+        """Test filtering Campaign by month."""
+        response = self.client.get(
+            reverse("admin:consvc_shepherd_campaign_changelist") + "?month=2024-01",
+            **{"settings.OPENIDC_HEADER": "dev@example.com"},
+        )
+        self.assertContains(response, "AdOps Person 1")
+        self.assertNotContains(response, "AdOps Person 2")
+
+    def test_placement_filter(self):
+        """Test filtering Campaign by placement."""
+        response = self.client.get(
+            reverse("admin:consvc_shepherd_campaign_changelist")
+            + "?placement=Product 2",
+            **{"settings.OPENIDC_HEADER": "dev@example.com"},
+        )
+        self.assertContains(response, "AdOps Person 2")
+        self.assertNotContains(response, "AdOps Person 1")
+
+    def test_country_filter(self):
+        """Test filtering Campaign by country."""
+        response = self.client.get(
+            reverse("admin:consvc_shepherd_campaign_changelist") + "?country=CA",
+            **{"settings.OPENIDC_HEADER": "dev@example.com"},
+        )
+        self.assertContains(response, "AdOps Person 2")
+        self.assertNotContains(response, "AdOps Person 1")
+
+    def test_deal_advertiser_filter(self):
+        """Test changelist_view with deal advertiser filter applied."""
+        response = self.client.get(
+            reverse("admin:consvc_shepherd_campaign_changelist")
+            + "?deal__advertiser=Test Advertiser1",
+            **{"settings.OPENIDC_HEADER": "dev@example.com"},
+        )
+        self.assertContains(response, "AdOps Person 1")
+        self.assertNotContains(response, "AdOps Person 2")

@@ -26,8 +26,16 @@ class UserFactory(factory.django.DjangoModelFactory):
     last_name = factory.LazyAttribute(lambda o: faker.last_name())  # type: ignore [attr-defined]
     email = factory.LazyAttribute(lambda o: faker.company_email())  # type: ignore [attr-defined]
     username = factory.LazyAttribute(lambda o: o.email)
+    password: str = factory.django.Password("password")
 
     class Meta:
         """Meta class to bind model to get_user_model()."""
 
         model = get_user_model()
+
+
+class AdminUserFactory(UserFactory):
+    """Factory for creating admin user instances with staff and superuser privileges."""
+
+    is_staff: bool = True
+    is_superuser: bool = True
