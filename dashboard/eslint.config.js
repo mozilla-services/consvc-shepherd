@@ -22,6 +22,11 @@ export default tseslint.config(
       parserOptions: {
         project: ["./tsconfig.node.json", "./tsconfig.app.json"],
         tsconfigRootDir: import.meta.dirname,
+        // We're currently using typescript 5.6.2 and typescript-eslint supports up to 5.6.0.ß
+        // The warning below is currently disabled since that seems a safe enough version difference.
+        // We may want to re-enable this once typescript-eslint catches up, which we can check here:
+        // https://typescript-eslint.io/users/dependency-versions/#typescript
+        warnOnUnsupportedTypeScriptVersion: false,
       },
     },
     plugins: {
