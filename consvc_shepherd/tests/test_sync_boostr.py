@@ -4,6 +4,7 @@ from unittest import mock
 
 from django.test import TestCase, override_settings
 from requests import HTTPError
+import requests
 
 from consvc_shepherd.management.commands.sync_boostr_data import (
     BoostrApi,
@@ -50,14 +51,13 @@ class TestSyncBoostrData(TestCase):
         jwt = boostr.authenticate(EMAIL, PASSWORD)
         self.assertEqual(jwt, "i.am.jwt")
 
-    # @mock.patch("requests.Session.get", side_effect=mock_get_error_429)
     @mock.patch(
         "consvc_shepherd.management.commands.sync_boostr_data.BoostrApi.get",
         side_effect=mock_get_error_429,
     )
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     def test429(self, mock_post, mock_get):
-        """Test authenticate function that calls boostr auth and returns a JWT"""
+        """Test get function for 429 error handling"""
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
         with self.assertRaises(HTTPError) as context:
             loader.upsert_deals()
