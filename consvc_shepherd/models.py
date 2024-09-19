@@ -521,7 +521,7 @@ class DeliveredCampaign(models.Model):
     campaign_id: IntegerField = models.IntegerField()
     flight: ForeignKey = models.ForeignKey(
         Campaign,
-        to_field='kevel_flight_id',
+        to_field="kevel_flight_id",
         on_delete=models.CASCADE,
     )
     country: CharField = models.CharField()
@@ -531,4 +531,4 @@ class DeliveredCampaign(models.Model):
 
     def __str__(self):
         """Return the string representation for campaign ids and associated number of clicks and impressions"""
-        return f"{self.campaign_id} : {self.clicks_delivered} clicks and {self.impressions_delivered} impressions"
+        return f"{self.flight} : {self.clicks_delivered} clicks and {self.impressions_delivered} impressions"

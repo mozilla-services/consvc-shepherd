@@ -19,9 +19,9 @@ from consvc_shepherd.models import (
     BoostrSyncStatus,
     Campaign,
     CampaignSummary,
+    DeliveredCampaign,
     PartnerAllocation,
     SettingsSnapshot,
-    DeliveredCampaign,
 )
 from consvc_shepherd.storage import send_to_storage
 from consvc_shepherd.utils import ShepherdMetrics
@@ -413,8 +413,8 @@ class PartnerFilter(admin.SimpleListFilter):
         """Return a list of distinct partners for the filter options."""
         # Define the possible values for partner
         return [
-            ('contile', 'Contile'),
-            ('kevel', 'Kevel'),
+            ("Contile", "Contile"),
+            ("Kevel", "Kevel"),
         ]
 
     def queryset(self, request, queryset):
@@ -434,9 +434,7 @@ class DeliveredCampaignsAdmin(admin.ModelAdmin):
         "flight_id",
         "provider",
     ]
-    search_help_text = (
-        "Search by campaign id, flight id, and provider."
-    )
+    search_help_text = "Search by campaign id, flight id, and provider."
     list_filter = [
         "submission_date",
         PartnerFilter,
