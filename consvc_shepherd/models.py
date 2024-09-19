@@ -498,8 +498,8 @@ class DeliveredCampaign(models.Model):
     submission_date : DateTimeField
         The date the metric was captured
     campaign_id : CharField
-        The Kevel campaign ID
-    flight_id : CharField
+        Foreign key pointing kevel flight id in Campaign
+    flight : CharField
         The Kevel flight ID
     country : CharField
         Country where metric was captured by Firefox telemetry

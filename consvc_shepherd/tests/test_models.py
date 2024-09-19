@@ -7,6 +7,7 @@ from consvc_shepherd.models import (
     AllocationSetting,
     BoostrDeal,
     Campaign,
+    DeliveredCampaign,
     Partner,
     PartnerAllocation,
 )
@@ -119,3 +120,66 @@ class CampaignTestCase(TestCase):
         """Verify that the __str__ method returns the correct string representation."""
         expected_str = "Campaign 12345 - John Doe"
         self.assertEqual(str(self.campaign), expected_str)
+
+
+class DeliveredCampaignTestCase(TestCase):
+    """Test case for DeliveredCampaign model operations."""
+
+    def setUp(self):
+        """Set up test data for DeliveredCampaign model."""
+        # Create a BoostrDeal instance to use in Campaign
+        self.deal = BoostrDeal.objects.create(
+            boostr_id=1,
+            name="Test Deal",
+            advertiser="Test Advertiser",
+            currency="$",
+            amount=1000,
+            sales_representatives="John Doe, Jane Doe",
+            start_date=timezone.now().date(),
+            end_date=timezone.now().date(),
+        )
+
+        # Create a Campaign instance
+        self.campaign = Campaign.objects.create(
+            ad_ops_person="John Doe",
+            notes="Test notes",
+            kevel_flight_id=12345,
+            net_spend=1000,
+            impressions_sold=1000,
+            seller="Test Seller",
+            deal=self.deal,
+            start_date=timezone.now().date(),
+            end_date=timezone.now().date(),
+        )
+
+        # Create a DeliveredCampaign instance
+        self.delivered_campaign = DeliveredCampaign.objects.create(
+            submission_date=timezone.now(),
+            campaign_id=12345,
+            flight=self.campaign,
+            country="US",
+            provider="kevel",
+            clicks_delivered=100,
+            impressions_delivered=1000,
+        )
+
+    def test_str_method(self):
+        """Verify that the __str__ method returns the correct string representation."""
+        expected_str = (
+            f"{self.delivered_campaign.flight} : "
+            + f"{self.delivered_campaign.clicks_delivered} clicks and "
+            + f"{self.delivered_campaign.impressions_delivered} impressions"
+        )
+        self.assertEqual(str(self.delivered_campaign), expected_str)
+
+    def test_delivered_campaign_fields(self):
+        """Test that Campaign model fields are correctly set."""
+        self.assertEqual(self.delivered_campaign.campaign_id, 12345)
+        self.assertEqual(
+            self.delivered_campaign.flight.kevel_flight_id,
+            self.campaign.kevel_flight_id,
+        )
+        self.assertEqual(self.delivered_campaign.country, "US")
+        self.assertEqual(self.delivered_campaign.provider, "kevel")
+        self.assertEqual(self.delivered_campaign.clicks_delivered, 100)
+        self.assertEqual(self.delivered_campaign.impressions_delivered, 1000)
