@@ -361,6 +361,7 @@ class BoostrDealProduct(models.Model):
         max_digits=13, decimal_places=2, null=True
     )
 
+
 class BoostrSyncStatus(models.Model):
     """Table for capturing the status of a Booster sync process execution
 
