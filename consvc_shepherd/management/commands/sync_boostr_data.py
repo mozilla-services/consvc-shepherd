@@ -4,12 +4,15 @@ import logging
 import math
 import time
 import traceback
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from decimal import Decimal
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List
 
 import environ
 import requests
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
@@ -21,6 +24,7 @@ from consvc_shepherd.models import (
     Campaign,
 )
 
+env = environ.Env()
 MAX_DEAL_PAGES_DEFAULT = 50
 DEFAULT_RETRY_INTERVAL = 60
 SYNC_STATUS_SUCCESS = "success"
@@ -29,6 +33,61 @@ HTTP_TOO_MANY_REQUESTS = 429
 DEFAULT_OPTIONS = {
     "max_deal_pages": MAX_DEAL_PAGES_DEFAULT,
 }
+
+
+@dataclass(frozen=True)
+class BoostrDealMediaPlanLineItem:
+    """Line Items for Boostr Media plans"""
+
+    media_plan_line_item_id: int
+    boostr_deal: int
+    boostr_product: int
+    rate_type: str
+    rate: Decimal
+    quantity: Decimal
+    budget: Decimal
+    month: str
+
+    def __str__(self) -> str:
+        return f"{self.boostr_product}"
+
+
+@dataclass
+class BoostrMediaPlan:
+    """Media Plan For Boostr Deals"""
+
+    media_plan_id: int
+    name: str
+    boostr_deal: int
+    line_items: Dict[
+        int,
+        Dict[int, List[BoostrDealMediaPlanLineItem]],
+    ] = field(default_factory=dict)
+
+    def __str__(self) -> str:
+        return f"{self.name}"
+
+    def add_line_item(self, line_item: BoostrDealMediaPlanLineItem):
+        """Add a line item to a media plan"""
+        if self.boostr_deal not in self.line_items:
+            self.line_items[self.boostr_deal] = {}
+        if line_item.boostr_product not in self.line_items[self.boostr_deal]:
+            self.line_items[self.boostr_deal][line_item.boostr_product] = []
+            self.line_items[self.boostr_deal][line_item.boostr_product].append(
+                line_item
+            )
+
+
+@dataclass
+class MediaPlanCollection:
+    """A collection for storing Media Plans"""
+
+    media_plans: Dict[int, BoostrMediaPlan] = field(default_factory=dict)
+
+    def add_media_plan(self, boostr_plan: int, media_plan: BoostrMediaPlan):
+        """Add a media plan to the collection"""
+        if boostr_plan not in self.media_plans:
+            self.media_plans[boostr_plan] = media_plan
 
 
 class Command(BaseCommand):
@@ -79,6 +138,12 @@ class BoostrApiMaxRetriesError(Exception):
     pass
 
 
+class BoostrAPIInvalidMethod(Exception):
+    """Raise this error if GET or POST is missing from the request"""
+
+    pass
+
+
 class BoostrApi:
     """Wrap up interactions with the Boostr API into a convenient class that handles the session, rate limits, etc"""
 
@@ -107,56 +172,49 @@ class BoostrApi:
 
     def authenticate(self, email: str, password: str) -> str:
         """Authenticate with the Boostr API and return jwt"""
+        if settings.BOOSTR_AUTH_BYPASS:
+            # if we are local, bypass auth to avoid login rate limits
+            return str(env("BOOSTR_JWT"))
         post_data = {"auth": {"email": email, "password": password}}
         token = self.post("user_token", post_data)
         return str(token["jwt"])
 
-    def post(self, path: str, json=None, headers=None) -> Any:
-        """Make POST requests to Boostr that uses the session, pass through headers and json data,
-        check status, and return parsed json
-        """
-        response = self.session.post(
-            f"{self.base_url}/{path}",
-            json=json or {},
-            headers=headers or {},
-            timeout=15,
-        )
-
-        if response.status_code == HTTP_TOO_MANY_REQUESTS:
-            retry_after = (
-                int(response.headers.get("Retry-After", default=DEFAULT_RETRY_INTERVAL))
-                + 1
-            )
-            self.log.info(
-                f"{response.status_code}: Rate Limited - Waiting {retry_after} seconds"
-            )
-            self._sleep(retry_after)
-            return self.post(path, json, headers)
-
-        if not response.ok:
-            raise BoostrApiError(
-                f"Bad response status {response.status_code} from /{path}: {response}"
-            )
-        json = response.json()
-        return json
-
-    def get(self, path: str, params=None, headers=None, max_retry=5):
-        """Make GET requests to Boostr, handling retries and rate limits."""
-        current_retry = 0
-
-        while current_retry < max_retry:
+    def request_with_retries(
+        self,
+        method: str,
+        path: str,
+        json=None,
+        params=None,
+        headers=None,
+        max_retry: int = 5,
+    ):
+        """Make GET or POST requests with retry for 429 and timeout errors"""
+        method = method.lower()
+        for current_retry in range(max_retry):
             try:
-                response = self.session.get(
-                    f"{self.base_url}/{path}",
-                    params=params or {},
-                    headers=headers or {},
-                    timeout=15,
-                )
+                if method == "get":
+                    response = self.session.get(
+                        f"{self.base_url}/{path}",
+                        params=params or {},
+                        headers=headers or {},
+                        timeout=15,
+                    )
+                elif method == "post":
+                    response = self.session.post(
+                        f"{self.base_url}/{path}",
+                        json=json or {},
+                        headers=headers or {},
+                        timeout=15,
+                    )
+                else:
+                    raise BoostrAPIInvalidMethod(
+                        f"{method} is not a support HTTP method. Use 'GET' or 'POST'."
+                    )
+
             except requests.exceptions.RequestException as e:
                 self.log.info(
                     f"RequestException occurred: {e}. Current retry: {current_retry}"
                 )
-                current_retry += 1
                 self._sleep(DEFAULT_RETRY_INTERVAL)
                 continue
 
@@ -168,7 +226,6 @@ class BoostrApi:
                     f"{response.status_code}: Rate limited - Waiting {retry_after} seconds. "
                     f"Current retry: {current_retry}"
                 )
-                current_retry += 1
                 self._sleep(retry_after)
                 continue
 
@@ -182,6 +239,24 @@ class BoostrApi:
 
         raise BoostrApiMaxRetriesError("Maximum retries reached")
 
+    def post(self, path: str, json=None, headers=None, max_retry=5) -> Any:
+        """Make POST requests to Boostr that uses the session, pass through headers and json data,
+        check status, and return parsed json
+        """
+        return self.request_with_retries(
+            method="post", path=path, json=json, headers=headers, max_retry=max_retry
+        )
+
+    def get(self, path: str, params=None, headers=None, max_retry=5):
+        """Make GET requests to Boostr, handling retries and rate limits."""
+        return self.request_with_retries(
+            method="get",
+            path=path,
+            params=params,
+            headers=headers,
+            max_retry=max_retry,
+        )
+
     def _sleep(self, seconds) -> None:
         """Sleep for the specified number of seconds. Extracted for testing purposes."""
         time.sleep(seconds)
@@ -193,6 +268,8 @@ class BoostrLoader:
     boostr: BoostrApi
     log: logging.Logger
     max_deal_pages: int
+    line_items: Dict[int, BoostrDealMediaPlanLineItem]
+    media_plan_collection = MediaPlanCollection()
 
     def __init__(
         self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
@@ -331,8 +408,99 @@ class BoostrLoader:
                 f"{product.boostr_id} to deal: {deal.boostr_id}"
             )
 
+    def upsert_mediaplan(self) -> None:
+        """Upsert media plan line item details into the database"""
+        page = 0
+        media_plan_params = {
+            "per": "300",
+            "page": str(page),
+            "filter": "all",
+        }
+
+        media_plans = self.boostr.get(
+            "media_plans",
+            params=media_plan_params,
+        )
+        self.log.info(f"Fetched {len(media_plans)} media plans ")
+
+        for media_plan in media_plans:
+            new_media_plan = BoostrMediaPlan(
+                media_plan_id=media_plan["id"],
+                name=media_plan["deal_name"],
+                boostr_deal=media_plan["deal_id"],
+            )
+
+            self.media_plan_collection.add_media_plan(
+                media_plan["deal_id"], new_media_plan
+            )
+            self.upsert_mediaplan_lineitems(new_media_plan)
+
+    def upsert_mediaplan_lineitems(self, media_plan: BoostrMediaPlan) -> None:
+        """Upsert media plan line item"""
+        page = 0
+        deals_params = {
+            "per": "300",
+            "page": str(page),
+            "filter": "all",
+        }
+
+        page += 1
+        deals_params["page"] = str(page)
+
+        media_plan_line_items = self.boostr.get(
+            f"media_plans/{media_plan.media_plan_id}/line_items",
+            params=deals_params,
+        )
+        self.log.info(f"Fetched {len(media_plan_line_items)} media plans ")
+
+        for line_item in media_plan_line_items:
+            if media_plan.media_plan_id:
+                for month in line_item["line_item_monthlies"]:
+                    media_plan_line_item = BoostrDealMediaPlanLineItem(
+                        media_plan_line_item_id=line_item["id"],
+                        boostr_deal=media_plan.boostr_deal,
+                        boostr_product=line_item["product"]["id"],
+                        rate_type=line_item["rate_type"]["name"],
+                        rate=line_item["rate"],
+                        quantity=month["quantity"],
+                        budget=month["budget"],
+                        month=month["month"],
+                    )
+
+                    media_plan.add_line_item(media_plan_line_item)
+                    try:
+                        boostr_deal = BoostrDeal.objects.get(
+                            boostr_id=media_plan_line_item.boostr_deal
+                        )
+                        boostr_product = BoostrProduct.objects.get(
+                            boostr_id=media_plan_line_item.boostr_product
+                        )
+                        filtered_deal_product = BoostrDealProduct.objects.filter(
+                            month=media_plan_line_item.month,
+                            boostr_deal_id=boostr_deal,
+                            boostr_product_id=boostr_product,
+                        )
+
+                        filtered_deal_product.update(
+                            quantity=media_plan_line_item.quantity,
+                            rate=media_plan_line_item.rate,
+                            rate_type=media_plan_line_item.rate_type,
+                        )
+
+                        BoostrDealProduct.objects.filter(
+                            month=media_plan_line_item.month,
+                            boostr_deal_id=media_plan_line_item.boostr_deal,
+                            boostr_product_id=media_plan_line_item.boostr_product,
+                        ).update(
+                            quantity=media_plan_line_item.quantity,
+                            rate=media_plan_line_item.rate,
+                            rate_type=media_plan_line_item.rate_type,
+                        )
+                    except (BoostrDeal.DoesNotExist, BoostrProduct.DoesNotExist):
+                        continue
+
     def update_sync_status(self, status: str, synced_on: datetime, message: str):
-        """Fupdate the BoostrSyncStatus table given the status and the message"""
+        """Update the BoostrSyncStatus table given the status and the message"""
         BoostrSyncStatus.objects.create(
             status=status,
             synced_on=synced_on,
@@ -364,6 +532,7 @@ class BoostrLoader:
             )
             self.upsert_products()
             self.upsert_deals()
+            self.upsert_mediaplan()
             self.log.info(
                 "Boostr sync process completed successfully. Updating sync_status"
             )
