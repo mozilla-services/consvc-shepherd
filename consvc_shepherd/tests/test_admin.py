@@ -3,6 +3,7 @@
 import json
 from datetime import datetime
 from typing import Any
+from dateutil.relativedelta import relativedelta
 
 import mock
 import pytz
@@ -11,6 +12,7 @@ from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 from jsonschema import validate
+from datetime import timedelta
 from markus.testing import MetricsMock
 
 from consvc_shepherd.admin import (
@@ -29,6 +31,7 @@ from consvc_shepherd.models import (
     Partner,
     PartnerAllocation,
     SettingsSnapshot,
+    DeliveredCampaign,
 )
 from consvc_shepherd.tests.factories import AdminUserFactory, UserFactory
 from contile.models import Advertiser, AdvertiserUrl
@@ -491,3 +494,116 @@ class CampaignAdminTests(TestCase):
         )
         self.assertContains(response, "AdOps Person 1")
         self.assertNotContains(response, "AdOps Person 2")
+
+
+@override_settings(DEBUG=True)
+class DeliveredCampaignAdminTests(TestCase):
+    """Test case for the admin interface of DeliveredCampaign."""
+
+    def setUp(self):
+        """Set up test user, request, and data."""
+        self.request_factory = RequestFactory()
+        self.admin_user = AdminUserFactory()
+
+        self.create_test_data()
+
+    def create_test_data(self):
+        self.deal1 = BoostrDeal.objects.create(
+            boostr_id=1,
+            name="Test Deal1",
+            advertiser="Test Advertiser1",
+            currency="$",
+            amount=10000,
+            sales_representatives="Rep1, Rep2",
+            start_date="2024-01-01",
+            end_date="2024-12-31",
+        )
+
+        self.deal2 = BoostrDeal.objects.create(
+            boostr_id=2,
+            name="Test Deal2",
+            advertiser="Test Advertiser2",
+            currency="$",
+            amount=10000,
+            sales_representatives="Rep1, Rep2",
+            start_date="2024-01-01",
+            end_date="2024-12-31",
+        )
+
+        self.campaign_overview1 = Campaign.objects.create(
+            deal=self.deal1,
+            ad_ops_person="AdOps Person 1",
+            notes="Notes 1",
+            kevel_flight_id=1001,
+            net_spend=1000,
+            impressions_sold=2000,
+            start_date="2023-01-01",
+            end_date="2023-01-05",
+        )
+
+        self.campaign_overview2 = Campaign.objects.create(
+            deal=self.deal2,
+            ad_ops_person="AdOps Person 2",
+            notes="Notes 2",
+            kevel_flight_id=1002,
+            net_spend=1500,
+            impressions_sold=3000,
+            start_date="2023-01-01",
+            end_date="2023-01-05",
+        )
+
+        self.delivered_campaign1 = DeliveredCampaign.objects.create(
+            submission_date=timezone.now(),
+            campaign_id=12345,
+            flight=self.campaign_overview1,
+            country="US",
+            provider="Partner1",
+            clicks_delivered=100,
+            impressions_delivered=1000,
+        )
+
+        self.delivered_campaign2 = DeliveredCampaign.objects.create(
+            submission_date=timezone.now() - relativedelta(months=1),
+            campaign_id=54321,
+            flight=self.campaign_overview2,
+            country="US",
+            provider="Partner2",
+            clicks_delivered=50,
+            impressions_delivered=500,
+        )
+
+    def test_partner_filter(self):
+        """Test filtering Delivered Campaigns by parner name."""
+        response = self.client.get(
+            reverse("admin:consvc_shepherd_deliveredcampaign_changelist") + "?partner=Partner1",
+            **{"settings.OPENIDC_HEADER": "dev@example.com"},
+        )
+
+
+        self.assertContains(response, "Partner1")
+        self.assertNotContains(response, "Partner2")
+
+
+
+    def test_submission_date_filter(self):
+        """Test filtering Delivered Campaigns by submission date."""
+        # Get today's date at 00:00 AM and 11:59 PM
+        today_start = timezone.now().date()
+        today_end = today_start + timedelta(days=1)
+
+        # Construct the filter parameters
+        filter_params = {
+            'submission_date__gte': today_start,
+            'submission_date__lt': today_end,
+        }
+        response = self.client.get(
+            # Get the delivered campaigns created today
+            reverse("admin:consvc_shepherd_deliveredcampaign_changelist") + "?submission_date__gte={}&submission_date__lt={}".format(today_start, today_end),
+            **{"settings.OPENIDC_HEADER": "dev@example.com"},
+        )
+
+
+        # Check if the response contains today's delivered campaign
+        self.assertContains(response, self.delivered_campaign1.provider)
+        # Ensure it does not contain the delivered campaign from last month
+        self.assertNotContains(response, self.delivered_campaign2.provider)
