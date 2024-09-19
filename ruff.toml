@@ -36,7 +36,7 @@ exclude = [
 ]
 
 [lint]
-select = ["S","I","B","D202","D212"]
+select = ["E","W","S","I","B","D202","D212"]
 ignore = ["D105","D107","D203", "D205", "D400","S101", "S104"]
 fixable = ["ALL"]
 
