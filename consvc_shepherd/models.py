@@ -9,7 +9,6 @@ from django.db.models import (
     CharField,
     DateField,
     DateTimeField,
-    DecimalField,
     FloatField,
     ForeignKey,
     IntegerField,
@@ -405,7 +404,7 @@ class Campaign(models.Model):
     ad_ops_person: CharField = models.CharField()
     notes: CharField = models.CharField()
     kevel_flight_id: IntegerField = models.IntegerField()
-    net_spend: DecimalField = models.DecimalField(max_digits=12, decimal_places=2)
+    net_spend: IntegerField = models.IntegerField()
     impressions_sold: IntegerField = models.IntegerField()
     seller: CharField = models.CharField()
     deal: ForeignKey = models.ForeignKey(BoostrDeal, on_delete=models.CASCADE)
