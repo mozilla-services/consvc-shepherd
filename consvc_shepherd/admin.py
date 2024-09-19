@@ -391,6 +391,7 @@ class CampaignSummaryAdmin(admin.ModelAdmin):
         "net_ecpm",
         "clicks_delivered",
         "impressions_delivered",
+        "impressions_remaining",
         "ctr",
         "live",
     ]
