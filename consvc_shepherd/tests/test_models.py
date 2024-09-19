@@ -7,9 +7,9 @@ from consvc_shepherd.models import (
     AllocationSetting,
     BoostrDeal,
     Campaign,
+    DeliveredCampaign,
     Partner,
     PartnerAllocation,
-    DeliveredCampaign,
 )
 
 
@@ -160,18 +160,25 @@ class DeliveredCampaignTestCase(TestCase):
             country="US",
             provider="kevel",
             clicks_delivered=100,
-            impressions_delivered=1000
+            impressions_delivered=1000,
         )
 
     def test_str_method(self):
         """Verify that the __str__ method returns the correct string representation."""
-        expected_str = f"{self.delivered_campaign.flight} : {self.delivered_campaign.clicks_delivered} clicks and {self.delivered_campaign.impressions_delivered} impressions"
+        expected_str = (
+            f"{self.delivered_campaign.flight} : "
+            + f"{self.delivered_campaign.clicks_delivered} clicks and "
+            + f"{self.delivered_campaign.impressions_delivered} impressions"
+        )
         self.assertEqual(str(self.delivered_campaign), expected_str)
 
     def test_delivered_campaign_fields(self):
         """Test that Campaign model fields are correctly set."""
         self.assertEqual(self.delivered_campaign.campaign_id, 12345)
-        self.assertEqual(self.delivered_campaign.flight.kevel_flight_id, self.campaign.kevel_flight_id)
+        self.assertEqual(
+            self.delivered_campaign.flight.kevel_flight_id,
+            self.campaign.kevel_flight_id,
+        )
         self.assertEqual(self.delivered_campaign.country, "US")
         self.assertEqual(self.delivered_campaign.provider, "kevel")
         self.assertEqual(self.delivered_campaign.clicks_delivered, 100)

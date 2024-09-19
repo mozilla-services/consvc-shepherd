@@ -1,18 +1,17 @@
 """Admin test module for consvc_shepherd."""
 
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
-from dateutil.relativedelta import relativedelta
 
 import mock
 import pytz
+from dateutil.relativedelta import relativedelta
 from django.contrib.admin.sites import AdminSite
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 from jsonschema import validate
-from datetime import timedelta
 from markus.testing import MetricsMock
 
 from consvc_shepherd.admin import (
@@ -28,10 +27,10 @@ from consvc_shepherd.models import (
     BoostrDealProduct,
     BoostrProduct,
     Campaign,
+    DeliveredCampaign,
     Partner,
     PartnerAllocation,
     SettingsSnapshot,
-    DeliveredCampaign,
 )
 from consvc_shepherd.tests.factories import AdminUserFactory, UserFactory
 from contile.models import Advertiser, AdvertiserUrl
@@ -508,6 +507,7 @@ class DeliveredCampaignAdminTests(TestCase):
         self.create_test_data()
 
     def create_test_data(self):
+        """Create test data for BoostrDeal, Campaign, and Delivered Campaign models."""
         self.deal1 = BoostrDeal.objects.create(
             boostr_id=1,
             name="Test Deal1",
@@ -575,15 +575,13 @@ class DeliveredCampaignAdminTests(TestCase):
     def test_partner_filter(self):
         """Test filtering Delivered Campaigns by parner name."""
         response = self.client.get(
-            reverse("admin:consvc_shepherd_deliveredcampaign_changelist") + "?partner=Partner1",
+            reverse("admin:consvc_shepherd_deliveredcampaign_changelist")
+            + "?partner=Partner1",
             **{"settings.OPENIDC_HEADER": "dev@example.com"},
         )
 
-
         self.assertContains(response, "Partner1")
         self.assertNotContains(response, "Partner2")
-
-
 
     def test_submission_date_filter(self):
         """Test filtering Delivered Campaigns by submission date."""
@@ -593,15 +591,17 @@ class DeliveredCampaignAdminTests(TestCase):
 
         # Construct the filter parameters
         filter_params = {
-            'submission_date__gte': today_start,
-            'submission_date__lt': today_end,
+            "submission_date__gte": today_start,
+            "submission_date__lt": today_end,
         }
-        response = self.client.get(
-            # Get the delivered campaigns created today
-            reverse("admin:consvc_shepherd_deliveredcampaign_changelist") + "?submission_date__gte={}&submission_date__lt={}".format(today_start, today_end),
-            **{"settings.OPENIDC_HEADER": "dev@example.com"},
-        )
 
+        # Construct the URL with filter parameters
+        url = reverse("admin:consvc_shepherd_deliveredcampaign_changelist")
+
+        # Use the filter_params in the GET request
+        response = self.client.get(
+            url, data=filter_params, **{"settings.OPENIDC_HEADER": "dev@example.com"}
+        )
 
         # Check if the response contains today's delivered campaign
         self.assertContains(response, self.delivered_campaign1.provider)
