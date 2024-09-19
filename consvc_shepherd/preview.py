@@ -30,6 +30,9 @@ LOCALIZATIONS = {
         "LU": "Sponsorisé",
         "CH": "Gesponsert",
         "BE": "Gesponsord",
+        "JP": "Sponsored",
+        "SG": "Sponsored",
+        "SE": "Sponsored",
     },
     "Sponsored by": {
         "US": "Sponsored by {sponsor}",
@@ -45,6 +48,9 @@ LOCALIZATIONS = {
         "LU": "Sponsorisé par {sponsor}",
         "CH": "Werbung von {sponsor}",
         "BE": "Gesponsord door {sponsor}",
+        "JP": "Sponsored by {sponsor}",
+        "SG": "Sponsored by {sponsor}",
+        "SE": "Sponsored by {sponsor}",
     },
 }
 
@@ -193,6 +199,10 @@ COUNTRIES: list[Region] = [
     Region(code="DE", name="Germany"),
     Region(code="ES", name="Spain"),
     Region(code="FR", name="France"),
+    Region(code="SG", name="Singapore"),
+    Region(code="SE", name="Sweden"),
+    Region(code="JP", name="Japan"),
+    Region(code="NL", name="Netherlands"),
     Region(code="GB", name="United Kingdom"),
     Region(code="IT", name="Italy"),
     Region(code="PL", name="Poland"),
