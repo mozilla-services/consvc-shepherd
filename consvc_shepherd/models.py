@@ -475,6 +475,13 @@ class CampaignSummary(models.Model):
         return None
 
     @property
+    def impressions_remaining(self):
+        """Impressions_remaining = impressions_sold - impressions_delivered"""
+        if self.impressions_sold > 0:
+            return self.impressions_sold - self.impressions_delivered
+        return 0
+
+    @property
     def live(self):
         """Whether the campaign is active"""
         if self.impressions_delivered > 0:
