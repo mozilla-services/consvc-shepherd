@@ -21,6 +21,7 @@ from consvc_shepherd.models import (
     CampaignSummary,
     PartnerAllocation,
     SettingsSnapshot,
+    DeliveredCampaign,
 )
 from consvc_shepherd.storage import send_to_storage
 from consvc_shepherd.utils import ShepherdMetrics
@@ -383,13 +384,71 @@ class CampaignSummaryAdmin(admin.ModelAdmin):
 
     model = CampaignSummary
 
-    list_display = ["advertiser", "net_spend", "impressions_sold", "net_ecpm"]
+    list_display = [
+        "advertiser",
+        "net_spend",
+        "impressions_sold",
+        "net_ecpm",
+        "clicks_delivered",
+        "impressions_delivered",
+        "ctr",
+        "live",
+    ]
 
     list_filter = [
         MonthFilter,
         CountryFilter,
         PlacementFilter,
         "advertiser",
+    ]
+
+
+class PartnerFilter(admin.SimpleListFilter):
+    """Filter for listing by partner."""
+
+    title = _("partner")
+    parameter_name = "partner"
+
+    def lookups(self, request, model_admin):
+        """Return a list of distinct partners for the filter options."""
+        # Define the possible values for partner
+        return [
+            ('contile', 'Contile'),
+            ('kevel', 'Kevel'),
+        ]
+
+    def queryset(self, request, queryset):
+        """Filter the queryset based on the selected partner."""
+        if self.value():
+            return queryset.filter(provider=self.value())
+        return queryset
+
+
+@admin.register(DeliveredCampaign)
+class DeliveredCampaignsAdmin(admin.ModelAdmin):
+    """Admin model for showing Delivered Campaign imported from BQ"""
+
+    model = DeliveredCampaign
+    search_fields = [
+        "campaign",
+        "flight_id",
+        "provider",
+    ]
+    search_help_text = (
+        "Search by campaign id, flight id, and provider."
+    )
+    list_filter = [
+        "submission_date",
+        PartnerFilter,
+    ]
+    list_display = [
+        "submission_date",
+        "flight_id",
+        "campaign_id",
+        "provider",
+        "country",
+        "clicks_delivered",
+        "impressions_delivered",
     ]
 
 
