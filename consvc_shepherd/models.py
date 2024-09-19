@@ -402,9 +402,15 @@ class Campaign(models.Model):
 
     """
 
+<<<<<<< HEAD
     ad_ops_person: CharField = models.CharField(null=True, blank=True)
     notes: CharField = models.CharField(null=True, blank=True)
     kevel_flight_id: IntegerField = models.IntegerField(null=True, blank=True)
+=======
+    ad_ops_person: CharField = models.CharField()
+    notes: CharField = models.CharField()
+    kevel_flight_id: IntegerField = models.IntegerField(unique=True)
+>>>>>>> d4ae942 (add DeliveredCampaign model and migration)
     net_spend: DecimalField = models.DecimalField(max_digits=12, decimal_places=2)
     impressions_sold: IntegerField = models.IntegerField()
     seller: CharField = models.CharField()
@@ -432,19 +438,48 @@ class Campaign(models.Model):
 
 
 class CampaignSummary(models.Model):
-    """Model representing a summary of campaign metrics."""
+    """Model representing a summary of campaign metrics including Boostr, and kevel
+
+    deal_id : IntegerField
+        Boostr deal ID
+    advertiser : CharField
+        Advertiser Name
+    net_spend : CharField
+        Price of deal from Boostr
+    impressions_sold : FloatField
+        Number of impressions sold on Boostr
+
+    """
 
     deal_id: IntegerField = models.IntegerField(primary_key=True)
     advertiser: CharField = models.CharField(max_length=255)
     net_spend: FloatField = models.FloatField()
     impressions_sold: FloatField = models.FloatField()
+    clicks_delivered: IntegerField = models.IntegerField()
+    impressions_delivered: IntegerField = models.IntegerField()
 
     @property
     def net_ecpm(self):
         """Calculate and return the net eCPM."""
         if self.impressions_sold > 0:
-            return (self.net_spend / self.impressions_sold) * 1000
+            net_epcm_value = (self.net_spend / self.impressions_sold) * 1000
+            return round(net_epcm_value, 2)
         return None
+
+    @property
+    def ctr(self):
+        """Click-through rate => (clicks_delivered) / (impressions_delivered)"""
+        if self.clicks_delivered and self.impressions_delivered > 0:
+            ctr_value = (self.clicks_delivered / self.impressions_delivered) * 100
+            return round(ctr_value, 2)
+        return None
+
+    @property
+    def live(self):
+        """Whether the campaign is active"""
+        if self.impressions_delivered > 0:
+            return "Yes"
+        return "No"
 
     class Meta:
         """Metadata for the CampaignSummary model."""
@@ -453,3 +488,47 @@ class CampaignSummary(models.Model):
         db_table = "campaign_summary_view"
         verbose_name = "Campaign"
         verbose_name_plural = "Campaign Summaries"
+
+
+class DeliveredCampaign(models.Model):
+    """Representation of DeliveredCampaign metrics obtained from BigQuery for various ad partners
+
+    Attributes
+    ----------
+    submission_date : DateTimeField
+        The date the metric was captured
+    campaign_id : CharField
+        The Kevel campaign ID
+    flight_id : CharField
+        The Kevel flight ID
+    country : CharField
+        Country where metric was captured by Firefox telemetry
+    provider : Charfield
+        Ad partner
+    clicks_delivered : models.IntegerField
+        The number of clicks delivered
+    impression_delivered : models.IntegerField
+        The number of impressions delivered
+
+    Methods
+    -------
+    __str__(self)
+        Return the string representation for a Delivered Campaign
+
+    """
+
+    submission_date: DateField = models.DateField()
+    campaign_id: IntegerField = models.IntegerField()
+    flight: ForeignKey = models.ForeignKey(
+        Campaign,
+        to_field="kevel_flight_id",
+        on_delete=models.CASCADE,
+    )
+    country: CharField = models.CharField()
+    provider: CharField = models.CharField()
+    clicks_delivered: IntegerField = models.IntegerField()
+    impressions_delivered: IntegerField = models.IntegerField()
+
+    def __str__(self):
+        """Return the string representation for campaign ids and associated number of clicks and impressions"""
+        return f"{self.flight} : {self.clicks_delivered} clicks and {self.impressions_delivered} impressions"

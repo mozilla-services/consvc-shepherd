@@ -1,31 +1,43 @@
-"""Django admin custom command for populating the dev DB with some mock data"""
+"""This script generates mock data to test our models which get displayed in the Admin page"""
 
-from django.core.management.base import BaseCommand
-from consvc_shepherd.models import (
-    AllocationSetting, PartnerAllocation, BoostrProduct, BoostrDeal,
-    BoostrDealProduct, BoostrSyncStatus, Campaign, DeliveredCampaign
-)
-from django.utils import timezone
-from contile.models import Partner
+import secrets
+
 from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand
+from django.utils import timezone
 from faker import Faker
-import random
+
+from consvc_shepherd.models import (
+    AllocationSetting,
+    BoostrDeal,
+    BoostrDealProduct,
+    BoostrProduct,
+    BoostrSyncStatus,
+    Campaign,
+    DeliveredCampaign,
+    PartnerAllocation,
+)
+from contile.models import Partner
 
 fake = Faker()
 
+
 class Command(BaseCommand):
+    """Django admin custom command for populating the dev DB with some mock data"""
+
     help = "Seed the database with initial data for consvc_shepherd"
 
     def handle(self, *args, **kwargs):
+        """Handle running the command"""
         # Get or create user
         User = get_user_model()
-        user, _ = User.objects.get_or_create(username="admin", defaults={"password": "adminpass"})
+        user, _ = User.objects.get_or_create(
+            username="admin", defaults={"password": "adminpass"}
+        )
 
         # Create multiple partners
         for _ in range(5):
-            Partner.objects.get_or_create(
-                name=random.choice(["kevel", "adm"])
-            )
+            Partner.objects.get_or_create(name=secrets.choice(["kevel", "adm"]))
 
         partners = list(Partner.objects.all())
 
@@ -36,8 +48,8 @@ class Command(BaseCommand):
                 defaults={
                     "full_name": fake.catch_phrase(),
                     "country": fake.country_code(),
-                    "campaign_type": random.choice(["CPC", "CPM"])
-                }
+                    "campaign_type": secrets.choice(["CPC", "CPM"]),
+                },
             )
 
         products = list(BoostrProduct.objects.all())
@@ -49,12 +61,16 @@ class Command(BaseCommand):
                 defaults={
                     "name": f"Deal {i + 1} - {fake.company()}",
                     "advertiser": fake.company(),
-                    "currency": random.choice(["$", "€", "£"]),
-                    "amount": random.randint(50000, 200000),
+                    "currency": secrets.choice(["$", "€", "£"]),
+                    "amount": secrets.randbelow(150001) + 50000,
                     "sales_representatives": fake.name(),
-                    "start_date": fake.date_this_year(before_today=True, after_today=False),
-                    "end_date": fake.date_this_year(before_today=False, after_today=True),
-                }
+                    "start_date": fake.date_this_year(
+                        before_today=True, after_today=False
+                    ),
+                    "end_date": fake.date_this_year(
+                        before_today=False, after_today=True
+                    ),
+                },
             )
 
         deals = list(BoostrDeal.objects.all())
@@ -62,22 +78,26 @@ class Command(BaseCommand):
         # Create Boostr Deal Products
         for _ in range(10):
             BoostrDealProduct.objects.get_or_create(
-                boostr_deal=random.choice(deals),
-                boostr_product=random.choice(products),
+                boostr_deal=secrets.choice(deals),
+                boostr_product=secrets.choice(products),
                 defaults={
-                    "budget": random.randint(10000, 100000),
-                    "month": fake.date_between(start_date="-12m", end_date="now").strftime('%Y-%m')
-                }
+                    "budget": secrets.randbelow(90001) + 10000,
+                    "month": fake.date_between(
+                        start_date="-12m", end_date="now"
+                    ).strftime("%Y-%m"),
+                },
             )
 
         # Create Allocation Settings and Partner Allocations
         for i in range(3):
-            allocation_setting, _ = AllocationSetting.objects.get_or_create(position=i + 1)
+            allocation_setting, _ = AllocationSetting.objects.get_or_create(
+                position=i + 1
+            )
             for partner in partners[:2]:  # Randomly allocate 2 partners
                 PartnerAllocation.objects.get_or_create(
                     allocation_position=allocation_setting,
                     partner=partner,
-                    defaults={"percentage": random.randint(10, 90)}
+                    defaults={"percentage": (secrets.randbelow(81) + 10)},
                 )
 
         # Create multiple campaigns
@@ -87,13 +107,17 @@ class Command(BaseCommand):
                 defaults={
                     "ad_ops_person": fake.name(),
                     "notes": fake.sentence(),
-                    "net_spend": random.uniform(50000.00, 200000.00),
-                    "impressions_sold": random.randint(100000, 5000000),
+                    "net_spend": secrets.uniform(50000.00, 200000.00),
+                    "impressions_sold": secrets.randbelow(4900001) + 100000,
                     "seller": fake.company(),
-                    "deal": random.choice(deals),
-                    "start_date": fake.date_this_year(before_today=True, after_today=False),
-                    "end_date": fake.date_this_year(before_today=False, after_today=True),
-                }
+                    "deal": secrets.choice(deals),
+                    "start_date": fake.date_this_year(
+                        before_today=True, after_today=False
+                    ),
+                    "end_date": fake.date_this_year(
+                        before_today=False, after_today=True
+                    ),
+                },
             )
 
         campaigns = list(Campaign.objects.all())
@@ -102,21 +126,28 @@ class Command(BaseCommand):
         for _ in range(10):
             DeliveredCampaign.objects.get_or_create(
                 submission_date=fake.date_between(start_date="-6m", end_date="now"),
-                campaign_id=random.randint(1, 20),
-                flight=random.choice(campaigns),
+                campaign_id=secrets.randbelow(20) + 1,
+                flight=secrets.choice(campaigns),
                 defaults={
                     "country": fake.country_code(),
-                    "provider": random.choice(["Kevel", "Contile"]),
-                    "clicks_delivered": random.randint(1, 100),
-                    "impressions_delivered": random.randint(100, 1000)
-                }
+                    "provider": secrets.choice(["Kevel", "Contile"]),
+                    "clicks_delivered": secrets.randbelow(100) + 1,
+                    "impressions_delivered": secrets.randbelow(900) + 100,
+                },
             )
 
         # Create multiple BoostrSyncStatus
         for _ in range(10):
             BoostrSyncStatus.objects.get_or_create(
-                synced_on = timezone.make_aware(fake.date_time_between(start_date="-6m", end_date="now")),
-                defaults={"status": random.choice(["success", "failure"]), "message": fake.sentence()}
+                synced_on=timezone.make_aware(
+                    fake.date_time_between(start_date="-6m", end_date="now")
+                ),
+                defaults={
+                    "status": secrets.choice(["success", "failure"]),
+                    "message": fake.sentence(),
+                },
             )
 
-        self.stdout.write(self.style.SUCCESS("Successfully seeded the database with random data"))
+        self.stdout.write(
+            self.style.SUCCESS("Successfully seeded the database with random data")
+        )
