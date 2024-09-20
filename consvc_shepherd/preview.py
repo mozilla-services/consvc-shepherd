@@ -30,9 +30,9 @@ LOCALIZATIONS = {
         "LU": "Sponsorisé",
         "CH": "Gesponsert",
         "BE": "Gesponsord",
-        "JP": "Sponsored",
+        "JP": "広告",
         "SG": "Sponsored",
-        "SE": "Sponsored",
+        "SE": "Sponsrad",
     },
     "Sponsored by": {
         "US": "Sponsored by {sponsor}",
@@ -48,9 +48,9 @@ LOCALIZATIONS = {
         "LU": "Sponsorisé par {sponsor}",
         "CH": "Werbung von {sponsor}",
         "BE": "Gesponsord door {sponsor}",
-        "JP": "Sponsored by {sponsor}",
+        "JP": "提供 {sponsor}",
         "SG": "Sponsored by {sponsor}",
-        "SE": "Sponsored by {sponsor}",
+        "SE": "Sponsrad av {sponsor}",
     },
 }
 
