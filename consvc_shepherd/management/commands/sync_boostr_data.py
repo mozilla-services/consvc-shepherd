@@ -2,6 +2,7 @@
 
 import logging
 import math
+import pprint
 import time
 import traceback
 from pathlib import Path
@@ -127,7 +128,7 @@ class BoostrApi:
             self.log.info(
                 f"{response.status_code}: Rate Limited - Waiting {retry_after} seconds"
             )
-            time.sleep(retry_after)
+            self._sleep(retry_after)
             return self.post(path, json, headers)
 
         if not response.ok:
@@ -137,46 +138,51 @@ class BoostrApi:
         json = response.json()
         return json
 
-    def get(self, path: str, params=None, headers=None, max_retry=5, current_retry=0):
-        """Make GET requests to Boostr that use the session, pass through headers and query params,
-        check status, and return parsed json
-        """
-        try:
-            response = self.session.get(
-                f"{self.base_url}/{path}",
-                params=params or {},
-                headers=headers or {},
-                timeout=15,
-            )
-            if response.status_code == HTTP_TOO_MANY_REQUESTS:
-                if current_retry < max_retry:
-                    retry_after = (
-                        int(response.headers.get("Retry-After", DEFAULT_RETRY_INTERVAL))
-                        + 1
-                    )
-                    self.log.info(
-                        f"{response.status_code}: Rate Limited - Waiting {retry_after} seconds. "
-                        f"Current retry: {current_retry}"
-                    )
-                    time.sleep(retry_after)
-                    current_retry += 1
-                    return self.get(path, params, headers, max_retry, current_retry)
-                else:
-                    raise BoostrApiMaxRetriesError("Maximum Retries Reached")
-        except requests.exceptions.RequestException as e:
-            if current_retry < max_retry:
-                self.log.info(f"{e}: Current Retry: {current_retry}")
-                time.sleep(DEFAULT_RETRY_INTERVAL)
+    def get(self, path: str, params=None, headers=None, max_retry=5):
+        """Make GET requests to Boostr, handling retries and rate limits."""
+        current_retry = 0
+
+        while current_retry < max_retry:
+            try:
+                response = self.session.get(
+                    f"{self.base_url}/{path}",
+                    params=params or {},
+                    headers=headers or {},
+                    timeout=15,
+                )
+            except requests.exceptions.RequestException as e:
+                self.log.info(
+                    f"RequestException occurred: {e}. Current retry: {current_retry}"
+                )
                 current_retry += 1
-                return self.get(path, params, headers, max_retry, current_retry)
+                self._sleep(DEFAULT_RETRY_INTERVAL)
+                continue
+
+            if response.status_code == HTTP_TOO_MANY_REQUESTS:
+                retry_after = (
+                    int(response.headers.get("Retry-After", DEFAULT_RETRY_INTERVAL)) + 1
+                )
+                self.log.info(
+                    f"{response}: Rate limited - Waiting {retry_after} seconds. "
+                    f"Current retry: {current_retry}"
+                )
+                current_retry += 1
+                self._sleep(retry_after)
+                continue
+
+            if response.ok:
+                json = response.json()
+                return json
             else:
-                raise BoostrApiMaxRetriesError("Maximum Retries Reached") from e
-        if not response.ok:
-            raise BoostrApiError(
-                f"Bad response status {response.status_code} from /{path}: {response}"
-            )
-        json = response.json()
-        return json
+                raise BoostrApiError(
+                    f"Bad response status {response.status_code} from /{path}: {response}"
+                )
+
+        raise BoostrApiMaxRetriesError("Maximum retries reached")
+
+    def _sleep(self, seconds) -> None:
+        """Sleep for the specified number of seconds. Extracted for testing purposes."""
+        time.sleep(seconds)
 
 
 class BoostrLoader:
