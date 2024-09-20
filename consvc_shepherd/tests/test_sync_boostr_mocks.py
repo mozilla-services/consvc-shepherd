@@ -41,6 +41,11 @@ def mock_upsert_deals_exception(*args, **kwargs) -> MockResponse:
     raise Exception("upsert_deals mock raised an exception")
 
 
+def mock_request_exception(*args, **kwargs):
+    """Mock requests exception"""
+    return requests.RequestException("Request Timeout")
+
+
 def mock_get_success(*args, **kwargs) -> MockResponse:
     """Mock GET requests to boostr which handles mock responses for /products, /deals, and /deal_products"""
     if args[0].endswith("/products"):
@@ -73,6 +78,11 @@ def mock_too_many_requests_response(*args, **kwargs) -> requests.Response:
     mock_response.status_code = 429
     mock_response.headers["Retry-After"] = "5"
     raise requests.HTTPError(response=mock_response)
+
+
+def mock_get_success_response(*args, **kwargs) -> MockResponse:
+    """Mock response from sucessful get"""
+    return MockResponse({"data": "success"}, 200)
 
 
 def mock_update_or_create_deal(*args, **kwargs) -> tuple[BoostrDeal, bool]:

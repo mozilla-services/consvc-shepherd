@@ -17,8 +17,10 @@ from consvc_shepherd.tests.test_sync_boostr_mocks import (
     mock_get_fail,
     mock_get_product,
     mock_get_success,
+    mock_get_success_response,
     mock_post_success,
     mock_post_token_fail,
+    mock_request_exception,
     mock_too_many_requests_response,
     mock_update_or_create_deal,
     mock_upsert_deals_exception,
@@ -27,6 +29,7 @@ from consvc_shepherd.tests.test_sync_boostr_mocks import (
 BASE_URL = "https://example.com"
 EMAIL = "email@mozilla.com"
 PASSWORD = "test"  # nosec
+DEFAULT_RETRY_INTERVAL = 60
 
 
 @override_settings(DEBUG=True)
@@ -62,6 +65,20 @@ class TestSyncBoostrData(TestCase):
             loader.upsert_deals()
         self.assertEqual(context.exception.response.status_code, 429)
         self.assertEqual(context.exception.response.headers["Retry-After"], "5")
+
+    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.BoostrApi._sleep")
+    @mock.patch("requests.Session.get")
+    @mock.patch("requests.Session.post")
+    def test_api_request_with_request_exception(self, mock_post, mock_get, mock_sleep):
+        """Testing GET request with RequestException and a retry"""
+        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
+        mock_exception = mock_request_exception()
+        mock_response = mock_get_success_response()
+        mock_get.side_effect = [mock_exception, mock_response]
+        response = loader.boostr.get("deals")
+        mock_sleep.assert_called_once_with(DEFAULT_RETRY_INTERVAL)
+        self.assertEqual(mock_get.call_count, 2)
+        self.assertEqual(response, {"data": "success"})
 
     @mock.patch("requests.Session.post", side_effect=mock_post_token_fail)
     def test_authenticate_fail(self, mock_post):
