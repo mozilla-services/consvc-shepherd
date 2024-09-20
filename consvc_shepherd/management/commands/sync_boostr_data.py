@@ -70,6 +70,12 @@ class BoostrApiError(Exception):
     pass
 
 
+class BoostrApiMaxRetriesError(Exception):
+    """Raise this error when we hit the maximum retries for an API call to Boostr"""
+
+    pass
+
+
 class BoostrApi:
     """Wrap up interactions with the Boostr API into a convenient class that handles the session, rate limits, etc"""
 
@@ -156,7 +162,7 @@ class BoostrApi:
                     current_retry += 1
                     return self.get(path, params, headers, max_retry, current_retry)
                 else:
-                    raise BoostrApiError("Maximum Retries Reached")
+                    raise BoostrApiMaxRetriesError("Maximum Retries Reached")
         except requests.exceptions.RequestException as e:
             if current_retry < max_retry:
                 self.log.info(f"{e}: Current Retry: {current_retry}")
@@ -164,7 +170,7 @@ class BoostrApi:
                 current_retry += 1
                 return self.get(path, params, headers, max_retry, current_retry)
             else:
-                raise BoostrApiError("Maximum Retries Reached")
+                raise BoostrApiMaxRetriesError("Maximum Retries Reached") from e
         if not response.ok:
             raise BoostrApiError(
                 f"Bad response status {response.status_code} from /{path}: {response}"
