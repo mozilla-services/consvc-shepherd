@@ -1,5 +1,6 @@
 """This script generates mock data to test our models which get displayed in the Admin page"""
 
+import random
 import secrets
 
 from django.contrib.auth import get_user_model
@@ -107,7 +108,7 @@ class Command(BaseCommand):
                 defaults={
                     "ad_ops_person": fake.name(),
                     "notes": fake.sentence(),
-                    "net_spend": secrets.uniform(50000.00, 200000.00),
+                    "net_spend": random.uniform(50000.00, 200000.00),  # nosec
                     "impressions_sold": secrets.randbelow(4900001) + 100000,
                     "seller": fake.company(),
                     "deal": secrets.choice(deals),
