@@ -14,12 +14,12 @@ from consvc_shepherd.management.commands.sync_boostr_data import (
     get_campaign_type,
 )
 from consvc_shepherd.tests.test_sync_boostr_mocks import (
-    mock_get_error_429,
     mock_get_fail,
     mock_get_product,
     mock_get_success,
     mock_post_success,
     mock_post_token_fail,
+    mock_too_many_requests_response,
     mock_update_or_create_deal,
     mock_upsert_deals_exception,
 )
@@ -52,7 +52,7 @@ class TestSyncBoostrData(TestCase):
 
     @mock.patch(
         "consvc_shepherd.management.commands.sync_boostr_data.BoostrApi.get",
-        side_effect=mock_get_error_429,
+        side_effect=mock_too_many_requests_response,
     )
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     def test429(self, mock_post, mock_get):

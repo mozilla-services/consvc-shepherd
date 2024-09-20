@@ -67,7 +67,7 @@ def mock_get_fail(*args, **kwargs) -> MockResponse:
     return MockResponse({"uh": "oh"}, 400)
 
 
-def mock_get_error_429(*args, **kwargs) -> requests.Response:
+def mock_too_many_requests_response(*args, **kwargs) -> requests.Response:
     """Mock 429 error returned when rate limited"""
     mock_response = requests.Response()
     mock_response.status_code = 429
