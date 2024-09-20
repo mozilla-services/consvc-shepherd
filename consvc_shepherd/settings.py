@@ -59,12 +59,15 @@ COUNTRIES_ONLY: list[str] = [
     "FR",
     "GB",
     "IN",
+    "JP",
     "IT",
     "JP",
     "LU",
     "MX",
     "NL",
     "PL",
+    "SE",
+    "SG",
     "US",
 ]
 COUNTRIES_FIRST_SORT: bool = True
