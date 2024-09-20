@@ -448,6 +448,10 @@ class CampaignSummary(models.Model):
         Price of deal from Boostr
     impressions_sold : FloatField
         Number of impressions sold on Boostr
+    clicks_delivered : IntegerField
+        Number of clicks delivered from Glean(BQ)
+    impressions_delivered : IntegerField
+        Number of impressions delivered from Glean(BQ)
 
     """
 
