@@ -19,7 +19,7 @@ from consvc_shepherd.models import (
 )
 
 MAX_DEAL_PAGES_DEFAULT = 50
-MAX_SLEEP_SECONDS = 60
+DEFAULT_RETRY_INTERVAL = 60
 SYNC_STATUS_SUCCESS = "success"
 SYNC_STATUS_FAILURE = "failure"
 HTTP_TOO_MANY_REQUESTS = 429
@@ -115,7 +115,8 @@ class BoostrApi:
 
         if response.status_code == HTTP_TOO_MANY_REQUESTS:
             retry_after = (
-                int(response.headers.get("Retry-After", default=MAX_SLEEP_SECONDS)) + 1
+                int(response.headers.get("Retry-After", default=DEFAULT_RETRY_INTERVAL))
+                + 1
             )
             self.log.info(
                 f"{response.status_code}: Rate Limited - Waiting {retry_after} seconds"
@@ -144,11 +145,12 @@ class BoostrApi:
             if response.status_code == HTTP_TOO_MANY_REQUESTS:
                 if current_retry < max_retry:
                     retry_after = (
-                        int(response.headers.get("Retry-After", MAX_SLEEP_SECONDS)) + 1
+                        int(response.headers.get("Retry-After", DEFAULT_RETRY_INTERVAL))
+                        + 1
                     )
                     self.log.info(
-                        f"{response.status_code}: Rate Limited - Waiting {retry_after} seconds. \
-                        Current retry: {current_retry}"
+                        f"{response.status_code}: Rate Limited - Waiting {retry_after} seconds. "
+                        f"Current retry: {current_retry}"
                     )
                     time.sleep(retry_after)
                     current_retry += 1
@@ -157,8 +159,8 @@ class BoostrApi:
                     raise BoostrApiError("Maximum Retries Reached")
         except requests.exceptions.RequestException as e:
             if current_retry < max_retry:
-                self.log.info(f"{e}: Read timeout Current Retry: {current_retry}")
-                time.sleep(MAX_SLEEP_SECONDS)
+                self.log.info(f"{e}: Current Retry: {current_retry}")
+                time.sleep(DEFAULT_RETRY_INTERVAL)
                 current_retry += 1
                 return self.get(path, params, headers, max_retry, current_retry)
             else:
