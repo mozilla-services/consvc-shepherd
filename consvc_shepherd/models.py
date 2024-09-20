@@ -433,7 +433,11 @@ class Campaign(models.Model):
 
 
 class CampaignSummary(models.Model):
+<<<<<<< HEAD
     """Model representing a summary of campaign metrics including Boostr, and kevel
+=======
+    """Model representing a summary of campaign metrics including data from Boostr and BigQuery
+>>>>>>> dc57f2e (remove test code, plus model doc changes)
 
     deal_id : IntegerField
         Boostr deal ID
@@ -497,7 +501,7 @@ class CampaignSummary(models.Model):
 
 
 class DeliveredCampaign(models.Model):
-    """Representation of DeliveredCampaign metrics obtained from BigQuery for various ad partners
+    """Representation of DeliveredCampaign metrics obtained from BigQuery
 
     Attributes
     ----------
@@ -519,7 +523,7 @@ class DeliveredCampaign(models.Model):
     Methods
     -------
     __str__(self)
-        Return the string representation for a Delivered Campaign
+        Return the string representation for a DeliveredCampaign
 
     """
 
@@ -534,6 +538,22 @@ class DeliveredCampaign(models.Model):
     provider: CharField = models.CharField()
     clicks_delivered: IntegerField = models.IntegerField()
     impressions_delivered: IntegerField = models.IntegerField()
+
+    class Meta:
+        """Metadata for the DeliveredCampaign model."""
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "submission_date",
+                    "campaign_id",
+                    "flight",
+                    "country",
+                    "provider",
+                ],
+                name="unique_delivered_campaign",
+            ),
+        ]
 
     def __str__(self):
         """Return the string representation for campaign ids and associated number of clicks and impressions"""
