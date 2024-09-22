@@ -18,6 +18,8 @@ from consvc_shepherd.models import (
     BoostrSyncStatus,
 )
 
+from datetime import datetime
+
 MAX_DEAL_PAGES_DEFAULT = 50
 SYNC_STATUS_SUCCESS = "success"
 SYNC_STATUS_FAILURE = "failure"
@@ -160,13 +162,19 @@ class BoostrLoader:
         self.boostr = BoostrApi(base_url, email, password, options)
         self.max_deal_pages = options.get("max_deal_pages", MAX_DEAL_PAGES_DEFAULT)
 
-    def upsert_products(self) -> None:
+    def upsert_products(self, latest_synced_on: str) -> None:
         """Fetch all Boostr products and upsert them to Shepherd DB"""
         products_params = {
             "per": "300",
             "page": "1",
             "filter": "all",
         }
+
+        if latest_synced_on:
+            products_params.update({
+                "updated_at": latest_synced_on,
+                "updated_at_condition": ">=",
+            })
         products = self.boostr.get("products", params=products_params)
         self.log.info(f"Fetched {(len(products))} products")
 
@@ -181,7 +189,7 @@ class BoostrLoader:
             )
         self.log.info(f"Upserted {(len(products))} products")
 
-    def upsert_deals(self) -> None:
+    def upsert_deals(self, latest_synced_on: str) -> None:
         """Fetch all Boostr deals and upsert the Closed Won ones to Shepherd DB"""
         page = 0
         deals_params = {
@@ -189,6 +197,11 @@ class BoostrLoader:
             "page": str(page),
             "filter": "all",
         }
+        if latest_synced_on:
+            deals_params.update({
+                "updated_at": latest_synced_on,
+                "updated_at_condition": ">=",
+            })
         while page < self.max_deal_pages:
             page += 1
             deals_params["page"] = str(page)
@@ -219,7 +232,7 @@ class BoostrLoader:
                 )
                 self.log.debug(f"Upserted deal: {deal['id']}")
 
-                self.upsert_deal_products(boostr_deal)
+                self.upsert_deal_products(boostr_deal, latest_synced_on)
                 self.log.info(f"Upserted products and budgets for deal: {deal['id']}")
             # If this is the last iteration of the loop due to the max page limit, log that we stopped
             if page >= self.max_deal_pages:
@@ -227,9 +240,14 @@ class BoostrLoader:
                     f"Done. Stopped fetching deals after hitting max_page_limit of {page} pages."
                 )
 
-    def upsert_deal_products(self, deal: BoostrDeal) -> None:
+    def upsert_deal_products(self, deal: BoostrDeal, latest_synced_on: str) -> None:
         """Fetch the deal_products for a particular deal and store them in our DB with their monthly budgets"""
-        deal_products = self.boostr.get(f"deals/{deal.boostr_id}/deal_products")
+        deal_products_params = {
+                "updated_at": latest_synced_on,
+                "updated_at_condition": ">=",
+        } if latest_synced_on else {}
+
+        deal_products = self.boostr.get(f"deals/{deal.boostr_id}/deal_products", params=deal_products_params)
 
         self.log.debug(
             f"Fetched {len(deal_products)} deal_products for deal: {deal.boostr_id}"
@@ -256,11 +274,27 @@ class BoostrLoader:
             message=message,
         )
 
+    def get_latest_sync_status(self):
+        """ Retrieve the lastest successful boostr sync status from the DB"""
+        print("in function")
+        success_syncs = BoostrSyncStatus.objects.filter(status=SYNC_STATUS_SUCCESS)
+        print("Retrieved", success_syncs)
+        if not len(success_syncs):
+            self.log.info(f"Unable to retrieve the latest successful boost sync status record")
+            return None
+
+        sync_status = success_syncs.latest("synced_on")
+        self.log.info(f"Fetched latest sync status from record {sync_status.id}, status: {sync_status.status}, synced_on: {sync_status.synced_on}")
+        return sync_status.synced_on 
+
+
     def load(self):
         """Loader entry point"""
         try:
-            self.upsert_products()
-            self.upsert_deals()
+            latest_synced_on = self.get_latest_sync_status()
+            print("Latest synced on", latest_synced_on)    
+            self.upsert_products(latest_synced_on)
+            self.upsert_deals(latest_synced_on)
             self.log.info(
                 "Boostr sync process completed successfully. Updating sync_status"
             )

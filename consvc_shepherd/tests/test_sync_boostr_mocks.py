@@ -1,6 +1,6 @@
 """MockResponse utility class for testing the sync script's interactions with the Boostr API"""
 
-from consvc_shepherd.models import BoostrDeal, BoostrProduct
+from consvc_shepherd.models import BoostrDeal, BoostrProduct, BoostrSyncStatus
 from consvc_shepherd.tests.test_sync_boostr_mock_responses import (
     MOCK_DEAL_PRODUCTS_RESPONSE,
     MOCK_DEALS_RESPONSE,
@@ -103,7 +103,34 @@ BOOSTR_PRODUCTS = {
     ),
 }
 
+BOOSTR_SYNC_STATUSES = {
+    1: BoostrSyncStatus(
+        id=1,
+        synced_on="2024-09-22 16:52:34.369769+00:00",
+        status="success",
+        message="Boostr sync success",
+    ),
+    2: BoostrSyncStatus(
+        id=2,
+        synced_on="2024-05-22 16:52:34.369769+00:00",
+        status="success",
+        message="Boostr sync success",
+    ),
+    3: BoostrSyncStatus(
+        id=3,
+        synced_on="2024-01-22 16:52:34.369769+00:00",
+        status="success",
+        message="Boostr sync success",
+    ),
+}
+
 
 def mock_get_product(*args, **kwargs) -> BoostrProduct:
     """Mock out retrieving a product from the DB"""
     return BOOSTR_PRODUCTS[kwargs["boostr_id"]]
+
+
+def mock_get_latest_boostr_sync_status(*args, **kwargs) -> BoostrSyncStatus:
+    """Mock out retrieving the latest boostr sync status from the DB"""
+    print("IN MOCKER")
+    return BOOSTR_SYNC_STATUSES[1]
