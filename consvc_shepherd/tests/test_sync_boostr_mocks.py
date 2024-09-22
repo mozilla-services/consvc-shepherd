@@ -113,7 +113,7 @@ BOOSTR_SYNC_STATUSES = {
     2: BoostrSyncStatus(
         id=2,
         synced_on="2024-05-22 16:52:34.369769+00:00",
-        status="success",
+        status="failure",
         message="Boostr sync success",
     ),
     3: BoostrSyncStatus(
@@ -132,5 +132,6 @@ def mock_get_product(*args, **kwargs) -> BoostrProduct:
 
 def mock_get_latest_boostr_sync_status(*args, **kwargs) -> BoostrSyncStatus:
     """Mock out retrieving the latest boostr sync status from the DB"""
-    print("IN MOCKER")
+    print("IN MOCKER", BOOSTR_SYNC_STATUSES[1])
+
     return BOOSTR_SYNC_STATUSES[1]

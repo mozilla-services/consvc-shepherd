@@ -1,6 +1,6 @@
 """Unit tests for the sync_boostr_data command"""
 
-from unittest import mock, skip
+from unittest import mock
 
 from django.test import TestCase, override_settings
 
@@ -14,13 +14,13 @@ from consvc_shepherd.management.commands.sync_boostr_data import (
 )
 from consvc_shepherd.tests.test_sync_boostr_mocks import (
     mock_get_fail,
+    mock_get_latest_boostr_sync_status,
     mock_get_product,
     mock_get_success,
     mock_post_success,
     mock_post_token_fail,
     mock_update_or_create_deal,
     mock_upsert_deals_exception,
-    mock_get_latest_boostr_sync_status,
 )
 
 BASE_URL = "https://example.com"
@@ -364,7 +364,6 @@ class TestSyncBoostrData(TestCase):
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_success)
     @mock.patch("consvc_shepherd.models.BoostrSyncStatus.objects.create")
-    @skip
     def test_load_success(
         self,
         mock_create,
@@ -393,7 +392,6 @@ class TestSyncBoostrData(TestCase):
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_success)
     @mock.patch("consvc_shepherd.models.BoostrSyncStatus.objects.create")
-    @skip
     def test_load_failure(
         self, mock_create, mock_get, mock_post, mock_sleep, mock_upsert_products
     ):
@@ -409,16 +407,20 @@ class TestSyncBoostrData(TestCase):
             ]
             mock_create.assert_has_calls(calls)
 
-
     @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_success)
     @mock.patch("consvc_shepherd.models.BoostrSyncStatus.objects.filter")
-    def test_get_latest_sync_status(
-        self, mock_filter, mock_get, mock_post, mock_sleep
-    ):
-        """Test the get_sync_status function"""
-        mock_filter.return_value.latest.return_value = mock_get_latest_boostr_sync_status()
+    def test_get_latest_sync_status(self, mock_filter, mock_get, mock_post, mock_sleep):
+        """Test the get_latest_sync_status function"""
+        filter_return_value_mock = mock.MagicMock()
+
+        mock_filter.return_value = filter_return_value_mock
+        filter_return_value_mock.__len__.return_value = 3
+        filter_return_value_mock.latest.return_value = (
+            mock_get_latest_boostr_sync_status()
+        )
+
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
         synced_on = loader.get_latest_sync_status()
         self.assertEqual(synced_on, "2024-09-22 16:52:34.369769+00:00")
