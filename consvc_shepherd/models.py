@@ -424,7 +424,8 @@ class Campaign(models.Model):
     def net_ecpm(self):
         """Calculate and return the net eCPM."""
         if self.impressions_sold and self.impressions_sold > 0:
-            return (self.net_spend / self.impressions_sold) * 1000
+            net_epcm_value = (self.net_spend / self.impressions_sold) * 1000
+            return round(net_epcm_value, 2)
         return None
 
     class Meta:
@@ -465,14 +466,14 @@ class CampaignSummary(models.Model):
     @property
     def net_ecpm(self):
         """Calculate and return the net eCPM."""
-        if self.impressions_sold > 0:
+        if self.impressions_sold and self.impressions_sold > 0:
             net_epcm_value = (self.net_spend / self.impressions_sold) * 1000
             return round(net_epcm_value, 2)
         return None
 
     @property
     def ctr(self):
-        """Click-through rate => (clicks_delivered) / (impressions_delivered)"""
+        """Click-through rate = clicks_delivered / impressions_delivered"""
         if self.clicks_delivered and self.impressions_delivered > 0:
             ctr_value = (self.clicks_delivered / self.impressions_delivered) * 100
             return round(ctr_value, 2)
@@ -488,7 +489,7 @@ class CampaignSummary(models.Model):
     @property
     def live(self):
         """Whether the campaign is active"""
-        if self.impressions_delivered > 0:
+        if self.impressions_delivered and self.impressions_delivered > 0:
             return "Yes"
         return "No"
 
@@ -508,14 +509,14 @@ class DeliveredCampaign(models.Model):
     ----------
     submission_date : DateTimeField
         The date the metric was captured
-    campaign_id : CharField
-        Foreign key pointing kevel flight id in Campaign
-    flight : CharField
+    campaign_id : IntegerField
+        Kevel campaign ID
+    flight : IntegerField
         The Kevel flight ID
     country : CharField
-        Country where metric was captured by Firefox telemetry
+        Country where the metric was captured
     provider : Charfield
-        Ad partner
+        Ad partner (kevel|contile)
     clicks_delivered : models.IntegerField
         The number of clicks delivered
     impression_delivered : models.IntegerField

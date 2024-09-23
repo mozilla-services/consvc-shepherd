@@ -12,7 +12,7 @@ As new models are added in the future, we should consider including them in the 
     ```shell
     docker exec -it consvc-shepherd-app-1 bash # can also run with `make debug`
 
-    docker manage.py seed
+    python manage.py seed
     ```
 
 1. The script will output a success message once the database has been seeded:

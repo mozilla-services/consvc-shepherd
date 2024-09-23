@@ -1,5 +1,4 @@
-A
-P_DIRS := consvc_shepherd contile openidc schema
+APP_DIRS := consvc_shepherd contile openidc schema
 COV_FAIL_UNDER := 95
 INSTALL_STAMP := .install.stamp
 POETRY := $(shell command -v poetry 2> /dev/null)

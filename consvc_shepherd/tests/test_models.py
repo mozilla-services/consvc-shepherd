@@ -7,6 +7,7 @@ from consvc_shepherd.models import (
     AllocationSetting,
     BoostrDeal,
     Campaign,
+    CampaignSummary,
     DeliveredCampaign,
     Partner,
     PartnerAllocation,
@@ -114,12 +115,38 @@ class CampaignTestCase(TestCase):
             end_date=timezone.now().date(),
         )
         campaign.save()
-        self.assertEqual(campaign.net_ecpm, (2000 / 500) * 1000)  # 4000
+        self.assertEqual(campaign.net_ecpm, round((2000 / 500 * 1000), 2))  # 4000
 
     def test_str_method(self):
         """Verify that the __str__ method returns the correct string representation."""
         expected_str = "Campaign 12345 - John Doe"
         self.assertEqual(str(self.campaign), expected_str)
+
+
+class CampaignSummaryTestCase(TestCase):
+    """Test case for CampaignSummary view operations."""
+
+    def setUp(self):
+        """Set up test data for CampaignSummary model."""
+        self.campaign_summary = CampaignSummary(
+            deal_id=1,
+            advertiser="Test Advertiser",
+            net_spend=10000,
+            impressions_sold=6000,
+            clicks_delivered=100,
+            impressions_delivered=900,
+        )
+
+    def test_campaign_summary_fields(self):
+        """Test computed properties of CampaignSummary."""
+        self.assertEqual(
+            self.campaign_summary.net_ecpm, round(10000 / 6000 * 1000, 2)
+        )  # 1666.67
+        self.assertEqual(self.campaign_summary.ctr, round(100 / 900 * 100, 2))  # 11.11
+        self.assertEqual(
+            self.campaign_summary.impressions_remaining, 6000 - 900
+        )  # 5100
+        self.assertEqual(self.campaign_summary.live, "Yes")
 
 
 class DeliveredCampaignTestCase(TestCase):
