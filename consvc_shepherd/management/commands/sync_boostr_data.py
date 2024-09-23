@@ -283,7 +283,7 @@ class BoostrLoader:
     def load(self):
         """Loader entry point"""
         try:
-            # self.upsert_products()
+            self.upsert_products()
             self.upsert_deals()
             self.log.info(
                 "Boostr sync process completed successfully. Updating sync_status"
