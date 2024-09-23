@@ -222,7 +222,7 @@ class BoostrLoader:
 
                 if created:
                     self.create_campaign(boostr_deal)
-                    self.log.debug(f"Upserted campaigns for deal: {deal['id']}")
+                    self.log.debug(f"Created campaign for deal: {deal['id']}")
 
                 self.upsert_deal_products(boostr_deal)
                 self.log.info(f"Upserted products and budgets for deal: {deal['id']}")
@@ -232,16 +232,24 @@ class BoostrLoader:
                     f"Done. Stopped fetching deals after hitting max_page_limit of {page} pages."
                 )
 
-    def create_campaign(self, deal: BoostrDeal) -> None:
-        """Create campaign if a  boostr deal is created"""
-        Campaign.objects.create(
-            net_spend=deal.amount,
-            impressions_sold=0,
-            seller=deal.sales_representatives,
-            deal=deal,
-            start_date=deal.start_date,
-            end_date=deal.end_date,
-        )
+    def create_campaign(self, deal: BoostrDeal) -> bool:
+        """Create campaign if a boostr deal is created. Returns True if successful, False otherwise."""
+        try:
+            Campaign.objects.create(
+                net_spend=deal.amount,
+                impressions_sold=0,
+                seller=deal.sales_representatives,
+                deal=deal,
+                start_date=deal.start_date,
+                end_date=deal.end_date,
+            )
+            return True
+        except Exception as e:
+            error_message = (
+                f"Failed to create campaign for deal {deal.boostr_id}: {str(e)}"
+            )
+            self.log.error(error_message)
+            return False
 
     def upsert_deal_products(self, deal: BoostrDeal) -> None:
         """Fetch the deal_products for a particular deal and store them in our DB with their monthly budgets"""
@@ -275,7 +283,7 @@ class BoostrLoader:
     def load(self):
         """Loader entry point"""
         try:
-            self.upsert_products()
+            # self.upsert_products()
             self.upsert_deals()
             self.log.info(
                 "Boostr sync process completed successfully. Updating sync_status"
