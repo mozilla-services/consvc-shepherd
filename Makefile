@@ -1,4 +1,5 @@
-APP_DIRS := consvc_shepherd contile openidc schema
+A
+P_DIRS := consvc_shepherd contile openidc schema
 COV_FAIL_UNDER := 95
 INSTALL_STAMP := .install.stamp
 POETRY := $(shell command -v poetry 2> /dev/null)
@@ -62,10 +63,10 @@ format: install  ##  Sort imports and reformat code
 	$(POETRY) run black $(APP_DIRS)
 
 
-local-migration-check: install
+local-migration-check: install  ##  Dry run of database migrations
 	$(POETRY) run python manage.py makemigrations --check --dry-run --noinput
 
-local-migrate: install
+local-migrate: install  ##  Create Database migrations and run migrations
 	$(POETRY) run python manage.py makemigrations
 	$(POETRY) run python manage.py migrate
 
@@ -106,7 +107,7 @@ ruff: install ##  **Experimental** Run ruff linter. To fix and format files.
 	$(POETRY) run ruff check --select I --fix
 	$(POETRY) run ruff format
 
-debug: ##  Connect to docker container with docker debug.
+debug: ##  Connect to the shepherd container with docker debug.
 	docker debug consvc-shepherd-app-1
 
 remove-migration: install  ##  Run command to undo migrations add VER= to set the migration number e.g. 0002
