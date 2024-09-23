@@ -232,24 +232,16 @@ class BoostrLoader:
                     f"Done. Stopped fetching deals after hitting max_page_limit of {page} pages."
                 )
 
-    def create_campaign(self, deal: BoostrDeal) -> bool:
+    def create_campaign(self, deal: BoostrDeal) -> None:
         """Create campaign if a boostr deal is created. Returns True if successful, False otherwise."""
-        try:
-            Campaign.objects.create(
-                net_spend=deal.amount,
-                impressions_sold=0,
-                seller=deal.sales_representatives,
-                deal=deal,
-                start_date=deal.start_date,
-                end_date=deal.end_date,
-            )
-            return True
-        except Exception as e:
-            error_message = (
-                f"Failed to create campaign for deal {deal.boostr_id}: {str(e)}"
-            )
-            self.log.error(error_message)
-            return False
+        Campaign.objects.create(
+            net_spend=deal.amount,
+            impressions_sold=0,
+            seller=deal.sales_representatives,
+            deal=deal,
+            start_date=deal.start_date,
+            end_date=deal.end_date,
+        )
 
     def upsert_deal_products(self, deal: BoostrDeal) -> None:
         """Fetch the deal_products for a particular deal and store them in our DB with their monthly budgets"""
