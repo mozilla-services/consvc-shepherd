@@ -4,93 +4,92 @@ To use consvc-shepherd, you'll need a Python 3.11 development environment with P
 
 It is recommended to use `pyenv` and the `pyenv-virtualenv` plugin your virtual environments.
 1. Install `pyenv` using the [latest documentation](https://github.com/pyenv/pyenv#installation) for your platform.
-2. Follow the instructions to install the `pyenv-virtualenv` plugin.
+1. Follow the instructions to install the `pyenv-virtualenv` plugin.
 See the [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv) documentation.
-3. Ensure you've added `pyenv` and `pyenv-virtualenv` to your PATH.
+1. Ensure you've added `pyenv` and `pyenv-virtualenv` to your PATH.
 
-Ex:
-```shell
-export PATH="$HOME/.pyenv/bin:$PATH"
-eval "$(pyenv init -)"
-eval "$(pyenv virtualenv-init -)"
-```
+    Ex:
+    ```shell
+    export PATH="$HOME/.pyenv/bin:$PATH"
+    eval "$(pyenv init -)"
+    eval "$(pyenv virtualenv-init -)"
+    ```
 
-4. To run consvc-shepherd, you'll need to specify some minimal configurations.
-Use the existing `.env.example` and copy it to `.env`.
-You'll want to make sure the environment variables in the `.env` file match your database setup, configuring the database name, user, host, and password.
+    1. To run consvc-shepherd, you'll need to specify some minimal configurations.
+    Use the existing `.env.example` and copy it to `.env`.
+    You'll want to make sure the environment variables in the `.env` file match your database setup, configuring the database name, user, host, and password.
 
-It should appear as follows:
+    It should appear as follows:
 
-```shell
-$ cp .env.example .env
+    ```shell
+    $ cp .env.example .env
 
-# Variables to set in file
-DEBUG=true
-SECRET_KEY=keyboard-mash
-DB_NAME=postgres
-DB_USER=postgres
-DB_HOST=db
-DB_PASS=postgres
-```
+    # Variables to set in file
+    DEBUG=true
+    SECRET_KEY=keyboard-mash
+    DB_NAME=postgres
+    DB_USER=postgres
+    DB_HOST=db
+    DB_PASS=postgres
+    ```
 
-5. Set up and enable your virtual environment:
+1. Set up and enable your virtual environment:
 
-```shell
-# pyenv version install
-$ pyenv install 3.11
+    ```shell
+    # pyenv version install
+    $ pyenv install 3.11
 
-# pyenv virtualenv
-$ pyenv virtualenv 3.11 shepherd # or whatever project name you like.
-$ pyenv local shepherd # enables virtual env when you enter directory.
-```
+    # pyenv virtualenv
+    $ pyenv virtualenv 3.11 shepherd # or whatever project name you like.
+    $ pyenv local shepherd # enables virtual env when you enter directory.
+    ```
 
-6. Install your dependencies:
+1. Install your dependencies:
 
-```shell
-$ pip install poetry
-$ poetry install
-```
+    ```shell
+    $ pip install poetry
+    $ poetry install
+    ```
 
-7. [Install Docker](https://docs.docker.com/engine/install/) if not already installed.
+1. [Install Docker](https://docs.docker.com/engine/install/) if not already installed.
 
-8. Build the Docker image and start the container:
-```shell
-docker compose up --build
-```
+1. Build the Docker image and start the container:
+    ```shell
+    docker compose up --build
+    ```
 
-The application will then be accessible at the following url: [http://0.0.0.0:7001/](http://0.0.0.0:7001/). The admin panel is available at [http://0.0.0.0:7001/admin](http://0.0.0.0:7001/admin)
+    The application will then be accessible at the following url: [http://0.0.0.0:7001/](http://0.0.0.0:7001/). The admin panel is available at [http://0.0.0.0:7001/admin](http://0.0.0.0:7001/admin)
 
-9. Create database migrations and run migrations.
+1. Create database migrations and run migrations.
 You may have to do this periodically as you modify or create models. Shell in as above and run the following commands:
-``` shell
-docker exec -it consvc-shepherd-app-1 sh # interactive mode
-python manage.py makemigrations
-python manage.py migrate
-```
+    ```shell
+    docker exec -it consvc-shepherd-app-1 bash # can also run with `make debug`
+    python manage.py makemigrations
+    python manage.py migrate
+    ```
 
-10. Connect to the DB with `psql`
-
+1. Connect to the DB with `psql`
 While the Django Admin interface at /admin shows all the data in our DB in a human readable way, it may sometimes be
 helpful to connect directly to the Shepherd DB while developing. (The values for the DB user and DB name come from
 the `.env` file.)
 
-```sh
-docker exec -it consvc-shepherd-db-1 psql -U postgres postgres
-```
+    ```shell
+    docker exec -it consvc-shepherd-db-1 psql -U postgres postgres
+    ```
 
-11. Import Boostr Deals and Products
+1. Import Boostr Deals and Products
 If you're working with the AdOps dashboard, you may want to pull in Boostr Deals and Products.
 
-First, make sure you have the Boostr API credentials set in your `.env` file. You can find them in 1Password
+    First, make sure you have the Boostr API credentials set in your `.env` file. You can find them in 1Password
 
-```
-BOOSTR_API_EMAIL=find-me-in-1password@mozilla.com
-BOOSTR_API_PASS=i-am-in-1password-too
-```
+    ```shell
+    BOOSTR_API_EMAIL=find-me-in-1password@mozilla.com
+    BOOSTR_API_PASS=i-am-in-1password-too
+    ```
 
-Then, run the script
+    Then, run the script:
 
-``` shell
-docker exec -it consvc-shepherd-app-1 sh # interactive mode
-python manage.py sync_boostr_data https://app.boostr.com/api
-```
+    ```shell
+    docker exec -it consvc-shepherd-app-1 bash # can also run with `make debug`
+    python manage.py sync_boostr_data https://app.boostr.com/api
+    ```
