@@ -131,7 +131,7 @@ class Command(BaseCommand):
                 flight=secrets.choice(campaigns),
                 defaults={
                     "country": fake.country_code(),
-                    "provider": secrets.choice(["Kevel", "Contile"]),
+                    "provider": secrets.choice(["Kevel", "ADM"]),
                     "clicks_delivered": secrets.randbelow(100) + 1,
                     "impressions_delivered": secrets.randbelow(900) + 100,
                 },

@@ -414,7 +414,7 @@ class PartnerFilter(admin.SimpleListFilter):
         """Return a list of distinct partners for the filter options."""
         # Define the possible values for partner
         return [
-            ("Contile", "Contile"),
+            ("ADM", "ADM"),
             ("Kevel", "Kevel"),
         ]
 
