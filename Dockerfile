@@ -27,6 +27,11 @@ RUN apt-get update && \
 
 RUN pip install --no-cache-dir --quiet --upgrade -r requirements.txt
 
+# Install npm for the React dashboard
+RUN apt-get update && \
+    apt-get install -y npm && \
+    apt-get clean
+
 RUN apt-get remove --yes gcc python3-dev && \
     apt-get -q --yes autoremove && \
     apt-get clean
