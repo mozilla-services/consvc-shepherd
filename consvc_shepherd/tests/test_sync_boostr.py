@@ -67,15 +67,19 @@ class TestSyncBoostrData(TestCase):
         self.assertEqual(context.exception.response.headers["Retry-After"], "5")
 
     @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.BoostrApi._sleep")
+    # @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.BoostrApi.get")
     @mock.patch("requests.Session.get")
     @mock.patch("requests.Session.post")
     def test_api_request_with_request_exception(self, mock_post, mock_get, mock_sleep):
         """Testing GET request with RequestException and a retry"""
-        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
+
         mock_exception = mock_request_exception()
         mock_response = mock_get_success_response()
+        # mock_get.get.side_effect = [mock_exception,mock_response]
         mock_get.side_effect = [mock_exception, mock_response]
-        response = loader.boostr.get("deals")
+        boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD)
+        response = boostr.get("deals")
+
         mock_sleep.assert_called_once_with(DEFAULT_RETRY_INTERVAL)
         self.assertEqual(mock_get.call_count, 2)
         self.assertEqual(response, {"data": "success"})
