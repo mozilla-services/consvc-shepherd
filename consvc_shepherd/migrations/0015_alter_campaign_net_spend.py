@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('consvc_shepherd', '0014_alter_campaign_ad_ops_person_and_more'),
+        ("consvc_shepherd", "0014_alter_campaign_ad_ops_person_and_more"),
     ]
 
     operations = [
