@@ -9,13 +9,21 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "11:b4:92:0f:38:89:4f:2c:13:c6:eb:1e:52:2d:33:07"
-  lint:
+
+  lint-python:
     docker:
       - image: cimg/python:3.11
     steps:
       - checkout
-      - run:
-          make -k lint
+      - run: make -k lint
+
+  lint-ts:
+    docker:
+      - image: cimg/node:22.9.0
+    steps:
+      - checkout
+      - run: make eslint
+
   test:
     docker:
       - image: cimg/python:3.11
@@ -23,7 +31,7 @@ jobs:
           DJANGO_SETTINGS_MODULE: consvc_shepherd.settings
       - image: cimg/postgres:14.2
         environment:
-         POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_HOST_AUTH_METHOD: trust
         auth:
           username: $DOCKER_USER
           password: $DOCKER_PASS
@@ -31,8 +39,7 @@ jobs:
       - checkout
       - python/install-packages:
           pkg-manager: poetry
-      - run:
-         make test
+      - run: make test
 
   build:
     docker:
@@ -145,7 +152,6 @@ jobs:
               --message "[skip ci] Docs updates" \
               --repo "git@github.com:mozilla-services/consvc-shepherd.git" \
               --dist workspace/doc
-
 
 workflows:
   shepherd:
