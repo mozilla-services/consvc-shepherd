@@ -297,7 +297,7 @@ class BoostrLoader:
             message=message,
         )
 
-    def get_latest_sync_status(self):
+    def get_latest_sync_status(self) -> Any:
         """Retrieve the lastest successful boostr sync status from the DB"""
         success_syncs = BoostrSyncStatus.objects.filter(status=SYNC_STATUS_SUCCESS)
         print("Retrieved", len(success_syncs))
@@ -309,7 +309,7 @@ class BoostrLoader:
 
         sync_status = success_syncs.latest("synced_on")
         self.log.info(
-            f"Fetched latest sync status: {sync_status.id}, synced_on: {sync_status.synced_on}"
+            f"Fetched latest sync status: {sync_status.pk}, synced_on: {sync_status.synced_on}"
         )
         return sync_status.synced_on
 
