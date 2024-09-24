@@ -10,19 +10,12 @@ jobs:
           fingerprints:
             - "11:b4:92:0f:38:89:4f:2c:13:c6:eb:1e:52:2d:33:07"
 
-  lint-python:
+  lint:
     docker:
-      - image: cimg/python:3.11
+      - image: cimg/python:3.11-node
     steps:
       - checkout
       - run: make -k lint
-
-  lint-ts:
-    docker:
-      - image: cimg/node:22.9.0
-    steps:
-      - checkout
-      - run: make eslint
 
   test:
     docker:
@@ -156,18 +149,17 @@ jobs:
 workflows:
   shepherd:
     jobs:
-      - lint-python
-      - lint-ts
+      - lint
       - test
       - docs-build
       - build:
           requires:
-            - lint-python
+            - lint
             - test
       - deploy:
           requires:
             - build
-            - lint-python
+            - lint
             - test
           filters:
             branches:
