@@ -49,7 +49,7 @@ jobs:
         with:
           context: src
           tags: |
-            us-docker.pkg.dev/${{ secrets.GAR_PROJECT_ID }}/ads-prod/shepherd:${{ steps.get-tag.outputs.tag }}
+            us-docker.pkg.dev/${{ secrets.GAR_PROJECT_ID }}/ads-prod/shepherd:${{ steps.set-tag.outputs.TAG }}
             us-docker.pkg.dev/${{ secrets.GAR_PROJECT_ID }}/ads-prod/shepherd:latest
 
           push: true
