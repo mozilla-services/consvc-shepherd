@@ -42,7 +42,7 @@ jobs:
         with:
           registry: us-docker.pkg.dev
           username: oauth2accesstoken
-          password: ${{ steps.gcp_auth.outputs.access_token }}
+          password: ${{ steps.gcp-auth.outputs.access_token }}
 
       - id: build-and-push
         uses: docker/build-push-action@v6
