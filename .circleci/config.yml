@@ -156,17 +156,18 @@ jobs:
 workflows:
   shepherd:
     jobs:
-      - lint
+      - lint-python
+      - lint-ts
       - test
       - docs-build
       - build:
           requires:
-            - lint
+            - lint-python
             - test
       - deploy:
           requires:
             - build
-            - lint
+            - lint-python
             - test
           filters:
             branches:
