@@ -1,6 +1,5 @@
 """Dashboard API views that produce json data"""
 
-from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import ModelViewSet
 
 from consvc_shepherd.api.serializers import (
@@ -16,7 +15,6 @@ class ProductViewSet(ModelViewSet):
 
     queryset = BoostrProduct.objects.all()
     serializer_class = BoostrProductSerializer
-    permission_classes = [AllowAny]  # This allows unauthenticated access
 
 
 class CampaignViewSet(ModelViewSet):
@@ -24,7 +22,6 @@ class CampaignViewSet(ModelViewSet):
 
     queryset = Campaign.objects.all()
     serializer_class = CampaignSerializer
-    permission_classes = [AllowAny]  # This allows unauthenticated access
 
 
 class BoostrDealViewSet(ModelViewSet):
@@ -32,4 +29,3 @@ class BoostrDealViewSet(ModelViewSet):
 
     queryset = BoostrDeal.objects.all()
     serializer_class = BoostrDealSerializer
-    permission_classes = [AllowAny]  # This allows unauthenticated access
