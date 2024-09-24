@@ -2,6 +2,7 @@ APP_DIRS := consvc_shepherd contile openidc schema
 COV_FAIL_UNDER := 95
 INSTALL_STAMP := .install.stamp
 POETRY := $(shell command -v poetry 2> /dev/null)
+NPM := $(shell command -v npm 2> /dev/null)
 VER :=
 MIGRATE ?= true
 
@@ -13,10 +14,14 @@ MIGRATE ?= true
 help: ##  show this help message
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m\033[0m\n"} /^[$$()% 0-9a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
-install: $(INSTALL_STAMP)  ##  Install dependencies with poetry
+install: $(INSTALL_STAMP)  ##  Install dependencies with poetry and npm
 $(INSTALL_STAMP): pyproject.toml poetry.lock
+	# Python dependencies
 	@if [ -z $(POETRY) ]; then echo "Poetry could not be found. See https://python-poetry.org/docs/"; exit 2; fi
 	$(POETRY) install
+	# Node/ts dependencies
+	@if [ -z $(NPM) ]; then echo "Npm could not be found. See ..."; exit 2; fi
+	cd dashboard && $(NPM) install
 	touch $(INSTALL_STAMP)
 
 isort: $(INSTALL_STAMP)  ##  Run isort in --check-only mode
