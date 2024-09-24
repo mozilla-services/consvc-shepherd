@@ -6,7 +6,7 @@ on:
       - main
 
     tags:
-      - v\d{8}rc\d+
+      - v\.\d{8}rc\d+
 
 jobs:
   build-and-push:
