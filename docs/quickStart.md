@@ -95,7 +95,7 @@ See the [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv) documentat
 
     Shell into `psql` and describe any of the DB tables (see example below), you should see that it contains some random data. Alternatively, you can look at the data by accessing the admin console at [http://0.0.0.0:7001/admin](http://0.0.0.0:7001/admin).
     ```shell
-    SELECT * FROM consvc_shepherd_deliveredcampaign;
+    SELECT * FROM consvc_shepherd_deliveredflight;
     ```
 
 1. Import Boostr Deals and Products.

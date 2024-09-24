@@ -8,7 +8,7 @@ from consvc_shepherd.models import (
     BoostrDeal,
     Campaign,
     CampaignSummary,
-    DeliveredCampaign,
+    DeliveredFlight,
     Partner,
     PartnerAllocation,
 )
@@ -149,41 +149,17 @@ class CampaignSummaryTestCase(TestCase):
         self.assertEqual(self.campaign_summary.live, "Yes")
 
 
-class DeliveredCampaignTestCase(TestCase):
-    """Test case for DeliveredCampaign model operations."""
+class DeliveredFlightTestCase(TestCase):
+    """Test case for DeliveredFlight model operations."""
 
     def setUp(self):
-        """Set up test data for DeliveredCampaign model."""
-        # Create a BoostrDeal instance to use in Campaign
-        self.deal = BoostrDeal.objects.create(
-            boostr_id=1,
-            name="Test Deal",
-            advertiser="Test Advertiser",
-            currency="$",
-            amount=1000,
-            sales_representatives="John Doe, Jane Doe",
-            start_date=timezone.now().date(),
-            end_date=timezone.now().date(),
-        )
-
-        # Create a Campaign instance
-        self.campaign = Campaign.objects.create(
-            ad_ops_person="John Doe",
-            notes="Test notes",
-            kevel_flight_id=12345,
-            net_spend=1000,
-            impressions_sold=1000,
-            seller="Test Seller",
-            deal=self.deal,
-            start_date=timezone.now().date(),
-            end_date=timezone.now().date(),
-        )
-
-        # Create a DeliveredCampaign instance
-        self.delivered_campaign = DeliveredCampaign.objects.create(
+        """Set up test data for DeliveredFlight model."""
+        self.delivered_flight = DeliveredFlight.objects.create(
             submission_date=timezone.now(),
             campaign_id=12345,
-            flight=self.campaign,
+            campaign_name="Campaign Name",
+            flight_id=54321,
+            flight_name="Flight Name",
             country="US",
             provider="kevel",
             clicks_delivered=100,
@@ -193,20 +169,19 @@ class DeliveredCampaignTestCase(TestCase):
     def test_str_method(self):
         """Verify that the __str__ method returns the correct string representation."""
         expected_str = (
-            f"{self.delivered_campaign.flight} : "
-            + f"{self.delivered_campaign.clicks_delivered} clicks and "
-            + f"{self.delivered_campaign.impressions_delivered} impressions"
+            f"{self.delivered_flight.flight_id} : "
+            + f"{self.delivered_flight.clicks_delivered} clicks and "
+            + f"{self.delivered_flight.impressions_delivered} impressions"
         )
-        self.assertEqual(str(self.delivered_campaign), expected_str)
+        self.assertEqual(str(self.delivered_flight), expected_str)
 
-    def test_delivered_campaign_fields(self):
+    def test_delivered_flight_fields(self):
         """Test that Campaign model fields are correctly set."""
-        self.assertEqual(self.delivered_campaign.campaign_id, 12345)
-        self.assertEqual(
-            self.delivered_campaign.flight.kevel_flight_id,
-            self.campaign.kevel_flight_id,
-        )
-        self.assertEqual(self.delivered_campaign.country, "US")
-        self.assertEqual(self.delivered_campaign.provider, "kevel")
-        self.assertEqual(self.delivered_campaign.clicks_delivered, 100)
-        self.assertEqual(self.delivered_campaign.impressions_delivered, 1000)
+        self.assertEqual(self.delivered_flight.campaign_id, 12345)
+        self.assertEqual(self.delivered_flight.campaign_name, "Campaign Name")
+        self.assertEqual(self.delivered_flight.flight_id, 54321)
+        self.assertEqual(self.delivered_flight.flight_name, "Flight Name")
+        self.assertEqual(self.delivered_flight.country, "US")
+        self.assertEqual(self.delivered_flight.provider, "kevel")
+        self.assertEqual(self.delivered_flight.clicks_delivered, 100)
+        self.assertEqual(self.delivered_flight.impressions_delivered, 1000)

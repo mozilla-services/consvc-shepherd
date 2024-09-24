@@ -15,7 +15,7 @@ from consvc_shepherd.models import (
     BoostrProduct,
     BoostrSyncStatus,
     Campaign,
-    DeliveredCampaign,
+    DeliveredFlight,
     PartnerAllocation,
 )
 from contile.models import Partner
@@ -38,7 +38,7 @@ class Command(BaseCommand):
 
         # Create multiple partners
         for _ in range(5):
-            Partner.objects.get_or_create(name=secrets.choice(["kevel", "adm"]))
+            Partner.objects.get_or_create(name=secrets.choice(["Kevel", "ADM"]))
 
         partners = list(Partner.objects.all())
 
@@ -121,14 +121,14 @@ class Command(BaseCommand):
                 },
             )
 
-        campaigns = list(Campaign.objects.all())
-
-        # Create multiple delivered campaigns
+        # Create multiple delivered flights
         for _ in range(10):
-            DeliveredCampaign.objects.get_or_create(
+            DeliveredFlight.objects.get_or_create(
                 submission_date=fake.date_between(start_date="-6m", end_date="now"),
-                campaign_id=secrets.randbelow(20) + 1,
-                flight=secrets.choice(campaigns),
+                campaign_id=secrets.randbelow(10) + 1,
+                campaign_name=fake.text(max_nb_chars=10),
+                flight_id=secrets.randbelow(10) + 1,
+                flight_name=fake.color_name(),
                 defaults={
                     "country": fake.country_code(),
                     "provider": secrets.choice(["Kevel", "ADM"]),

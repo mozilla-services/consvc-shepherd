@@ -404,7 +404,7 @@ class Campaign(models.Model):
 
     ad_ops_person: CharField = models.CharField(null=True, blank=True)
     notes: CharField = models.CharField(null=True, blank=True)
-    kevel_flight_id: IntegerField = models.IntegerField(null=True, blank=True, unique=True)
+    kevel_flight_id: IntegerField = models.IntegerField(null=True, blank=True)
     net_spend: DecimalField = models.DecimalField(max_digits=12, decimal_places=2)
     impressions_sold: IntegerField = models.IntegerField()
     seller: CharField = models.CharField()
@@ -496,8 +496,8 @@ class CampaignSummary(models.Model):
         verbose_name_plural = "Campaign Summaries"
 
 
-class DeliveredCampaign(models.Model):
-    """Representation of DeliveredCampaign metrics obtained from BigQuery for various ad partners
+class DeliveredFlight(models.Model):
+    """Representation of DeliveredFlight metrics obtained from BigQuery for various ad partners
 
     Attributes
     ----------
@@ -505,12 +505,16 @@ class DeliveredCampaign(models.Model):
         The date the metric was captured
     campaign_id : IntegerField
         Kevel campaign ID
-    flight : IntegerField
-        The Kevel flight ID
+    campaign_name : CharField
+        Kevel campaign name
+    flight_id : IntegerField
+        Kevel flight ID
+    flight_name : CharField
+        Kevel flight name
     country : CharField
         Country where the metric was captured
     provider : Charfield
-        Ad partner (kevel|contile)
+        Ad partner
     clicks_delivered : models.IntegerField
         The number of clicks delivered
     impression_delivered : models.IntegerField
@@ -519,22 +523,36 @@ class DeliveredCampaign(models.Model):
     Methods
     -------
     __str__(self)
-        Return the string representation for a Delivered Campaign
+        Return the string representation for a Delivered Flight
 
     """
 
     submission_date: DateField = models.DateField()
     campaign_id: IntegerField = models.IntegerField()
-    flight: ForeignKey = models.ForeignKey(
-        Campaign,
-        to_field="kevel_flight_id",
-        on_delete=models.CASCADE,
-    )
+    campaign_name: CharField = models.CharField()
+    flight_id: IntegerField = models.IntegerField()
+    flight_name: CharField = models.CharField()
     country: CharField = models.CharField()
     provider: CharField = models.CharField()
     clicks_delivered: IntegerField = models.IntegerField()
     impressions_delivered: IntegerField = models.IntegerField()
 
+    class Meta:
+        """Metadata for the DeliveredFlight model."""
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "submission_date",
+                    "campaign_id",
+                    "flight_id",
+                    "country",
+                    "provider",
+                ],
+                name="unique_delivered_flight",
+            ),
+        ]
+
     def __str__(self):
-        """Return the string representation for campaign ids and associated number of clicks and impressions"""
-        return f"{self.flight} : {self.clicks_delivered} clicks and {self.impressions_delivered} impressions"
+        """Return the string representation for flight ids and associated number of clicks and impressions"""
+        return f"{self.flight_id} : {self.clicks_delivered} clicks and {self.impressions_delivered} impressions"

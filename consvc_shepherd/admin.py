@@ -19,7 +19,7 @@ from consvc_shepherd.models import (
     BoostrSyncStatus,
     Campaign,
     CampaignSummary,
-    DeliveredCampaign,
+    DeliveredFlight,
     PartnerAllocation,
     SettingsSnapshot,
 )
@@ -425,27 +425,30 @@ class PartnerFilter(admin.SimpleListFilter):
         return queryset
 
 
-@admin.register(DeliveredCampaign)
-class DeliveredCampaignsAdmin(admin.ModelAdmin):
-    """Admin model for showing Delivered Campaign imported from BQ"""
+@admin.register(DeliveredFlight)
+class DeliveredFlightsAdmin(admin.ModelAdmin):
+    """Admin model for showing Delivered Flights imported from BQ"""
 
-    model = DeliveredCampaign
+    model = DeliveredFlight
     search_fields = [
-        "campaign",
+        "campaign_name",
+        "campaign_id",
         "flight_id",
-        "provider",
+        "flight_name",
     ]
-    search_help_text = "Search by campaign id, flight id, and provider."
+    search_help_text = "campaign_name, campaign_id, flight_id, flight_name"
     list_filter = [
         "submission_date",
         PartnerFilter,
     ]
     list_display = [
         "submission_date",
-        "flight_id",
+        "campaign_name",
         "campaign_id",
-        "provider",
+        "flight_name",
+        "flight_id",
         "country",
+        "provider",
         "clicks_delivered",
         "impressions_delivered",
     ]
