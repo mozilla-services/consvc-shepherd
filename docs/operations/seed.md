@@ -10,7 +10,7 @@ As new models are added in the future, we should consider including them in the 
 
 1. Run Shepherd locally and exec into the Shepherd container to run the script:
     ```shell
-    docker exec -it consvc-shepherd-app-1 bash # can also run with `make debug`
+    docker exec -it consvc-shepherd-app-1 bash # can also be run with `make debug`
 
     python manage.py seed
     ```

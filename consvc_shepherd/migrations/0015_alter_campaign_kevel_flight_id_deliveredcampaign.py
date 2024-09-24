@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("consvc_shepherd", "0013_campaignsummary_campaign"),
+        ("consvc_shepherd", "0014_alter_campaign_ad_ops_person_and_more"),
     ]
 
     operations = [
