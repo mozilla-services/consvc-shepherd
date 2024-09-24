@@ -402,9 +402,9 @@ class Campaign(models.Model):
 
     """
 
-    ad_ops_person: CharField = models.CharField()
-    notes: CharField = models.CharField()
-    kevel_flight_id: IntegerField = models.IntegerField()
+    ad_ops_person: CharField = models.CharField(null=True, blank=True)
+    notes: CharField = models.CharField(null=True, blank=True)
+    kevel_flight_id: IntegerField = models.IntegerField(null=True, blank=True)
     net_spend: DecimalField = models.DecimalField(max_digits=12, decimal_places=2)
     impressions_sold: IntegerField = models.IntegerField()
     seller: CharField = models.CharField()

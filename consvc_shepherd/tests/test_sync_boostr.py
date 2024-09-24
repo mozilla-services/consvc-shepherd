@@ -164,9 +164,11 @@ class TestSyncBoostrData(TestCase):
         side_effect=mock_update_or_create_deal,
     )
     @mock.patch.object(BoostrLoader, "upsert_deal_products")
+    @mock.patch.object(BoostrLoader, "create_campaign")
     def test_upsert_deals_respects_max_deal_pages_limit(
         self,
         mock_upsert_deal_products,
+        mock_create_campaign,
         mock_update_or_create,
         mock_get,
         mock_post,
@@ -176,6 +178,7 @@ class TestSyncBoostrData(TestCase):
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD, {"max_deal_pages": 3})
         loader.upsert_deals(None)
         assert 3 == mock_get.call_count
+        mock_create_campaign.assert_called()
 
     @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
@@ -185,9 +188,11 @@ class TestSyncBoostrData(TestCase):
         side_effect=mock_update_or_create_deal,
     )
     @mock.patch.object(BoostrLoader, "upsert_deal_products")
+    @mock.patch.object(BoostrLoader, "create_campaign")
     def test_upsert_deals_respects_default_max_deal_pages_limit(
         self,
         mock_upsert_deal_products,
+        mock_create_campaign,
         mock_update_or_create,
         mock_get,
         mock_post,
@@ -197,6 +202,7 @@ class TestSyncBoostrData(TestCase):
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
         loader.upsert_deals(None)
         assert 50 == mock_get.call_count
+        mock_create_campaign.assert_called()
 
     @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)

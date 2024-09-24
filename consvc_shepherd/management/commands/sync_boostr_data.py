@@ -16,6 +16,7 @@ from consvc_shepherd.models import (
     BoostrDealProduct,
     BoostrProduct,
     BoostrSyncStatus,
+    Campaign,
 )
 
 MAX_DEAL_PAGES_DEFAULT = 50
@@ -218,7 +219,7 @@ class BoostrLoader:
 
             closed_won_deals = [d for d in deals if (d["stage_name"] == "Closed Won")]
             for deal in closed_won_deals:
-                boostr_deal, _ = BoostrDeal.objects.update_or_create(
+                boostr_deal, created = BoostrDeal.objects.update_or_create(
                     boostr_id=deal["id"],
                     defaults={
                         "name": deal["name"],
@@ -233,6 +234,9 @@ class BoostrLoader:
                     },
                 )
                 self.log.debug(f"Upserted deal: {deal['id']}")
+                if created:
+                    self.create_campaign(boostr_deal)
+                    self.log.debug(f"Created campaign for deal: {deal['id']}")
 
                 self.upsert_deal_products(boostr_deal, latest_synced_on)
                 self.log.info(f"Upserted products and budgets for deal: {deal['id']}")
@@ -241,6 +245,17 @@ class BoostrLoader:
                 self.log.info(
                     f"Done. Stopped fetching deals after hitting max_page_limit of {page} pages."
                 )
+
+    def create_campaign(self, deal: BoostrDeal) -> None:
+        """Create campaign if a boostr deal is created. Returns True if successful, False otherwise."""
+        Campaign.objects.create(
+            net_spend=deal.amount,
+            impressions_sold=0,
+            seller=deal.sales_representatives,
+            deal=deal,
+            start_date=deal.start_date,
+            end_date=deal.end_date,
+        )
 
     def upsert_deal_products(self, deal: BoostrDeal, latest_synced_on: str) -> None:
         """Fetch the deal_products for a particular deal and store them in our DB with their monthly budgets"""
