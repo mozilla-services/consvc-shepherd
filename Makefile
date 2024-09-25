@@ -66,7 +66,7 @@ eslint-fix: $(INSTALL_STAMP)  ##  Format code with eslint
 
 lint: $(INSTALL_STAMP) isort black flake8 bandit pydocstyle mypy eslint ##  Run various linters
 
-lint-fix: $(INSTALL_STAMP) isort-fix black-fix eslint-fix flake8 bandit pydocstyle mypy ##  Run various linters and fix errors to pass CircleCi checks
+lint-fix: $(INSTALL_STAMP) isort-fix black-fix eslint-fix flake8 bandit pydocstyle mypy eslint-fix ##  Run various linters and fix errors to pass CircleCi checks
 
 format: install  ##  Sort imports and reformat code
 	$(POETRY) run isort $(APP_DIRS) --profile black
@@ -79,8 +79,13 @@ local-migrate: install  ##  Create Database migrations and run migrations
 	$(POETRY) run python manage.py makemigrations
 	$(POETRY) run python manage.py migrate
 
-test: local-migration-check
+test-dashboard:
+	cd dashboard && npm run test
+
+test-shepherd: local-migration-check
 	env DJANGO_SETTINGS_MODULE=consvc_shepherd.settings $(POETRY) run pytest --cov --cov-report=term-missing --cov-fail-under=$(COV_FAIL_UNDER)
+
+test: test-shepherd test-dashboard
 
 doc-install-deps:  ##  Install the dependencies for doc generation
 	cargo install mdbook && cargo install mdbook-mermaid
@@ -95,7 +100,7 @@ dev: $(INSTALL_STAMP)  ##  Run shepherd locally and reload automatically
 	docker compose up
 
 local-test: $(INSTALL_STAMP)  ##  local test
-	docker compose -f docker-compose.test-python.yml up --abort-on-container-exit && docker compose -f docker-compose.test-ts.yml up --abort-on-container-exit
+	docker compose -f docker-compose.test-shepherd.yml up --abort-on-container-exit && docker compose -f docker-compose.test-dashboard.yml up --abort-on-container-exit
 
 makemigrations-empty: ##  Create an empty migrations file for manual migrations
 	docker exec -it consvc-shepherd-app-1 python manage.py makemigrations --empty consvc_shepherd
