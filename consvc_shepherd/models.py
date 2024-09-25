@@ -532,8 +532,8 @@ class DeliveredFlight(models.Model):
     campaign_name: CharField = models.CharField()
     flight_id: IntegerField = models.IntegerField()
     flight_name: CharField = models.CharField()
-    country: CharField = models.CharField()
-    provider: CharField = models.CharField()
+    country: CharField = models.CharField(null=True, blank=True)
+    provider: CharField = models.CharField(null=True, blank=True)
     clicks_delivered: IntegerField = models.IntegerField()
     impressions_delivered: IntegerField = models.IntegerField()
 
