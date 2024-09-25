@@ -14,15 +14,19 @@ MIGRATE ?= true
 help: ##  show this help message
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m\033[0m\n"} /^[$$()% 0-9a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
-install: $(INSTALL_STAMP)  ##  Install dependencies with poetry and npm
+install-python: $(INSTALL_STAMP)  ##  Install dependencies with poetry
 $(INSTALL_STAMP): pyproject.toml poetry.lock
 	# Python dependencies
 	@if [ -z $(POETRY) ]; then echo "Poetry could not be found. See https://python-poetry.org/docs/"; exit 2; fi
 	$(POETRY) install
-	# Node/ts dependencies
-	@if [ -z $(NPM) ]; then echo "Npm could not be found. See ..."; exit 2; fi
+
+install-node: ##  Install dependencies with npm
+	# Node dependencies
+	@if [ -z $(NPM) ]; then echo "Npm could not be found. See npm install instructions for you platform"; exit 2; fi
 	cd dashboard && $(NPM) install
 	touch $(INSTALL_STAMP)
+
+install: install-python	install-node
 
 isort: $(INSTALL_STAMP)  ##  Run isort in --check-only mode
 	@echo "Running isort..."
@@ -79,13 +83,13 @@ local-migrate: install  ##  Create Database migrations and run migrations
 	$(POETRY) run python manage.py makemigrations
 	$(POETRY) run python manage.py migrate
 
-test-dashboard:
-	cd dashboard && npm run test
-
 test-shepherd: local-migration-check
 	env DJANGO_SETTINGS_MODULE=consvc_shepherd.settings $(POETRY) run pytest --cov --cov-report=term-missing --cov-fail-under=$(COV_FAIL_UNDER)
 
-test: test-shepherd test-dashboard
+test-dashboard:
+	cd dashboard && npm run test
+
+test: test-shepherd test-dashboard  ##  Run tests in CI
 
 doc-install-deps:  ##  Install the dependencies for doc generation
 	cargo install mdbook && cargo install mdbook-mermaid
@@ -99,8 +103,13 @@ doc-preview: doc  ##  Preview Merino docs via the default browser
 dev: $(INSTALL_STAMP)  ##  Run shepherd locally and reload automatically
 	docker compose up
 
-local-test: $(INSTALL_STAMP)  ##  local test
-	docker compose -f docker-compose.test-shepherd.yml up --abort-on-container-exit && docker compose -f docker-compose.test-dashboard.yml up --abort-on-container-exit
+local-test-shepherd: $(INSTALL_STAMP)
+	docker compose -f docker-compose.test-shepherd.yml up --abort-on-container-exit
+
+local-test-dashboard:
+	docker compose -f docker-compose.test-dashboard.yml up --abort-on-container-exit
+
+local-test: local-test-shepherd local-test-dashboard   ##  Run tests when developing locally
 
 makemigrations-empty: ##  Create an empty migrations file for manual migrations
 	docker exec -it consvc-shepherd-app-1 python manage.py makemigrations --empty consvc_shepherd

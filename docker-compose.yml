@@ -15,6 +15,7 @@ services:
     tty: true
     env_file:
       - .env
+    image: app
     build:
       context: ./
       dockerfile: ./Dockerfile

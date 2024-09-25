@@ -8,7 +8,7 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   { settings: { react: { version: "18.3" } } },
-  { ignores: ["dist", "node_modules", ".vite"] },
+  { ignores: [".vite", "coverage", "dist", "node_modules"] },
   {
     extends: [
       js.configs.recommended,
