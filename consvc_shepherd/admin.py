@@ -415,7 +415,7 @@ class PartnerFilter(admin.SimpleListFilter):
         # Define the possible values for partner
         return [
             ("ADM", "ADM"),
-            ("Kevel", "Kevel"),
+            ("kevel", "Kevel"),
         ]
 
     def queryset(self, request, queryset):
