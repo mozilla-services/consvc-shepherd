@@ -300,7 +300,6 @@ class BoostrLoader:
     def get_latest_sync_status(self) -> Any:
         """Retrieve the lastest successful boostr sync status from the DB"""
         success_syncs = BoostrSyncStatus.objects.filter(status=SYNC_STATUS_SUCCESS)
-        print("Retrieved", len(success_syncs))
         if not len(success_syncs):
             self.log.info(
                 "Unable to retrieve the latest successful boost sync status record"
