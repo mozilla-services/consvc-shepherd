@@ -19,7 +19,7 @@ jobs:
 
   test:
     docker:
-      - image: cimg/python:3.11
+      - image: cimg/python:3.11-node
         environment:
           DJANGO_SETTINGS_MODULE: consvc_shepherd.settings
       - image: cimg/postgres:14.2
