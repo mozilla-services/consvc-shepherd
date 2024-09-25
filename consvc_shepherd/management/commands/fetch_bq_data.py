@@ -99,7 +99,6 @@ class BQFetcher:
 
         client = bigquery.Client(project=self.project_id)
 
-        # Configure the query with the required parameter (the date entered)
         job_config = bigquery.QueryJobConfig(
             query_parameters=[
                 bigquery.ScalarQueryParameter("submission_date", "DATE", self.date)
@@ -107,7 +106,6 @@ class BQFetcher:
         )
 
         try:
-            # Execute the query
             query_job = client.query(query, job_config=job_config)
             results = query_job.result()
 
@@ -116,14 +114,13 @@ class BQFetcher:
                 self.log.error(message)
                 raise ValueError(message)
 
-            # Convert results to DataFrame
             df = results.to_dataframe()
 
             self.log.info(f"BQ data pulled successfully for date {self.date}")
             return df
         except Exception as e:
             self.log.error(f"An error occurred while querying BigQuery: {e}")
-            raise  # Re-raise the exception to propagate it further
+            raise
 
     def upsert_data(self, df):
         """Upsert data queried from BigQuery into Shepherd DB"""
@@ -166,10 +163,8 @@ class BQFetcher:
             self.upsert_data(df)
             self.log.info("BigQuery fetcher process has completed successfully")
         except ValueError as ve:
-            # Important: if we dont find anything in BQ, we report a value error
-            # Handle the case where no data is returned
             self.log.warning(f"No data returned for the date {self.date}: {str(ve)}")
-            return  # Exit early if no data is present
+            return
         except Exception as e:
             error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
             self.log.error(f"BigQuery fetcher process has encounterd an error: {error}")
