@@ -174,7 +174,7 @@ class BoostrApi:
                 return json
             else:
                 raise BoostrApiError(
-                    f"Bad response status {response.status_code} from /{path}: {response}"
+                    f"Bad response status {response.status_code} from /{path}"
                 )
 
         raise BoostrApiMaxRetriesError("Maximum retries reached")
