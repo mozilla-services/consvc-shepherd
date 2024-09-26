@@ -142,24 +142,26 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="quick-start-development-guide"><a class="header" href="#quick-start-development-guide">Quick Start Development Guide</a></h1>
-<p>To use consvc-shepherd, you'll need a Python 3.11 development environment with Poetry installed and Docker.</p>
-<p>It is recommended to use <code>pyenv</code> and the <code>pyenv-virtualenv</code> plugin your virtual environments.</p>
+<p>To use consvc-shepherd, you'll need a Python 3.11 development environment with Poetry Docker installed.</p>
+<p>It is recommended to use <code>pyenv</code> and the <code>pyenv-virtualenv</code> plugin for your virtual environment.</p>
 <ol>
-<li>Install <code>pyenv</code> using the <a href="https://github.com/pyenv/pyenv#installation">latest documentation</a> for your platform.</li>
-<li>Follow the instructions to install the <code>pyenv-virtualenv</code> plugin.
-See the <a href="https://github.com/pyenv/pyenv-virtualenv">pyenv-virtualenv</a> documentation.</li>
-<li>Ensure you've added <code>pyenv</code> and <code>pyenv-virtualenv</code> to your PATH.</li>
-</ol>
+<li>
+<p>Install <code>pyenv</code> using the <a href="https://github.com/pyenv/pyenv#installation">latest documentation</a> for your platform.</p>
+</li>
+<li>
+<p>Follow the instructions to install the <code>pyenv-virtualenv</code> plugin.
+See the <a href="https://github.com/pyenv/pyenv-virtualenv">pyenv-virtualenv</a> documentation.</p>
+</li>
+<li>
+<p>Ensure you've added <code>pyenv</code> and <code>pyenv-virtualenv</code> to your <code>PATH</code>:</p>
 <p>Ex:</p>
 <pre><code class="language-shell">export PATH=&quot;$HOME/.pyenv/bin:$PATH&quot;
 eval &quot;$(pyenv init -)&quot;
 eval &quot;$(pyenv virtualenv-init -)&quot;
 </code></pre>
-<ol start="4">
-<li>To run consvc-shepherd, you'll need to specify some minimal configurations.
-Use the existing <code>.env.example</code> and copy it to <code>.env</code>.
-You'll want to make sure the environment variables in the <code>.env</code> file match your database setup, configuring the database name, user, host, and password.</li>
-</ol>
+<p>To run consvc-shepherd, you'll need to specify some minimal configurations.
+Use the existing <code>.env.example</code> and copy it to <code>.env</code>.</p>
+<p>You'll want to make sure the environment variables in the <code>.env</code> file match your database setup, configuring the database name, user, host, and password.</p>
 <p>It should appear as follows:</p>
 <pre><code class="language-shell">$ cp .env.example .env
 
@@ -171,9 +173,9 @@ DB_USER=postgres
 DB_HOST=db
 DB_PASS=postgres
 </code></pre>
-<ol start="5">
-<li>Set up and enable your virtual environment:</li>
-</ol>
+</li>
+<li>
+<p>Set up and enable your virtual environment:</p>
 <pre><code class="language-shell"># pyenv version install
 $ pyenv install 3.11
 
@@ -181,51 +183,63 @@ $ pyenv install 3.11
 $ pyenv virtualenv 3.11 shepherd # or whatever project name you like.
 $ pyenv local shepherd # enables virtual env when you enter directory.
 </code></pre>
-<ol start="6">
-<li>Install your dependencies:</li>
-</ol>
+</li>
+<li>
+<p>Install your dependencies:</p>
 <pre><code class="language-shell">$ pip install poetry
 $ poetry install
 </code></pre>
-<ol start="7">
+</li>
 <li>
-<p><a href="https://docs.docker.com/engine/install/">Install Docker</a> if not already installed.</p>
+<p><a href="https://docs.docker.com/engine/install/">Install Docker</a>, if not already installed.</p>
 </li>
 <li>
 <p>Build the Docker image and start the container:</p>
-</li>
-</ol>
 <pre><code class="language-shell">docker compose up --build
 </code></pre>
-<p>The application will then be accessible at the following url: <a href="http://0.0.0.0:7001/">http://0.0.0.0:7001/</a>. The admin panel is available at <a href="http://0.0.0.0:7001/admin">http://0.0.0.0:7001/admin</a></p>
-<ol start="9">
-<li>Create database migrations and run migrations.
-You may have to do this periodically as you modify or create models. Shell in as above and run the following commands:</li>
-</ol>
-<pre><code class="language-shell">docker exec -it consvc-shepherd-app-1 sh # interactive mode
+<p>The application will then be accessible at the following url: <a href="http://0.0.0.0:7001/">http://0.0.0.0:7001/</a>. The admin panel is available at <a href="http://0.0.0.0:7001/admin">http://0.0.0.0:7001/admin</a>.</p>
+</li>
+<li>
+<p>Create database migrations and run migrations.</p>
+<p>You may have to do this periodically as you modify or create models. Shell in as above and run the following commands:</p>
+<pre><code class="language-shell">docker exec -it consvc-shepherd-app-1 bash # can also be run with `make debug`
 python manage.py makemigrations
 python manage.py migrate
 </code></pre>
-<ol start="10">
-<li>Connect to the DB with <code>psql</code></li>
-</ol>
-<p>While the Django Admin interface at /admin shows all the data in our DB in a human readable way, it may sometimes be
-helpful to connect directly to the Shepherd DB while developing. (The values for the DB user and DB name come from
-the <code>.env</code> file.)</p>
-<pre><code class="language-sh">docker exec -it consvc-shepherd-db-1 psql -U postgres postgres
+</li>
+<li>
+<p>Connect to the DB with <code>psql</code>.</p>
+<p>While the Django Admin interface at <code>/admin</code> shows all the data in our DB in a human readable way, it may sometimes be
+helpful to connect directly to the Shepherd DB while developing.</p>
+<p><strong>Note</strong>: The values for the DB user and DB name come from the <code>.env</code> file.</p>
+<pre><code class="language-shell">docker exec -it consvc-shepherd-db-1 psql -U postgres postgres
 </code></pre>
-<ol start="11">
-<li>Import Boostr Deals and Products
-If you're working with the AdOps dashboard, you may want to pull in Boostr Deals and Products.</li>
-</ol>
-<p>First, make sure you have the Boostr API credentials set in your <code>.env</code> file. You can find them in 1Password</p>
-<pre><code>BOOSTR_API_EMAIL=find-me-in-1password@mozilla.com
+</li>
+<li>
+<p>Seed Shepherd DB with random test data.</p>
+<p>Shell into the <code>consvc-shepherd-app-1</code> container as mentioned above and run the following command:</p>
+<pre><code class="language-shell">python manage.py seed
+</code></pre>
+<p>The script will output a success message once the database has been seeded:</p>
+<pre><code class="language-shell">Successfully seeded the database with random data
+</code></pre>
+<p>Shell into <code>psql</code> and describe any of the DB tables (see example below), you should see that it contains some random data. Alternatively, you can look at the data by accessing the admin console at <a href="http://0.0.0.0:7001/admin">http://0.0.0.0:7001/admin</a>.</p>
+<pre><code class="language-shell">SELECT * FROM consvc_shepherd_deliveredflight;
+</code></pre>
+</li>
+<li>
+<p>Import Boostr Deals and Products.</p>
+<p>If you're working with the AdOps dashboard, you may want to pull in Boostr Deals and Products.</p>
+<p>First, make sure you have the Boostr API credentials set in your <code>.env</code> file. You can find them in 1Password.</p>
+<pre><code class="language-shell">BOOSTR_API_EMAIL=find-me-in-1password@mozilla.com
 BOOSTR_API_PASS=i-am-in-1password-too
 </code></pre>
-<p>Then, run the script</p>
-<pre><code class="language-shell">docker exec -it consvc-shepherd-app-1 sh # interactive mode
+<p>Then, run the script:</p>
+<pre><code class="language-shell">docker exec -it consvc-shepherd-app-1 bash # can also be run with `make debug`
 python manage.py sync_boostr_data https://app.boostr.com/api
 </code></pre>
+</li>
+</ol>
 
                     </main>
 
