@@ -72,20 +72,20 @@ format: install  ##  Sort imports and reformat code
 	$(POETRY) run isort $(APP_DIRS) --profile black
 	$(POETRY) run black $(APP_DIRS)
 
-local-migration-check: install
+local-migration-check: install # Check if any DB migrations need to be run
 	$(POETRY) run python manage.py makemigrations --check --dry-run --noinput
 
-local-migrate: install  ##  Create Database migrations and run migrations
+local-migrate: install # Create DB migrations from models and apply them in one command
 	$(POETRY) run python manage.py makemigrations
 	$(POETRY) run python manage.py migrate
 
-test-shepherd: local-migration-check
+test-shepherd: local-migration-check # Run the tests for the shepherd Django app in CI
 	env DJANGO_SETTINGS_MODULE=consvc_shepherd.settings $(POETRY) run pytest --cov --cov-report=term-missing --cov-fail-under=$(COV_FAIL_UNDER)
 
-test-dashboard:
+test-dashboard: # Run the tests for the dashboard React app in CI
 	cd dashboard && npm run test
 
-test: test-shepherd test-dashboard  ##  Run tests in CI
+test: test-shepherd test-dashboard  ##  Run all tests in CI
 
 doc-install-deps:  ##  Install the dependencies for doc generation
 	cargo install mdbook && cargo install mdbook-mermaid
@@ -99,13 +99,13 @@ doc-preview: doc  ##  Preview Merino docs via the default browser
 dev: $(INSTALL_STAMP)  ##  Run shepherd locally and reload automatically
 	docker compose up
 
-local-test-shepherd: $(INSTALL_STAMP)
+local-test-shepherd: $(INSTALL_STAMP) # Run shepherd Django app tests locally
 	docker compose -f docker-compose.test-shepherd.yml up --abort-on-container-exit
 
-local-test-dashboard:
+local-test-dashboard: # Run dashboard React app tests locally
 	docker compose -f docker-compose.test-dashboard.yml up --abort-on-container-exit
 
-local-test: local-test-shepherd local-test-dashboard   ##  Run tests when developing locally
+local-test: local-test-shepherd local-test-dashboard   ##  Run all tests when developing locally
 
 makemigrations-empty: ##  Create an empty migrations file for manual migrations
 	docker exec -it consvc-shepherd-app-1 python manage.py makemigrations --empty consvc_shepherd
