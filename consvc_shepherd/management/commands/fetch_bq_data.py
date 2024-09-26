@@ -79,7 +79,6 @@ class BQFetcher:
                 flight_id,
                 flight_name,
                 provider,
-                country,
                 SUM(clicks) AS clicks,
                 SUM(impressions) AS impressions
             FROM
@@ -93,7 +92,6 @@ class BQFetcher:
                 campaign_name,
                 flight_id,
                 flight_name,
-                country,
                 provider
         """
 
@@ -120,7 +118,7 @@ class BQFetcher:
             return df
         except Exception as e:
             self.log.error(f"An error occurred while querying BigQuery: {e}")
-            raise
+            raise  # Re-raise the exception to propagate it further
 
     def upsert_data(self, df):
         """Upsert data queried from BigQuery into Shepherd DB"""
@@ -130,7 +128,6 @@ class BQFetcher:
             campaign_name = row["campaign_name"]
             flight_id = row["flight_id"]
             flight_name = row["flight_name"]
-            country = row["country"]
             provider = row["provider"]
             clicks = row["clicks"]
             impressions = row["impressions"]
@@ -141,7 +138,6 @@ class BQFetcher:
                 campaign_name=campaign_name,
                 flight_id=flight_id,
                 flight_name=flight_name,
-                country=country,
                 provider=provider,
                 # If script runs again in the same day, just update the clicks and impressions
                 defaults={
@@ -164,7 +160,7 @@ class BQFetcher:
             self.log.info("BigQuery fetcher process has completed successfully")
         except ValueError as ve:
             self.log.warning(f"No data returned for the date {self.date}: {str(ve)}")
-            return
+            return  # Exit early if no data is present
         except Exception as e:
             error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
             self.log.error(f"BigQuery fetcher process has encounterd an error: {error}")

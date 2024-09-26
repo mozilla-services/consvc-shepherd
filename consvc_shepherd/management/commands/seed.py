@@ -130,7 +130,6 @@ class Command(BaseCommand):
                 flight_id=secrets.randbelow(10) + 1,
                 flight_name=fake.color_name(),
                 defaults={
-                    "country": fake.country_code(),
                     "provider": secrets.choice(["Kevel", "ADM"]),
                     "clicks_delivered": secrets.randbelow(100) + 1,
                     "impressions_delivered": secrets.randbelow(900) + 100,
