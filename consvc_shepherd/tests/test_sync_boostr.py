@@ -67,7 +67,7 @@ class TestSyncBoostrData(TestCase):
     ):
         """Test function that calls boostr API for product data and saves to our DB"""
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
-        loader.upsert_products(None)
+        loader.upsert_products()
         calls = [
             mock.call(
                 boostr_id=212592,
@@ -95,7 +95,7 @@ class TestSyncBoostrData(TestCase):
         """Test that upsert_products will raise an API error on non-200 status"""
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
         with self.assertRaises(BoostrApiError):
-            loader.upsert_products(None)
+            loader.upsert_products()
 
     @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
@@ -118,7 +118,7 @@ class TestSyncBoostrData(TestCase):
             "Currently hangs with the addition of the last upsert_deal_products mock"
         )
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
-        loader.upsert_deals(None)
+        loader.upsert_deals()
         calls = [
             mock.call(
                 boostr_id=1498421,
@@ -154,7 +154,7 @@ class TestSyncBoostrData(TestCase):
         """Test that upsert_deals will raise an API error on non-200 status"""
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
         with self.assertRaises(BoostrApiError):
-            loader.upsert_deals(None)
+            loader.upsert_deals()
 
     @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
@@ -176,7 +176,7 @@ class TestSyncBoostrData(TestCase):
     ):
         """Test that upsert_deals respects the given max_deal_pages limit"""
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD, {"max_deal_pages": 3})
-        loader.upsert_deals(None)
+        loader.upsert_deals()
         assert 3 == mock_get.call_count
         mock_create_campaign.assert_called()
 
@@ -200,7 +200,7 @@ class TestSyncBoostrData(TestCase):
     ):
         """Test that upsert_deals respects the default max_deal_pages limit"""
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
-        loader.upsert_deals(None)
+        loader.upsert_deals()
         assert 50 == mock_get.call_count
         mock_create_campaign.assert_called()
 
@@ -226,7 +226,7 @@ class TestSyncBoostrData(TestCase):
             end_date="2024-05-31",
         )
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
-        loader.upsert_deal_products(deal, None)
+        loader.upsert_deal_products(deal)
         calls = [
             mock.call(
                 boostr_deal=deal,
@@ -284,7 +284,7 @@ class TestSyncBoostrData(TestCase):
         )
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
         with self.assertRaises(BoostrApiError):
-            loader.upsert_deal_products(deal, None)
+            loader.upsert_deal_products(deal)
 
     def test_get_campaign_type(self):
         """Test function that reads a Product name and decides if the Product is CPC, CPM, Flat Fee, or None"""

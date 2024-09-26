@@ -600,6 +600,16 @@ django = "*"
 typing-extensions = "*"
 
 [[package]]
+name = "django-utils"
+version = "0.0.2"
+description = "Utilities for Django"
+optional = false
+python-versions = "*"
+files = [
+    {file = "django-utils-0.0.2.tar.gz", hash = "sha256:98b59b368d499b4d1b6dc66f15c0a136833bea12e0b299efdbfd754dc04c79d5"},
+]
+
+[[package]]
 name = "djangorestframework"
 version = "3.15.2"
 description = "Web APIs for Django, made easy."
@@ -2048,4 +2058,4 @@ h11 = ">=0.9.0,<1"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "7028311df5956fb6f81502194d13a0eb097849b61e4028095d954f89f1076760"
+content-hash = "a52b630d2b427339561433baa3ed6fc2804a1cdc58c135336659fa9a597dec20"

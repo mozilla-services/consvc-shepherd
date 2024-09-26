@@ -11,6 +11,7 @@ from typing import Any
 import environ
 import requests
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 
 from consvc_shepherd.models import (
     BoostrDeal,
@@ -161,8 +162,9 @@ class BoostrLoader:
         self.log = logging.getLogger("sync_boostr_data")
         self.boostr = BoostrApi(base_url, email, password, options)
         self.max_deal_pages = options.get("max_deal_pages", MAX_DEAL_PAGES_DEFAULT)
+        self.latest_synced_on = self.get_latest_sync_status()
 
-    def upsert_products(self, latest_synced_on: str) -> None:
+    def upsert_products(self) -> None:
         """Fetch all Boostr products and upsert them to Shepherd DB"""
         products_params = {
             "per": "300",
@@ -170,10 +172,10 @@ class BoostrLoader:
             "filter": "all",
         }
 
-        if latest_synced_on:
+        if self.latest_synced_on:
             products_params.update(
                 {
-                    "updated_at": latest_synced_on,
+                    "updated_at": self.latest_synced_on,
                     "updated_at_condition": ">=",
                 }
             )
@@ -191,7 +193,7 @@ class BoostrLoader:
             )
         self.log.info(f"Upserted {(len(products))} products")
 
-    def upsert_deals(self, latest_synced_on: str) -> None:
+    def upsert_deals(self) -> None:
         """Fetch all Boostr deals and upsert the Closed Won ones to Shepherd DB"""
         page = 0
         deals_params = {
@@ -199,10 +201,10 @@ class BoostrLoader:
             "page": str(page),
             "filter": "all",
         }
-        if latest_synced_on:
+        if self.latest_synced_on:
             deals_params.update(
                 {
-                    "updated_at": latest_synced_on,
+                    "updated_at": self.latest_synced_on,
                     "updated_at_condition": ">=",
                 }
             )
@@ -239,7 +241,7 @@ class BoostrLoader:
                     self.create_campaign(boostr_deal)
                     self.log.debug(f"Created campaign for deal: {deal['id']}")
 
-                self.upsert_deal_products(boostr_deal, latest_synced_on)
+                self.upsert_deal_products(boostr_deal, self.latest_synced_on)
                 self.log.info(f"Upserted products and budgets for deal: {deal['id']}")
             # If this is the last iteration of the loop due to the max page limit, log that we stopped
             if page >= self.max_deal_pages:
@@ -258,14 +260,14 @@ class BoostrLoader:
             end_date=deal.end_date,
         )
 
-    def upsert_deal_products(self, deal: BoostrDeal, latest_synced_on: str) -> None:
+    def upsert_deal_products(self, deal: BoostrDeal) -> None:
         """Fetch the deal_products for a particular deal and store them in our DB with their monthly budgets"""
         deal_products_params = (
             {
-                "updated_at": latest_synced_on,
+                "updated_at": self.latest_synced_on,
                 "updated_at_condition": ">=",
             }
-            if latest_synced_on
+            if self.latest_synced_on
             else {}
         )
 
@@ -317,13 +319,13 @@ class BoostrLoader:
     def load(self):
         """Loader entry point"""
         try:
-            sync_start_time = datetime.now() + timedelta(hours=1)
-            latest_synced_on = self.get_latest_sync_status()
+            sync_start_time = timezone.now() + timedelta(hours=1)
+            
             self.log.info(
-                f"Starting Boostr sync process at {sync_start_time} to retrieve records older than {latest_synced_on}"
+                f"Starting Boostr sync process at {sync_start_time} to retrieve records older than {self.latest_synced_on}"
             )
-            self.upsert_products(latest_synced_on)
-            self.upsert_deals(latest_synced_on)
+            self.upsert_products()
+            self.upsert_deals()
             self.log.info(
                 "Boostr sync process completed successfully. Updating sync_status"
             )
