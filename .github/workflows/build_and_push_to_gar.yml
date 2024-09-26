@@ -6,7 +6,7 @@ on:
       - main
 
     tags:
-      - v\d{8}rc\d+
+      - v.[0-9]+rc[0-9]+
 
 jobs:
   build-and-push:
@@ -42,14 +42,14 @@ jobs:
         with:
           registry: us-docker.pkg.dev
           username: oauth2accesstoken
-          password: ${{ steps.gcp_auth.outputs.access_token }}
+          password: ${{ steps.gcp-auth.outputs.access_token }}
 
       - id: build-and-push
         uses: docker/build-push-action@v6
         with:
           context: src
           tags: |
-            us-docker.pkg.dev/${{ secrets.GAR_PROJECT_ID }}/ads-prod/shepherd:${{ steps.get-tag.outputs.tag }}
+            us-docker.pkg.dev/${{ secrets.GAR_PROJECT_ID }}/ads-prod/shepherd:${{ steps.set-tag.outputs.TAG }}
             us-docker.pkg.dev/${{ secrets.GAR_PROJECT_ID }}/ads-prod/shepherd:latest
 
           push: true

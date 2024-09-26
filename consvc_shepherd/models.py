@@ -417,7 +417,8 @@ class Campaign(models.Model):
     def net_ecpm(self):
         """Calculate and return the net eCPM."""
         if self.impressions_sold and self.impressions_sold > 0:
-            return (self.net_spend / self.impressions_sold) * 1000
+            net_epcm_value = (self.net_spend / self.impressions_sold) * 1000
+            return round(net_epcm_value, 2)
         return None
 
     class Meta:
@@ -431,19 +432,59 @@ class Campaign(models.Model):
 
 
 class CampaignSummary(models.Model):
-    """Model representing a summary of campaign metrics."""
+    """Model representing a summary of campaign metrics including Boostr, and kevel
+
+    deal_id : IntegerField
+        Boostr deal ID
+    advertiser : CharField
+        Advertiser Name
+    net_spend : CharField
+        Price of deal from Boostr
+    impressions_sold : FloatField
+        Number of impressions sold on Boostr
+    clicks_delivered : IntegerField
+        Number of clicks delivered from Glean(BQ)
+    impressions_delivered : IntegerField
+        Number of impressions delivered from Glean(BQ)
+
+    """
 
     deal_id: IntegerField = models.IntegerField(primary_key=True)
     advertiser: CharField = models.CharField(max_length=255)
     net_spend: FloatField = models.FloatField()
     impressions_sold: FloatField = models.FloatField()
+    clicks_delivered: IntegerField = models.IntegerField()
+    impressions_delivered: IntegerField = models.IntegerField()
 
     @property
     def net_ecpm(self):
         """Calculate and return the net eCPM."""
-        if self.impressions_sold > 0:
-            return (self.net_spend / self.impressions_sold) * 1000
+        if self.impressions_sold and self.impressions_sold > 0:
+            net_epcm_value = (self.net_spend / self.impressions_sold) * 1000
+            return round(net_epcm_value, 2)
         return None
+
+    @property
+    def ctr(self):
+        """Click-through rate = clicks_delivered / impressions_delivered"""
+        if self.clicks_delivered and self.impressions_delivered > 0:
+            ctr_value = (self.clicks_delivered / self.impressions_delivered) * 100
+            return round(ctr_value, 2)
+        return None
+
+    @property
+    def impressions_remaining(self):
+        """Impressions_remaining = impressions_sold - impressions_delivered"""
+        if self.impressions_sold > 0:
+            return self.impressions_sold - self.impressions_delivered
+        return 0
+
+    @property
+    def live(self):
+        """Whether the campaign is active"""
+        if self.impressions_delivered and self.impressions_delivered > 0:
+            return "Yes"
+        return "No"
 
     class Meta:
         """Metadata for the CampaignSummary model."""
@@ -452,3 +493,65 @@ class CampaignSummary(models.Model):
         db_table = "campaign_summary_view"
         verbose_name = "Campaign"
         verbose_name_plural = "Campaign Summaries"
+
+
+class DeliveredFlight(models.Model):
+    """Representation of DeliveredFlight metrics obtained from BigQuery for various ad partners
+
+    Attributes
+    ----------
+    submission_date : DateTimeField
+        The date the metric was captured
+    campaign_id : IntegerField
+        Kevel campaign ID
+    campaign_name : CharField
+        Kevel campaign name
+    flight_id : IntegerField
+        Kevel flight ID
+    flight_name : CharField
+        Kevel flight name
+    country : CharField
+        Country where the metric was captured
+    provider : Charfield
+        Ad partner
+    clicks_delivered : models.IntegerField
+        The number of clicks delivered
+    impression_delivered : models.IntegerField
+        The number of impressions delivered
+
+    Methods
+    -------
+    __str__(self)
+        Return the string representation for a Delivered Flight
+
+    """
+
+    submission_date: DateField = models.DateField()
+    campaign_id: IntegerField = models.IntegerField()
+    campaign_name: CharField = models.CharField()
+    flight_id: IntegerField = models.IntegerField()
+    flight_name: CharField = models.CharField()
+    country: CharField = models.CharField(null=True, blank=True)
+    provider: CharField = models.CharField(null=True, blank=True)
+    clicks_delivered: IntegerField = models.IntegerField()
+    impressions_delivered: IntegerField = models.IntegerField()
+
+    class Meta:
+        """Metadata for the DeliveredFlight model."""
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "submission_date",
+                    "campaign_id",
+                    "flight_id",
+                    "country",
+                    "provider",
+                ],
+                name="unique_delivered_flight",
+            ),
+        ]
+
+    def __str__(self):
+        """Return the string representation for flight ids and associated number of clicks and impressions"""
+        return f"{self.flight_id} : {self.clicks_delivered} clicks and {self.impressions_delivered} impressions"
