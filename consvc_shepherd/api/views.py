@@ -1,6 +1,6 @@
 """Dashboard API views that produce json data"""
 
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from consvc_shepherd.api.serializers import (
     BoostrDealSerializer,
@@ -10,7 +10,7 @@ from consvc_shepherd.api.serializers import (
 from consvc_shepherd.models import BoostrDeal, BoostrProduct, Campaign
 
 
-class ProductViewSet(ModelViewSet):
+class ProductViewSet(ReadOnlyModelViewSet):
     """Fetch all BoostrProducts"""
 
     queryset = BoostrProduct.objects.all()
@@ -24,7 +24,7 @@ class CampaignViewSet(ModelViewSet):
     serializer_class = CampaignSerializer
 
 
-class BoostrDealViewSet(ModelViewSet):
+class BoostrDealViewSet(ReadOnlyModelViewSet):
     """Fetch all BoostrDeal"""
 
     queryset = BoostrDeal.objects.all()

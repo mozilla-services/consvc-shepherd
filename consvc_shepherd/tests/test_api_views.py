@@ -34,30 +34,6 @@ class ProductViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serializer.data)
 
-    def test_create_product(self):
-        """Test creating a new product via POST request."""
-        data = {"boostr_id": 3, "full_name": "product3", "campaign_type": "CPC"}
-        response = self.client.post(reverse("products-list"), data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(BoostrProduct.objects.count(), 3)
-
-    def test_update_product(self):
-        """Test updating an existing product via PUT request."""
-        data = {"boostr_id": 5, "full_name": "UpdatedProduct1", "campaign_type": "CPC"}
-        product_url = reverse("products-detail", args=[self.product1.id])
-        response = self.client.put(product_url, data, format="json")
-        self.product1.refresh_from_db()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(self.product1.full_name, "UpdatedProduct1")
-        self.assertEqual(self.product1.boostr_id, 5)
-
-    def test_delete_product(self):
-        """Test deleting an existing product via DELETE request."""
-        product_url = reverse("products-detail", args=[self.product1.id])
-        response = self.client.delete(product_url)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(BoostrProduct.objects.count(), 1)
-
 
 @override_settings(DEBUG=True)
 class BoostrDealViewSetTests(APITestCase):
@@ -95,48 +71,6 @@ class BoostrDealViewSetTests(APITestCase):
         serializer = BoostrDealSerializer(deals, many=True)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serializer.data)
-
-    def test_create_deal(self):
-        """Test creating a new deal via POST request."""
-        data = {
-            "boostr_id": 5,
-            "name": "test Deal 3",
-            "advertiser": "test advertiser 3",
-            "currency": "$",
-            "amount": 2000,
-            "sales_representatives": "Rep1, Rep2",
-            "start_date": "2024-01-01",
-            "end_date": "2025-01-01",
-        }
-        response = self.client.post(self.url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(BoostrDeal.objects.count(), 3)
-
-    def test_update_deal(self):
-        """Test updating an existing deal via PUT request."""
-        data = {
-            "boostr_id": 10,
-            "name": "test Deal 3",
-            "advertiser": "test advertiser 3",
-            "currency": "$",
-            "amount": 5000,
-            "sales_representatives": "Rep1, Rep2",
-            "start_date": "2024-01-01",
-            "end_date": "2025-01-01",
-        }
-        product_url = reverse("deals-detail", args=[self.deal1.id])
-        response = self.client.put(product_url, data, format="json")
-        self.deal1.refresh_from_db()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(self.deal1.name, "test Deal 3")
-        self.assertEqual(self.deal1.boostr_id, 10)
-
-    def test_delete_deal(self):
-        """Test deleting an existing deal via DELETE request."""
-        product_url = reverse("deals-detail", args=[self.deal1.id])
-        response = self.client.delete(product_url)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(BoostrDeal.objects.count(), 1)
 
 
 @override_settings(DEBUG=True)
