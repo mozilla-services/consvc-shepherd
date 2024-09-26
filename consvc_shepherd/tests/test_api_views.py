@@ -38,7 +38,6 @@ class ProductViewSetTests(APITestCase):
         """Test creating a new product via POST request."""
         data = {"boostr_id": 3, "full_name": "product3", "campaign_type": "CPC"}
         response = self.client.post(reverse("products-list"), data, format="json")
-        print(response.content)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BoostrProduct.objects.count(), 3)
 
@@ -47,7 +46,6 @@ class ProductViewSetTests(APITestCase):
         data = {"boostr_id": 5, "full_name": "UpdatedProduct1", "campaign_type": "CPC"}
         product_url = reverse("products-detail", args=[self.product1.id])
         response = self.client.put(product_url, data, format="json")
-        print(response.content)
         self.product1.refresh_from_db()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(self.product1.full_name, "UpdatedProduct1")
@@ -111,7 +109,6 @@ class BoostrDealViewSetTests(APITestCase):
             "end_date": "2025-01-01",
         }
         response = self.client.post(self.url, data, format="json")
-        print(response.content)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BoostrDeal.objects.count(), 3)
 
@@ -129,7 +126,6 @@ class BoostrDealViewSetTests(APITestCase):
         }
         product_url = reverse("deals-detail", args=[self.deal1.id])
         response = self.client.put(product_url, data, format="json")
-        print(response.content)
         self.deal1.refresh_from_db()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(self.deal1.name, "test Deal 3")
