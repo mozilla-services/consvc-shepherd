@@ -8,7 +8,14 @@ import { routes } from "./routes.tsx";
 import { Suspense } from "react";
 import AppLoader from "./components/AppLoader/AppLoader.tsx";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
 const router = createBrowserRouter(routes);
 export default function App() {
   return (
