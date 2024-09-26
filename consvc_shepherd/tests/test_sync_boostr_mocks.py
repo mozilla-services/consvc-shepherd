@@ -1,7 +1,5 @@
 """MockResponse utility class for testing the sync script's interactions with the Boostr API"""
 
-import json
-
 import requests
 
 from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct

@@ -3,7 +3,6 @@
 from unittest import mock
 
 from django.test import TestCase, override_settings
-from more_itertools import side_effect
 
 from consvc_shepherd.management.commands.sync_boostr_data import (
     BoostrApi,
