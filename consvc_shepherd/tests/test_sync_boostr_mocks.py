@@ -75,8 +75,13 @@ def mock_get_success(*args, **kwargs) -> MockResponse:
 
 
 def mock_get_fail(*args, **kwargs) -> MockResponse:
-    """Mock failed GET requets to boostr"""
+    """Mock failed GET request to boostr"""
     return MockResponse({"uh": "oh"}, 400)
+
+
+def mock_get_fail_500(*args, **kwargs) -> MockResponse:
+    """Mock failed 500 GET request to boostr"""
+    return MockResponse({"mock": "unknown"}, 500)
 
 
 def mock_too_many_requests_response(*args, **kwargs) -> MockResponse:
