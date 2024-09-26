@@ -1,11 +1,12 @@
 """Admin test module for consvc_shepherd."""
 
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 import mock
 import pytz
+from dateutil.relativedelta import relativedelta
 from django.contrib.admin.sites import AdminSite
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
@@ -26,6 +27,7 @@ from consvc_shepherd.models import (
     BoostrDealProduct,
     BoostrProduct,
     Campaign,
+    DeliveredFlight,
     Partner,
     PartnerAllocation,
     SettingsSnapshot,
@@ -491,3 +493,77 @@ class CampaignAdminTests(TestCase):
         )
         self.assertContains(response, "AdOps Person 1")
         self.assertNotContains(response, "AdOps Person 2")
+
+
+@override_settings(DEBUG=True)
+class DeliveredFlightAdminTests(TestCase):
+    """Test case for the admin interface of DeliveredFlight."""
+
+    def setUp(self):
+        """Set up test user, request, and data."""
+        self.request_factory = RequestFactory()
+        self.admin_user = AdminUserFactory()
+
+        self.create_test_data()
+
+    def create_test_data(self):
+        """Create test data for Delivered Flight model."""
+        self.delivered_flight1 = DeliveredFlight.objects.create(
+            submission_date=timezone.now(),
+            campaign_id=12345,
+            campaign_name="Campaign Name 1",
+            flight_id=54321,
+            flight_name="Flight Name 1",
+            country="US",
+            provider="Partner 1",
+            clicks_delivered=100,
+            impressions_delivered=1000,
+        )
+
+        self.delivered_flight2 = DeliveredFlight.objects.create(
+            submission_date=timezone.now() - relativedelta(months=1),
+            campaign_id=55555,
+            campaign_name="Campaign Name 2",
+            flight_id=88888,
+            flight_name="Flight Name 2",
+            country="BR",
+            provider="Partner 2",
+            clicks_delivered=50,
+            impressions_delivered=500,
+        )
+
+    def test_partner_filter(self):
+        """Test filtering Delivered Flight by partner name."""
+        response = self.client.get(
+            reverse("admin:consvc_shepherd_deliveredflight_changelist")
+            + "?partner=Partner1",
+            **{"settings.OPENIDC_HEADER": "dev@example.com"},
+        )
+
+        self.assertContains(response, "Partner1")
+        self.assertNotContains(response, "Partner2")
+
+    def test_submission_date_filter(self):
+        """Test filtering Delivered Flight by submission date."""
+        # Get today's date at 00:00 AM and 11:59 PM
+        today_start = timezone.now().date()
+        today_end = today_start + timedelta(days=1)
+
+        # Construct the filter parameters
+        filter_params = {
+            "submission_date__gte": today_start,
+            "submission_date__lt": today_end,
+        }
+
+        # Construct the URL with filter parameters
+        url = reverse("admin:consvc_shepherd_deliveredflight_changelist")
+
+        # Use the filter_params in the GET request
+        response = self.client.get(
+            url, data=filter_params, **{"settings.OPENIDC_HEADER": "dev@example.com"}
+        )
+
+        # Check if the response contains today's delivered flight
+        self.assertContains(response, self.delivered_flight1.provider)
+        # Ensure it does not contain the delivered flight from last month
+        self.assertNotContains(response, self.delivered_flight2.provider)

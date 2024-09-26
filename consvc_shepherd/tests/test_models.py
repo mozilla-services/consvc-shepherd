@@ -7,6 +7,8 @@ from consvc_shepherd.models import (
     AllocationSetting,
     BoostrDeal,
     Campaign,
+    CampaignSummary,
+    DeliveredFlight,
     Partner,
     PartnerAllocation,
 )
@@ -113,9 +115,73 @@ class CampaignTestCase(TestCase):
             end_date=timezone.now().date(),
         )
         campaign.save()
-        self.assertEqual(campaign.net_ecpm, (2000 / 500) * 1000)  # 4000
+        self.assertEqual(campaign.net_ecpm, round((2000 / 500 * 1000), 2))  # 4000
 
     def test_str_method(self):
         """Verify that the __str__ method returns the correct string representation."""
         expected_str = "Campaign 12345 - John Doe"
         self.assertEqual(str(self.campaign), expected_str)
+
+
+class CampaignSummaryTestCase(TestCase):
+    """Test case for CampaignSummary view operations."""
+
+    def setUp(self):
+        """Set up test data for CampaignSummary model."""
+        self.campaign_summary = CampaignSummary(
+            deal_id=1,
+            advertiser="Test Advertiser",
+            net_spend=10000,
+            impressions_sold=6000,
+            clicks_delivered=100,
+            impressions_delivered=900,
+        )
+
+    def test_campaign_summary_fields(self):
+        """Test computed properties of CampaignSummary."""
+        self.assertEqual(
+            self.campaign_summary.net_ecpm, round(10000 / 6000 * 1000, 2)
+        )  # 1666.67
+        self.assertEqual(self.campaign_summary.ctr, round(100 / 900 * 100, 2))  # 11.11
+        self.assertEqual(
+            self.campaign_summary.impressions_remaining, 6000 - 900
+        )  # 5100
+        self.assertEqual(self.campaign_summary.live, "Yes")
+
+
+class DeliveredFlightTestCase(TestCase):
+    """Test case for DeliveredFlight model operations."""
+
+    def setUp(self):
+        """Set up test data for DeliveredFlight model."""
+        self.delivered_flight = DeliveredFlight.objects.create(
+            submission_date=timezone.now(),
+            campaign_id=12345,
+            campaign_name="Campaign Name",
+            flight_id=54321,
+            flight_name="Flight Name",
+            country="US",
+            provider="kevel",
+            clicks_delivered=100,
+            impressions_delivered=1000,
+        )
+
+    def test_str_method(self):
+        """Verify that the __str__ method returns the correct string representation."""
+        expected_str = (
+            f"{self.delivered_flight.flight_id} : "
+            + f"{self.delivered_flight.clicks_delivered} clicks and "
+            + f"{self.delivered_flight.impressions_delivered} impressions"
+        )
+        self.assertEqual(str(self.delivered_flight), expected_str)
+
+    def test_delivered_flight_fields(self):
+        """Test that Campaign model fields are correctly set."""
+        self.assertEqual(self.delivered_flight.campaign_id, 12345)
+        self.assertEqual(self.delivered_flight.campaign_name, "Campaign Name")
+        self.assertEqual(self.delivered_flight.flight_id, 54321)
+        self.assertEqual(self.delivered_flight.flight_name, "Flight Name")
+        self.assertEqual(self.delivered_flight.country, "US")
+        self.assertEqual(self.delivered_flight.provider, "kevel")
+        self.assertEqual(self.delivered_flight.clicks_delivered, 100)
+        self.assertEqual(self.delivered_flight.impressions_delivered, 1000)
