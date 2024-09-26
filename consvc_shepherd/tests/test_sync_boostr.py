@@ -3,11 +3,11 @@
 from unittest import mock
 
 from django.test import TestCase, override_settings
-from requests import HTTPError
 
 from consvc_shepherd.management.commands.sync_boostr_data import (
     BoostrApi,
     BoostrApiError,
+    BoostrApiMaxRetriesError,
     BoostrDeal,
     BoostrLoader,
     BoostrProduct,
@@ -30,6 +30,8 @@ BASE_URL = "https://example.com"
 EMAIL = "email@mozilla.com"
 PASSWORD = "test"  # nosec
 DEFAULT_RETRY_INTERVAL = 60
+MOCK_RETRY_AFTER_SECONDS = 10
+MAX_RETRY = 5
 
 
 @override_settings(DEBUG=True)
@@ -53,33 +55,63 @@ class TestSyncBoostrData(TestCase):
         jwt = boostr.authenticate(EMAIL, PASSWORD)
         self.assertEqual(jwt, "i.am.jwt")
 
-    @mock.patch(
-        "consvc_shepherd.management.commands.sync_boostr_data.BoostrApi.get",
-        side_effect=mock_too_many_requests_response,
-    )
-    @mock.patch("requests.Session.post", side_effect=mock_post_success)
-    def test429(self, mock_post, mock_get):
+    @mock.patch("time.sleep", return_value=None)
+    @mock.patch("requests.Session.get")
+    @mock.patch("requests.Session.post")
+    def test429(self, mock_post, mock_get, mock_sleep):
         """Test get function for 429 error handling"""
-        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
-        with self.assertRaises(HTTPError) as context:
-            loader.upsert_deals()
-        self.assertEqual(context.exception.response.status_code, 429)
-        self.assertEqual(context.exception.response.headers["Retry-After"], "5")
+        mock_429_response = mock_too_many_requests_response()
+        mock_response = mock_get_success_response()
+        mock_get.side_effect = [mock_429_response, mock_response]
+        boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD)
+        with self.assertLogs("sync_boostr_data", level="INFO") as captured_logs:
+            response = boostr.get("deals")
+        mock_sleep.assert_called_once_with(MOCK_RETRY_AFTER_SECONDS + 1)
+        self.assertEqual(mock_get.call_count, 2)
+        self.assertEqual(response, {"data": "success"})
+        self.assertIn(
+            f"INFO:sync_boostr_data:429: Rate limited - Waiting {MOCK_RETRY_AFTER_SECONDS+1} seconds. Current retry: 0",
+            captured_logs.output,
+        )
 
-    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.BoostrApi._sleep")
+    @mock.patch("time.sleep", return_value=None)
+    @mock.patch("requests.Session.get")
+    @mock.patch("requests.Session.post")
+    def test_max_retries(self, mock_post, mock_get, mock_sleep):
+        """Test get function for 429 error handling"""
+        mock_429_response = mock_too_many_requests_response()
+        mock_get.side_effect = [mock_429_response for _ in range(10)]
+        boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD)
+        with self.assertLogs("sync_boostr_data", level="INFO") as captured_logs:
+            with self.assertRaises(BoostrApiMaxRetriesError):
+                boostr.get("deals")
+        mock_sleep.assert_called()
+        self.assertEqual(mock_get.call_count, MAX_RETRY)
+
+        for i in range(MAX_RETRY):
+            expected_log = (
+                f"INFO:sync_boostr_data:429: Rate limited - "
+                f"Waiting {MOCK_RETRY_AFTER_SECONDS+1} seconds. Current retry: {i}"
+            )
+            self.assertIn(
+                expected_log,
+                captured_logs.output[i],
+            )
+
+    @mock.patch(
+        "consvc_shepherd.management.commands.sync_boostr_data.BoostrApi._sleep",
+        return_value=None,
+    )
     # @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.BoostrApi.get")
     @mock.patch("requests.Session.get")
     @mock.patch("requests.Session.post")
     def test_api_request_with_request_exception(self, mock_post, mock_get, mock_sleep):
         """Testing GET request with RequestException and a retry"""
-
         mock_exception = mock_request_exception()
         mock_response = mock_get_success_response()
-        # mock_get.get.side_effect = [mock_exception,mock_response]
         mock_get.side_effect = [mock_exception, mock_response]
         boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD)
         response = boostr.get("deals")
-
         mock_sleep.assert_called_once_with(DEFAULT_RETRY_INTERVAL)
         self.assertEqual(mock_get.call_count, 2)
         self.assertEqual(response, {"data": "success"})
