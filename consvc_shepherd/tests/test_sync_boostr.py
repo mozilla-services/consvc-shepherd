@@ -3,6 +3,7 @@
 from unittest import mock
 
 from django.test import TestCase, override_settings
+from more_itertools import side_effect
 
 from consvc_shepherd.management.commands.sync_boostr_data import (
     BoostrApi,
@@ -15,6 +16,7 @@ from consvc_shepherd.management.commands.sync_boostr_data import (
 )
 from consvc_shepherd.tests.test_sync_boostr_mocks import (
     mock_get_fail,
+    mock_get_fail_500,
     mock_get_product,
     mock_get_success,
     mock_get_success_response,
@@ -58,7 +60,7 @@ class TestSyncBoostrData(TestCase):
     @mock.patch("time.sleep", return_value=None)
     @mock.patch("requests.Session.get")
     @mock.patch("requests.Session.post")
-    def test429(self, mock_post, mock_get, mock_sleep):
+    def test_429_error(self, mock_post, mock_get, mock_sleep):
         """Test get function for 429 error handling"""
         mock_429_response = mock_too_many_requests_response()
         mock_response = mock_get_success_response()
@@ -74,6 +76,15 @@ class TestSyncBoostrData(TestCase):
             captured_logs.output,
         )
 
+    @mock.patch("requests.Session.get", side_effect=mock_get_fail_500)
+    @mock.patch("requests.Session.post")
+    def test_500_error(self, mock_post, mock_get):
+        """Test sad path for the authenticate function"""
+        boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD)
+        with self.assertRaises(BoostrApiError) as context:
+            boostr.get("deals")
+        self.assertEqual(str(context.exception), "Bad response status 500 from /deals")
+
     @mock.patch("time.sleep", return_value=None)
     @mock.patch("requests.Session.get")
     @mock.patch("requests.Session.post")
@@ -83,10 +94,11 @@ class TestSyncBoostrData(TestCase):
         mock_get.side_effect = [mock_429_response for _ in range(10)]
         boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD)
         with self.assertLogs("sync_boostr_data", level="INFO") as captured_logs:
-            with self.assertRaises(BoostrApiMaxRetriesError):
+            with self.assertRaises(BoostrApiMaxRetriesError) as context:
                 boostr.get("deals")
-        mock_sleep.assert_called()
+        self.assertEqual(mock_sleep.call_count, MAX_RETRY)
         self.assertEqual(mock_get.call_count, MAX_RETRY)
+        self.assertEqual(str(context.exception), "Maximum retries reached")
 
         for i in range(MAX_RETRY):
             expected_log = (
@@ -102,7 +114,6 @@ class TestSyncBoostrData(TestCase):
         "consvc_shepherd.management.commands.sync_boostr_data.BoostrApi._sleep",
         return_value=None,
     )
-    # @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.BoostrApi.get")
     @mock.patch("requests.Session.get")
     @mock.patch("requests.Session.post")
     def test_api_request_with_request_exception(self, mock_post, mock_get, mock_sleep):
