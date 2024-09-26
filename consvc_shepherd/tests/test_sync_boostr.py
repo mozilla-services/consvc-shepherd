@@ -385,6 +385,7 @@ class TestSyncBoostrData(TestCase):
         calls = [
             mock.call(
                 status="success",
+                synced_on=mock.ANY,
                 message="Boostr sync success",
             ),
         ]
@@ -408,6 +409,7 @@ class TestSyncBoostrData(TestCase):
             calls = [
                 mock.call(
                     status="failure",
+                    synced_on=mock.ANY,
                     message=mock.ANY,
                 ),
             ]

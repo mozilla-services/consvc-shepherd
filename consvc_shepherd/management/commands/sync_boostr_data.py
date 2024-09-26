@@ -3,6 +3,7 @@
 import logging
 import math
 import traceback
+from datetime import datetime, timedelta
 from pathlib import Path
 from time import sleep
 from typing import Any
@@ -290,10 +291,11 @@ class BoostrLoader:
                 f"{product.boostr_id} to deal: {deal.boostr_id}"
             )
 
-    def update_sync_status(self, status, message):
+    def update_sync_status(self, status: str, synced_on: datetime, message: str):
         """Fupdate the BoostrSyncStatus table given the status and the message"""
         BoostrSyncStatus.objects.create(
             status=status,
+            synced_on=synced_on,
             message=message,
         )
 
@@ -315,14 +317,19 @@ class BoostrLoader:
     def load(self):
         """Loader entry point"""
         try:
+            sync_start_time = datetime.now() + timedelta(hours=1)
             latest_synced_on = self.get_latest_sync_status()
-            print("Latest synced on", latest_synced_on)
+            self.log.info(
+                f"Starting Boostr sync process at {sync_start_time} to retrieve records older than {latest_synced_on}"
+            )
             self.upsert_products(latest_synced_on)
             self.upsert_deals(latest_synced_on)
             self.log.info(
                 "Boostr sync process completed successfully. Updating sync_status"
             )
-            self.update_sync_status(SYNC_STATUS_SUCCESS, "Boostr sync success")
+            self.update_sync_status(
+                SYNC_STATUS_SUCCESS, sync_start_time, "Boostr sync success"
+            )
         except Exception as e:
             error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
             self.log.error(
@@ -330,6 +337,7 @@ class BoostrLoader:
             )
             self.update_sync_status(
                 SYNC_STATUS_FAILURE,
+                sync_start_time,
                 f"Exception: {str(e):} Trace: {traceback.format_exc()}",
             )
             raise e

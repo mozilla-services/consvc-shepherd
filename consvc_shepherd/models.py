@@ -362,7 +362,7 @@ class BoostrSyncStatus(models.Model):
         success = "success"
         failure = "failure"
 
-    synced_on: DateTimeField = models.DateTimeField(auto_now=True)
+    synced_on: DateTimeField = models.DateTimeField()
     status: CharField = models.CharField(choices=SyncStatus.choices)
     message: CharField = models.CharField()
 
