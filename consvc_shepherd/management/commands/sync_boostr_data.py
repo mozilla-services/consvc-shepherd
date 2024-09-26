@@ -241,7 +241,7 @@ class BoostrLoader:
                     self.create_campaign(boostr_deal)
                     self.log.debug(f"Created campaign for deal: {deal['id']}")
 
-                self.upsert_deal_products(boostr_deal, self.latest_synced_on)
+                self.upsert_deal_products(boostr_deal)
                 self.log.info(f"Upserted products and budgets for deal: {deal['id']}")
             # If this is the last iteration of the loop due to the max page limit, log that we stopped
             if page >= self.max_deal_pages:
@@ -320,9 +320,9 @@ class BoostrLoader:
         """Loader entry point"""
         try:
             sync_start_time = timezone.now() + timedelta(hours=1)
-            
+
             self.log.info(
-                f"Starting Boostr sync process at {sync_start_time} to retrieve records older than {self.latest_synced_on}"
+                f"Starting Boostr sync at {sync_start_time} retrieving records older than {self.latest_synced_on}"
             )
             self.upsert_products()
             self.upsert_deals()
