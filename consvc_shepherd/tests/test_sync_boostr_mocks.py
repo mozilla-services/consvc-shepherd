@@ -1,5 +1,7 @@
 """MockResponse utility class for testing the sync script's interactions with the Boostr API"""
 
+import json
+
 import requests
 
 from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct
@@ -9,13 +11,18 @@ from consvc_shepherd.tests.test_sync_boostr_mock_responses import (
     MOCK_PRODUCTS_RESPONSE,
 )
 
+MOCK_RETRY_AFTER_SECONDS = 10
+
 
 class MockResponse:
     """Mock for returning a response, used in functions that mock requests"""
 
-    def __init__(self, json_data: object, status_code: int):
+    def __init__(
+        self, json_data: object, status_code: int, headers_data: object = None
+    ):
         self.json_data = json_data
         self.status_code = status_code
+        self.headers = headers_data or {}
         self.ok = 200 <= self.status_code < 400
 
     def json(self):
@@ -72,12 +79,9 @@ def mock_get_fail(*args, **kwargs) -> MockResponse:
     return MockResponse({"uh": "oh"}, 400)
 
 
-def mock_too_many_requests_response(*args, **kwargs) -> requests.Response:
+def mock_too_many_requests_response(*args, **kwargs) -> MockResponse:
     """Mock 429 error returned when rate limited"""
-    mock_response = requests.Response()
-    mock_response.status_code = 429
-    mock_response.headers["Retry-After"] = "5"
-    raise requests.HTTPError(response=mock_response)
+    return MockResponse({"uh": "oh"}, 429, {"Retry-After": MOCK_RETRY_AFTER_SECONDS})
 
 
 def mock_get_success_response(*args, **kwargs) -> MockResponse:
