@@ -162,7 +162,7 @@ class BoostrApi:
                     int(response.headers.get("Retry-After", DEFAULT_RETRY_INTERVAL)) + 1
                 )
                 self.log.info(
-                    f"{response}: Rate limited - Waiting {retry_after} seconds. "
+                    f"{response.status_code}: Rate limited - Waiting {retry_after} seconds. "
                     f"Current retry: {current_retry}"
                 )
                 current_retry += 1
