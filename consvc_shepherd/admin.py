@@ -19,6 +19,7 @@ from consvc_shepherd.models import (
     BoostrSyncStatus,
     Campaign,
     CampaignSummary,
+    DeliveredFlight,
     PartnerAllocation,
     SettingsSnapshot,
 )
@@ -383,13 +384,73 @@ class CampaignSummaryAdmin(admin.ModelAdmin):
 
     model = CampaignSummary
 
-    list_display = ["advertiser", "net_spend", "impressions_sold", "net_ecpm"]
+    list_display = [
+        "advertiser",
+        "net_spend",
+        "impressions_sold",
+        "net_ecpm",
+        "clicks_delivered",
+        "impressions_delivered",
+        "impressions_remaining",
+        "ctr",
+        "live",
+    ]
 
     list_filter = [
         MonthFilter,
         CountryFilter,
         PlacementFilter,
         "advertiser",
+    ]
+
+
+class PartnerFilter(admin.SimpleListFilter):
+    """Filter for listing by partner."""
+
+    title = _("partner")
+    parameter_name = "partner"
+
+    def lookups(self, request, model_admin):
+        """Return a list of distinct partners for the filter options."""
+        # Define the possible values for partner
+        return [
+            ("ADM", "ADM"),
+            ("kevel", "Kevel"),
+        ]
+
+    def queryset(self, request, queryset):
+        """Filter the queryset based on the selected partner."""
+        if self.value():
+            return queryset.filter(provider=self.value())
+        return queryset
+
+
+@admin.register(DeliveredFlight)
+class DeliveredFlightsAdmin(admin.ModelAdmin):
+    """Admin model for showing Delivered Flights imported from BQ"""
+
+    model = DeliveredFlight
+    search_fields = [
+        "campaign_name",
+        "campaign_id",
+        "flight_id",
+        "flight_name",
+    ]
+    search_help_text = "campaign_name, campaign_id, flight_id, flight_name"
+    list_filter = [
+        "submission_date",
+        PartnerFilter,
+    ]
+    list_display = [
+        "submission_date",
+        "campaign_name",
+        "campaign_id",
+        "flight_name",
+        "flight_id",
+        "country",
+        "provider",
+        "clicks_delivered",
+        "impressions_delivered",
     ]
 
 
