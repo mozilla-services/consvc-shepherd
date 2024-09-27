@@ -9,7 +9,7 @@ Currently this is a Django admin command that can be manually run by `docker exe
 3. Exec into the consvc-shepherd container:
 
 ```sh
-docker exec -it consvc-shepherd-app-1 sh
+make debug
 ```
 4. Find the base url of the Boostr API that you want to hit. For production Boostr, this is "https://app.boostr.com/api/".
 5. Run the script, providing base url as a positional arg.
@@ -35,21 +35,7 @@ upper limit on deal pages.
 
 Usage:
 ```sh
-python manage.py sync_boostr_data --max-deal-pages 15
-```
-
-#### --request-interval-seconds
-The script can take an optional named argument, `--request-interval-seconds`, which
-controls the rate of requests to the Boostr API in order to stay under their rate limits.
-By default, the sync code will wait 1 second between requests.
-
-Their API's stated rate limits are 100reqs/second, which gives a much higher request rate,
-but in practice we've seen that the actual rate limit is lower, so this can be a helpful way
-to configure a successful full sync of that script.
-
-Usage:
-```sh
-python manage.py sync_boostr_data --request-interval-seconds .5
+python manage.py sync_boostr_data https://app.boostr.com/api --max-deal-pages 15
 ```
 
 ### Debug logs

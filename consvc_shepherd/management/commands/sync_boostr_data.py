@@ -2,9 +2,9 @@
 
 import logging
 import math
+import time
 import traceback
 from pathlib import Path
-from time import sleep
 from typing import Any
 
 import environ
@@ -20,11 +20,11 @@ from consvc_shepherd.models import (
 )
 
 MAX_DEAL_PAGES_DEFAULT = 50
+DEFAULT_RETRY_INTERVAL = 60
 SYNC_STATUS_SUCCESS = "success"
 SYNC_STATUS_FAILURE = "failure"
-REQUEST_INTERVAL_SECONDS_DEFAULT = 1
+HTTP_TOO_MANY_REQUESTS = 429
 DEFAULT_OPTIONS = {
-    "request_interval_seconds": REQUEST_INTERVAL_SECONDS_DEFAULT,
     "max_deal_pages": MAX_DEAL_PAGES_DEFAULT,
 }
 
@@ -49,14 +49,6 @@ class Command(BaseCommand):
                 {MAX_DEAL_PAGES_DEFAULT} pages. Currently we have ~14 pages of deals in Boostr, so this default max
                 should be sufficient for a while.""",
         )
-        parser.add_argument(
-            "--request-interval-seconds",
-            default=REQUEST_INTERVAL_SECONDS_DEFAULT,
-            type=int,
-            help=f"""This parameter controls the rate of requests to the Boostr API in order to stay under their rate
-                limits. By default, the sync code will wait {REQUEST_INTERVAL_SECONDS_DEFAULT} seconds between
-                requests.""",
-        )
 
     def handle(self, *args, **options):
         """Handle running the command"""
@@ -79,21 +71,25 @@ class BoostrApiError(Exception):
     pass
 
 
+class BoostrApiMaxRetriesError(Exception):
+    """Raise this error when we hit the maximum retries for an API call to Boostr"""
+
+    pass
+
+
 class BoostrApi:
     """Wrap up interactions with the Boostr API into a convenient class that handles the session, rate limits, etc"""
 
     base_url: str
     session: requests.Session
-    request_interval_seconds: int
+    log: logging.Logger
 
     def __init__(
         self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
     ):
         self.base_url = base_url
-        self.request_interval_seconds = options.get(
-            "request_interval_seconds", REQUEST_INTERVAL_SECONDS_DEFAULT
-        )
         self.setup_session(email, password)
+        self.log = logging.getLogger("sync_boostr_data")
 
     def setup_session(self, email: str, password: str) -> None:
         """Authenticate with the boostr api and create and store a session on the instance"""
@@ -113,17 +109,28 @@ class BoostrApi:
         token = self.post("user_token", post_data)
         return str(token["jwt"])
 
-    def post(self, path: str, json={}, headers={}) -> Any:
+    def post(self, path: str, json=None, headers=None) -> Any:
         """Make POST requests to Boostr that uses the session, pass through headers and json data,
         check status, and return parsed json
         """
-        sleep(self.request_interval_seconds)
         response = self.session.post(
             f"{self.base_url}/{path}",
-            json=json,
-            headers=headers,
+            json=json or {},
+            headers=headers or {},
             timeout=15,
         )
+
+        if response.status_code == HTTP_TOO_MANY_REQUESTS:
+            retry_after = (
+                int(response.headers.get("Retry-After", default=DEFAULT_RETRY_INTERVAL))
+                + 1
+            )
+            self.log.info(
+                f"{response.status_code}: Rate Limited - Waiting {retry_after} seconds"
+            )
+            self._sleep(retry_after)
+            return self.post(path, json, headers)
+
         if not response.ok:
             raise BoostrApiError(
                 f"Bad response status {response.status_code} from /{path}: {response}"
@@ -131,20 +138,51 @@ class BoostrApi:
         json = response.json()
         return json
 
-    def get(self, path: str, params={}, headers={}):
-        """Make GET requests to Boostr that use the session, pass through headers and query params,
-        check status, and return parsed json
-        """
-        sleep(self.request_interval_seconds)
-        response = self.session.get(
-            f"{self.base_url}/{path}", params=params, headers=headers, timeout=15
-        )
-        if not response.ok:
-            raise BoostrApiError(
-                f"Bad response status {response.status_code} from /{path}: {response}"
-            )
-        json = response.json()
-        return json
+    def get(self, path: str, params=None, headers=None, max_retry=5):
+        """Make GET requests to Boostr, handling retries and rate limits."""
+        current_retry = 0
+
+        while current_retry < max_retry:
+            try:
+                response = self.session.get(
+                    f"{self.base_url}/{path}",
+                    params=params or {},
+                    headers=headers or {},
+                    timeout=15,
+                )
+            except requests.exceptions.RequestException as e:
+                self.log.info(
+                    f"RequestException occurred: {e}. Current retry: {current_retry}"
+                )
+                current_retry += 1
+                self._sleep(DEFAULT_RETRY_INTERVAL)
+                continue
+
+            if response.status_code == HTTP_TOO_MANY_REQUESTS:
+                retry_after = (
+                    int(response.headers.get("Retry-After", DEFAULT_RETRY_INTERVAL)) + 1
+                )
+                self.log.info(
+                    f"{response.status_code}: Rate limited - Waiting {retry_after} seconds. "
+                    f"Current retry: {current_retry}"
+                )
+                current_retry += 1
+                self._sleep(retry_after)
+                continue
+
+            if response.ok:
+                json = response.json()
+                return json
+            else:
+                raise BoostrApiError(
+                    f"Bad response status {response.status_code} from /{path}"
+                )
+
+        raise BoostrApiMaxRetriesError("Maximum retries reached")
+
+    def _sleep(self, seconds) -> None:
+        """Sleep for the specified number of seconds. Extracted for testing purposes."""
+        time.sleep(seconds)
 
 
 class BoostrLoader:
