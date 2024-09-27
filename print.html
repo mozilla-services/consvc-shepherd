@@ -483,7 +483,7 @@ json file you provide it.</li>
 <li>Set the credentials by copying .env.example to .env, and setting the BOOSTR_API_EMAIL and BOOSTR_API_PASS variables</li>
 <li>Exec into the consvc-shepherd container:</li>
 </ol>
-<pre><code class="language-sh">docker exec -it consvc-shepherd-app-1 sh
+<pre><code class="language-sh">make debug
 </code></pre>
 <ol start="4">
 <li>Find the base url of the Boostr API that you want to hit. For production Boostr, this is &quot;https://app.boostr.com/api/&quot;.</li>
@@ -504,17 +504,7 @@ production Boostr account, so the default value of 50 gives us lots of overhead,
 but this parameter allows us to invoke the script with a custom value for the
 upper limit on deal pages.</p>
 <p>Usage:</p>
-<pre><code class="language-sh">python manage.py sync_boostr_data --max-deal-pages 15
-</code></pre>
-<h4 id="--request-interval-seconds"><a class="header" href="#--request-interval-seconds">--request-interval-seconds</a></h4>
-<p>The script can take an optional named argument, <code>--request-interval-seconds</code>, which
-controls the rate of requests to the Boostr API in order to stay under their rate limits.
-By default, the sync code will wait 1 second between requests.</p>
-<p>Their API's stated rate limits are 100reqs/second, which gives a much higher request rate,
-but in practice we've seen that the actual rate limit is lower, so this can be a helpful way
-to configure a successful full sync of that script.</p>
-<p>Usage:</p>
-<pre><code class="language-sh">python manage.py sync_boostr_data --request-interval-seconds .5
+<pre><code class="language-sh">python manage.py sync_boostr_data https://app.boostr.com/api --max-deal-pages 15
 </code></pre>
 <h3 id="debug-logs"><a class="header" href="#debug-logs">Debug logs</a></h3>
 <p>The script takes several minutes to run. To get more detailed logging on which
