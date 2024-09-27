@@ -9,7 +9,7 @@ MIGRATE ?= true
 # This will be run if no target is provided
 .DEFAULT_GOAL := help
 
-.PHONY: help install isort isort-fix black black-fix flake8 bandit pydocstyle mypy lint lint-fix format local-migration-check local-migrate  test doc-install-deps doc doc-preview dev local-test makemigrations-empty migrate makemigrations remove-migration debug ruff
+.PHONY: help install isort isort-fix black black-fix flake8 bandit pydocstyle mypy lint lint-fix eslint eslint-fix format local-migration-check local-migrate test doc-install-deps doc doc-preview dev local-test makemigrations-empty migrate makemigrations remove-migration debug ruff
 
 help: ##  show this help message
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m\033[0m\n"} /^[$$()% 0-9a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
@@ -20,8 +20,8 @@ $(INSTALL_STAMP): pyproject.toml poetry.lock
 	@if [ -z $(POETRY) ]; then echo "Poetry could not be found. See https://python-poetry.org/docs/"; exit 2; fi
 	$(POETRY) install
 	# Node dependencies
-	@if [ -z $(NPM) ]; then echo "Npm could not be found. See npm install instructions for you platform"; exit 2; fi
-	cd dashboard && $(NPM) install
+	@if [ -z $(NPM) ]; then echo "Npm could not be found. See npm install instructions for your platform"; exit 2; fi
+	cd ad-ops-dashboard && $(NPM) install
 	touch $(INSTALL_STAMP)
 
 isort: $(INSTALL_STAMP)  ##  Run isort in --check-only mode
@@ -58,15 +58,15 @@ mypy: $(INSTALL_STAMP)  ##  Run mypy
 
 eslint: $(INSTALL_STAMP)  ##  Run eslint
 	@echo "Running eslint ..."
-	cd dashboard && npm run lint
+	cd ad-ops-dashboard && npm run lint
 
 eslint-fix: $(INSTALL_STAMP)  ##  Format code with eslint
 	@echo "Running eslint with autofix..."
-	cd dashboard && npm run lint:fix
+	cd ad-ops-dashboard && npm run lint:fix
 
 lint: $(INSTALL_STAMP) isort black flake8 bandit pydocstyle mypy eslint ##  Run various linters
 
-lint-fix: $(INSTALL_STAMP) isort-fix black-fix eslint-fix flake8 bandit pydocstyle mypy eslint-fix ##  Run various linters and fix errors to pass CircleCi checks
+lint-fix: $(INSTALL_STAMP) isort-fix black-fix flake8 bandit pydocstyle mypy eslint-fix ##  Run various linters and fix errors to pass CircleCi checks
 
 format: install  ##  Sort imports and reformat code
 	$(POETRY) run isort $(APP_DIRS) --profile black
@@ -79,13 +79,13 @@ local-migrate: install # Create DB migrations from models and apply them in one 
 	$(POETRY) run python manage.py makemigrations
 	$(POETRY) run python manage.py migrate
 
-test-shepherd: local-migration-check # Run the tests for the shepherd Django app in CI
+test-django: local-migration-check # Run the tests for the shepherd Django app in CI
 	env DJANGO_SETTINGS_MODULE=consvc_shepherd.settings $(POETRY) run pytest --cov --cov-report=term-missing --cov-fail-under=$(COV_FAIL_UNDER)
 
-test-dashboard: # Run the tests for the dashboard React app in CI
-	cd dashboard && npm run test
+test-react: # Run the tests for the ad-ops-dashboard React app in CI
+	cd ad-ops-dashboard && npm run test
 
-test: test-shepherd test-dashboard  ##  Run all tests in CI
+test: test-django test-react  ##  Run all tests in CI
 
 doc-install-deps:  ##  Install the dependencies for doc generation
 	cargo install mdbook && cargo install mdbook-mermaid
@@ -99,13 +99,13 @@ doc-preview: doc  ##  Preview Merino docs via the default browser
 dev: $(INSTALL_STAMP)  ##  Run shepherd locally and reload automatically
 	docker compose up
 
-local-test-shepherd: $(INSTALL_STAMP) # Run shepherd Django app tests locally
-	docker compose -f docker-compose.test-shepherd.yml up --abort-on-container-exit
+local-test-django: $(INSTALL_STAMP) # Run shepherd Django app tests locally
+	docker compose -f docker-compose.test-django.yml up --abort-on-container-exit
 
-local-test-dashboard: # Run dashboard React app tests locally
-	docker compose -f docker-compose.test-dashboard.yml up --abort-on-container-exit
+local-test-react: # Run ad-ops-ad-ops-dashboard React app tests locally
+	docker compose -f docker-compose.test-react.yml up --abort-on-container-exit
 
-local-test: local-test-shepherd local-test-dashboard   ##  Run all tests when developing locally
+local-test: local-test-django local-test-react   ##  Run all tests when developing locally
 
 makemigrations-empty: ##  Create an empty migrations file for manual migrations
 	docker exec -it consvc-shepherd-app-1 python manage.py makemigrations --empty consvc_shepherd
@@ -127,8 +127,6 @@ ruff: install ##  **Experimental** Run ruff linter. To fix and format files.
 	@echo "Running Ruff..."
 	$(POETRY) run ruff check
 	$(POETRY) run ruff format
-	
-
 
 debug: ##  Connect to the shepherd container with docker debug.
 	docker debug consvc-shepherd-app-1

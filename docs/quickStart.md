@@ -3,7 +3,7 @@
 Shepherd is a grab-bag of Ad Operations tools, and currently consists of
 * `consvc_shepherd`: A full-stack Python Django app, as well as a json REST API
 * `contile`: A Python Django app
-* `dashboard`: A Node/Typescript React app, backed by the `consvc_shepherd` REST API
+* `ad-ops-dashboard`: A Node/Typescript React app, backed by the `consvc_shepherd` REST API
 
 ## Python setup
 
@@ -125,38 +125,38 @@ See the [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv) documentat
 
 ## Node/Typescript setup
 
-To develop on the dashboard app, you'll need `node` and `npm` installed.
+To develop on the ad-ops-dashboard app, you'll need `node` and `npm` installed.
 
 It is recommended to use a node version manager to allow for multiple `node`s on your system
 
 1. Install a node version manager. [nvm](https://github.com/nvm-sh/nvm) is a great
   choice if you're developing on a macOS with a POSIX-compliant shell.
 
-2. `cd dashboard`
+2. `cd ad-ops-dashboard`
 
-3. Install the `node` version specified in `dashboard/.nvmrc`:
+3. Install the `node` version specified in `ad-ops-dashboard/.nvmrc`:
 
     ```shell
     $ nvm install
     ```
 
-4. Install dashboard app's dependencies:
+4. Install `ad-ops-dashboard` app's dependencies:
 
     ```shell
     $ npm install
     ```
-5. Set up the `dashboard` environment:
+5. Set up the `ad-ops-dashboard` environment:
 
     ```shell
     $ cp .env.example .env
     ```
-6. Spin up the dashboard app and REST api together:
+6. Spin up the `ad-ops-dashboard` app and REST api together:
 
     ```shell
     $ cd ..
     $ docker-compose up --build
     ```
 
-    (You can also run the dashboard without the API via `npm run dev` from `./dashboard`)
+    (You can also run the `ad-ops-dashboard` without the API via `npm run dev` from `./ad-ops-dashboard`)
 
 7. Visit the home page at http://0.0.0.0:5173/

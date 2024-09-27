@@ -1,6 +1,6 @@
 FROM node:alpine
 
-WORKDIR /dashboard
+WORKDIR /ad-ops-dashboard
 
 COPY package*.json .
 

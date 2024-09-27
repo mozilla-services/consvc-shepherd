@@ -1,8 +1,8 @@
 services:
-  dashboard:
+  ad-ops-dashboard:
     tty: true
     build:
-      context: ./dashboard
+      context: ./ad-ops-dashboard
       dockerfile: ./Dockerfile
     command: npm run test
     ports:
