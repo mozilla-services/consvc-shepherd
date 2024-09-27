@@ -1,12 +1,13 @@
 """MockResponse utility class for testing the sync script's interactions with the Boostr API"""
 
-<<<<<<< HEAD
-from consvc_shepherd.models import BoostrDeal, BoostrProduct, BoostrSyncStatus
-=======
 import requests
 
-from consvc_shepherd.models import BoostrDeal, BoostrDealProduct, BoostrProduct
->>>>>>> main
+from consvc_shepherd.models import (
+    BoostrDeal,
+    BoostrDealProduct,
+    BoostrProduct,
+    BoostrSyncStatus,
+)
 from consvc_shepherd.tests.test_sync_boostr_mock_responses import (
     MOCK_DEAL_PRODUCTS_RESPONSE,
     MOCK_DEALS_RESPONSE,
@@ -166,6 +167,8 @@ def mock_get_latest_boostr_sync_status(*args, **kwargs) -> BoostrSyncStatus:
     print("IN MOCKER", BOOSTR_SYNC_STATUSES[1])
 
     return BOOSTR_SYNC_STATUSES[1]
+
+
 def mock_update_or_create_deal_product(
     *args, **kwargs
 ) -> tuple[BoostrDealProduct, bool]:

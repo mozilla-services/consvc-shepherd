@@ -15,8 +15,8 @@ from consvc_shepherd.management.commands.sync_boostr_data import (
 )
 from consvc_shepherd.tests.test_sync_boostr_mocks import (
     mock_get_fail,
-    mock_get_latest_boostr_sync_status,
     mock_get_fail_500,
+    mock_get_latest_boostr_sync_status,
     mock_get_product,
     mock_get_success,
     mock_get_success_response,
