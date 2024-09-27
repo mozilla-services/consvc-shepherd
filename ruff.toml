@@ -33,6 +33,7 @@ exclude = [
     "venv",
     "migrations",
     "manage.py",
+    "*test_*.py",
 ]
 
 [lint]
