@@ -103,8 +103,11 @@ makemigrations: ##  Run makemigrations on the docker container set MIGRATE=false
 	fi
 
 ruff: install ##  **Experimental** Run ruff linter. To fix and format files.
+	@echo "Running Ruff..."
 	$(POETRY) run ruff check --select I --fix
 	$(POETRY) run ruff format
+	@echo "Running Mypy..."
+	$(POETRY) run mypy $(APP_DIRS) --config-file="pyproject.toml"
 
 debug: ##  Connect to the shepherd container with docker debug.
 	docker debug consvc-shepherd-app-1
