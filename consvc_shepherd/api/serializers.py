@@ -18,9 +18,7 @@ class BoostrProductSerializer(serializers.ModelSerializer):
 class CampaignSerializer(serializers.ModelSerializer):
     """Serializer for Campaign model"""
 
-    campaign_fields = serializers.ListSerializer(
-        child=serializers.DictField(), write_only=True
-    )
+    campaign_fields = serializers.ListSerializer(child=serializers.DictField(), write_only=True)
 
     class Meta:
         """Metadata to specify the way Campaign is serialized"""
@@ -37,13 +35,11 @@ class CampaignSerializer(serializers.ModelSerializer):
         try:
             deal_data = BoostrDeal.objects.get(id=deal.id)
             deal_amount = deal_data.amount
-        except BoostrDeal.DoesNotExist:
-            raise serializers.ValidationError(f"Deal with name {deal} does not exist.")
+        except BoostrDeal.DoesNotExist as exec:
+            raise serializers.ValidationError(f"Deal with name {deal} does not exist.") from exec
 
         campaign_fields_data = data.get("campaign_fields", [])
-        total_net_spend = sum(
-            field.get("net_spend", 0) for field in campaign_fields_data
-        ) + data.get("net_spend", 0)
+        total_net_spend = sum(field.get("net_spend", 0) for field in campaign_fields_data) + data.get("net_spend", 0)
 
         if total_net_spend != deal_amount:
             raise serializers.ValidationError(
@@ -64,9 +60,7 @@ class CampaignSerializer(serializers.ModelSerializer):
                 existing_campaign.impressions_sold = field_data.get(
                     "impressions_sold", existing_campaign.impressions_sold
                 )
-                existing_campaign.net_spend = field_data.get(
-                    "net_spend", existing_campaign.net_spend
-                )
+                existing_campaign.net_spend = field_data.get("net_spend", existing_campaign.net_spend)
                 existing_campaign.save()
             except Campaign.DoesNotExist:
                 continue

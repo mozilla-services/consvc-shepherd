@@ -158,21 +158,16 @@ class AllocationSettingsSnapshotModelAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change) -> None:
         """Save SettingsSnapshot model instance."""
-        allocation_settings_name: str = (
-            f"SOV-{dateformat.format(timezone.now(), 'YmdHis')}"
-        )
+        allocation_settings_name: str = f"SOV-{dateformat.format(timezone.now(), 'YmdHis')}"
         json_settings: dict = {
             "name": allocation_settings_name,
             "allocations": [
-                allocation.to_dict()
-                for allocation in AllocationSetting.objects.all().order_by("position")
+                allocation.to_dict() for allocation in AllocationSetting.objects.all().order_by("position")
             ],
         }
         obj.json_settings = json_settings
         obj.created_by = request.user
-        super(AllocationSettingsSnapshotModelAdmin, self).save_model(
-            request, obj, form, change
-        )
+        super(AllocationSettingsSnapshotModelAdmin, self).save_model(request, obj, form, change)
         metrics.incr("allocations.snapshot.create")
 
     def get_readonly_fields(self, request, obj=None) -> list:
@@ -185,9 +180,7 @@ class AllocationSettingsSnapshotModelAdmin(admin.ModelAdmin):
 
     def delete_queryset(self, request, queryset) -> None:
         """Delete given SettingsSnapshot entry."""
-        super(AllocationSettingsSnapshotModelAdmin, self).delete_queryset(
-            request, queryset
-        )
+        super(AllocationSettingsSnapshotModelAdmin, self).delete_queryset(request, queryset)
         metrics.incr("allocations.snapshot.delete")
 
 
@@ -211,9 +204,7 @@ class AllocationSettingAdmin(admin.ModelAdmin):
 
     def partner_allocation(self, obj) -> str:  # pragma: no cover
         """Partner allocation summary display column."""
-        result = PartnerAllocation.objects.filter(allocation_position=obj).order_by(
-            "-percentage"
-        )
+        result = PartnerAllocation.objects.filter(allocation_position=obj).order_by("-percentage")
         row = ""
         for item in result:
             if not item.partner:
@@ -290,9 +281,7 @@ class MonthFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         """Filter the queryset based on the selected month."""
         if self.value():
-            subquery = BoostrDealProduct.objects.filter(month=self.value()).values(
-                "boostr_deal_id"
-            )
+            subquery = BoostrDealProduct.objects.filter(month=self.value()).values("boostr_deal_id")
             queryset = queryset.filter(deal_id__in=Subquery(subquery))
             return queryset
 
@@ -307,17 +296,13 @@ class PlacementFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         """Return a list of distinct placements for the filter options."""
-        placements = BoostrProduct.objects.values_list(
-            "full_name", flat=True
-        ).distinct()
+        placements = BoostrProduct.objects.values_list("full_name", flat=True).distinct()
         return [(placement, placement) for placement in placements]
 
     def queryset(self, request, queryset):
         """Filter the queryset based on the selected placement."""
         if self.value():
-            subquery = BoostrDealProduct.objects.filter(
-                boostr_product__full_name=self.value()
-            ).values(
+            subquery = BoostrDealProduct.objects.filter(boostr_product__full_name=self.value()).values(
                 "boostr_deal"
             )  # Assuming 'boostr_deal_id' is the correct field
 
@@ -339,9 +324,7 @@ class CountryFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         """Filter the queryset based on the selected country."""
         if self.value():
-            subquery = BoostrDealProduct.objects.filter(
-                boostr_product__country=self.value()
-            ).values("boostr_deal")
+            subquery = BoostrDealProduct.objects.filter(boostr_product__country=self.value()).values("boostr_deal")
 
             queryset = queryset.filter(deal_id__in=Subquery(subquery))
             return queryset

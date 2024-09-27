@@ -59,28 +59,17 @@ def main():
                 urls_info = settings[advertiser][geo]
                 for url_info in urls_info:
                     for path in url_info["paths"]:
-
-                        geo_field = Select(
-                            driver.find_element(By.ID, f"id_ad_urls-{i}-geo")
-                        )
+                        geo_field = Select(driver.find_element(By.ID, f"id_ad_urls-{i}-geo"))
                         geo_field.select_by_value(geo)
 
-                        fill_text_field_by_id(
-                            f"id_ad_urls-{i}-domain", url_info["host"], driver
-                        )
-                        fill_text_field_by_id(
-                            f"id_ad_urls-{i}-path", path["value"], driver
-                        )
+                        fill_text_field_by_id(f"id_ad_urls-{i}-domain", url_info["host"], driver)
+                        fill_text_field_by_id(f"id_ad_urls-{i}-path", path["value"], driver)
 
                         if path["matching"] == "prefix":
-                            matching_select = driver.find_element(
-                                By.ID, f"id_ad_urls-{i}-matching_1"
-                            )
+                            matching_select = driver.find_element(By.ID, f"id_ad_urls-{i}-matching_1")
                             matching_select.click()
 
-                        add_url_button = driver.find_element(
-                            By.LINK_TEXT, "Add another Advertiser url"
-                        )
+                        add_url_button = driver.find_element(By.LINK_TEXT, "Add another Advertiser url")
                         add_url_button.click()
 
                         i += 1

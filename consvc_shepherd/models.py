@@ -47,9 +47,7 @@ class SettingsSnapshot(models.Model):
     """
 
     name: CharField = models.CharField(max_length=128)
-    settings_type: ForeignKey = models.ForeignKey(
-        Partner, on_delete=models.SET_NULL, null=True
-    )
+    settings_type: ForeignKey = models.ForeignKey(Partner, on_delete=models.SET_NULL, null=True)
     json_settings: JSONField = models.JSONField(blank=True, null=True)
     created_by: ForeignKey = models.ForeignKey(
         get_user_model(),
@@ -161,7 +159,8 @@ class AllocationSetting(models.Model):
         return {
             "position": self.position,
             "allocation": [
-                allocation.to_dict() for allocation in self.partner_allocations.all()  # type: ignore [attr-defined]
+                allocation.to_dict()
+                for allocation in self.partner_allocations.all()  # type: ignore [attr-defined]
             ],
         }
 
@@ -192,9 +191,7 @@ class PartnerAllocation(models.Model):
     allocation_position: ForeignKey = models.ForeignKey(
         AllocationSetting, on_delete=models.CASCADE, related_name="partner_allocations"
     )
-    partner: ForeignKey = models.ForeignKey(
-        Partner, on_delete=models.CASCADE, null=True
-    )
+    partner: ForeignKey = models.ForeignKey(Partner, on_delete=models.CASCADE, null=True)
     percentage: IntegerField = models.IntegerField()
 
     def to_dict(self) -> dict[str, Any]:
@@ -343,23 +340,15 @@ class BoostrDealProduct(models.Model):
         FLATFEE = "FF", _("Flat Fee")
 
     boostr_deal: ForeignKey = models.ForeignKey(BoostrDeal, on_delete=models.CASCADE)
-    boostr_product: ForeignKey = models.ForeignKey(
-        BoostrProduct, on_delete=models.CASCADE
-    )
-    budget: models.DecimalField = models.DecimalField(
-        max_digits=13, decimal_places=2, null=True
-    )
+    boostr_product: ForeignKey = models.ForeignKey(BoostrProduct, on_delete=models.CASCADE)
+    budget: models.DecimalField = models.DecimalField(max_digits=13, decimal_places=2, null=True)
     month: CharField = models.CharField()
     rate_type: models.CharField = models.CharField(
         choices=RateTypes.choices,
         null=True,
     )
-    rate: models.DecimalField = models.DecimalField(
-        max_digits=13, decimal_places=2, null=True
-    )
-    quantity: models.DecimalField = models.DecimalField(
-        max_digits=13, decimal_places=2, null=True
-    )
+    rate: models.DecimalField = models.DecimalField(max_digits=13, decimal_places=2, null=True)
+    quantity: models.DecimalField = models.DecimalField(max_digits=13, decimal_places=2, null=True)
 
 
 class BoostrSyncStatus(models.Model):

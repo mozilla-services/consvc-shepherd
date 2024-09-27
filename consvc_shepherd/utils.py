@@ -51,11 +51,7 @@ class ShepherdMetrics:  # pragma: no cover
 
         def timing_decorator(func):
             def func_wrapper(*args, **kwargs):
-                ctx_manager = (
-                    self.metrics.timer(name)
-                    if settings.STATSD_ENABLED
-                    else contextlib.nullcontext()
-                )
+                ctx_manager = self.metrics.timer(name) if settings.STATSD_ENABLED else contextlib.nullcontext()
                 with ctx_manager:
                     return func(*args, **kwargs)
 

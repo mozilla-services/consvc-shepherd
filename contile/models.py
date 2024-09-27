@@ -11,9 +11,7 @@ MATCHING_CHOICES: tuple[tuple[bool, str], tuple[bool, str]] = (
     (True, "exact"),
     (False, "prefix"),
 )
-INVALID_PREFIX_PATH_ERROR: str = (
-    "Prefix paths can't be just '/' but needs to end with '/' "
-)
+INVALID_PREFIX_PATH_ERROR: str = "Prefix paths can't be just '/' but needs to end with '/' "
 INVALID_PATH_ERROR: str = "All paths need to start '/'"
 
 
@@ -210,9 +208,7 @@ def is_valid_host(host: str) -> None:
         does not conform to structure: <leaf-domain>.<second-level-domain>.<top-domain(s)>
     """
     if not all([h.isalnum() or h in [".", "-"] for h in host]):
-        raise ValidationError(
-            f"{host}: hostnames should only contain alphanumeric characters '-' and '.'"
-        )
+        raise ValidationError(f"{host}: hostnames should only contain alphanumeric characters '-' and '.'")
     if not 2 <= len(host.split(".")) <= 4 or "" in host.split("."):
         raise ValidationError(
             f"{host}: hostnames should have the structure <leaf-domain>.<second-level-domain>.<top-domain(s)>"

@@ -109,19 +109,16 @@ class AllocationSettingsSnapshotForm(forms.ModelForm):
                 raise ValidationError(
                     message=f"JSON generated is different from the expected allocation schema. "
                     f"Ensure that there are two allocation settings: {e}",
-                )
+                ) from e
         return cd
 
     def get_json_settings(self) -> Dict[str, Any]:
         """Generate JSON based on allocation settings."""
-        allocation_settings_name: str = (
-            f"SOV-{dateformat.format(timezone.now(), 'YmdHis')}"
-        )
+        allocation_settings_name: str = f"SOV-{dateformat.format(timezone.now(), 'YmdHis')}"
         return {
             "name": allocation_settings_name,
             "allocations": [
-                allocation.to_dict()
-                for allocation in AllocationSetting.objects.all().order_by("position")
+                allocation.to_dict() for allocation in AllocationSetting.objects.all().order_by("position")
             ],
         }
 
@@ -175,9 +172,7 @@ class AllocationSettingFormset(BaseInlineFormSet):
     def clean(self):
         """Additional Form Validation."""
         super(AllocationSettingFormset, self).clean()
-        alive_forms = [
-            form for form in self.forms if not form.cleaned_data.get("DELETE")
-        ]
+        alive_forms = [form for form in self.forms if not form.cleaned_data.get("DELETE")]
 
         if sum((form.cleaned_data.get("percentage", 0) for form in alive_forms)) != 100:
             raise forms.ValidationError("Total Percentage has to add up to 100.")

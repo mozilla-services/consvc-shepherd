@@ -143,9 +143,7 @@ ENVIRONMENTS: list[Environment] = [
         spoc_site_id=1084367,
         spoc_site_id_mobile=1084367,
         spoc_zone_ids=[],
-        direct_sold_tile_zone_ids=[
-            319618
-        ],  # In Kevel > Network: Pocket, Site: Firefox Staging, Zone: Tiles
+        direct_sold_tile_zone_ids=[319618],  # In Kevel > Network: Pocket, Site: Firefox Staging, Zone: Tiles
     ),
     Environment(
         code="production",
@@ -154,9 +152,7 @@ ENVIRONMENTS: list[Environment] = [
         spoc_site_id=1070098,
         spoc_site_id_mobile=1240699,
         spoc_zone_ids=[217995],
-        direct_sold_tile_zone_ids=[
-            280143
-        ],  # In Kevel > Network: Pocket, Site: Firefox Production, Zone: Tiles
+        direct_sold_tile_zone_ids=[280143],  # In Kevel > Network: Pocket, Site: Firefox Production, Zone: Tiles
     ),
     Environment(
         code="unified_dev",
@@ -298,9 +294,7 @@ def get_spocs_and_direct_sold_tiles(
     return (tiles, spocs)
 
 
-def get_amp_tiles(
-    env: Environment, country: str, region: str, user_agent: str
-) -> list[Tile]:
+def get_amp_tiles(env: Environment, country: str, region: str, user_agent: str) -> list[Tile]:
     """Load Sponsored Tiles from MARS for given country and region"""
     params = {
         "country": country,
@@ -311,9 +305,7 @@ def get_amp_tiles(
         "User-Agent": user_agent,
     }
 
-    r = requests.get(
-        f"{env.mars_url}/v1/tiles", params=params, headers=headers, timeout=30
-    )
+    r = requests.get(f"{env.mars_url}/v1/tiles", params=params, headers=headers, timeout=30)
     return [
         Tile(
             image_url=tile["image_url"],
@@ -351,9 +343,7 @@ def get_unified(env: Environment, country: str, is_mobile: bool = False) -> Ads:
     r_json = r.json()
 
     tiles_responses = (
-        r_json.get(tile_one_placement, [])
-        + r_json.get(tile_two_placement, [])
-        + r_json.get(tile_three_placement, [])
+        r_json.get(tile_one_placement, []) + r_json.get(tile_two_placement, []) + r_json.get(tile_three_placement, [])
     )
 
     tiles = [
@@ -382,17 +372,13 @@ def get_unified(env: Environment, country: str, is_mobile: bool = False) -> Ads:
     return Ads(spocs=spocs, tiles=tiles, is_mobile=is_mobile)
 
 
-def get_ads(
-    env: Environment, country: str, region: str, form_factor: FormFactor
-) -> Ads:
+def get_ads(env: Environment, country: str, region: str, form_factor: FormFactor) -> Ads:
     """Based on Environment, either load spocs & tiles individually or from a single request"""
     if env.code.startswith("unified_"):
         return get_unified(env, country, form_factor.is_mobile)
     else:
         amp_tiles = get_amp_tiles(env, country, region, form_factor.user_agent)
-        spocs_and_direct_sold_tiles = get_spocs_and_direct_sold_tiles(
-            env, country, region, form_factor.is_mobile
-        )
+        spocs_and_direct_sold_tiles = get_spocs_and_direct_sold_tiles(env, country, region, form_factor.is_mobile)
 
         return Ads(
             tiles=amp_tiles + spocs_and_direct_sold_tiles[0],
@@ -401,9 +387,7 @@ def get_ads(
         )
 
 
-def localized_sponsor(
-    spoc: dict[str, str], country: str, is_mobile: bool = False
-) -> str:
+def localized_sponsor(spoc: dict[str, str], country: str, is_mobile: bool = False) -> str:
     """Render the localized 'Sponsored by ...' text for a SPOC"""
     if (override := spoc.get("sponsored_by_override")) is not None:
         return override

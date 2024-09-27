@@ -32,9 +32,7 @@ class Command(BaseCommand):
         """Handle running the command"""
         # Get or create user
         User = get_user_model()
-        user, _ = User.objects.get_or_create(
-            username="admin", defaults={"password": "adminpass"}
-        )
+        user, _ = User.objects.get_or_create(username="admin", defaults={"password": "adminpass"})
 
         # Create multiple partners
         for _ in range(5):
@@ -65,12 +63,8 @@ class Command(BaseCommand):
                     "currency": secrets.choice(["$", "€", "£"]),
                     "amount": secrets.randbelow(150001) + 50000,
                     "sales_representatives": fake.name(),
-                    "start_date": fake.date_this_year(
-                        before_today=True, after_today=False
-                    ),
-                    "end_date": fake.date_this_year(
-                        before_today=False, after_today=True
-                    ),
+                    "start_date": fake.date_this_year(before_today=True, after_today=False),
+                    "end_date": fake.date_this_year(before_today=False, after_today=True),
                 },
             )
 
@@ -83,17 +77,13 @@ class Command(BaseCommand):
                 boostr_product=secrets.choice(products),
                 defaults={
                     "budget": secrets.randbelow(90001) + 10000,
-                    "month": fake.date_between(
-                        start_date="-12m", end_date="now"
-                    ).strftime("%Y-%m"),
+                    "month": fake.date_between(start_date="-12m", end_date="now").strftime("%Y-%m"),
                 },
             )
 
         # Create Allocation Settings and Partner Allocations
         for i in range(3):
-            allocation_setting, _ = AllocationSetting.objects.get_or_create(
-                position=i + 1
-            )
+            allocation_setting, _ = AllocationSetting.objects.get_or_create(position=i + 1)
             for partner in partners[:2]:  # Randomly allocate 2 partners
                 PartnerAllocation.objects.get_or_create(
                     allocation_position=allocation_setting,
@@ -108,16 +98,12 @@ class Command(BaseCommand):
                 defaults={
                     "ad_ops_person": fake.name(),
                     "notes": fake.sentence(),
-                    "net_spend": random.uniform(50000.00, 200000.00),  # nosec
+                    "net_spend": random.uniform(50000.00, 200000.00),  # nosec  # noqa: S311
                     "impressions_sold": secrets.randbelow(4900001) + 100000,
                     "seller": fake.company(),
                     "deal": secrets.choice(deals),
-                    "start_date": fake.date_this_year(
-                        before_today=True, after_today=False
-                    ),
-                    "end_date": fake.date_this_year(
-                        before_today=False, after_today=True
-                    ),
+                    "start_date": fake.date_this_year(before_today=True, after_today=False),
+                    "end_date": fake.date_this_year(before_today=False, after_today=True),
                 },
             )
 
@@ -140,15 +126,11 @@ class Command(BaseCommand):
         # Create multiple BoostrSyncStatus
         for _ in range(10):
             BoostrSyncStatus.objects.get_or_create(
-                synced_on=timezone.make_aware(
-                    fake.date_time_between(start_date="-6m", end_date="now")
-                ),
+                synced_on=timezone.make_aware(fake.date_time_between(start_date="-6m", end_date="now")),
                 defaults={
                     "status": secrets.choice(["success", "failure"]),
                     "message": fake.sentence(),
                 },
             )
 
-        self.stdout.write(
-            self.style.SUCCESS("Successfully seeded the database with random data")
-        )
+        self.stdout.write(self.style.SUCCESS("Successfully seeded the database with random data"))
