@@ -33,7 +33,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """Handle running the command"""
-        self.stdout.write(f"Starting BigQuery fetch for date {options['date']}")
+        self.stdout.write(f"Starting BigQuery sync for date {options['date']}")
 
         try:
             datetime.strptime(options["date"], "%Y-%m-%d")
@@ -47,17 +47,17 @@ class Command(BaseCommand):
                 f"Invalid project ID: {options['project_id']}. Error: {e}"
             )
 
-        fetcher = BQFetcher(options["project_id"], options["date"])
+        syncer = BQSyncer(options["project_id"], options["date"])
 
         try:
-            fetcher.fetch_data()
+            syncer.sync_data()
         except Exception as e:
             raise CommandError(f"An error occurred: {e}")
 
-        self.stdout.write(f"BigQuery fetch completed for date {options['date']}")
+        self.stdout.write(f"BigQuery sync completed for date {options['date']}")
 
 
-class BQFetcher:
+class BQSyncer:
     """Wrap up interaction with BigQuery"""
 
     log: logging.Logger
@@ -151,17 +151,17 @@ class BQFetcher:
             else:
                 self.log.info(f"Updated DeliveredFlight: {delivered_flight}")
 
-    def fetch_data(self):
-        """BQ Fetcher entrypoint"""
+    def sync_data(self):
+        """BQ Syncer entrypoint"""
         try:
             df = self.query_bq()
 
             self.upsert_data(df)
-            self.log.info("BigQuery fetcher process has completed successfully")
+            self.log.info("BigQuery sync process has completed successfully")
         except ValueError as ve:
             self.log.warning(f"No data returned for the date {self.date}: {str(ve)}")
             return  # Exit early if no data is present
         except Exception as e:
             error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
-            self.log.error(f"BigQuery fetcher process has encounterd an error: {error}")
+            self.log.error(f"BigQuery sync process has encounterd an error: {error}")
             raise
