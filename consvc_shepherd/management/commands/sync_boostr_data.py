@@ -360,7 +360,7 @@ class BoostrLoader:
             sync_start_time = timezone.now() + timedelta(hours=1)
 
             self.log.info(
-                f"Starting Boostr sync at {sync_start_time} retrieving records older than {self.latest_synced_on}"
+                f"Starting Boostr sync at {sync_start_time} retrieving records >= {self.latest_synced_on}"
             )
             self.upsert_products()
             self.upsert_deals()

@@ -415,6 +415,29 @@ class TestSyncBoostrData(TestCase):
         self.assertEqual(len(products), 2)
         mock_get_success.assert_has_calls(get_calls)
 
+    @mock.patch("requests.Session.post", side_effect=mock_post_success)
+    @mock.patch("requests.Session.get", side_effect=mock_get_success)
+    @mock.patch("consvc_shepherd.models.BoostrSyncStatus.objects.create")
+    def test_update_sync_status(
+        self,
+        mock_create,
+        mock_get,
+        mock_post,
+    ):
+        """Test the update_sync_status function"""
+        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
+        loader.update_sync_status(
+            "success", "2024-05-22 16:52:34.369769+00:00", "Boostr sync success"
+        )
+        calls = [
+            mock.call(
+                status="success",
+                synced_on="2024-05-22 16:52:34.369769+00:00",
+                message="Boostr sync success",
+            ),
+        ]
+        mock_create.assert_has_calls(calls)
+
     @mock.patch(
         "consvc_shepherd.management.commands.sync_boostr_data.BoostrLoader.upsert_products"
     )
