@@ -465,11 +465,10 @@ class TestSyncBoostrData(TestCase):
             ]
             mock_create.assert_has_calls(calls)
 
-    @mock.patch("consvc_shepherd.management.commands.sync_boostr_data.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_success)
     @mock.patch("consvc_shepherd.models.BoostrSyncStatus.objects.filter")
-    def test_get_latest_sync_status(self, mock_filter, mock_get, mock_post, mock_sleep):
+    def test_get_latest_sync_status(self, mock_filter, mock_get, mock_post):
         """Test the get_latest_sync_status function"""
         filter_return_value_mock = mock.MagicMock()
 
