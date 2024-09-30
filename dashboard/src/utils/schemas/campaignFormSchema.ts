@@ -99,3 +99,13 @@ export const defaultCampaignValues: CampaignFormSchema = {
   end_date: "",
   campaign_fields: [],
 };
+
+export const splitFormSchema = z.object({
+  campaigns: z.array(
+    campaignFormSchema.omit({ campaign_fields: true }).extend({
+      campaign_fields: campaignFormSchema.shape.campaign_fields.optional(),
+    })
+  ),
+});
+
+export type SplitFormSchema = z.infer<typeof splitFormSchema>;

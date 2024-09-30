@@ -19,6 +19,7 @@ interface FormDialogProps {
   children: ReactNode;
   open: boolean;
   handleClose: () => void;
+  maxWidth?: "sm" | "md" | "lg" | "xl";
 }
 
 const Container = styled(Box)`
@@ -33,6 +34,7 @@ export default function FormDialog({
   children,
   open,
   handleClose,
+  maxWidth,
 }: FormDialogProps) {
   return (
     <Dialog
@@ -43,6 +45,7 @@ export default function FormDialog({
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
       aria-modal
+      maxWidth={maxWidth}
     >
       <DialogTitle>
         <Container>
