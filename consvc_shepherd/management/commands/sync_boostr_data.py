@@ -4,12 +4,14 @@ import logging
 import math
 import time
 import traceback
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 import environ
 import requests
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 
 from consvc_shepherd.models import (
     BoostrDeal,
@@ -198,6 +200,7 @@ class BoostrLoader:
         self.log = logging.getLogger("sync_boostr_data")
         self.boostr = BoostrApi(base_url, email, password, options)
         self.max_deal_pages = options.get("max_deal_pages", MAX_DEAL_PAGES_DEFAULT)
+        self.latest_synced_on = self.get_latest_sync_status()
 
     def upsert_products(self) -> None:
         """Fetch all Boostr products and upsert them to Shepherd DB"""
@@ -206,6 +209,14 @@ class BoostrLoader:
             "page": "1",
             "filter": "all",
         }
+
+        if self.latest_synced_on:
+            products_params.update(
+                {
+                    "updated_at": self.latest_synced_on,
+                    "updated_at_condition": ">=",
+                }
+            )
         products = self.boostr.get("products", params=products_params)
         self.log.info(f"Fetched {(len(products))} products")
 
@@ -228,6 +239,13 @@ class BoostrLoader:
             "page": str(page),
             "filter": "all",
         }
+        if self.latest_synced_on:
+            deals_params.update(
+                {
+                    "updated_at": self.latest_synced_on,
+                    "updated_at_condition": ">=",
+                }
+            )
         while page < self.max_deal_pages:
             page += 1
             deals_params["page"] = str(page)
@@ -257,7 +275,6 @@ class BoostrLoader:
                     },
                 )
                 self.log.debug(f"Upserted deal: {deal['id']}")
-
                 if created:
                     self.create_campaign(boostr_deal)
                     self.log.debug(f"Created campaign for deal: {deal['id']}")
@@ -283,7 +300,18 @@ class BoostrLoader:
 
     def upsert_deal_products(self, deal: BoostrDeal) -> None:
         """Fetch the deal_products for a particular deal and store them in our DB with their monthly budgets"""
-        deal_products = self.boostr.get(f"deals/{deal.boostr_id}/deal_products")
+        deal_products_params = (
+            {
+                "updated_at": self.latest_synced_on,
+                "updated_at_condition": ">=",
+            }
+            if self.latest_synced_on
+            else {}
+        )
+
+        deal_products = self.boostr.get(
+            f"deals/{deal.boostr_id}/deal_products", params=deal_products_params
+        )
 
         self.log.debug(
             f"Fetched {len(deal_products)} deal_products for deal: {deal.boostr_id}"
@@ -303,22 +331,45 @@ class BoostrLoader:
                 f"{product.boostr_id} to deal: {deal.boostr_id}"
             )
 
-    def update_sync_status(self, status, message):
+    def update_sync_status(self, status: str, synced_on: datetime, message: str):
         """Fupdate the BoostrSyncStatus table given the status and the message"""
         BoostrSyncStatus.objects.create(
             status=status,
+            synced_on=synced_on,
             message=message,
         )
+
+    def get_latest_sync_status(self) -> Any:
+        """Retrieve the lastest successful boostr sync status from the DB"""
+        success_syncs = BoostrSyncStatus.objects.filter(status=SYNC_STATUS_SUCCESS)
+        if not len(success_syncs):
+            self.log.info(
+                "Unable to retrieve the latest successful boost sync status record"
+            )
+            return None
+
+        sync_status = success_syncs.latest("synced_on")
+        self.log.info(
+            f"Fetched latest sync status: {sync_status.pk}, synced_on: {sync_status.synced_on}"
+        )
+        return sync_status.synced_on
 
     def load(self):
         """Loader entry point"""
         try:
+            sync_start_time = timezone.now() + timedelta(hours=1)
+
+            self.log.info(
+                f"Starting Boostr sync at {sync_start_time} retrieving records >= {self.latest_synced_on}"
+            )
             self.upsert_products()
             self.upsert_deals()
             self.log.info(
                 "Boostr sync process completed successfully. Updating sync_status"
             )
-            self.update_sync_status(SYNC_STATUS_SUCCESS, "Boostr sync success")
+            self.update_sync_status(
+                SYNC_STATUS_SUCCESS, sync_start_time, "Boostr sync success"
+            )
         except Exception as e:
             error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
             self.log.error(
@@ -326,6 +377,7 @@ class BoostrLoader:
             )
             self.update_sync_status(
                 SYNC_STATUS_FAILURE,
+                sync_start_time,
                 f"Exception: {str(e):} Trace: {traceback.format_exc()}",
             )
             raise e
