@@ -63,7 +63,7 @@ export default function CampaignForm({
       selectedDeal = formData.deal === watchDeal ? formData.deal : watchDeal;
     }
 
-    if (selectedDeal) {
+    if (Array.isArray(campaigns) && selectedDeal) {
       const filtered = campaigns
         .filter((item) => item.deal === selectedDeal)
         .filter((item) => !isUpdate || item.id !== formData.id);
@@ -111,10 +111,12 @@ export default function CampaignForm({
     }
   };
 
-  const deals = boostrDeals?.map((deal: BoostrDeal) => ({
-    label: deal.name,
-    value: deal.id,
-  }));
+  const deals = Array.isArray(boostrDeals)
+    ? boostrDeals.map((deal: BoostrDeal) => ({
+        label: deal.name,
+        value: deal.id,
+      }))
+    : [];
 
   return (
     <Box>
