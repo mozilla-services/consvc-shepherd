@@ -35,10 +35,9 @@ export const useSplitCampaignMutation = () => {
         toast.error("An unexpected error occurred");
       }
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success("Campaign splitted successfully.");
       queryClient.invalidateQueries({ queryKey: ["campaigns"] });
-      return data;
     },
   });
 };
