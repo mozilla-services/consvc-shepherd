@@ -174,8 +174,7 @@ FirefoxUser[\fa:fa-user Firefox User/]
 A pre-defined JSON schema validates the snapshot output prior to sending the snapshot to Google Cloud.
 From there, Contile accesses the settings from the uploaded JSON file to serve Firefox users the correct advertising tiles in each new tab.</p>
 <h2 id="shepherd-service-urls"><a class="header" href="#shepherd-service-urls">Shepherd Service URLs:</a></h2>
-<p>Dev: https://shepherd-dev.topsites.nonprod.cloudops.mozgcp.net/admin/</p>
-<p>Stage: https://shepherd-stage.topsites.nonprod.cloudops.mozgcp.net/admin/</p>
+<p>Stage: https://shepherd.stage.ads.nonprod.webservices.mozgcp.net/admin/</p>
 <p>Prod: https://shepherd.services.mozilla.com/admin/</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="quick-start-development-guide"><a class="header" href="#quick-start-development-guide">Quick Start Development Guide</a></h1>
 <p>To use consvc-shepherd, you'll need a Python 3.11 development environment with Poetry Docker installed.</p>
@@ -304,7 +303,7 @@ Dashes (and some other values) are converted to periods.</li>
 <p>With the defaults <code>DJANGO_STATSD_ENABLED=False</code> and <code>STATSD_DEBUG=False</code>, no metrics
 are emitted. Ensure that in the deployed production instance of Shepherd, the following values are set accordingly:
 <code>DJANGO_STATSD_ENABLED=True</code> and <code>STATSD_DEBUG=False</code>. This is so metrics are emitted but do not appear in logs.</p>
-<p>Deployment variables are set in <code>cloudops-infra</code> in the <code>configmap.yaml</code> file in the topsites/shepherd directory.</p>
+<p>Shepherd runs on k8s, the app is defined in a helm chart that lives in the <code>webservices-infra</code> repo. Environment variables are set in the <code>config</code> dictionary in shepherd's helm chart's values files and rendered into a configmap during deployment. Additionally, secret values (that are mapped to k8s secrets via <code>external-secrets</code>) are set in Google Secret Manager.</p>
 <h2 id="development"><a class="header" href="#development">Development</a></h2>
 <p>By default, metrics are disabled in development. They must be enabled via an
 environment variable or in the <code>.env</code> file. Set <code>STATSD_DEBUG</code> to <code>True</code>.</p>
@@ -382,8 +381,7 @@ when determining what metrics code is emitting.</p>
 <p><em>For access please ask someone on the Engineering Team. For engineers, ask to be given superuser privileges. For ad operations ask to be added to the 'AdOps' Django group</em></p>
 <h2 id="shepherd-urls"><a class="header" href="#shepherd-urls">Shepherd URLs:</a></h2>
 <ul>
-<li>Dev: https://shepherd-dev.topsites.nonprod.cloudops.mozgcp.net/admin</li>
-<li>Stage: https://shepherd-stage.topsites.nonprod.cloudops.mozgcp.net/admin/</li>
+<li>Stage: https://shepherd.stage.ads.nonprod.webservices.mozgcp.net/admin/</li>
 <li>Prod: https://shepherd.services.mozilla.com/admin/</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h2 id="adding-advertisers"><a class="header" href="#adding-advertisers">Adding Advertisers</a></h2>
@@ -512,82 +510,29 @@ specific deals and products are being saved, run with <code>SHEPHERD_ENV=DEBUG</
 <pre><code class="language-shell">SHEPHERD_ENV=DEBUG python manage.py sync_boostr_data
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="boostr-data-sync-cron"><a class="header" href="#boostr-data-sync-cron">Boostr Data Sync Cron</a></h1>
-<p>The Boostr data sync process documented in the <a href="operations/syncBoostrData.html">SyncBoostrData.md</a> document is orchestrated by a <a href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/">Kubernetetes Cronjob</a> that is maintained in the <a href="https://github.com/mozilla-services/cloudops-infra/tree/master/projects/topsites">topsites</a> project of the 
-<a href="https://github.com/mozilla-services/cloudops-infra/tree/master">Cloud Ops Infra</a> repository. </p>
+<p>The Boostr data sync process documented in the <a href="operations/syncBoostrData.html">SyncBoostrData.md</a> document is orchestrated by a <a href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/">Kubernetetes Cronjob</a> that is maintained in the <a href="https://github.com/mozilla-it/webservices-infra/tree/main/ads/k8s/shepherd">shepherd chart</a> in the <a href="https://github.com/mozilla-it/webservices-infra/tree/main">webservices-infra</a> repo. </p>
 <h3 id="how-it-runs"><a class="header" href="#how-it-runs">How it runs</a></h3>
 <p>The CronJob spins up a new pod on a configurable schedule using the latest container image of the Shepherd application. It then triggers the 
 <a href="operations/consvc_shepherd/management/commands/sync_boostr_data.py">sync_boostr_data.py</a> script within the pod. Refer to <a href="operations/syncBoostrDataCron.html">SyncBoostrData.md</a> to understand more about the inner workings of the script.</p>
 <h3 id="a-note-on-secrets"><a class="header" href="#a-note-on-secrets">A Note on Secrets</a></h3>
-<p>Secrets such as the email and password used to access the Boostr API are stored in 1Pass, BUT the CronJob resource does not retrieve the secrets from 1Pass. Instead, they are stored GCP by SRE and pulled dynamically by the deployment processes established by SRE. Please contact the <a href="https://mozilla.enterprise.slack.com/archives/C019WG3TTM2">SRE</a> team for more info on this process.</p>
+<p>Secrets such as the email and password used to access the Boostr API are stored in 1Pass. However, since k8s cronjobs are ultimately k8s pods running a container image, we follow best practices and mount environment variables and secrets to the resulting pods via k8s configmaps &amp; secrets. In this context, non-sensitive key-value pairs are deployed using a configmap (defined in the [shepherd chart]'s values files), sensitive values are deployed using a secret (secrets are defined in Google Secret Manager secrets in tenant projects and synced into tenant namespaces using the <code>external-secrets operator</code>, see <a href="https://mozilla-hub.atlassian.net/wiki/x/cQaqAQ">here</a> for more details).</p>
 <p>The process SRE has recommended for storing/using secrets is as follows:</p>
 <ol>
-<li>Use 1Password  to store your secrets </li>
-<li>Create secrets in secrets.yaml and optionally expose them as environment variables in the resource or service that needs it.</li>
-<li>Share the 1Password secret with SRE using an individual's corporate email.</li>
-<li>SRE will store these secrets in sops and use some custom tooling to make them available to helm.</li>
-<li>As a result of the above, the values for the secret variables and environment variables created in #2 are set and available in the resource/service (container, pod etc) where the environment variabls are used.</li>
+<li>Secrets should be stored in 1password for use by individuals (e.g. the dev team)</li>
+<li>GCPv2 tenant projects make use of Google Secret Manager to distribute secrets to deployments. Helm charts that are deployed to tenant namespaces should define an external-secret that syncs secret data down to k8s secrets from Google Secret Manager Secrets. <a href="https://mozilla-hub.atlassian.net/wiki/x/cQaqAQ">see</a></li>
+<li>Tenant developers &amp; admins can update Google Secret Manager secrets as necessary. Please follow the process defined in the previous step to do so.</li>
+<li>As a result of the above, the values for the secret variables in #2 are set and available in the resource (pod / container) as environment variables.</li>
 </ol>
 <h3 id="debugging-troubleshooting-and-viewing-logs"><a class="header" href="#debugging-troubleshooting-and-viewing-logs">Debugging, troubleshooting and viewing logs</a></h3>
-<p>Debugging involves accessing the <code>shepherd-boostr-sync</code> pods that are created by the cronjob resource and inspecting the logs. </p>
-<p>There are many approaches but, with tools like <a href="https://cloud.google.com/sdk/docs/install">Gcloud CLI</a>, <a href="https://kubernetes.io/docs/reference/kubectl/">kubectl</a>, and <a href="https://k9scli.io/">k9s</a> one can do the following:</p>
-<ol>
-<li>Authenticate to Gcloud</li>
-</ol>
-<pre><code>gcloud auth login
+<p>To view logs, use Logs Explorer. All GKE pod logs are forwarded to tenant projects for tenant viewers, developers and admins to look at. To filter for boostr data sync's logs explicitly, set the following filter:</p>
+<pre><code>labels.&quot;k8s-pod/app_kubernetes_io/component&quot; =~ &quot;^shepherd-cron-boostr-sync&quot;
 </code></pre>
-<ol start="2">
-<li>Connect to the bastion for accessing the topsites project in Gcloud</li>
-</ol>
-<pre><code>gcloud compute ssh --zone &quot;us-central1-a&quot; &quot;bastion-us-central1&quot; --project &quot;moz-fx-bastion-nonprod-global&quot; --ssh-flag=&quot;-D&quot; --ssh-flag=&quot;5001&quot; --ssh-flag=&quot;-N&quot; --tunnel-through-iap
-</code></pre>
-<ol start="3">
-<li>Get credentials for topsites. Use  topsites-prod-v1 for produuction</li>
-</ol>
-<pre><code>gcloud container clusters get-credentials topsites-nonprod-v1 --region us-west1 --project moz-fx-topsites-nonprod-619d
-</code></pre>
-<ol start="4">
-<li>Set the local proxy</li>
-</ol>
-<pre><code>export HTTPS_PROXY=socks5://127.0.0.1:5001
-</code></pre>
-<ol start="5">
-<li>Switch to the topsites-dev namespace</li>
-</ol>
-<pre><code>kubectl config set-context --current --namespace=dev-topsites
-</code></pre>
-<ol start="6">
-<li>Login to k9s</li>
-</ol>
-<pre><code>k9s
-</code></pre>
-<ol start="7">
-<li>Access all pods</li>
-</ol>
-<pre><code>type :pods, then press enter on the keyboard
-</code></pre>
-<ol start="8">
-<li>
-<p>Select the latest runnning cronjob <code>shepherd-boostr-sync</code> pod. Note that the cronjob spins up a new pod each time it runs but does not destroy older pods once the process has completed.</p>
-</li>
-<li>
-<p>Access the logs for the pod</p>
-</li>
-</ol>
-<pre><code>press l on the keyboard
-</code></pre>
-<p>Below are steps for viewing logs through the GCP console</p>
-<ol>
-<li>Access the topsites project</li>
-</ol>
-<pre><code>https://console.cloud.google.com/logs/query;project=moz-fx-topsites-prod-6d32
-</code></pre>
-<ol start="2">
-<li>Use the query input field to search for logs for the shepherd-boostr-sync pods</li>
-</ol>
-<pre><code>resource.labels.namespace_name=&quot;dev-topsites&quot;
-resource.labels.container_name=&quot;shepherd&quot;
-resource.labels.pod_name:&quot;shepherd-boostr-sync&quot;
-</code></pre>
+<p>The following links should lead to the right place:</p>
+<ul>
+<li><a href="https://cloudlogging.app.goo.gl/VPZZgGHdFPvzVBzB7">prod/prod</a></li>
+<li><a href="https://cloudlogging.app.goo.gl/qT3JmY6bcLw54Cwi9">nonprod/stage</a></li>
+</ul>
+<p>As an alternative, <code>gcloud logging read</code> can be used to retrieve logs via the CLI (follow <a href="https://cloud.google.com/sdk/gcloud/reference/logging/read">this guide</a>, to get more details). It is possible to retrieve logs via <code>kubectl</code> as well, setup requires some additional steps, though, since we're running on private clusters that need to be accessed via jumphosts(more info can be found <a href="https://mozilla-hub.atlassian.net/wiki/x/TAiqAQ">here</a>).</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="statsd-client-library-for-shepherd"><a class="header" href="#statsd-client-library-for-shepherd">StatsD Client Library for Shepherd</a></h1>
 <ul>
 <li>Status: Accepted</li>

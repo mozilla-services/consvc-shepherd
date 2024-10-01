@@ -169,7 +169,7 @@ Dashes (and some other values) are converted to periods.</li>
 <p>With the defaults <code>DJANGO_STATSD_ENABLED=False</code> and <code>STATSD_DEBUG=False</code>, no metrics
 are emitted. Ensure that in the deployed production instance of Shepherd, the following values are set accordingly:
 <code>DJANGO_STATSD_ENABLED=True</code> and <code>STATSD_DEBUG=False</code>. This is so metrics are emitted but do not appear in logs.</p>
-<p>Deployment variables are set in <code>cloudops-infra</code> in the <code>configmap.yaml</code> file in the topsites/shepherd directory.</p>
+<p>Shepherd runs on k8s, the app is defined in a helm chart that lives in the <code>webservices-infra</code> repo. Environment variables are set in the <code>config</code> dictionary in shepherd's helm chart's values files and rendered into a configmap during deployment. Additionally, secret values (that are mapped to k8s secrets via <code>external-secrets</code>) are set in Google Secret Manager.</p>
 <h2 id="development"><a class="header" href="#development">Development</a></h2>
 <p>By default, metrics are disabled in development. They must be enabled via an
 environment variable or in the <code>.env</code> file. Set <code>STATSD_DEBUG</code> to <code>True</code>.</p>
