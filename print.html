@@ -177,7 +177,14 @@ From there, Contile accesses the settings from the uploaded JSON file to serve F
 <p>Stage: https://shepherd.stage.ads.nonprod.webservices.mozgcp.net/admin/</p>
 <p>Prod: https://shepherd.services.mozilla.com/admin/</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="quick-start-development-guide"><a class="header" href="#quick-start-development-guide">Quick Start Development Guide</a></h1>
-<p>To use consvc-shepherd, you'll need a Python 3.11 development environment with Poetry Docker installed.</p>
+<p>Shepherd is a grab-bag of Ad Operations tools, and currently consists of</p>
+<ul>
+<li><code>consvc_shepherd</code>: A full-stack Python Django app, as well as a json REST API</li>
+<li><code>contile</code>: A Python Django app</li>
+<li><code>ad-ops-dashboard</code>: A Node/Typescript React app, backed by the <code>consvc_shepherd</code> REST API</li>
+</ul>
+<h2 id="python-setup"><a class="header" href="#python-setup">Python setup</a></h2>
+<p>To use consvc-shepherd, you'll need a Python 3.11 development environment with Poetry installed and Docker.</p>
 <p>It is recommended to use <code>pyenv</code> and the <code>pyenv-virtualenv</code> plugin for your virtual environment.</p>
 <ol>
 <li>
@@ -273,6 +280,43 @@ BOOSTR_API_PASS=i-am-in-1password-too
 <pre><code class="language-shell">docker exec -it consvc-shepherd-app-1 bash # can also be run with `make debug`
 python manage.py sync_boostr_data https://app.boostr.com/api
 </code></pre>
+</li>
+</ol>
+<h2 id="nodetypescript-setup"><a class="header" href="#nodetypescript-setup">Node/Typescript setup</a></h2>
+<p>To develop on the ad-ops-dashboard app, you'll need <code>node</code> and <code>npm</code> installed.</p>
+<p>It is recommended to use a node version manager to allow for multiple <code>node</code>s on your system</p>
+<ol>
+<li>
+<p>Install a node version manager. <a href="https://github.com/nvm-sh/nvm">nvm</a> is a great
+choice if you're developing on a macOS with a POSIX-compliant shell.</p>
+</li>
+<li>
+<p><code>cd ad-ops-dashboard</code></p>
+</li>
+<li>
+<p>Install the <code>node</code> version specified in <code>ad-ops-dashboard/.nvmrc</code>:</p>
+<pre><code class="language-shell">$ nvm install
+</code></pre>
+</li>
+<li>
+<p>Install <code>ad-ops-dashboard</code> app's dependencies:</p>
+<pre><code class="language-shell">$ npm install
+</code></pre>
+</li>
+<li>
+<p>Set up the <code>ad-ops-dashboard</code> environment:</p>
+<pre><code class="language-shell">$ cp .env.example .env
+</code></pre>
+</li>
+<li>
+<p>Spin up the <code>ad-ops-dashboard</code> app and REST api together:</p>
+<pre><code class="language-shell">$ cd ..
+$ docker-compose up --build
+</code></pre>
+<p>(You can also run the <code>ad-ops-dashboard</code> without the API via <code>npm run dev</code> from <code>./ad-ops-dashboard</code>)</p>
+</li>
+<li>
+<p>Visit the home page at http://0.0.0.0:5173/</p>
 </li>
 </ol>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="shepherd-metrics"><a class="header" href="#shepherd-metrics">Shepherd Metrics</a></h1>
