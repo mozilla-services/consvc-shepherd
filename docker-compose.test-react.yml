@@ -1,0 +1,9 @@
+services:
+  ad-ops-dashboard:
+    tty: true
+    build:
+      context: ./ad-ops-dashboard
+      dockerfile: ./Dockerfile
+    command: npm run test
+    ports:
+      - "5173:5173"

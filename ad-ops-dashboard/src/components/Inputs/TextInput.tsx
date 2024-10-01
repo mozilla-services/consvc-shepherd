@@ -23,7 +23,7 @@ export default function TextInput({
       }) => (
         <TextField
           onChange={(e) =>
-            onChange(props.type === "number" ? +e.target.value : e.target.value)
+            { onChange(props.type === "number" ? +e.target.value : e.target.value); }
           }
           onBlur={onBlur}
           value={value}

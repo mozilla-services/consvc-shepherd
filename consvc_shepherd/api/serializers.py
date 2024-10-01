@@ -1,4 +1,4 @@
-"""Serializers for the json API that drives the dashboard"""
+"""Serializers for the json API that drives the ad-ops-dashboard"""
 
 from rest_framework import serializers
 

@@ -1,6 +1,13 @@
 # Quick Start Development Guide
 
-To use consvc-shepherd, you'll need a Python 3.11 development environment with Poetry Docker installed.
+Shepherd is a grab-bag of Ad Operations tools, and currently consists of
+* `consvc_shepherd`: A full-stack Python Django app, as well as a json REST API
+* `contile`: A Python Django app
+* `ad-ops-dashboard`: A Node/Typescript React app, backed by the `consvc_shepherd` REST API
+
+## Python setup
+
+To use consvc-shepherd, you'll need a Python 3.11 development environment with Poetry installed and Docker.
 
 It is recommended to use `pyenv` and the `pyenv-virtualenv` plugin for your virtual environment.
 1. Install `pyenv` using the [latest documentation](https://github.com/pyenv/pyenv#installation) for your platform.
@@ -115,3 +122,41 @@ See the [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv) documentat
     docker exec -it consvc-shepherd-app-1 bash # can also be run with `make debug`
     python manage.py sync_boostr_data https://app.boostr.com/api
     ```
+
+## Node/Typescript setup
+
+To develop on the ad-ops-dashboard app, you'll need `node` and `npm` installed.
+
+It is recommended to use a node version manager to allow for multiple `node`s on your system
+
+1. Install a node version manager. [nvm](https://github.com/nvm-sh/nvm) is a great
+  choice if you're developing on a macOS with a POSIX-compliant shell.
+
+2. `cd ad-ops-dashboard`
+
+3. Install the `node` version specified in `ad-ops-dashboard/.nvmrc`:
+
+    ```shell
+    $ nvm install
+    ```
+
+4. Install `ad-ops-dashboard` app's dependencies:
+
+    ```shell
+    $ npm install
+    ```
+5. Set up the `ad-ops-dashboard` environment:
+
+    ```shell
+    $ cp .env.example .env
+    ```
+6. Spin up the `ad-ops-dashboard` app and REST api together:
+
+    ```shell
+    $ cd ..
+    $ docker-compose up --build
+    ```
+
+    (You can also run the `ad-ops-dashboard` without the API via `npm run dev` from `./ad-ops-dashboard`)
+
+7. Visit the home page at http://0.0.0.0:5173/

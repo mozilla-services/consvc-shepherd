@@ -19,9 +19,6 @@ services:
       context: ./
       dockerfile: ./Dockerfile
     command: bash -c "/app/bin/wait-for-it.sh db:5432 -- pip install poetry && poetry install && poetry run pytest --cov --cov-report=term-missing --cov-fail-under=95 "
-    links:
-      - db
-
     volumes:
       - .:/app
     ports:

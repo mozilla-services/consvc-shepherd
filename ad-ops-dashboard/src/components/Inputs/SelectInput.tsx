@@ -41,7 +41,7 @@ export default function SelectInput({
             isOptionEqualToValue={(option: Option, value: Option | null) =>
               option.value === (value ? value.value : "")
             }
-            onChange={(_, newValue) => onChange(newValue ? newValue.value : "")}
+            onChange={(_, newValue) => { onChange(newValue ? newValue.value : ""); }}
             onBlur={onBlur}
             value={options.find((option) => option.value === value) || null}
             renderInput={(params) => (
