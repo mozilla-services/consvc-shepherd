@@ -25,18 +25,20 @@ export default {
               runtime: "automatic",
             },
           },
+          experimental: {
+            plugins: [["swc-plugin-import-meta-env", {}]],
+          },
         },
       },
     ],
   },
   transformIgnorePatterns: [
     "[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|cjs|ts|tsx)$",
-    "^.+\\.module\\.(css|sass|scss)$",
   ],
   modulePaths: ["<rootDir>/src"],
   moduleNameMapper: {
-    "\\.(gif|ttf|eot|svg|png)$": "<rootDir>/test/__ mocks __/fileMock.js",
-    "^.+\\.module\\.(css|sass|scss)$": "identity-obj-proxy",
+    "^.+.(css|styl|less|sass|scss|png|jpg|ttf|woff|woff2)$":
+      "jest-transform-stub",
   },
   moduleFileExtensions: [
     "tsx",
