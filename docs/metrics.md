@@ -39,7 +39,7 @@ With the defaults `DJANGO_STATSD_ENABLED=False` and `STATSD_DEBUG=False`, no met
 are emitted. Ensure that in the deployed production instance of Shepherd, the following values are set accordingly:
 `DJANGO_STATSD_ENABLED=True` and `STATSD_DEBUG=False`. This is so metrics are emitted but do not appear in logs.
 
-Deployment variables are set in `cloudops-infra` in the `configmap.yaml` file in the topsites/shepherd directory.
+Shepherd runs on k8s, the app is defined in a helm chart that lives in the `webservices-infra` repo. Environment variables are set in the `config` dictionary in shepherd's helm chart's values files and rendered into a configmap during deployment. Additionally, secret values (that are mapped to k8s secrets via `external-secrets`) are set in Google Secret Manager.
 
 ## Development
 

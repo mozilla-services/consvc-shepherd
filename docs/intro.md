@@ -40,8 +40,6 @@ From there, Contile accesses the settings from the uploaded JSON file to serve F
 
 ## Shepherd Service URLs:
 
-Dev: https://shepherd-dev.topsites.nonprod.cloudops.mozgcp.net/admin/
-
-Stage: https://shepherd-stage.topsites.nonprod.cloudops.mozgcp.net/admin/
+Stage: https://shepherd.stage.ads.nonprod.webservices.mozgcp.net/admin/
 
 Prod: https://shepherd.services.mozilla.com/admin/
