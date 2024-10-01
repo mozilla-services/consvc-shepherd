@@ -12,6 +12,5 @@ There are a number of authorization and access requirements needed to be able to
 
 ## Shepherd URLs:
 
-- Dev: https://shepherd-dev.topsites.nonprod.cloudops.mozgcp.net/admin
-- Stage: https://shepherd-stage.topsites.nonprod.cloudops.mozgcp.net/admin/
+- Stage: https://shepherd.stage.ads.nonprod.webservices.mozgcp.net/admin/
 - Prod: https://shepherd.services.mozilla.com/admin/
