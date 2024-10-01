@@ -12,6 +12,7 @@ from consvc_shepherd.tests.test_sync_boostr_mock_responses import (
     MOCK_DEAL_PRODUCTS_RESPONSE,
     MOCK_DEALS_RESPONSE,
     MOCK_PRODUCTS_RESPONSE,
+    MOCK_DEAL_PRODUCTS_RESPONSE,
 )
 
 MOCK_RETRY_AFTER_SECONDS = 10
@@ -31,6 +32,11 @@ class MockResponse:
     def json(self):
         """Mock json data"""
         return self.json_data
+
+    def raise_for_status(self):
+        """Mock raise_for_status()"""
+        if 400 <= self.status_code < 600:
+            raise requests.exceptions.HTTPError(f"{self.status_code} Error: Mock error")
 
 
 def mock_post_success(*args, **kwargs) -> MockResponse:
@@ -69,6 +75,11 @@ def mock_get_success(*args, **kwargs) -> MockResponse:
             200,
         )
     elif args[0].endswith("/deal_products"):
+        return MockResponse(
+            MOCK_DEAL_PRODUCTS_RESPONSE,
+            200,
+        )
+    elif args[0].endswith("/media_plans"):
         return MockResponse(
             MOCK_DEAL_PRODUCTS_RESPONSE,
             200,
