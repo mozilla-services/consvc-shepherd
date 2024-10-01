@@ -159,7 +159,7 @@ export default function CampaignOverview() {
           formData={formData}
           isUpdate={isUpdate}
           handleClose={handleClose}
-          campaigns={campaignsData}
+          campaigns={campaignsData || []}
         />
       </FormDialog>
 
