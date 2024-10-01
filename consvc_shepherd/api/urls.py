@@ -1,4 +1,4 @@
-"""consvc_shepherd API URL Configuration
+"""aconsvc_shepherd API URL Configuration
 
 This module defines the URL patterns for the API endpoints of the consvc_shepherd application,
 specifically for the dashboard app views. It uses Django REST Framework's router to automatically

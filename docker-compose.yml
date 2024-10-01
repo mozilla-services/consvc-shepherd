@@ -15,6 +15,7 @@ services:
     tty: true
     env_file:
       - .env
+    image: app
     build:
       context: ./
       dockerfile: ./Dockerfile
@@ -28,14 +29,14 @@ services:
     depends_on:
       - db
 
-  dashboard:
+  ad-ops-dashboard:
     image: node:alpine
     build:
-      context: ./dashboard
-    working_dir: /dashboard
+      context: ./ad-ops-dashboard
+    working_dir: /ad-ops-dashboard
     volumes:
-      - ./dashboard:/dashboard
-      - /dashboard/node_modules
+      - ./ad-ops-dashboard:/ad-ops-dashboard
+      - /ad-ops-dashboard/node_modules
     ports:
       - "5173:5173"
     depends_on:

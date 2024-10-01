@@ -1,6 +1,7 @@
-FROM node:alpine
+# Dev Dockerfile
+FROM node:20.17.0-slim
 
-WORKDIR /dashboard
+WORKDIR /ad-ops-dashboard
 
 COPY package*.json .
 

@@ -12,6 +12,4 @@ Visit the React frontend at http://0.0.0.0:5173/
 
 Still missing from this setup:
 
-- jest test setup and first-pass unit test
-- Add dashboard linting and tests to the existing Makefile
 - Build for production and serve React app from Django
