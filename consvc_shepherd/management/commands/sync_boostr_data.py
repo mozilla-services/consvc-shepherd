@@ -73,7 +73,9 @@ class BoostrMediaPlan:
             self.line_items[self.boostr_deal] = {}
         if line_item.boostr_product not in self.line_items[self.boostr_deal]:
             self.line_items[self.boostr_deal][line_item.boostr_product] = []
-            self.line_items[self.boostr_deal][line_item.boostr_product].append(line_item)
+            self.line_items[self.boostr_deal][line_item.boostr_product].append(
+                line_item
+            )
 
 
 @dataclass
@@ -149,7 +151,9 @@ class BoostrApi:
     session: requests.Session
     log: logging.Logger
 
-    def __init__(self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS):
+    def __init__(
+        self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
+    ):
         self.base_url = base_url
         self.setup_session(email, password)
         self.log = logging.getLogger("sync_boostr_data")
@@ -215,7 +219,9 @@ class BoostrApi:
                 continue
 
             if response.status_code == HTTP_TOO_MANY_REQUESTS:
-                retry_after = int(response.headers.get("Retry-After", DEFAULT_RETRY_INTERVAL)) + 1
+                retry_after = (
+                    int(response.headers.get("Retry-After", DEFAULT_RETRY_INTERVAL)) + 1
+                )
                 self.log.info(
                     f"{response.status_code}: Rate limited - Waiting {retry_after} seconds. "
                     f"Current retry: {current_retry}"
@@ -227,7 +233,9 @@ class BoostrApi:
                 json = response.json()
                 return json
             else:
-                raise BoostrApiError(f"Bad response status {response.status_code} from /{path}")
+                raise BoostrApiError(
+                    f"Bad response status {response.status_code} from /{path}"
+                )
 
         raise BoostrApiMaxRetriesError("Maximum retries reached")
 
@@ -263,7 +271,9 @@ class BoostrLoader:
     line_items: Dict[int, BoostrDealMediaPlanLineItem]
     media_plan_collection = MediaPlanCollection()
 
-    def __init__(self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS):
+    def __init__(
+        self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
+    ):
         self.log = logging.getLogger("sync_boostr_data")
         self.boostr = BoostrApi(base_url, email, password, options)
         self.max_deal_pages = options.get("max_deal_pages", MAX_DEAL_PAGES_DEFAULT)
@@ -334,7 +344,9 @@ class BoostrLoader:
                         "advertiser": deal["advertiser_name"],
                         "currency": deal["currency"],
                         "amount": math.floor(float(deal["budget"])),
-                        "sales_representatives": ",".join(str(d["email"]) for d in deal["deal_members"]),
+                        "sales_representatives": ",".join(
+                            str(d["email"]) for d in deal["deal_members"]
+                        ),
                         "start_date": deal["start_date"],
                         "end_date": deal["end_date"],
                     },
@@ -348,7 +360,9 @@ class BoostrLoader:
                 self.log.info(f"Upserted products and budgets for deal: {deal['id']}")
             # If this is the last iteration of the loop due to the max page limit, log that we stopped
             if page >= self.max_deal_pages:
-                self.log.info(f"Done. Stopped fetching deals after hitting max_page_limit of {page} pages.")
+                self.log.info(
+                    f"Done. Stopped fetching deals after hitting max_page_limit of {page} pages."
+                )
 
     def create_campaign(self, deal: BoostrDeal) -> None:
         """Create campaign if a boostr deal is created. Returns True if successful, False otherwise."""
@@ -376,7 +390,9 @@ class BoostrLoader:
             f"deals/{deal.boostr_id}/deal_products", params=deal_products_params
         )
 
-        self.log.debug(f"Fetched {len(deal_products)} deal_products for deal: {deal.boostr_id}")
+        self.log.debug(
+            f"Fetched {len(deal_products)} deal_products for deal: {deal.boostr_id}"
+        )
 
         for deal_product in deal_products:
             product = BoostrProduct.objects.get(boostr_id=deal_product["product"]["id"])
@@ -414,7 +430,9 @@ class BoostrLoader:
                 boostr_deal=media_plan["deal_id"],
             )
 
-            self.media_plan_collection.add_media_plan(media_plan["deal_id"], new_media_plan)
+            self.media_plan_collection.add_media_plan(
+                media_plan["deal_id"], new_media_plan
+            )
             self.upsert_mediaplan_lineitems(new_media_plan)
 
     def upsert_mediaplan_lineitems(self, media_plan: BoostrMediaPlan) -> None:
@@ -523,7 +541,9 @@ class BoostrLoader:
             )
         except Exception as e:
             error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
-            self.log.error(f"Boostr sync process encountered an error: {error}. Updating sync_status")
+            self.log.error(
+                f"Boostr sync process encountered an error: {error}. Updating sync_status"
+            )
             self.update_sync_status(
                 SYNC_STATUS_FAILURE,
                 sync_start_time,
