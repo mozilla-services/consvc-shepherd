@@ -29,16 +29,10 @@ class MockResponse:
         self.status_code = status_code
         self.headers = headers_data or {}
         self.ok = 200 <= self.status_code < 400
-        self.raise_for_status =self._raise_for_status
 
     def json(self):
         """Mock json data"""
         return self.json_data
-
-    def _raise_for_status(self):
-        """Mock raise_for_status()"""
-        if not self.ok:
-            raise requests.exceptions.HTTPError(f"{self.status_code} Error: Mock error")
 
 
 def mock_post_success(*args, **kwargs) -> MockResponse:
