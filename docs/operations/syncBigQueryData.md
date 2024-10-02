@@ -19,7 +19,7 @@ Currently this is a Django admin command that can be manually run by `docker exe
     ```
 1. Run the script for today's date:
     ```sh
-    python manage.py fetch_bq_data --project_id "moz-fx-ads-nonprod" --date $(date +%F)
+    python manage.py sync_bq_data --project_id "moz-fx-ads-nonprod" --date $(date +%F)
     ```
 
 ### Optional arguments

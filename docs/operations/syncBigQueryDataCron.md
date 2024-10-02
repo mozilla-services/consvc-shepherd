@@ -7,7 +7,6 @@ The Sync BigQuery data script documented in [SyncBigQueryData.md](./syncBigQuery
 The CronJob spins up a new pod on a configurable schedule using the latest container image of the Shepherd application. It then triggers the 
 [sync_bq_data.py](../../consvc_shepherd/management/commands/sync_bq_data.py) script within the pod. Refer to [SyncBoostrData.md](syncBoostrDataCron.md) to understand more about the inner workings of the script.
 
-
 ### Debugging, troubleshooting and viewing logs
 
 Debugging involves accessing the `shepherd-bq-sync` pods that are created by the cronjob resource and inspecting the logs. 
