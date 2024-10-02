@@ -19,6 +19,7 @@ from consvc_shepherd.tests.test_sync_boostr_mocks import (
     mock_get_latest_boostr_sync_status,
     mock_get_product,
     mock_get_success,
+    mock_get_success_empty_response,
     mock_get_success_response,
     mock_post_success,
     mock_post_token_fail,
@@ -175,17 +176,16 @@ class TestSyncBoostrData(TestCase):
         side_effect=mock_update_or_create_deal,
     )
     @mock.patch.object(BoostrLoader, "upsert_deal_products")
+    @mock.patch.object(BoostrLoader, "create_campaign")
     def test_upsert_deals(
         self,
         mock_upsert_deal_products,
+        mock_create_campaign,
         mock_update_or_create,
         mock_get,
         mock_post,
     ):
         """Test function that calls the Boostr API for deal data and saves to our DB"""
-        self.skipTest(
-            "Currently hangs with the addition of the last upsert_deal_products mock"
-        )
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
         loader.upsert_deals()
         calls = [
@@ -215,6 +215,26 @@ class TestSyncBoostrData(TestCase):
             ),
         ]
         mock_update_or_create.assert_has_calls(calls)
+
+    @mock.patch("requests.Session.post", side_effect=mock_post_success)
+    @mock.patch("requests.Session.get", side_effect=mock_get_success_empty_response)
+    @mock.patch(
+        "consvc_shepherd.models.BoostrDeal.objects.update_or_create",
+        side_effect=mock_update_or_create_deal,
+    )
+    @mock.patch.object(BoostrLoader, "upsert_deal_products")
+    def test_upsert_deals_called_with_empty_response(
+        self,
+        mock_upsert_deal_products,
+        mock_update_or_create,
+        mock_get,
+        mock_post,
+    ):
+        """Test function that calls the Boostr API for deal data and API returns empty array"""
+        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
+        loader.upsert_deals()
+
+        mock_update_or_create.assert_not_called()
 
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_fail)
