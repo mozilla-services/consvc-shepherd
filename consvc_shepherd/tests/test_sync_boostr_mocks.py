@@ -12,10 +12,11 @@ from consvc_shepherd.tests.test_sync_boostr_mock_responses import (
     MOCK_DEAL_PRODUCTS_RESPONSE,
     MOCK_DEALS_RESPONSE,
     MOCK_PRODUCTS_RESPONSE,
-    MOCK_DEAL_PRODUCTS_RESPONSE,
+    MOCK_MEDIA_PLAN_RESPONSE,
+    MOCK_MEDIA_PLAN_LINE_ITEMS_RESPONSE,
 )
 
-MOCK_RETRY_AFTER_SECONDS = 10
+MOCK_RETRY_AFTER_SECONDS = 60
 
 
 class MockResponse:
@@ -28,14 +29,15 @@ class MockResponse:
         self.status_code = status_code
         self.headers = headers_data or {}
         self.ok = 200 <= self.status_code < 400
+        self.raise_for_status =self._raise_for_status
 
     def json(self):
         """Mock json data"""
         return self.json_data
 
-    def raise_for_status(self):
+    def _raise_for_status(self):
         """Mock raise_for_status()"""
-        if 400 <= self.status_code < 600:
+        if not self.ok:
             raise requests.exceptions.HTTPError(f"{self.status_code} Error: Mock error")
 
 
@@ -52,7 +54,7 @@ def mock_post_token_fail(*args, **kwargs) -> MockResponse:
     return MockResponse({"uh": "oh"}, 401)
 
 
-def mock_upsert_deals_exception(*args, **kwargs) -> MockResponse:
+def mock_upsert_deals_exception(*args, **kwargs) -> None:
     """Mock upsert_deals exception"""
     raise Exception("upsert_deals mock raised an exception")
 
@@ -65,6 +67,7 @@ def mock_request_exception(*args, **kwargs):
 def mock_get_success(*args, **kwargs) -> MockResponse:
     """Mock GET requests to boostr which handles mock responses for /products, /deals, and /deal_products"""
     if args[0].endswith("/products"):
+        print("args[0]>>>>>>", args[0])
         return MockResponse(
             MOCK_PRODUCTS_RESPONSE,
             200,
@@ -81,7 +84,12 @@ def mock_get_success(*args, **kwargs) -> MockResponse:
         )
     elif args[0].endswith("/media_plans"):
         return MockResponse(
-            MOCK_DEAL_PRODUCTS_RESPONSE,
+            MOCK_MEDIA_PLAN_RESPONSE,
+            200,
+        )
+    elif args[0].endswith("/line_items"):
+        return MockResponse(
+            MOCK_MEDIA_PLAN_LINE_ITEMS_RESPONSE,
             200,
         )
     else:
