@@ -341,3 +341,77 @@ MOCK_MEDIA_PLAN_RESPONSE = [
         "discounts": [],
     },
 ]
+
+MOCK_MEDIA_PLAN_LINE_ITEMS_RESPONSE = [
+    {
+        "id": 12345678,
+        "rate": "0.93",
+        "product": {"id": 28254, "name": "Firefox New Tab US (CPM)"},
+        "rate_type": {"id": 124, "name": "CPM"},
+        "territory": None,
+        "custom_fields": None,
+        "line_item_monthlies": [
+            {
+                "month": "2024-06",
+                "quantity": "148351648.35",
+                "budget": "137967.032967",
+            },
+            {
+                "month": "2024-04",
+                "quantity": "148351648.35",
+                "budget": "137967.032967",
+            },
+            {
+                "month": "2024-05",
+                "quantity": "153296703.3",
+                "budget": "142565.934066",
+            },
+        ],
+    },
+    {
+        "id": 12345679,
+        "rate": "0.44",
+        "product": {"id": 204408, "name": "Firefox New Tab DE (CPM)"},
+        "rate_type": {"id": 124, "name": "CPM"},
+        "line_item_monthlies": [
+            {
+                "month": "2024-05",
+                "quantity": "153296703.3",
+                "budget": "67450.549451",
+            },
+            {
+                "month": "2024-04",
+                "quantity": "148351648.35",
+                "budget": "65274.725275",
+            },
+            {
+                "month": "2024-06",
+                "quantity": "148351648.35",
+                "budget": "65274.725274",
+            },
+        ],
+    },
+    {
+        "id": 12345680,
+        "rate": "0.41",
+        "product": {"id": 204409, "name": "Firefox New Tab CA (CPM)"},
+        "rate_type": {"id": 124, "name": "CPM"},
+        "line_item_monthlies": [
+            {
+                "month": "2024-04",
+                "quantity": "39560439.56",
+                "budget": "16219.78022",
+            },
+            {
+                "month": "2024-06",
+                "quantity": "39560439.56",
+                "budget": "16219.78022",
+            },
+            {
+                "month": "2024-05",
+                "quantity": "40879120.88",
+                "budget": "16760.43956",
+            },
+        ],
+    },
+]
