@@ -32,7 +32,7 @@ BASE_URL = "https://example.com"
 EMAIL = "email@mozilla.com"
 PASSWORD = "test"  # nosec
 DEFAULT_RETRY_INTERVAL = 60
-MOCK_RETRY_AFTER_SECONDS = 10
+MOCK_RETRY_AFTER_SECONDS = 60
 MAX_RETRY = 5
 
 
@@ -92,7 +92,7 @@ class TestSyncBoostrData(TestCase):
     def test_max_retries(self, mock_post, mock_get, mock_sleep):
         """Test get function for 429 error handling"""
         mock_429_response = mock_too_many_requests_response()
-        mock_get.side_effect = [mock_429_response for _ in range(10)]
+        mock_get.side_effect = [mock_429_response for _ in range(MAX_RETRY)]
         boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD)
         with self.assertLogs("sync_boostr_data", level="INFO") as captured_logs:
             with self.assertRaises(BoostrApiMaxRetriesError) as context:
