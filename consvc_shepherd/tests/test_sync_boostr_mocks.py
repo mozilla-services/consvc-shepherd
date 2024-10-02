@@ -11,9 +11,9 @@ from consvc_shepherd.models import (
 from consvc_shepherd.tests.test_sync_boostr_mock_responses import (
     MOCK_DEAL_PRODUCTS_RESPONSE,
     MOCK_DEALS_RESPONSE,
-    MOCK_PRODUCTS_RESPONSE,
-    MOCK_MEDIA_PLAN_RESPONSE,
     MOCK_MEDIA_PLAN_LINE_ITEMS_RESPONSE,
+    MOCK_MEDIA_PLAN_RESPONSE,
+    MOCK_PRODUCTS_RESPONSE,
 )
 
 MOCK_RETRY_AFTER_SECONDS = 60
