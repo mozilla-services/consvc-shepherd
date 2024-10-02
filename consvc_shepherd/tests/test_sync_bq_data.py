@@ -87,7 +87,7 @@ class TestBQSyncerData(TestCase):
 
         mock_bigquery_client.return_value.query.return_value = mock_query_job
 
-        with self.assertLogs("sync_bigquery_ads_data", level="ERROR") as log:
+        with self.assertLogs("sync_bigquery_ads_data", level="WARNING") as log:
             call_command("sync_bq_data", project_id="test-project", date="2024-09-18")
 
         self.assertIn("No data returned for the date 2024-09-18", log.output[0])
@@ -166,6 +166,7 @@ class TestBQSyncerData(TestCase):
 
         mock_query_bq.return_value = mock_query_job.result.return_value.to_dataframe()
         mock_bigquery_client.return_value.query.return_value = mock_query_job
+        mock_update_or_create.return_value = (MagicMock(), True)
 
         call_command("sync_bq_data", project_id="test-project")
 

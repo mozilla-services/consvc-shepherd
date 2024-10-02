@@ -107,9 +107,8 @@ class BQSyncer:
             results = query_job.result()
 
             if results.total_rows == 0:
-                message = f"No data returned for the date {self.date}"
-                self.log.error(message)
-                raise ValueError(message)
+                self.log.warning(f"No data returned for the date {self.date}")
+                return pandas.DataFrame()
 
             df = results.to_dataframe()
 
@@ -153,11 +152,10 @@ class BQSyncer:
         try:
             df = self.query_bq()
 
-            self.upsert_data(df)
+            if not df.empty:
+                self.upsert_data(df)
+
             self.log.info("BigQuery sync process has completed successfully")
-        except ValueError as ve:
-            self.log.warning(f"No data returned for the date {self.date}: {str(ve)}")
-            return  # Exit early if no data is present
         except Exception as e:
             error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
             self.log.error(f"BigQuery sync process has encounterd an error: {error}")
