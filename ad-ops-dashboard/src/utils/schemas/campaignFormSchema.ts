@@ -45,7 +45,7 @@ export const campaignFormSchema = z.object({
       invalid_type_error: "Deal value is required",
       required_error: "Deal is required",
     })
-    .positive("Deal must be a positive number"),
+    .positive("Deal must be selected"),
   start_date: z
     .string({ required_error: "Start date is required" })
     .refine((val) => dayjs(val, "YYYY-MM-DD", true).isValid(), {
