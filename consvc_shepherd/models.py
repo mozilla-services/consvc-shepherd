@@ -555,3 +555,15 @@ class DeliveredFlight(models.Model):
     def __str__(self):
         """Return the string representation for flight ids and associated number of clicks and impressions"""
         return f"{self.flight_id} : {self.clicks_delivered} clicks and {self.impressions_delivered} impressions"
+
+
+class Advertiser(models.Model):
+    """Table representing an Advertise
+
+    Attributes
+    ----------
+    name: CharField = models.CharField()
+        The name of the advertiser
+    """
+
+    name: CharField = models.CharField(unique=True)

@@ -24,6 +24,7 @@ from consvc_shepherd.tests.test_sync_boostr_mocks import (
     mock_post_token_fail,
     mock_request_exception,
     mock_too_many_requests_response,
+    mock_update_or_create_advertiser,
     mock_update_or_create_deal,
     mock_upsert_deals_exception,
 )
@@ -175,8 +176,13 @@ class TestSyncBoostrData(TestCase):
         side_effect=mock_update_or_create_deal,
     )
     @mock.patch.object(BoostrLoader, "upsert_deal_products")
+    @mock.patch(
+        "consvc_shepherd.models.Advertiser.objects.update_or_create",
+        side_effect=mock_update_or_create_advertiser,
+    )
     def test_upsert_deals(
         self,
+        mock_update_or_create_advertiser,
         mock_upsert_deal_products,
         mock_update_or_create,
         mock_get,
@@ -215,6 +221,16 @@ class TestSyncBoostrData(TestCase):
             ),
         ]
         mock_update_or_create.assert_has_calls(calls)
+
+        advertiser_calls = [
+            mock.call(
+                name="Neutron",
+            ),
+            mock.call(
+                name="HiProduce",
+            ),
+        ]
+        mock_update_or_create_advertiser.assert_has_calls(advertiser_calls)
 
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_fail)

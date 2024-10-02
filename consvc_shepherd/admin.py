@@ -11,6 +11,7 @@ from jsonschema import exceptions, validate
 
 from consvc_shepherd.forms import AllocationSettingForm, AllocationSettingFormset
 from consvc_shepherd.models import (
+    Advertiser,
     AllocationSetting,
     AllocationSettingsSnapshot,
     BoostrDeal,
@@ -464,4 +465,14 @@ class BoostrSyncStatusAdmin(admin.ModelAdmin):
         "synced_on",
         "status",
         "message",
+    ]
+
+
+@admin.register(Advertiser)
+class AdvertiserAdmin(admin.ModelAdmin):
+    """Admin model for Advertiser records"""
+
+    model = Advertiser
+    list_display = [
+        "name",
     ]
