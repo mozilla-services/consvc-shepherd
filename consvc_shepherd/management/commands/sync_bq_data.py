@@ -85,6 +85,7 @@ class BQSyncer:
             WHERE
                 submission_date = @submission_date
                 AND flight_id IS NOT NULL
+                AND campaign_id IS NOT NULL
             GROUP BY
                 submission_date,
                 campaign_id,
