@@ -34,7 +34,7 @@ but this parameter allows us to invoke the script with a custom value for the
 upper limit on deal pages.
 
 #### --full-sync
-Set this parameter to force the script to perform a full sync of all teh Boostr data. 
+Set this parameter to force the script to perform a full sync of all the Boostr data. 
 This means the script does not start from the last successful sync timestamp
 
 Usage:
