@@ -432,7 +432,7 @@ class Campaign(models.Model):
 
 
 class CampaignSummary(models.Model):
-    """Model representing a summary of campaign metrics including Boostr, and kevel
+    """Model representing a summary of campaign metrics including data from Boostr and BigQuery
 
     deal_id : IntegerField
         Boostr deal ID
