@@ -156,11 +156,6 @@ remove-migration-fix: install  ##  Run command to undo migrations, delete the co
 			fi; \
 		done; \
 		echo "Migration files removed."; \
-		echo "Rebasing from main branch..."; \
-        git fetch origin; \
-        if ! git rebase origin/main --no-verify; then \
-            echo "Rebase conflict detected. Please resolve manually."; \
-        fi; \
 		echo "Generating New Migration file."; \
 		if [ "$(MIGRATE)" = "true" ]; then \
 			docker exec -it consvc-shepherd-app-1 python manage.py makemigrations; \
