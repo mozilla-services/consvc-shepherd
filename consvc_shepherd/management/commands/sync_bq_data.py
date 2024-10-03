@@ -3,13 +3,17 @@
 import logging
 import traceback
 from datetime import datetime
+from django.utils import timezone
 
 import pandas
 from django.core.management import CommandError
 from django.core.management.base import BaseCommand
 from google.cloud import bigquery
 
-from consvc_shepherd.models import DeliveredFlight
+from consvc_shepherd.models import BQSyncStatus, DeliveredFlight
+
+SYNC_STATUS_SUCCESS = "success"
+SYNC_STATUS_FAILURE = "failure"
 
 
 class Command(BaseCommand):
@@ -147,6 +151,16 @@ class BQSyncer:
             else:
                 self.log.info(f"Updated DeliveredFlight: {delivered_flight}")
 
+    def update_sync_status(self, status: str, synced_on: str, message: str):
+        """Update the BQSyncStatus table given the status and the message"""
+        synced_on = datetime.strptime(self.date, "%Y-%m-%d")
+        synced_on = timezone.make_aware(synced_on)
+        BQSyncStatus.objects.create(
+            status=status,
+            message=message,
+            synced_on=synced_on,
+        )
+
     def sync_data(self):
         """BQ Syncer entrypoint"""
         try:
@@ -155,8 +169,17 @@ class BQSyncer:
             if not df.empty:
                 self.upsert_data(df)
 
-            self.log.info("BigQuery sync process has completed successfully")
+            self.log.info(
+                "BigQuery sync process has completed successfully. Updating sync_status"
+            )
+            self.update_sync_status(SYNC_STATUS_SUCCESS, self.date, "BigQuery sync success")
         except Exception as e:
             error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
-            self.log.error(f"BigQuery sync process has encounterd an error: {error}")
-            raise
+            self.log.error(
+                f"BigQuery sync process has encountered an error: {error}. Updating sync_status"
+            )
+            self.update_sync_status(
+                SYNC_STATUS_FAILURE,
+                f"Exception: {SYNC_STATUS_FAILURE, self.date, str(e):} Trace: {traceback.format_exc()}",
+            )
+            raise e

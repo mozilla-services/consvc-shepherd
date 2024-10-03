@@ -17,6 +17,7 @@ from consvc_shepherd.models import (
     BoostrDealProduct,
     BoostrProduct,
     BoostrSyncStatus,
+    BQSyncStatus,
     Campaign,
     CampaignSummary,
     DeliveredFlight,
@@ -455,6 +456,19 @@ class DeliveredFlightsAdmin(admin.ModelAdmin):
 
 @admin.register(BoostrSyncStatus)
 class BoostrSyncStatusAdmin(admin.ModelAdmin):
+    """Admin model for BoostrSyncStatuss records which represent the status of each Boostr sync operation"""
+
+    model = BoostrSyncStatus
+    list_display = [
+        "id",
+        "synced_on",
+        "status",
+        "message",
+    ]
+
+
+@admin.register(BQSyncStatus)
+class BQSyncStatusAdmin(admin.ModelAdmin):
     """Admin model for BoostrSyncStatuss records which represent the status of each Boostr sync operation"""
 
     model = BoostrSyncStatus
