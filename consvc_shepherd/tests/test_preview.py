@@ -99,7 +99,9 @@ class TestGetAmpTiles(TestCase):
             "requests.get",
             side_effect=self.mock_amp_tiles_data,
         ) as mock_amp_tiles:
-            tiles = get_amp_tiles(self.MOCK_ENV, "US", "CA", DEFAULT_USER_AGENT.user_agent)
+            tiles = get_amp_tiles(
+                self.MOCK_ENV, "US", "CA", DEFAULT_USER_AGENT.user_agent
+            )
 
             mock_amp_tiles.assert_called()
 
@@ -127,7 +129,9 @@ class TestGetAmpTiles(TestCase):
             "requests.get",
             return_value=mock.Mock(status_code=204),
         ) as mock_amp_tiles:
-            tiles = get_amp_tiles(self.MOCK_ENV, "US", "CA", DEFAULT_USER_AGENT.user_agent)
+            tiles = get_amp_tiles(
+                self.MOCK_ENV, "US", "CA", DEFAULT_USER_AGENT.user_agent
+            )
 
             mock_amp_tiles.assert_called()
 
