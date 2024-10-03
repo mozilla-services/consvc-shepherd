@@ -3,17 +3,12 @@ import dayjs from "dayjs";
 
 export const campaignFormSchema = z.object({
   id: z.number().optional(),
-  notes: z.string().min(1, "Notes must be at least 1 characters long"),
-  ad_ops_person: z
-    .string()
-    .min(1, "Ad Ops person name must be at least 1 characters long"),
+  notes: z.string().optional(),
+  ad_ops_person: z.string().optional(),
   kevel_flight_id: z.preprocess(
     (val) => (val === null ? undefined : Number(val)),
     z
-      .union([
-        z.number().min(1, "Kevel Flight ID must be a positive number"),
-        z.string().optional(),
-      ])
+      .union([z.number().optional(), z.string().optional()])
       .refine((val) => val !== undefined, {
         message: "Kevel Flight ID is required",
       })
