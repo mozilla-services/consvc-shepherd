@@ -448,7 +448,6 @@ class DeliveredFlightsAdmin(admin.ModelAdmin):
         "campaign_id",
         "flight_name",
         "flight_id",
-        "country",
         "provider",
         "clicks_delivered",
         "impressions_delivered",

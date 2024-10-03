@@ -160,7 +160,6 @@ class DeliveredFlightTestCase(TestCase):
             campaign_name="Campaign Name",
             flight_id=54321,
             flight_name="Flight Name",
-            country="US",
             provider="kevel",
             clicks_delivered=100,
             impressions_delivered=1000,
@@ -181,7 +180,6 @@ class DeliveredFlightTestCase(TestCase):
         self.assertEqual(self.delivered_flight.campaign_name, "Campaign Name")
         self.assertEqual(self.delivered_flight.flight_id, 54321)
         self.assertEqual(self.delivered_flight.flight_name, "Flight Name")
-        self.assertEqual(self.delivered_flight.country, "US")
         self.assertEqual(self.delivered_flight.provider, "kevel")
         self.assertEqual(self.delivered_flight.clicks_delivered, 100)
         self.assertEqual(self.delivered_flight.impressions_delivered, 1000)
