@@ -3,10 +3,10 @@ import dayjs from "dayjs";
 
 export const campaignFormSchema = z.object({
   id: z.number().optional(),
-  notes: z.string().min(5, "Notes must be at least 5 characters long"),
+  notes: z.string().min(1, "Notes must be at least 1 characters long"),
   ad_ops_person: z
     .string()
-    .min(5, "Ad Ops person name must be at least 5 characters long"),
+    .min(1, "Ad Ops person name must be at least 1 characters long"),
   kevel_flight_id: z.preprocess(
     (val) => (val === null ? undefined : Number(val)),
     z
@@ -56,7 +56,7 @@ export const campaignFormSchema = z.object({
     .refine((val) => dayjs(val, "YYYY-MM-DD", true).isValid(), {
       message: "Start date is required",
     }),
-  seller: z.string().min(5, "Seller name must be at least 5 characters long"),
+  seller: z.string().min(1, "Seller name must be at least 1 characters long"),
   campaign_fields: z.array(
     z.object({
       impressions_sold: z.preprocess(

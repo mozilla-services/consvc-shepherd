@@ -120,18 +120,18 @@ export default function SplitCampaignForm({
               </Grid2>
               <Grid2 size={3}>
                 <StyledBox>
-                  <Box>
-                    <DateInput
-                      control={control}
-                      label="End Date"
-                      name={`campaigns.${index}.end_date`}
-                    />
-                  </Box>
                   <Box sx={{ marginLeft: "1rem" }}>
                     <DateInput
                       control={control}
                       label="Start Date"
                       name={`campaigns.${index}.start_date`}
+                    />
+                  </Box>
+                  <Box>
+                    <DateInput
+                      control={control}
+                      label="End Date"
+                      name={`campaigns.${index}.end_date`}
                     />
                   </Box>
                 </StyledBox>
