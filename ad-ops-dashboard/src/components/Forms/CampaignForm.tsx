@@ -126,6 +126,7 @@ export default function CampaignForm({
             name="ad_ops_person"
             label="Ad Ops Person"
             control={control}
+            fullWidth
           />
         </Box>
         <Box mt={2}>
@@ -134,6 +135,7 @@ export default function CampaignForm({
             label="Kevel Flight Id"
             control={control}
             type="number"
+            fullWidth
           />
         </Box>
         <Box mt={2}>
@@ -142,6 +144,7 @@ export default function CampaignForm({
             label="Impressions Sold"
             control={control}
             type="number"
+            fullWidth
           />
         </Box>
         <Box mt={2}>
@@ -150,10 +153,11 @@ export default function CampaignForm({
             label="Net Spend"
             control={control}
             type="number"
+            fullWidth
           />
         </Box>
         <Box mt={2}>
-          <TextInput name="seller" label="Seller" control={control} />
+          <TextInput name="seller" label="Seller" control={control} fullWidth />
         </Box>
         <Box mt={2}>
           <DateInput
@@ -178,6 +182,7 @@ export default function CampaignForm({
             control={control}
             rows={3}
             multiline
+            fullWidth
           />
         </Box>
         <Box mt={2}>

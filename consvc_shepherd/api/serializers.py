@@ -118,6 +118,7 @@ class SplitCampaignSerializer(serializers.Serializer):
             parent_campaign_id = campaigns[0].get("id")
             parent_campaign_instance = Campaign.objects.get(id=parent_campaign_id)
             campaign_net_spend = parent_campaign_instance.net_spend
+            campaign_impression_sold = parent_campaign_instance.impressions_sold
         except Campaign.DoesNotExist:
             raise serializers.ValidationError("Campaign does not exist.")
 
@@ -127,11 +128,24 @@ class SplitCampaignSerializer(serializers.Serializer):
             raise serializers.ValidationError(f"Deal with ID {deal_id} does not exist.")
 
         total_net_spend = sum(field.get("net_spend", 0) for field in campaigns)
+        total_impression_sold = sum(
+            field.get("impressions_sold", 0) for field in campaigns
+        )
 
         if total_net_spend != campaign_net_spend:
             raise serializers.ValidationError(
                 f"Total net spend ({total_net_spend}) must equal "
                 f"the parent campaign's net spend ({campaign_net_spend})."
+            )
+
+        if (
+            campaign_impression_sold
+            and campaign_impression_sold > 0
+            and total_impression_sold != campaign_impression_sold
+        ):
+            raise serializers.ValidationError(
+                f"Total impression sold ({total_impression_sold}) must equal "
+                f"the parent campaign's impression sold ({campaign_impression_sold})."
             )
 
         data["deal_instance"] = deal

@@ -85,6 +85,7 @@ export default function SplitCampaignForm({
                   name={`campaigns.${index}.ad_ops_person`}
                   label="Ad Ops Person"
                   control={control}
+                  fullWidth
                 />
               </Grid2>
               <Grid2 size={1}>
@@ -93,6 +94,7 @@ export default function SplitCampaignForm({
                   label="Kevel Flight Id"
                   type="number"
                   control={control}
+                  fullWidth
                 />
               </Grid2>
               <Grid2 size={1}>
@@ -101,6 +103,7 @@ export default function SplitCampaignForm({
                   label="Impressions Sold"
                   type="number"
                   control={control}
+                  fullWidth
                 />
               </Grid2>
               <Grid2 size={1}>
@@ -109,6 +112,7 @@ export default function SplitCampaignForm({
                   label="Net spend"
                   type="number"
                   control={control}
+                  fullWidth
                 />
               </Grid2>
               <Grid2 size={2}>
@@ -116,6 +120,7 @@ export default function SplitCampaignForm({
                   name={`campaigns.${index}.seller`}
                   label="Seller"
                   control={control}
+                  fullWidth
                 />
               </Grid2>
               <Grid2 size={3}>

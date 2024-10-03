@@ -7,11 +7,7 @@ export const campaignFormSchema = z.object({
   ad_ops_person: z.string().optional(),
   kevel_flight_id: z.preprocess(
     (val) => (val === null ? undefined : Number(val)),
-    z
-      .union([z.number().optional(), z.string().optional()])
-      .refine((val) => val !== undefined, {
-        message: "Kevel Flight ID is required",
-      })
+    z.union([z.number().optional(), z.string().optional()])
   ),
   impressions_sold: z.preprocess(
     (val) => (val === null ? undefined : Number(val)),
