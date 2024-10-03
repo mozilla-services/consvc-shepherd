@@ -6,28 +6,30 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('consvc_shepherd', '0018_fix_campaign_summary_view'),
+        ("consvc_shepherd", "0018_fix_campaign_summary_view"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='boostrdealproduct',
-            name='quantity',
+            model_name="boostrdealproduct",
+            name="quantity",
             field=models.DecimalField(decimal_places=2, max_digits=13, null=True),
         ),
         migrations.AddField(
-            model_name='boostrdealproduct',
-            name='rate',
+            model_name="boostrdealproduct",
+            name="rate",
             field=models.DecimalField(decimal_places=2, max_digits=13, null=True),
         ),
         migrations.AddField(
-            model_name='boostrdealproduct',
-            name='rate_type',
-            field=models.CharField(choices=[('CPM', 'CPM'), ('CPC', 'CPC'), ('FF', 'Flat Fee')], null=True),
+            model_name="boostrdealproduct",
+            name="rate_type",
+            field=models.CharField(
+                choices=[("CPM", "CPM"), ("CPC", "CPC"), ("FF", "Flat Fee")], null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='boostrdealproduct',
-            name='budget',
+            model_name="boostrdealproduct",
+            name="budget",
             field=models.DecimalField(decimal_places=2, max_digits=13, null=True),
         ),
     ]

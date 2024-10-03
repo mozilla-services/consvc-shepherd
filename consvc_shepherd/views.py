@@ -85,9 +85,13 @@ class AllocationSettingList(ListView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Return ordered context data from all AllocationSetting instances."""
         context = super().get_context_data(**kwargs)
-        context["allocation_settings"] = AllocationSetting.objects.all().order_by("position")
+        context["allocation_settings"] = AllocationSetting.objects.all().order_by(
+            "position"
+        )
         context["latest_snapshot"] = (
-            AllocationSettingsSnapshot.objects.filter(launched_date__isnull=False).order_by("-created_on").first()
+            AllocationSettingsSnapshot.objects.filter(launched_date__isnull=False)
+            .order_by("-created_on")
+            .first()
         )
         context["form"] = AllocationSettingsSnapshotForm
         return context
@@ -206,7 +210,9 @@ class AllocationUpdateView(AllocationViewMixin, UpdateView):
         """Get form data for view."""
         context = super(AllocationUpdateView, self).get_context_data(**kwargs)
         if self.request.method == "POST":
-            context["formset"] = AllocationFormset(self.request.POST or None, self.request.FILES, instance=self.object)
+            context["formset"] = AllocationFormset(
+                self.request.POST or None, self.request.FILES, instance=self.object
+            )
         else:
             context["formset"] = AllocationFormset(instance=self.object)
         return context

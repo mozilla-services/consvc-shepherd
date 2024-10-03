@@ -179,7 +179,9 @@ ALLOCATION_FILE_NAME: str = env("ALLOCATION_FILE_NAME", default="allocation_file
 
 LOGGING: dict[str, Any] = {
     "version": 1,
-    "formatters": {"json": {"()": "dockerflow.logging.JsonLogFormatter", "logger_name": "shepherd"}},
+    "formatters": {
+        "json": {"()": "dockerflow.logging.JsonLogFormatter", "logger_name": "shepherd"}
+    },
     "handlers": {
         "console": {
             "level": env("SHEPHERD_ENV", default="DEBUG"),
