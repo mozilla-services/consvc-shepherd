@@ -73,7 +73,9 @@ class BoostrMediaPlan:
             self.line_items[self.boostr_deal] = {}
         if line_item.boostr_product not in self.line_items[self.boostr_deal]:
             self.line_items[self.boostr_deal][line_item.boostr_product] = []
-            self.line_items[self.boostr_deal][line_item.boostr_product].append(line_item)
+            self.line_items[self.boostr_deal][line_item.boostr_product].append(
+                line_item
+            )
 
 
 @dataclass
@@ -149,7 +151,9 @@ class BoostrApi:
     session: requests.Session
     log: logging.Logger
 
-    def __init__(self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS):
+    def __init__(
+        self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
+    ):
         self.base_url = base_url
         self.setup_session(email, password)
         self.log = logging.getLogger("sync_boostr_data")
@@ -203,15 +207,21 @@ class BoostrApi:
                         timeout=15,
                     )
                 else:
-                    raise BoostrAPIInvalidMethod(f"{method} is not a support HTTP method. Use 'GET' or 'POST'.")
+                    raise BoostrAPIInvalidMethod(
+                        f"{method} is not a support HTTP method. Use 'GET' or 'POST'."
+                    )
 
             except requests.exceptions.RequestException as e:
-                self.log.info(f"RequestException occurred: {e}. Current retry: {current_retry}")
+                self.log.info(
+                    f"RequestException occurred: {e}. Current retry: {current_retry}"
+                )
                 self._sleep(DEFAULT_RETRY_INTERVAL)
                 continue
 
             if response.status_code == HTTP_TOO_MANY_REQUESTS:
-                retry_after = int(response.headers.get("Retry-After", DEFAULT_RETRY_INTERVAL)) + 1
+                retry_after = (
+                    int(response.headers.get("Retry-After", DEFAULT_RETRY_INTERVAL)) + 1
+                )
                 self.log.info(
                     f"{response.status_code}: Rate limited - Waiting {retry_after} seconds. "
                     f"Current retry: {current_retry}"
@@ -223,7 +233,9 @@ class BoostrApi:
                 json = response.json()
                 return json
             else:
-                raise BoostrApiError(f"Bad response status {response.status_code} from /{path}")
+                raise BoostrApiError(
+                    f"Bad response status {response.status_code} from /{path}"
+                )
 
         raise BoostrApiMaxRetriesError("Maximum retries reached")
 
@@ -231,7 +243,9 @@ class BoostrApi:
         """Make POST requests to Boostr that uses the session, pass through headers and json data,
         check status, and return parsed json
         """
-        return self.request_with_retries(method="post", path=path, json=json, headers=headers, max_retry=max_retry)
+        return self.request_with_retries(
+            method="post", path=path, json=json, headers=headers, max_retry=max_retry
+        )
 
     def get(self, path: str, params=None, headers=None, max_retry=5):
         """Make GET requests to Boostr, handling retries and rate limits."""
@@ -257,7 +271,9 @@ class BoostrLoader:
     line_items: Dict[int, BoostrDealMediaPlanLineItem]
     media_plan_collection = MediaPlanCollection()
 
-    def __init__(self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS):
+    def __init__(
+        self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
+    ):
         self.log = logging.getLogger("sync_boostr_data")
         self.boostr = BoostrApi(base_url, email, password, options)
         self.max_deal_pages = options.get("max_deal_pages", MAX_DEAL_PAGES_DEFAULT)
@@ -328,7 +344,9 @@ class BoostrLoader:
                         "advertiser": deal["advertiser_name"],
                         "currency": deal["currency"],
                         "amount": math.floor(float(deal["budget"])),
-                        "sales_representatives": ",".join(str(d["email"]) for d in deal["deal_members"]),
+                        "sales_representatives": ",".join(
+                            str(d["email"]) for d in deal["deal_members"]
+                        ),
                         "start_date": deal["start_date"],
                         "end_date": deal["end_date"],
                     },
@@ -342,7 +360,9 @@ class BoostrLoader:
                 self.log.info(f"Upserted products and budgets for deal: {deal['id']}")
             # If this is the last iteration of the loop due to the max page limit, log that we stopped
             if page >= self.max_deal_pages:
-                self.log.info(f"Done. Stopped fetching deals after hitting max_page_limit of {page} pages.")
+                self.log.info(
+                    f"Done. Stopped fetching deals after hitting max_page_limit of {page} pages."
+                )
 
     def create_campaign(self, deal: BoostrDeal) -> None:
         """Create campaign if a boostr deal is created. Returns True if successful, False otherwise."""
@@ -366,9 +386,13 @@ class BoostrLoader:
             else {}
         )
 
-        deal_products = self.boostr.get(f"deals/{deal.boostr_id}/deal_products", params=deal_products_params)
+        deal_products = self.boostr.get(
+            f"deals/{deal.boostr_id}/deal_products", params=deal_products_params
+        )
 
-        self.log.debug(f"Fetched {len(deal_products)} deal_products for deal: {deal.boostr_id}")
+        self.log.debug(
+            f"Fetched {len(deal_products)} deal_products for deal: {deal.boostr_id}"
+        )
 
         for deal_product in deal_products:
             product = BoostrProduct.objects.get(boostr_id=deal_product["product"]["id"])
@@ -406,7 +430,9 @@ class BoostrLoader:
                 boostr_deal=media_plan["deal_id"],
             )
 
-            self.media_plan_collection.add_media_plan(media_plan["deal_id"], new_media_plan)
+            self.media_plan_collection.add_media_plan(
+                media_plan["deal_id"], new_media_plan
+            )
             self.upsert_mediaplan_lineitems(new_media_plan)
 
     def upsert_mediaplan_lineitems(self, media_plan: BoostrMediaPlan) -> None:
@@ -485,11 +511,15 @@ class BoostrLoader:
         """Retrieve the lastest successful boostr sync status from the DB"""
         success_syncs = BoostrSyncStatus.objects.filter(status=SYNC_STATUS_SUCCESS)
         if not len(success_syncs):
-            self.log.info("Unable to retrieve the latest successful boost sync status record")
+            self.log.info(
+                "Unable to retrieve the latest successful boost sync status record"
+            )
             return None
 
         sync_status = success_syncs.latest("synced_on")
-        self.log.info(f"Fetched latest sync status: {sync_status.pk}, synced_on: {sync_status.synced_on}")
+        self.log.info(
+            f"Fetched latest sync status: {sync_status.pk}, synced_on: {sync_status.synced_on}"
+        )
         return sync_status.synced_on
 
     def load(self):
@@ -497,15 +527,23 @@ class BoostrLoader:
         try:
             sync_start_time = timezone.now() + timedelta(hours=1)
 
-            self.log.info(f"Starting Boostr sync at {sync_start_time} retrieving records >= {self.latest_synced_on}")
+            self.log.info(
+                f"Starting Boostr sync at {sync_start_time} retrieving records >= {self.latest_synced_on}"
+            )
             self.upsert_products()
             self.upsert_deals()
             self.upsert_mediaplan()
-            self.log.info("Boostr sync process completed successfully. Updating sync_status")
-            self.update_sync_status(SYNC_STATUS_SUCCESS, sync_start_time, "Boostr sync success")
+            self.log.info(
+                "Boostr sync process completed successfully. Updating sync_status"
+            )
+            self.update_sync_status(
+                SYNC_STATUS_SUCCESS, sync_start_time, "Boostr sync success"
+            )
         except Exception as e:
             error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
-            self.log.error(f"Boostr sync process encountered an error: {error}. Updating sync_status")
+            self.log.error(
+                f"Boostr sync process encountered an error: {error}. Updating sync_status"
+            )
             self.update_sync_status(
                 SYNC_STATUS_FAILURE,
                 sync_start_time,
