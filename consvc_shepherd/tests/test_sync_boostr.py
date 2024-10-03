@@ -353,6 +353,66 @@ class TestSyncBoostrData(TestCase):
         with self.assertRaises(BoostrApiError):
             loader.upsert_deal_products(deal)
 
+    @mock.patch("requests.Session.post", side_effect=mock_post_success)
+    @mock.patch("requests.Session.get", side_effect=mock_get_success)
+    @mock.patch(
+        "consvc_shepherd.models.BoostrProduct.objects.get", side_effect=mock_get_product
+    )
+    @mock.patch("consvc_shepherd.models.BoostrDealProduct.objects.update_or_create")
+    def test_upsert_media_plans(
+        self, mock_update_or_create, mock_get_product, mock_get, mock_post
+    ):
+        """Test function that tests updating deal products with media plan data"""
+        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
+        loader.upsert_mediaplan()
+
+        media_plans_calls = [
+            mock.call(
+                f"{BASE_URL}/media_plans",
+                params={"per": "300", "page": "0", "filter": "all"},
+                headers={},
+                timeout=15,
+            ),
+            mock.call(
+                f"{BASE_URL}/media_plans/265115/line_items",
+                params={"per": "300", "page": "1", "filter": "all"},
+                headers={},
+                timeout=15,
+            ),
+            mock.call(
+                f"{BASE_URL}/media_plans/271925/line_items",
+                params={"per": "300", "page": "1", "filter": "all"},
+                headers={},
+                timeout=15,
+            ),
+            mock.call(
+                f"{BASE_URL}/media_plans/269031/line_items",
+                params={"per": "300", "page": "1", "filter": "all"},
+                headers={},
+                timeout=15,
+            ),
+        ]
+        mock_get.assert_has_calls(media_plans_calls)
+
+    @mock.patch("requests.Session.post", side_effect=mock_post_success)
+    @mock.patch("requests.Session.get", side_effect=mock_get_fail)
+    @mock.patch(
+        "consvc_shepherd.models.BoostrProduct.objects.get", side_effect=mock_get_product
+    )
+    @mock.patch("consvc_shepherd.models.BoostrDealProduct.objects.update_or_create")
+    def test_upsert_media_plans_fail(
+        self, mock_update_or_create, mock_get_product, mock_get, mock_post
+    ):
+        """Test function that tests updating deal products with media plan data"""
+
+        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
+        with self.assertRaises(BoostrApiError) as context:
+            loader.upsert_mediaplan()
+
+        self.assertEqual(
+            str(context.exception), "Bad response status 400 from /media_plans"
+        )
+
     def test_get_campaign_type(self):
         """Test function that reads a Product name and decides if the Product is CPC, CPM, Flat Fee, or None"""
         cpc_name = "Firefox New Tab UK (CPC)"
