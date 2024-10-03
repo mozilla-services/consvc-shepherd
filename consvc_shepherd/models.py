@@ -350,7 +350,7 @@ class BoostrSyncStatus(models.Model):
     synced_on : DateTimeField
         Date the Boostr sync process ran
     sync_status: CharField = models.CharField()
-        The status of the symc process (success|failure)
+        The status of the sync process (success|failure)
     message: CharField = models.CharField()
         An optional error message populated when sync_status is "failure"
     """
@@ -360,6 +360,42 @@ class BoostrSyncStatus(models.Model):
 
         success = "success"
         failure = "failure"
+
+    class Meta:
+        """Metadata for the BoostrSyncStatus model."""
+
+        verbose_name = "Boostr sync status"
+        verbose_name_plural = "Boostr sync statuses"
+
+    synced_on: DateTimeField = models.DateTimeField()
+    status: CharField = models.CharField(choices=SyncStatus.choices)
+    message: CharField = models.CharField()
+
+
+class BQSyncStatus(models.Model):
+    """Table for capturing the daily status of the BigQuery sync process runs
+
+    Attributes
+    ----------
+    synced_on : DateTimeField
+        Date the Boostr sync process ran
+    sync_status: CharField = models.CharField()
+        The status of the sync process (success|failure)
+    message: CharField = models.CharField()
+        An optional error message populated when sync_status is "failure"
+    """
+
+    class SyncStatus(models.TextChoices):
+        """Represents the status of a sync"""
+
+        success = "success"
+        failure = "failure"
+
+    class Meta:
+        """Metadata for the CampaignSummary model."""
+
+        verbose_name = "BigQuery sync status"
+        verbose_name_plural = "BigQuery sync statuses"
 
     synced_on: DateTimeField = models.DateTimeField()
     status: CharField = models.CharField(choices=SyncStatus.choices)
