@@ -20,7 +20,7 @@ class TestBQSyncerData(TestCase):
     def test_fetch_data_successful(
         self, mock_bigquery_client, mock_query_bq, mock_update_or_create
     ):
-        """Test that sync_data inserts data into DB when successful"""
+        """Test that sync_data inserts data into DB when BQ query is successful"""
         mock_query_job = MagicMock()
         mock_query_job.result.return_value.total_rows = 1
         mock_query_job.result.return_value.to_dataframe.return_value = pd.DataFrame(
@@ -39,7 +39,7 @@ class TestBQSyncerData(TestCase):
 
         mock_bigquery_client.return_value.query.return_value = mock_query_job
 
-        mock_update_or_create.return_value = (MagicMock(), True)  # Simulating creation
+        mock_update_or_create.return_value = (MagicMock(), True)
 
         call_command("sync_bq_data", project_id="test-project", date="2024-09-18")
 
@@ -69,7 +69,7 @@ class TestBQSyncerData(TestCase):
             call_command("sync_bq_data", project_id="test-project", date="2024-09-18")
 
         self.assertIn(
-            "An error occurred: Failed to sync data from BigQuery",
+            "An error occurred while querying BigQuery: Failed to sync data from BigQuery",
             str(context.exception),
         )
 
