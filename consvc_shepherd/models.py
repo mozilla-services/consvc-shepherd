@@ -337,7 +337,7 @@ class BoostrDealProduct(models.Model):
     """
 
     class RateTypes(models.TextChoices):
-        """TODO"""
+        """Definitions of the 3 different Rate Types We have for deals"""
 
         CPM = "CPM", _("CPM")
         CPC = "CPC", _("CPC")
