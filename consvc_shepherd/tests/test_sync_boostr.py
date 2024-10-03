@@ -186,7 +186,7 @@ class TestSyncBoostrData(TestCase):
         mock_post,
     ):
         """Test function that calls the Boostr API for deal data and saves to our DB"""
-        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
+        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD, {"max_deal_pages": 2})
         loader.upsert_deals()
         calls = [
             mock.call(
