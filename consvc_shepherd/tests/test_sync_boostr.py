@@ -362,7 +362,7 @@ class TestSyncBoostrData(TestCase):
     def test_upsert_media_plans(
         self, mock_update_or_create, mock_get_product, mock_get, mock_post
     ):
-        """Test function that tests updating deal products with media plan data"""
+        """Test function that updates deal products with media plan data"""
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
         loader.upsert_mediaplan()
 
@@ -403,8 +403,7 @@ class TestSyncBoostrData(TestCase):
     def test_upsert_media_plans_fail(
         self, mock_update_or_create, mock_get_product, mock_get, mock_post
     ):
-        """Test function that tests updating deal products with media plan data"""
-
+        """Test failure of function that updates deal products with media plan data"""
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
         with self.assertRaises(BoostrApiError) as context:
             loader.upsert_mediaplan()
