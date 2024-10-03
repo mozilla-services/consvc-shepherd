@@ -453,7 +453,7 @@ class Campaign(models.Model):
 
 
 class CampaignSummary(models.Model):
-    """Model representing a summary of campaign metrics including Boostr, and kevel
+    """Model representing a summary of campaign metrics including data from Boostr and BigQuery
 
     deal_id : IntegerField
         Boostr deal ID
@@ -531,8 +531,6 @@ class DeliveredFlight(models.Model):
         Kevel flight ID
     flight_name : CharField
         Kevel flight name
-    country : CharField
-        Country where the metric was captured
     provider : Charfield
         Ad partner
     clicks_delivered : models.IntegerField
@@ -552,7 +550,6 @@ class DeliveredFlight(models.Model):
     campaign_name: CharField = models.CharField()
     flight_id: IntegerField = models.IntegerField()
     flight_name: CharField = models.CharField()
-    country: CharField = models.CharField(null=True, blank=True)
     provider: CharField = models.CharField(null=True, blank=True)
     clicks_delivered: IntegerField = models.IntegerField()
     impressions_delivered: IntegerField = models.IntegerField()
@@ -566,7 +563,6 @@ class DeliveredFlight(models.Model):
                     "submission_date",
                     "campaign_id",
                     "flight_id",
-                    "country",
                     "provider",
                 ],
                 name="unique_delivered_flight",
