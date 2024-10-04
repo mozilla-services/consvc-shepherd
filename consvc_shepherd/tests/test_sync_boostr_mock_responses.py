@@ -132,7 +132,17 @@ MOCK_DEALS_RESPONSE = [
                 "seller_type": "direct",
                 "role": None,
                 "product": None,
-            }
+            },
+            {
+                "id": 4525425,
+                "user_id": 21625,
+                "email": "lsales@mozilla.com",
+                "share": 100,
+                "type": "Seller",
+                "seller_type": "direct",
+                "role": None,
+                "product": None,
+            },
         ],
         "custom_fields": {
             "Forecast Close Date": None,
