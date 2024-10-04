@@ -27,7 +27,7 @@ export const useSplitCampaignMutation = () => {
       return axios.post(apiRoutes.splitCampaigns, data);
     },
     onError: (error: any) => {
-      if (error.response && error.response.data) {
+      if (error.response?.data) {
         const errorMessage =
           error.response.data.non_field_errors?.[0] || "An error occurred";
         toast.error(errorMessage);

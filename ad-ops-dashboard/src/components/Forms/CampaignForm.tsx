@@ -34,8 +34,8 @@ export default function CampaignForm({
     useForm<CampaignFormSchema>({
       resolver: zodResolver(campaignFormSchema),
       defaultValues: {
-        notes: formData.notes,
-        ad_ops_person: formData.ad_ops_person,
+        notes: formData.notes ?? "",
+        ad_ops_person: formData.ad_ops_person ?? "",
         kevel_flight_id: formData.kevel_flight_id,
         impressions_sold: formData.impressions_sold,
         net_spend: formData.net_spend,
