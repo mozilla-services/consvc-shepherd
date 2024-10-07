@@ -56,9 +56,16 @@ class Command(BaseCommand):
         try:
             syncer.sync_data()
         except Exception as e:
-            raise CommandError(f"An error occurred: {e}")
+            raise CommandError(f"{e}")
 
         self.stdout.write(f"BigQuery sync completed for date {options['date']}")
+
+
+class NoDataReturnedError(Exception):
+    """Exception raised when no data is returned from the BigQuery query."""
+    def __init__(self, date):
+        self.message = f"No data returned for date {date}"
+        super().__init__(self.message)
 
 
 class BQSyncer:
@@ -111,8 +118,7 @@ class BQSyncer:
             results = query_job.result()
 
             if results.total_rows == 0:
-                self.log.warning(f"No data returned for the date {self.date}")
-                return pandas.DataFrame()
+                raise NoDataReturnedError(self.date)
 
             df = results.to_dataframe()
 
@@ -173,13 +179,14 @@ class BQSyncer:
                 "BigQuery sync process has completed successfully. Updating sync_status"
             )
             self.update_sync_status(SYNC_STATUS_SUCCESS, self.date, "BigQuery sync success")
+        except NoDataReturnedError as e:
+            self.update_sync_status(SYNC_STATUS_FAILURE, self.date, str(e))
+            raise e
         except Exception as e:
-            error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
-            self.log.error(
-                f"BigQuery sync process has encountered an error: {error}. Updating sync_status"
-            )
+            error = f"Exception: {SYNC_STATUS_FAILURE}, {self.date}, {str(e)} Trace: {traceback.format_exc()}"
             self.update_sync_status(
                 SYNC_STATUS_FAILURE,
-                f"Exception: {SYNC_STATUS_FAILURE, self.date, str(e):} Trace: {traceback.format_exc()}",
+                self.date,
+                error
             )
             raise e
