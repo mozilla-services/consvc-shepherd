@@ -61,6 +61,16 @@ DEFAULT_USER_AGENT = FormFactor(
 class TestGetAmpTiles(TestCase):
     """Test the Fetching of Tiles for the Preview Page."""
 
+    MOCK_ENV = Environment(
+        code="mock",
+        name="Mock",
+        mars_url="https://mars.mock.if.you.are.connecting.to.this.the.test.broke.com",
+        spoc_site_id=1234567,
+        spoc_site_id_mobile=1234567,
+        spoc_zone_ids=[],
+        direct_sold_tile_zone_ids=[424242],
+    )
+
     def mock_amp_tiles_data(self, *args, **kwargs):
         """Mock out the function that wraps 'GET /v1/tiles' request within get_amp_tiles"""
         response = {
@@ -89,23 +99,9 @@ class TestGetAmpTiles(TestCase):
             "requests.get",
             side_effect=self.mock_amp_tiles_data,
         ) as mock_amp_tiles:
-            mockEnv = Environment(
-                code="mock",
-                name="Mock",
-                mars_url="https://mars.mock.if.you.are.connecting.to.this.the.test.broke.com",
-                spoc_site_id=1234567,
-                spoc_site_id_mobile=1234567,
-                spoc_zone_ids=[],
-                direct_sold_tile_zone_ids=[424242],
+            tiles = get_amp_tiles(
+                self.MOCK_ENV, "US", "CA", DEFAULT_USER_AGENT.user_agent
             )
-            mockFormFactor = FormFactor(
-                code="desktop",
-                name="Desktop",
-                is_mobile=False,
-                user_agent="Mozilla/5.0 (Windows NT 10.0; rv:10.0) Gecko/20100101 Firefox/91.0",
-            )
-
-            tiles = get_amp_tiles(mockEnv, "US", "CA", mockFormFactor.user_agent)
 
             mock_amp_tiles.assert_called()
 
@@ -121,11 +117,25 @@ class TestGetAmpTiles(TestCase):
 
             # Verify that requests.get was called once with the expected parameters
             mock_amp_tiles.assert_called_once_with(
-                f"{mockEnv.mars_url}/v1/tiles",
+                f"{self.MOCK_ENV.mars_url}/v1/tiles",
                 params={"country": "US", "region": "CA"},
-                headers={"User-Agent": mockFormFactor.user_agent},
+                headers={"User-Agent": DEFAULT_USER_AGENT.user_agent},
                 timeout=30,
             )
+
+    def test_get_amp_tiles_204(self):
+        """Test a 204 response from /v1/tiles."""
+        with mock.patch(
+            "requests.get",
+            return_value=mock.Mock(status_code=204),
+        ) as mock_amp_tiles:
+            tiles = get_amp_tiles(
+                self.MOCK_ENV, "US", "CA", DEFAULT_USER_AGENT.user_agent
+            )
+
+            mock_amp_tiles.assert_called()
+
+            self.assertEqual(len(tiles), 0)
 
 
 @override_settings(DEBUG=True)
