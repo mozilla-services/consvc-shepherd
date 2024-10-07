@@ -82,3 +82,113 @@ class BoostrDealSerializer(serializers.ModelSerializer):
 
         model = BoostrDeal
         fields = "__all__"
+
+
+class NestedCampaignSerializer(serializers.Serializer):
+    """Serializer for individual campaign data."""
+
+    id = serializers.IntegerField(required=False)
+    notes = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    ad_ops_person = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True
+    )
+    kevel_flight_id = serializers.IntegerField(required=False, allow_null=True)
+    impressions_sold = serializers.IntegerField()
+    net_spend = serializers.IntegerField()
+    deal = serializers.IntegerField()
+    start_date = serializers.DateField()
+    end_date = serializers.DateField()
+    seller = serializers.CharField()
+
+
+class SplitCampaignSerializer(serializers.Serializer):
+    """Serializer for Split create/update of campaigns."""
+
+    campaigns = NestedCampaignSerializer(many=True, write_only=True)
+    deal = serializers.IntegerField(write_only=True)
+
+    def validate(self, data: dict) -> dict:
+        """Validate campaign data."""
+        campaigns = data.get("campaigns", [])
+
+        if not campaigns:
+            raise serializers.ValidationError("No campaign data was provided.")
+
+        deal_id = data.get("deal")
+
+        try:
+            parent_campaign_id = campaigns[0].get("id")
+            parent_campaign_instance = Campaign.objects.get(id=parent_campaign_id)
+            campaign_net_spend = parent_campaign_instance.net_spend
+            campaign_impression_sold = parent_campaign_instance.impressions_sold
+        except Campaign.DoesNotExist:
+            raise serializers.ValidationError("Campaign does not exist.")
+
+        try:
+            deal = BoostrDeal.objects.get(id=deal_id)
+        except BoostrDeal.DoesNotExist:
+            raise serializers.ValidationError(f"Deal with ID {deal_id} does not exist.")
+
+        total_net_spend = sum(field.get("net_spend", 0) for field in campaigns)
+        total_impression_sold = sum(
+            field.get("impressions_sold", 0) for field in campaigns
+        )
+
+        if total_net_spend != campaign_net_spend:
+            raise serializers.ValidationError(
+                f"Total net spend ({total_net_spend}) must equal "
+                f"the parent campaign's net spend ({campaign_net_spend})."
+            )
+
+        if (
+            campaign_impression_sold
+            and campaign_impression_sold > 0
+            and total_impression_sold != campaign_impression_sold
+        ):
+            raise serializers.ValidationError(
+                f"Total impression sold ({total_impression_sold}) must equal "
+                f"the parent campaign's impression sold ({campaign_impression_sold})."
+            )
+
+        data["deal_instance"] = deal
+        return data
+
+    def create(self, validated_data: dict) -> list:
+        """Create new campaigns and update existing ones."""
+        campaigns = validated_data.pop("campaigns", [])
+        deal = validated_data.pop("deal_instance")
+
+        created_campaigns = []
+        for campaign in campaigns:
+            campaign_id = campaign.get("id")
+            if campaign_id:
+                created_campaigns.append(
+                    self._update_existing_campaign(campaign_id, campaign, deal)
+                )
+            else:
+                created_campaigns.append(self._create_new_campaign(campaign, deal))
+
+        return created_campaigns
+
+    def _update_existing_campaign(
+        self, campaign_id: int, campaign: dict, deal
+    ) -> Campaign:
+        """Update an existing campaign."""
+        try:
+            existing_campaign = Campaign.objects.get(id=campaign_id)
+        except Campaign.DoesNotExist:
+            raise serializers.ValidationError(
+                f"Campaign with ID {campaign_id} does not exist."
+            )
+
+        for attr, value in campaign.items():
+            if attr != "id":
+                setattr(existing_campaign, attr, deal if attr == "deal" else value)
+
+        existing_campaign.save()
+        return existing_campaign
+
+    def _create_new_campaign(self, campaign: dict, deal) -> Campaign:
+        """Create a new campaign."""
+        campaign["deal"] = deal
+        return Campaign.objects.create(**campaign)

@@ -424,6 +424,7 @@ class Campaign(models.Model):
     class Meta:
         """Metadata for the Campaign model."""
 
+        ordering = ["deal"]
         verbose_name = "Campaign"
         verbose_name_plural = "Campaigns"
 
