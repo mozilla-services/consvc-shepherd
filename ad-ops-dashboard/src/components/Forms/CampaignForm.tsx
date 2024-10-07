@@ -36,7 +36,7 @@ export default function CampaignForm({
       defaultValues: {
         notes: formData.notes ?? "",
         ad_ops_person: formData.ad_ops_person ?? "",
-        kevel_flight_id: formData.kevel_flight_id,
+        kevel_flight_id: formData.kevel_flight_id ?? "",
         impressions_sold: formData.impressions_sold,
         net_spend: formData.net_spend,
         start_date: formData.start_date,
@@ -94,6 +94,10 @@ export default function CampaignForm({
 
     const finalData = {
       ...data,
+      notes: data.notes?.trim() !== "" ? data.notes : null,
+      ad_ops_person:
+        data.ad_ops_person?.trim() !== "" ? data.ad_ops_person : null,
+      kevel_flight_id: data.kevel_flight_id !== 0 ? data.kevel_flight_id : null,
       campaign_fields: updated_campaign_fields,
     };
 

@@ -43,12 +43,12 @@ export default function SplitCampaignForm({
           id: formData.id,
           impressions_sold: formData.impressions_sold || "",
           net_spend: formData.net_spend || "",
-          kevel_flight_id: formData.kevel_flight_id || "",
-          ad_ops_person: formData.ad_ops_person || "",
+          kevel_flight_id: formData.kevel_flight_id ?? "",
+          ad_ops_person: formData.ad_ops_person ?? "",
           seller: formData.seller || "",
           start_date: formData.start_date || "",
           end_date: formData.end_date || "",
-          notes: formData.notes || "",
+          notes: formData.notes ?? "",
           deal: formData.deal || undefined,
         },
       ],
@@ -58,6 +58,14 @@ export default function SplitCampaignForm({
   const onSubmitHandler = (data: SplitFormSchema) => {
     const updatedData = {
       ...data,
+      campaigns: data.campaigns.map((campaign) => ({
+        ...campaign,
+        notes: campaign.notes?.trim() !== "" ? campaign.notes : null,
+        ad_ops_person:
+          campaign.ad_ops_person?.trim() !== "" ? campaign.ad_ops_person : null,
+        kevel_flight_id:
+          campaign.kevel_flight_id !== 0 ? campaign.kevel_flight_id : null,
+      })),
       deal: formData.deal,
     };
 
@@ -76,13 +84,19 @@ export default function SplitCampaignForm({
 
   return (
     <Box mt="2rem">
-      <Box component="form" onSubmit={handleSubmit(onSubmitHandler)}>
+      <Box
+        component="form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          handleSubmit(onSubmitHandler)();
+        }}
+      >
         <Grid2 container spacing={2}>
           {fields.map((field, index) => (
             <React.Fragment key={field.id}>
               <Grid2 size={2}>
                 <TextInput
-                  name={`campaigns.${index}.ad_ops_person`}
+                  name={`campaigns.${index.toString()}.ad_ops_person`}
                   label="Ad Ops Person"
                   control={control}
                   fullWidth
@@ -90,7 +104,7 @@ export default function SplitCampaignForm({
               </Grid2>
               <Grid2 size={1}>
                 <TextInput
-                  name={`campaigns.${index}.kevel_flight_id`}
+                  name={`campaigns.${index.toString()}.kevel_flight_id`}
                   label="Kevel Flight Id"
                   type="number"
                   control={control}
@@ -99,7 +113,7 @@ export default function SplitCampaignForm({
               </Grid2>
               <Grid2 size={1}>
                 <TextInput
-                  name={`campaigns.${index}.impressions_sold`}
+                  name={`campaigns.${index.toString()}.impressions_sold`}
                   label="Impressions Sold"
                   type="number"
                   control={control}
@@ -108,7 +122,7 @@ export default function SplitCampaignForm({
               </Grid2>
               <Grid2 size={1}>
                 <TextInput
-                  name={`campaigns.${index}.net_spend`}
+                  name={`campaigns.${index.toString()}.net_spend`}
                   label="Net spend"
                   type="number"
                   control={control}
@@ -117,7 +131,7 @@ export default function SplitCampaignForm({
               </Grid2>
               <Grid2 size={2}>
                 <TextInput
-                  name={`campaigns.${index}.seller`}
+                  name={`campaigns.${index.toString()}.seller`}
                   label="Seller"
                   control={control}
                   fullWidth
@@ -129,14 +143,14 @@ export default function SplitCampaignForm({
                     <DateInput
                       control={control}
                       label="Start Date"
-                      name={`campaigns.${index}.start_date`}
+                      name={`campaigns.${index.toString()}.start_date`}
                     />
                   </Box>
                   <Box sx={{ marginLeft: "1rem" }}>
                     <DateInput
                       control={control}
                       label="End Date"
-                      name={`campaigns.${index}.end_date`}
+                      name={`campaigns.${index.toString()}.end_date`}
                     />
                   </Box>
                 </StyledBox>
@@ -145,7 +159,7 @@ export default function SplitCampaignForm({
                 <StyledBox>
                   <Box>
                     <TextInput
-                      name={`campaigns.${index}.notes`}
+                      name={`campaigns.${index.toString()}.notes`}
                       label="Notes"
                       control={control}
                     />
@@ -160,7 +174,7 @@ export default function SplitCampaignForm({
                     {index == 0 ? (
                       <Tooltip title="Split Campaign" placement="top" arrow>
                         <Button
-                          onClick={() =>
+                          onClick={() => {
                             append({
                               impressions_sold: "",
                               net_spend: "",
@@ -171,15 +185,19 @@ export default function SplitCampaignForm({
                               end_date: "",
                               notes: "",
                               deal: formData.deal,
-                            })
-                          }
+                            });
+                          }}
                         >
                           <Add fontSize="large" />
                         </Button>
                       </Tooltip>
                     ) : (
                       <Tooltip title="Remove Campaign" placement="top" arrow>
-                        <Button onClick={() => remove(index)}>
+                        <Button
+                          onClick={() => {
+                            remove(index);
+                          }}
+                        >
                           <Remove fontSize="large" color="error" />
                         </Button>
                       </Tooltip>
