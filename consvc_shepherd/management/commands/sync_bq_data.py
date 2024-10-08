@@ -3,11 +3,11 @@
 import logging
 import traceback
 from datetime import datetime
-from django.utils import timezone
 
 import pandas
 from django.core.management import CommandError
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 from google.cloud import bigquery
 
 from consvc_shepherd.models import BQSyncStatus, DeliveredFlight
@@ -63,7 +63,8 @@ class Command(BaseCommand):
 
 class NoDataReturnedError(Exception):
     """Exception raised when no data is returned from the BigQuery query."""
-    def __init__(self, date):
+
+    def __init__(self, date: str):
         self.message = f"No data returned for date {date}"
         super().__init__(self.message)
 
@@ -145,7 +146,6 @@ class BQSyncer:
                 campaign_name=campaign_name,
                 flight_id=flight_id,
                 provider=provider,
-                # If script runs again in the same day, just update the clicks and impressions
                 defaults={
                     "clicks_delivered": clicks,
                     "impressions_delivered": impressions,
@@ -157,7 +157,7 @@ class BQSyncer:
             else:
                 self.log.info(f"Updated DeliveredFlight: {delivered_flight}")
 
-    def update_sync_status(self, status: str, synced_on: str, message: str):
+    def update_sync_status(self, status: str, synced_on: datetime, message: str):
         """Update the BQSyncStatus table given the status and the message"""
         synced_on = datetime.strptime(self.date, "%Y-%m-%d")
         synced_on = timezone.make_aware(synced_on)
@@ -178,15 +178,13 @@ class BQSyncer:
             self.log.info(
                 "BigQuery sync process has completed successfully. Updating sync_status"
             )
-            self.update_sync_status(SYNC_STATUS_SUCCESS, self.date, "BigQuery sync success")
+            self.update_sync_status(
+                SYNC_STATUS_SUCCESS, self.date, "BigQuery sync success"
+            )
         except NoDataReturnedError as e:
             self.update_sync_status(SYNC_STATUS_FAILURE, self.date, str(e))
             raise e
         except Exception as e:
             error = f"Exception: {SYNC_STATUS_FAILURE}, {self.date}, {str(e)} Trace: {traceback.format_exc()}"
-            self.update_sync_status(
-                SYNC_STATUS_FAILURE,
-                self.date,
-                error
-            )
+            self.update_sync_status(SYNC_STATUS_FAILURE, self.date, error)
             raise e
