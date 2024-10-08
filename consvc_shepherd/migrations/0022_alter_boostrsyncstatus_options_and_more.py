@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("consvc_shepherd", "0020_bqsyncstatus"),
+        ("consvc_shepherd", "0021_bqsyncstatus"),
     ]
 
     operations = [
