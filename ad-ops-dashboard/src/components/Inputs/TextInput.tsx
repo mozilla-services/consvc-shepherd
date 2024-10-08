@@ -4,7 +4,7 @@ import { TextField } from "@mui/material";
 interface TextInputProps extends FieldValues {
   name: string;
   label: string;
-  control: Control<any>;
+  control: Control;
 }
 
 export default function TextInput({
