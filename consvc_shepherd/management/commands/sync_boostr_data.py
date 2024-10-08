@@ -13,6 +13,7 @@ from typing import Any, Dict, List
 import environ
 import requests
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
@@ -475,28 +476,17 @@ class BoostrLoader:
                         boostr_product = BoostrProduct.objects.get(
                             boostr_id=media_plan_line_item.boostr_product
                         )
-                        filtered_deal_product = BoostrDealProduct.objects.filter(
-                            month=media_plan_line_item.month,
-                            boostr_deal_id=boostr_deal,
-                            boostr_product_id=boostr_product,
-                        )
-
-                        filtered_deal_product.update(
-                            quantity=media_plan_line_item.quantity,
-                            rate=media_plan_line_item.rate,
-                            rate_type=media_plan_line_item.rate_type,
-                        )
 
                         BoostrDealProduct.objects.filter(
                             month=media_plan_line_item.month,
-                            boostr_deal_id=media_plan_line_item.boostr_deal,
-                            boostr_product_id=media_plan_line_item.boostr_product,
+                            boostr_deal=boostr_deal,
+                            boostr_product=boostr_product,
                         ).update(
                             quantity=media_plan_line_item.quantity,
                             rate=media_plan_line_item.rate,
                             rate_type=media_plan_line_item.rate_type,
                         )
-                    except (BoostrDeal.DoesNotExist, BoostrProduct.DoesNotExist):
+                    except ObjectDoesNotExist:
                         continue
 
     def update_sync_status(self, status: str, synced_on: datetime, message: str):
