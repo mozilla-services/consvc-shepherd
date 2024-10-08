@@ -39,7 +39,7 @@ class CampaignSerializer(serializers.ModelSerializer):
             deal_amount = deal_data.amount
         except BoostrDeal.DoesNotExist as exec:
             raise serializers.ValidationError(
-                f"Deal with name {deal} does not exist."
+                f"Deal with id {deal.id} does not exist."
             ) from exec
 
         campaign_fields_data = data.get("campaign_fields", [])
