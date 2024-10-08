@@ -265,6 +265,7 @@ class BoostrProduct(models.Model):
         """Return the string representation for a Boostr Product"""
         return self.full_name
 
+
 class Advertiser(models.Model):
     """Table representing an Advertise
 
@@ -276,7 +277,7 @@ class Advertiser(models.Model):
 
     name: CharField = models.CharField(unique=True)
 
-    
+
 class BoostrDeal(models.Model):
     """Representation of AdOps sales deals pulled from Boostr
 
@@ -313,7 +314,9 @@ class BoostrDeal(models.Model):
     boostr_id: IntegerField = models.IntegerField(unique=True)
     name: CharField = models.CharField()
     advertiser: CharField = models.CharField()
-    advertiser_id: ForeignKey = models.ForeignKey(Advertiser, on_delete=models.CASCADE, null=True)
+    advertiser_id: ForeignKey = models.ForeignKey(
+        Advertiser, on_delete=models.CASCADE, null=True
+    )
     currency: CharField = models.CharField()
     amount: IntegerField = models.IntegerField()
     sales_representatives: CharField = models.CharField()
@@ -464,7 +467,9 @@ class CampaignSummary(models.Model):
 
     deal_id: IntegerField = models.IntegerField(primary_key=True)
     advertiser: CharField = models.CharField(max_length=255)
-    advertiser_id: ForeignKey = models.ForeignKey(Advertiser, on_delete=models.CASCADE, null=True)
+    advertiser_id: ForeignKey = models.ForeignKey(
+        Advertiser, on_delete=models.CASCADE, null=True
+    )
     net_spend: FloatField = models.FloatField()
     impressions_sold: FloatField = models.FloatField()
     clicks_delivered: IntegerField = models.IntegerField()
@@ -565,4 +570,3 @@ class DeliveredFlight(models.Model):
     def __str__(self):
         """Return the string representation for flight ids and associated number of clicks and impressions"""
         return f"{self.flight_id} : {self.clicks_delivered} clicks and {self.impressions_delivered} impressions"
-
