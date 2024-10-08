@@ -173,9 +173,9 @@ class BoostrApi:
 
     def authenticate(self, email: str, password: str) -> str:
         """Authenticate with the Boostr API and return jwt"""
-        if settings.BOOSTR_AUTH_BYPASS:
+        if settings.BOOSTR_API_JWT:
             # if we are local, bypass auth to avoid login rate limits
-            return str(env("BOOSTR_JWT"))
+            return str(env("BOOSTR_API_JWT"))
         post_data = {"auth": {"email": email, "password": password}}
         token = self.post("user_token", post_data)
         return str(token["jwt"])
