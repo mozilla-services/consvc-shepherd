@@ -109,7 +109,7 @@ class AllocationSettingsSnapshotForm(forms.ModelForm):
                 raise ValidationError(
                     message=f"JSON generated is different from the expected allocation schema. "
                     f"Ensure that there are two allocation settings: {e}",
-                ) from e
+                )
         return cd
 
     def get_json_settings(self) -> Dict[str, Any]:
