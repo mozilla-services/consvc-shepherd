@@ -80,6 +80,15 @@ jobs:
         run: |-
           echo TAG=$(cd src; git describe --tags --abbrev=4 2>/dev/null || git rev-parse --short=8 HEAD) | tee -a ${GITHUB_OUTPUT}
 
+      - id: generate_version_json
+        name: generate version.json
+        run: |-
+          printf '{"commit":"%s","version":"%s","source":"%s","build":"%s"}\n' \
+            "$(cd src; git rev-parse HEAD)" \
+            "${{ steps.set-tag.outputs.TAG }}" \
+            "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
+            "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" |tee src/version.json
+
       - uses: docker/setup-buildx-action@v3
 
       - id: gcp-auth
