@@ -1,6 +1,8 @@
 """Models module for consvc_shepherd."""
 
+import calendar
 import json
+from datetime import date
 from typing import Any
 
 from django.contrib.auth import get_user_model
@@ -552,3 +554,66 @@ class DeliveredFlight(models.Model):
     def __str__(self):
         """Return the string representation for flight ids and associated number of clicks and impressions"""
         return f"{self.flight_id} : {self.clicks_delivered} clicks and {self.impressions_delivered} impressions"
+
+
+class Inventory(models.Model):
+    """Representation of AdOps InventoryOverview
+
+    Attributes
+    ----------
+
+
+    Methods
+    -------
+    __str__(self)
+        Return the string representation for the inventory object
+
+    """
+
+    country: CharField = models.CharField(null=True, blank=True)
+    revenue: IntegerField = models.IntegerField()
+    inv_available: IntegerField = models.IntegerField()
+    inv_booked: IntegerField = models.IntegerField()
+    created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
+    updated_on: DateTimeField = models.DateTimeField(auto_now=True)
+
+    @property
+    def ecpm(self):
+        """Calculate and return the eCPM."""
+        if self.revenue and self.inv_booked > 0:
+            epcm_value = (self.revenue / self.inv_booked) * 1000
+            return round(epcm_value, 2)
+        return 0
+
+    @property
+    def inv_unsold(self):
+        """Calculate and return the eCPM."""
+        if self.inv_available is not None:
+            return self.inv_available - self.inv_booked
+        return 0
+
+    @property
+    def inv_remaining(self):
+        """Calculate and return the inventory remaining."""
+        if self.inv_booked == 0:
+            if self.inv_available is not None:
+                return self.inv_available
+            return 0
+        today = date.today()
+        total_days_in_month = calendar.monthrange(today.year, today.month)[1]
+        days_left_in_month = total_days_in_month - (today.day - 1)
+
+        inv_remaining = int(
+            self.inv_unsold * (days_left_in_month / total_days_in_month)
+        )
+        return inv_remaining
+
+    class Meta:
+        """Metadata for the Inventory model."""
+
+        ordering = ["country"]
+        verbose_name = "Inventory"
+        verbose_name_plural = "Inventory"
+
+    def __str__(self):
+        return f"Inventory {self.country}"
