@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     dependencies = [
         (
             "consvc_shepherd",
-            "0019_remove_deliveredflight_unique_delivered_flight_and_more",
+            "0020_alter_campaign_options",
         ),
     ]
 
