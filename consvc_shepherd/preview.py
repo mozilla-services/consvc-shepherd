@@ -314,6 +314,10 @@ def get_amp_tiles(
     r = requests.get(
         f"{env.mars_url}/v1/tiles", params=params, headers=headers, timeout=30
     )
+
+    if r.status_code == 204:
+        return []
+
     return [
         Tile(
             image_url=tile["image_url"],
