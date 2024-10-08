@@ -19,3 +19,7 @@ export interface BoostrDeal {
   id: number;
   name: string;
 }
+
+export interface ErrorResponse {
+  non_field_errors?: string[];
+}

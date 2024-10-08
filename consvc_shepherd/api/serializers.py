@@ -88,9 +88,11 @@ class NestedCampaignSerializer(serializers.Serializer):
     """Serializer for individual campaign data."""
 
     id = serializers.IntegerField(required=False)
-    notes = serializers.CharField(required=False, allow_blank=True)
-    ad_ops_person = serializers.CharField(required=False, allow_blank=True)
-    kevel_flight_id = serializers.IntegerField(required=False)
+    notes = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    ad_ops_person = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True
+    )
+    kevel_flight_id = serializers.IntegerField(required=False, allow_null=True)
     impressions_sold = serializers.IntegerField()
     net_spend = serializers.IntegerField()
     deal = serializers.IntegerField()
