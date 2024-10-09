@@ -13,18 +13,18 @@ from consvc_shepherd.version import fetch_app_version_from_file
 
 env = environ.Env(
     DEBUG=(bool, False),
-    BOOSTR_API_JWT={str, None},
-    OPENIDC_HEADER={str, None},
-    OPENIDC_HEADER_PREFIX={str, None},
-    IAP_AUDIENCE={str, None},
-    SESSION_COOKIE_SECURE={bool, True},
-    CSRF_COOKIE_SECURE={bool, True},
-    SECURE_REFERRER_POLICY={str, "origin"},
-    DJANGO_STATSD_ENABLED={bool, False},
-    STATSD_DEBUG={bool, False},
-    STATSD_HOST={str, "127.0.0.1"},
-    STATSD_PORT={str, "8125"},
-    STATSD_PREFIX={str, "shepherd"},
+    BOOSTR_API_JWT=(str, None),
+    OPENIDC_HEADER=(str, None),
+    OPENIDC_HEADER_PREFIX=(str, None),
+    IAP_AUDIENCE=(str, None),
+    SESSION_COOKIE_SECURE=(bool, True),
+    CSRF_COOKIE_SECURE=(bool, True),
+    SECURE_REFERRER_POLICY=(str, "origin"),
+    DJANGO_STATSD_ENABLED=(bool, False),
+    STATSD_DEBUG=(bool, False),
+    STATSD_HOST=(str, "127.0.0.1"),
+    STATSD_PORT=(str, "8125"),
+    STATSD_PREFIX=(str, "shepherd"),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
