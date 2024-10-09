@@ -456,7 +456,7 @@ class DeliveredFlightsAdmin(admin.ModelAdmin):
 
 @admin.register(BoostrSyncStatus)
 class BoostrSyncStatusAdmin(admin.ModelAdmin):
-    """Admin model for BoostrSyncStatuss records which represent the status of each Boostr sync operation"""
+    """Admin model for BoostrSyncStatuses records which represent the status of each Boostr sync operation"""
 
     model = BoostrSyncStatus
     list_display = [
@@ -469,9 +469,9 @@ class BoostrSyncStatusAdmin(admin.ModelAdmin):
 
 @admin.register(BQSyncStatus)
 class BQSyncStatusAdmin(admin.ModelAdmin):
-    """Admin model for BoostrSyncStatuss records which represent the status of each Boostr sync operation"""
+    """Admin model for BQSyncStatuses records which represent the status of each BigQuery sync operation"""
 
-    model = BoostrSyncStatus
+    model = BQSyncStatus
     list_display = [
         "id",
         "synced_on",
