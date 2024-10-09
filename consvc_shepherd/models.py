@@ -378,7 +378,7 @@ class BQSyncStatus(models.Model):
     Attributes
     ----------
     synced_on : DateTimeField
-        Date the Boostr sync process ran
+        Date the BigQuery sync process ran
     sync_status: CharField = models.CharField()
         The status of the sync process (success|failure)
     message: CharField = models.CharField()
@@ -392,7 +392,7 @@ class BQSyncStatus(models.Model):
         failure = "failure"
 
     class Meta:
-        """Metadata for the CampaignSummary model."""
+        """Metadata for the BQSyncStatus model."""
 
         verbose_name = "BigQuery sync status"
         verbose_name_plural = "BigQuery sync statuses"
