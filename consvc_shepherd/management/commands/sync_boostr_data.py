@@ -75,13 +75,13 @@ class Command(BaseCommand):
         loader.load()
 
 
-class BoostrApiError(Exception):
+class BoostrAPIError(Exception):
     """Raise this error whenever we don't get a 200 status back from boostr"""
 
     pass
 
 
-class BoostrApiMaxRetriesError(Exception):
+class BoostrAPIMaxRetriesError(Exception):
     """Raise this error when we hit the maximum retries for an API call to Boostr"""
 
     pass
@@ -93,7 +93,7 @@ class BoostrAPIInvalidMethod(Exception):
     pass
 
 
-class BoostrApi:
+class BoostrAPI:
     """Wrap up interactions with the Boostr API into a convenient class that handles the session, rate limits, etc"""
 
     base_url: str
@@ -182,11 +182,11 @@ class BoostrApi:
                 json = response.json()
                 return json
             else:
-                raise BoostrApiError(
+                raise BoostrAPIError(
                     f"Bad response status {response.status_code} from /{path}"
                 )
 
-        raise BoostrApiMaxRetriesError("Maximum retries reached")
+        raise BoostrAPIMaxRetriesError("Maximum retries reached")
 
     def post(self, path: str, json=None, headers=None, max_retry=5) -> Any:
         """Make POST requests to Boostr that uses the session, pass through headers and json data,
@@ -214,7 +214,7 @@ class BoostrApi:
 class BoostrLoader:
     """Wrap up interaction with the Boostr API"""
 
-    boostr: BoostrApi
+    boostr: BoostrAPI
     log: logging.Logger
     max_deal_pages: int
     line_items: Dict[int, BoostrDealMediaPlanLineItem]
@@ -224,7 +224,7 @@ class BoostrLoader:
         self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
     ):
         self.log = logging.getLogger("sync_boostr_data")
-        self.boostr = BoostrApi(base_url, email, password, options)
+        self.boostr = BoostrAPI(base_url, email, password, options)
         self.max_deal_pages = options.get("max_deal_pages", MAX_DEAL_PAGES_DEFAULT)
         self.latest_synced_on = self.get_latest_sync_status()
 
