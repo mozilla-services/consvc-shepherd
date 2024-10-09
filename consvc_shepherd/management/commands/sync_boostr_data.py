@@ -4,11 +4,9 @@ import logging
 import math
 import time
 import traceback
-from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from decimal import Decimal
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import environ
 import requests
@@ -16,6 +14,11 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+from media_plan_models import (
+    BoostrDealMediaPlanLineItem,
+    BoostrMediaPlan,
+    MediaPlanCollection,
+)
 
 from consvc_shepherd.models import (
     BoostrDeal,
@@ -34,61 +37,6 @@ HTTP_TOO_MANY_REQUESTS = 429
 DEFAULT_OPTIONS = {
     "max_deal_pages": MAX_DEAL_PAGES_DEFAULT,
 }
-
-
-@dataclass(frozen=True)
-class BoostrDealMediaPlanLineItem:
-    """Line Items for Boostr Media plans"""
-
-    media_plan_line_item_id: int
-    boostr_deal: int
-    boostr_product: int
-    rate_type: str
-    rate: Decimal
-    quantity: Decimal
-    budget: Decimal
-    month: str
-
-    def __str__(self) -> str:
-        return f"{self.boostr_product}"
-
-
-@dataclass
-class BoostrMediaPlan:
-    """Media Plan For Boostr Deals"""
-
-    media_plan_id: int
-    name: str
-    boostr_deal: int
-    line_items: Dict[
-        int,
-        Dict[int, List[BoostrDealMediaPlanLineItem]],
-    ] = field(default_factory=dict)
-
-    def __str__(self) -> str:
-        return f"{self.name}"
-
-    def add_line_item(self, line_item: BoostrDealMediaPlanLineItem):
-        """Add a line item to a media plan"""
-        if self.boostr_deal not in self.line_items:
-            self.line_items[self.boostr_deal] = {}
-        if line_item.boostr_product not in self.line_items[self.boostr_deal]:
-            self.line_items[self.boostr_deal][line_item.boostr_product] = []
-            self.line_items[self.boostr_deal][line_item.boostr_product].append(
-                line_item
-            )
-
-
-@dataclass
-class MediaPlanCollection:
-    """A collection for storing Media Plans"""
-
-    media_plans: Dict[int, BoostrMediaPlan] = field(default_factory=dict)
-
-    def add_media_plan(self, boostr_plan: int, media_plan: BoostrMediaPlan):
-        """Add a media plan to the collection"""
-        if boostr_plan not in self.media_plans:
-            self.media_plans[boostr_plan] = media_plan
 
 
 class Command(BaseCommand):
@@ -174,7 +122,7 @@ class BoostrApi:
     def authenticate(self, email: str, password: str) -> str:
         """Authenticate with the Boostr API and return jwt"""
         if settings.BOOSTR_API_JWT:
-            # if we are local, bypass auth to avoid login rate limits
+            # We can bypass auth endpoint with a pre-existing JWT to avoid login rate limits
             return str(env("BOOSTR_API_JWT"))
         post_data = {"auth": {"email": email, "password": password}}
         token = self.post("user_token", post_data)
@@ -452,7 +400,7 @@ class BoostrLoader:
             f"media_plans/{media_plan.media_plan_id}/line_items",
             params=deals_params,
         )
-        self.log.info(f"Fetched {len(media_plan_line_items)} media plans ")
+        self.log.info(f"Fetched {len(media_plan_line_items)} media plan line items")
 
         for line_item in media_plan_line_items:
             if media_plan.media_plan_id:
