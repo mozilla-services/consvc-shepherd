@@ -25,7 +25,8 @@ class BoostrDealMediaPlanLineItem:
 @dataclass
 class BoostrMediaPlan:
     """Media Plan For Boostr Deals. Each Media Plan can have multiple line items which links BoostrDeals
-    to Products. It also stores the cost, and quantity """
+    to Products. It also stores the cost, and quantity
+    """
 
     media_plan_id: int
     name: str
