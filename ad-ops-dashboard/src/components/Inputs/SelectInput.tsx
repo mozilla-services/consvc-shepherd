@@ -1,4 +1,4 @@
-import { Controller, Control } from "react-hook-form";
+import { Controller, Control, FieldValues } from "react-hook-form";
 import {
   FormControl,
   InputLabel,
@@ -7,10 +7,10 @@ import {
   FormHelperText,
 } from "@mui/material";
 
-interface SelectInputProps {
+interface SelectInputProps extends FieldValues {
   name: string;
   label: string;
-  control: Control<any>;
+  control: Control;
   options?: { value: string | number; label: string }[];
 }
 
@@ -41,9 +41,11 @@ export default function SelectInput({
             isOptionEqualToValue={(option: Option, value: Option | null) =>
               option.value === (value ? value.value : "")
             }
-            onChange={(_, newValue) => { onChange(newValue ? newValue.value : ""); }}
+            onChange={(_, newValue) => {
+              onChange(newValue ? newValue.value : "");
+            }}
             onBlur={onBlur}
-            value={options.find((option) => option.value === value) || null}
+            value={options.find((option) => option.value === value) ?? null}
             renderInput={(params) => (
               <TextField
                 {...params}

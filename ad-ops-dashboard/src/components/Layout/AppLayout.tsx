@@ -50,7 +50,7 @@ const StyledMainBox = styled(Box)(({ theme }) => ({
   padding: theme.spacing(3),
   width: "auto",
   [theme.breakpoints.up("md")]: {
-    width: `calc(100% - ${drawerWidth}px)`,
+    width: `calc(100% - ${drawerWidth.toString()}px)`,
   },
 }));
 
@@ -61,6 +61,11 @@ export default function Layout({ window }: LayoutProps) {
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
+  };
+
+  const handleNavClick = () => {
+    navigate("/");
+    setSelectedItem(null);
   };
 
   const container =
@@ -86,9 +91,7 @@ export default function Layout({ window }: LayoutProps) {
           </StyledIconButton>
           <StyledTypography
             variant="h6"
-            onClick={() => {
-              navigate("/"), setSelectedItem(null);
-            }}
+            onClick={handleNavClick}
             noWrap
             component="header"
           >
