@@ -441,6 +441,7 @@ class TestSyncBoostrData(TestCase):
         self.assertEqual(
             get_campaign_type(no_campaign_type_name), BoostrProduct.CampaignType.NONE
         )
+
     @mock.patch.object(settings, "BOOSTR_API_JWT", None)
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     def test_boostr_api_post(self, mock_post_success):
