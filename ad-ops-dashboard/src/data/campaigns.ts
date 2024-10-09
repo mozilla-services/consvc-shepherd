@@ -1,8 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { toast } from "react-toastify";
 import { apiRoutes } from "../config/routes.config";
-import { CampaignFormSchema } from "../utils/schemas/campaignFormSchema";
+import {
+  CampaignFormSchema,
+  SplitFormSchema,
+} from "../utils/schemas/campaignFormSchema";
+import { ErrorResponse } from "../types";
+
 export const useGetCampaignsQuery = () => {
   const getCampaigns = useQuery({
     queryKey: ["campaigns"],
@@ -14,6 +19,37 @@ export const useGetCampaignsQuery = () => {
 
   return getCampaigns;
 };
+
+export const useSplitCampaignMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: SplitFormSchema) => {
+      return axios.post(apiRoutes.splitCampaigns, data);
+    },
+    onError: (error: AxiosError<ErrorResponse>) => {
+      const nonFieldErrors = error.response?.data.non_field_errors;
+
+      let errorMessage: string;
+
+      if (
+        nonFieldErrors &&
+        Array.isArray(nonFieldErrors) &&
+        nonFieldErrors.length > 0
+      ) {
+        errorMessage = nonFieldErrors[0];
+      } else {
+        errorMessage = "An unexpected error occurred";
+      }
+      toast.error(errorMessage);
+    },
+    onSuccess: () => {
+      toast.success("Campaign splitted successfully.");
+      queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+    },
+  });
+};
+
 export const useCreateCampaignMutation = () => {
   const queryClient = useQueryClient();
 

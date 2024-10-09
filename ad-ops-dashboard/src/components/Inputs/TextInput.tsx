@@ -17,22 +17,13 @@ export default function TextInput({
     <Controller
       name={name}
       control={control}
-      render={({
-        field: { onChange, onBlur, value, ref },
-        fieldState: { error },
-      }) => (
+      render={({ field, fieldState: { error } }) => (
         <TextField
-          onChange={(e) =>
-            { onChange(props.type === "number" ? +e.target.value : e.target.value); }
-          }
-          onBlur={onBlur}
-          value={value}
-          inputRef={ref}
-          fullWidth
-          label={label}
+          {...field}
           {...props}
           error={!!error}
           helperText={error?.message}
+          label={label}
         />
       )}
     />

@@ -34,9 +34,9 @@ export default function CampaignForm({
     useForm<CampaignFormSchema>({
       resolver: zodResolver(campaignFormSchema),
       defaultValues: {
-        notes: formData.notes,
-        ad_ops_person: formData.ad_ops_person,
-        kevel_flight_id: formData.kevel_flight_id,
+        notes: formData.notes ?? "",
+        ad_ops_person: formData.ad_ops_person ?? "",
+        kevel_flight_id: formData.kevel_flight_id ?? "",
         impressions_sold: formData.impressions_sold,
         net_spend: formData.net_spend,
         start_date: formData.start_date,
@@ -63,7 +63,7 @@ export default function CampaignForm({
       selectedDeal = formData.deal === watchDeal ? formData.deal : watchDeal;
     }
 
-    if (selectedDeal) {
+    if (Array.isArray(campaigns) && selectedDeal) {
       const filtered = campaigns
         .filter((item) => item.deal === selectedDeal)
         .filter((item) => !isUpdate || item.id !== formData.id);
@@ -94,6 +94,10 @@ export default function CampaignForm({
 
     const finalData = {
       ...data,
+      notes: data.notes?.trim() !== "" ? data.notes : null,
+      ad_ops_person:
+        data.ad_ops_person?.trim() !== "" ? data.ad_ops_person : null,
+      kevel_flight_id: data.kevel_flight_id !== 0 ? data.kevel_flight_id : null,
       campaign_fields: updated_campaign_fields,
     };
 
@@ -111,10 +115,12 @@ export default function CampaignForm({
     }
   };
 
-  const deals = boostrDeals?.map((deal: BoostrDeal) => ({
-    label: deal.name,
-    value: deal.id,
-  }));
+  const deals = Array.isArray(boostrDeals)
+    ? boostrDeals.map((deal: BoostrDeal) => ({
+        label: deal.name,
+        value: deal.id,
+      }))
+    : [];
 
   return (
     <Box>
@@ -124,6 +130,7 @@ export default function CampaignForm({
             name="ad_ops_person"
             label="Ad Ops Person"
             control={control}
+            fullWidth
           />
         </Box>
         <Box mt={2}>
@@ -132,6 +139,7 @@ export default function CampaignForm({
             label="Kevel Flight Id"
             control={control}
             type="number"
+            fullWidth
           />
         </Box>
         <Box mt={2}>
@@ -140,6 +148,7 @@ export default function CampaignForm({
             label="Impressions Sold"
             control={control}
             type="number"
+            fullWidth
           />
         </Box>
         <Box mt={2}>
@@ -148,10 +157,11 @@ export default function CampaignForm({
             label="Net Spend"
             control={control}
             type="number"
+            fullWidth
           />
         </Box>
         <Box mt={2}>
-          <TextInput name="seller" label="Seller" control={control} />
+          <TextInput name="seller" label="Seller" control={control} fullWidth />
         </Box>
         <Box mt={2}>
           <DateInput
@@ -176,6 +186,7 @@ export default function CampaignForm({
             control={control}
             rows={3}
             multiline
+            fullWidth
           />
         </Box>
         <Box mt={2}>
