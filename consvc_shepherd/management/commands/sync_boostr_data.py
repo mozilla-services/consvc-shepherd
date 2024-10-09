@@ -157,7 +157,7 @@ class BoostrAPI:
                     )
                 else:
                     raise BoostrAPIInvalidMethod(
-                        f"{method} is not a support HTTP method. Use 'GET' or 'POST'."
+                        f"{method} is not a supported HTTP method. Use 'GET' or 'POST'."
                     )
 
             except requests.exceptions.RequestException as e:
