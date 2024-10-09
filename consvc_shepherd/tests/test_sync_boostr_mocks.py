@@ -61,7 +61,6 @@ def mock_request_exception(*args, **kwargs):
 def mock_get_success(*args, **kwargs) -> MockResponse:
     """Mock GET requests to boostr which handles mock responses for /products, /deals, and /deal_products"""
     if args[0].endswith("/products"):
-        print("args[0]>>>>>>", args[0])
         return MockResponse(
             MOCK_PRODUCTS_RESPONSE,
             200,
