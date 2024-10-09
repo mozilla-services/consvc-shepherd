@@ -157,14 +157,12 @@ class BQSyncer:
             else:
                 self.log.info(f"Updated DeliveredFlight: {delivered_flight}")
 
-    def update_sync_status(self, status: str, synced_on: datetime, message: str):
+    def update_sync_status(self, status: str, message: str):
         """Update the BQSyncStatus table given the status and the message"""
-        synced_on = datetime.strptime(self.date, "%Y-%m-%d")
-        synced_on = timezone.make_aware(synced_on)
         BQSyncStatus.objects.create(
             status=status,
             message=message,
-            synced_on=synced_on,
+            synced_on=timezone.now(),
         )
 
     def sync_data(self):
@@ -178,13 +176,11 @@ class BQSyncer:
             self.log.info(
                 "BigQuery sync process has completed successfully. Updating sync_status"
             )
-            self.update_sync_status(
-                SYNC_STATUS_SUCCESS, self.date, "BigQuery sync success"
-            )
+            self.update_sync_status(SYNC_STATUS_SUCCESS, "BigQuery sync success")
         except NoDataReturnedError as e:
-            self.update_sync_status(SYNC_STATUS_FAILURE, self.date, str(e))
+            self.update_sync_status(SYNC_STATUS_FAILURE, str(e))
             raise e
         except Exception as e:
             error = f"Exception: {SYNC_STATUS_FAILURE}, {self.date}, {str(e)} Trace: {traceback.format_exc()}"
-            self.update_sync_status(SYNC_STATUS_FAILURE, self.date, error)
+            self.update_sync_status(SYNC_STATUS_FAILURE, error)
             raise e
