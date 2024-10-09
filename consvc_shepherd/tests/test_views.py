@@ -10,7 +10,7 @@ from consvc_shepherd.models import (
     PartnerAllocation,
     SettingsSnapshot,
 )
-from consvc_shepherd.preview import Ads, Spoc, Tile, Rectangle
+from consvc_shepherd.preview import Ads, Rectangle, Spoc, Tile
 from contile.models import Partner
 
 
@@ -265,5 +265,5 @@ class TestPreviewView(TestCase):
             self.assertContains(response, "example3.com")
 
             # Check the Rectangles section
-            self.assertContains(response, 'https://picsum.photos/300/250')
+            self.assertContains(response, "https://picsum.photos/300/250")
             self.assertContains(response, "example4.com")
