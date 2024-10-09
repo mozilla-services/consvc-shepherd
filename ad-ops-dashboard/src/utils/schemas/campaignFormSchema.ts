@@ -48,32 +48,34 @@ export const campaignFormSchema = z.object({
       message: "Start date is required",
     }),
   seller: z.string().min(1, "Seller name must be at least 1 characters long"),
-  campaign_fields: z.array(
-    z.object({
-      impressions_sold: z.preprocess(
-        (val) => (val === null ? undefined : Number(val)),
-        z
-          .union([
-            z.number().min(1, "Impressions sold must be a positive number"),
-            z.string().optional(),
-          ])
-          .refine((val) => val !== undefined, {
-            message: "Impressions sold is required",
-          })
-      ),
-      net_spend: z.preprocess(
-        (val) => (val === null ? undefined : Number(val)),
-        z
-          .union([
-            z.number().min(1, "Net spend must be a positive number"),
-            z.string().optional(),
-          ])
-          .refine((val) => val !== undefined, {
-            message: "Net spend is required",
-          })
-      ),
-    })
-  ),
+  campaign_fields: z
+    .array(
+      z.object({
+        impressions_sold: z.preprocess(
+          (val) => (val === null ? undefined : Number(val)),
+          z
+            .union([
+              z.number().min(1, "Impressions sold must be a positive number"),
+              z.string().optional(),
+            ])
+            .refine((val) => val !== undefined, {
+              message: "Impressions sold is required",
+            })
+        ),
+        net_spend: z.preprocess(
+          (val) => (val === null ? undefined : Number(val)),
+          z
+            .union([
+              z.number().min(1, "Net spend must be a positive number"),
+              z.string().optional(),
+            ])
+            .refine((val) => val !== undefined, {
+              message: "Net spend is required",
+            })
+        ),
+      })
+    )
+    .optional(),
 });
 
 export type CampaignFormSchema = z.infer<typeof campaignFormSchema>;
