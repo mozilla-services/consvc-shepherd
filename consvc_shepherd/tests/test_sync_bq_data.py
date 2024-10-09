@@ -71,7 +71,7 @@ class TestBQSyncerData(TestCase):
         )
 
         mock_update_sync_status.assert_called_once_with(
-            "success", "2024-09-18", "BigQuery sync success"
+            "success", "BigQuery sync success"
         )
 
     @patch("consvc_shepherd.management.commands.sync_bq_data.BQSyncer.sync_data")
@@ -144,7 +144,7 @@ class TestBQSyncerData(TestCase):
         )
 
         mock_update_sync_status.assert_called_once_with(
-            "success", "2024-09-18", "BigQuery sync success"
+            "success", "BigQuery sync success"
         )
 
     @patch("consvc_shepherd.management.commands.sync_bq_data.BQSyncer.query_bq")
