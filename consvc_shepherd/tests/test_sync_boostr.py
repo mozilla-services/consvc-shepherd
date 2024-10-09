@@ -2,6 +2,7 @@
 
 from unittest import mock
 
+from django.conf import settings
 from django.test import TestCase, override_settings
 
 from consvc_shepherd.management.commands.sync_boostr_data import (
@@ -50,12 +51,22 @@ class TestSyncBoostrData(TestCase):
         self.assertEqual(boostr.session.headers["Content-Type"], "application/json")
         self.assertEqual(boostr.session.headers["Authorization"], "Bearer im.a.jwt")
 
+    @mock.patch.object(settings, "BOOSTR_API_JWT", None)
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     def test_authenticate(self, mock_post):
         """Test authenticate function that calls boostr auth and returns a JWT"""
         boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD)
         jwt = boostr.authenticate(EMAIL, PASSWORD)
         self.assertEqual(jwt, "i.am.jwt")
+
+    @mock.patch.object(settings, "BOOSTR_API_JWT", "i.am.jwt")
+    @mock.patch("requests.Session.post", side_effect=mock_post_success)
+    def test_authenticate_with_JWT(self, mock_post):
+        """Test authenticate function that uses an existing JWT and skips calling Boostr API auth endpoint"""
+        boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD)
+        jwt = boostr.authenticate(EMAIL, PASSWORD)
+        self.assertEqual(jwt, "i.am.jwt")
+        mock_post.assert_not_called()
 
     @mock.patch("time.sleep", return_value=None)
     @mock.patch("requests.Session.get")
@@ -128,6 +139,7 @@ class TestSyncBoostrData(TestCase):
         self.assertEqual(mock_get.call_count, 2)
         self.assertEqual(response, {"data": "success"})
 
+    @mock.patch.object(settings, "BOOSTR_API_JWT", None)
     @mock.patch("time.sleep", return_value=None)
     @mock.patch("requests.Session.post", side_effect=mock_post_token_fail)
     def test_authenticate_fail(self, mock_post, mock_sleep):
@@ -429,7 +441,7 @@ class TestSyncBoostrData(TestCase):
         self.assertEqual(
             get_campaign_type(no_campaign_type_name), BoostrProduct.CampaignType.NONE
         )
-
+    @mock.patch.object(settings, "BOOSTR_API_JWT", None)
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     def test_boostr_api_post(self, mock_post_success):
         """Test the BoostrApi POST wrapper"""
