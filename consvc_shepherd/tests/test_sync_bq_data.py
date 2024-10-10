@@ -29,6 +29,7 @@ class TestBQSyncerData(TestCase):
                 "campaign_id": [1],
                 "campaign_name": ["Campaign 1"],
                 "flight_id": [100],
+                "flight_name": ["Flight 1"],
                 "provider": ["Provider 1"],
                 "clicks": [10],
                 "impressions": [100],
@@ -50,6 +51,7 @@ class TestBQSyncerData(TestCase):
             campaign_id=1,
             campaign_name="Campaign 1",
             flight_id=100,
+            flight_name="Flight 1",
             provider="Provider 1",
             defaults={
                 "clicks_delivered": 10,
@@ -122,6 +124,7 @@ class TestBQSyncerData(TestCase):
                 "campaign_id": [1, 2],
                 "campaign_name": ["Campaign 1", "Campaign 2"],
                 "flight_id": [100, 101],
+                "flight_name": ["Flight 1", "Flight 2"],
                 "provider": ["Provider 1", "Provider 2"],
                 "clicks": [10, 20],
                 "impressions": [100, 200],
@@ -152,12 +155,11 @@ class TestBQSyncerData(TestCase):
         mock_query_job.result.return_value.total_rows = 1
         mock_query_job.result.return_value.to_dataframe.return_value = pd.DataFrame(
             {
-                "submission_date": [
-                    datetime.today().strftime("%Y-%m-%d")
-                ],  # Today's date
+                "submission_date": [datetime.today().strftime("%Y-%m-%d")],
                 "campaign_id": [1],
                 "campaign_name": ["Campaign 1"],
                 "flight_id": [100],
+                "flight_name": ["Flight 1"],
                 "provider": ["Provider 1"],
                 "clicks": [10],
                 "impressions": [100],
@@ -177,6 +179,7 @@ class TestBQSyncerData(TestCase):
             campaign_id=1,
             campaign_name="Campaign 1",
             flight_id=100,
+            flight_name="Flight 1",
             provider="Provider 1",
             defaults={
                 "clicks_delivered": 10,
