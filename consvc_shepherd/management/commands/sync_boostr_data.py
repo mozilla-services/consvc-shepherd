@@ -6,7 +6,7 @@ import time
 import traceback
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import environ
 import requests
@@ -14,12 +14,11 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from media_plan_models import (
+
+from consvc_shepherd.management.media_plan_models import (
     BoostrDealMediaPlanLineItem,
     BoostrMediaPlan,
-    MediaPlanCollection,
 )
-
 from consvc_shepherd.models import (
     BoostrDeal,
     BoostrDealProduct,
@@ -123,7 +122,7 @@ class BoostrAPI:
         """Authenticate with the Boostr API and return jwt"""
         if settings.BOOSTR_API_JWT:
             # We can bypass auth endpoint with a pre-existing JWT to avoid login rate limits
-            return str(env("BOOSTR_API_JWT"))
+            return str(settings.BOOSTR_API_JWT)
         post_data = {"auth": {"email": email, "password": password}}
         token = self.post("user_token", post_data)
         return str(token["jwt"])
@@ -217,8 +216,6 @@ class BoostrLoader:
     boostr: BoostrAPI
     log: logging.Logger
     max_deal_pages: int
-    line_items: Dict[int, BoostrDealMediaPlanLineItem]
-    media_plan_collection = MediaPlanCollection()
 
     def __init__(
         self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
@@ -379,9 +376,6 @@ class BoostrLoader:
                 boostr_deal=media_plan["deal_id"],
             )
 
-            self.media_plan_collection.add_media_plan(
-                media_plan["deal_id"], new_media_plan
-            )
             self.upsert_mediaplan_lineitems(new_media_plan)
 
     def upsert_mediaplan_lineitems(self, media_plan: BoostrMediaPlan) -> None:
