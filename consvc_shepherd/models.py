@@ -15,6 +15,7 @@ from django.db.models import (
     JSONField,
     ManyToManyField,
 )
+from django.utils.translation import gettext_lazy as _
 
 from contile.models import Partner
 
@@ -160,7 +161,8 @@ class AllocationSetting(models.Model):
         return {
             "position": self.position,
             "allocation": [
-                allocation.to_dict() for allocation in self.partner_allocations.all()  # type: ignore [attr-defined]
+                allocation.to_dict()
+                for allocation in self.partner_allocations.all()  # type: ignore [attr-defined]
             ],
         }
 
@@ -328,18 +330,37 @@ class BoostrDealProduct(models.Model):
         Foreign key pointer to BoostrDeal, with related name of deals
     boostr_product : Partner
         Foreign key pointing to BoostrProduct instance, with related name of products
-    budget : IntegerField
+    budget : DecimalField
         How much of the deal's overall budget is allocated to this product and month
     month: CharField
         The month when this product and budget combo will run
     """
 
+    class RateTypes(models.TextChoices):
+        """Definitions of the 3 different Rate Types We have for deals"""
+
+        CPM = "CPM", _("CPM")
+        CPC = "CPC", _("CPC")
+        FLATFEE = "FF", _("Flat Fee")
+
     boostr_deal: ForeignKey = models.ForeignKey(BoostrDeal, on_delete=models.CASCADE)
     boostr_product: ForeignKey = models.ForeignKey(
         BoostrProduct, on_delete=models.CASCADE
     )
-    budget: IntegerField = models.IntegerField()
+    budget: models.DecimalField = models.DecimalField(
+        max_digits=13, decimal_places=2, null=True
+    )
     month: CharField = models.CharField()
+    rate_type: models.CharField = models.CharField(
+        choices=RateTypes.choices,
+        null=True,
+    )
+    rate: models.DecimalField = models.DecimalField(
+        max_digits=13, decimal_places=2, null=True
+    )
+    quantity: models.DecimalField = models.DecimalField(
+        max_digits=13, decimal_places=2, null=True
+    )
 
 
 class BoostrSyncStatus(models.Model):

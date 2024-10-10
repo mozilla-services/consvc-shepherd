@@ -11,10 +11,12 @@ from consvc_shepherd.models import (
 from consvc_shepherd.tests.test_sync_boostr_mock_responses import (
     MOCK_DEAL_PRODUCTS_RESPONSE,
     MOCK_DEALS_RESPONSE,
+    MOCK_MEDIA_PLAN_LINE_ITEMS_RESPONSE,
+    MOCK_MEDIA_PLAN_RESPONSE,
     MOCK_PRODUCTS_RESPONSE,
 )
 
-MOCK_RETRY_AFTER_SECONDS = 10
+MOCK_RETRY_AFTER_SECONDS = 60
 
 
 class MockResponse:
@@ -46,7 +48,7 @@ def mock_post_token_fail(*args, **kwargs) -> MockResponse:
     return MockResponse({"uh": "oh"}, 401)
 
 
-def mock_upsert_deals_exception(*args, **kwargs) -> MockResponse:
+def mock_upsert_deals_exception(*args, **kwargs) -> None:
     """Mock upsert_deals exception"""
     raise Exception("upsert_deals mock raised an exception")
 
@@ -71,6 +73,16 @@ def mock_get_success(*args, **kwargs) -> MockResponse:
     elif args[0].endswith("/deal_products"):
         return MockResponse(
             MOCK_DEAL_PRODUCTS_RESPONSE,
+            200,
+        )
+    elif args[0].endswith("/media_plans"):
+        return MockResponse(
+            MOCK_MEDIA_PLAN_RESPONSE,
+            200,
+        )
+    elif args[0].endswith("/line_items"):
+        return MockResponse(
+            MOCK_MEDIA_PLAN_LINE_ITEMS_RESPONSE,
             200,
         )
     else:
