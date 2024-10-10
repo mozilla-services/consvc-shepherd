@@ -19,7 +19,7 @@ from consvc_shepherd.preview import (
 )
 
 SPOC = Spoc(
-    image_src="https://picsum.photos/296/148",
+    image_url="https://picsum.photos/296/148",
     title="There is a Sale",
     domain="cosmetics.beauty",
     excerpt="The sale has begun...",
@@ -213,7 +213,7 @@ class TestGetSpocsAndDirectSoldTiles(TestCase):
             self.assertEqual(tiles[0].sponsored, LOCALIZATIONS["Sponsored"][country])
 
             # Check the properties of the spoc
-            self.assertEqual(spocs[0].image_src, "spoc_image_src_1")
+            self.assertEqual(spocs[0].image_url, "spoc_image_src_1")
             self.assertEqual(spocs[0].title, "Spoc 1")
             self.assertEqual(spocs[0].domain, "example.com")
             self.assertEqual(spocs[0].excerpt, "An example spoc.")
@@ -302,7 +302,7 @@ class TestGetAds(TestCase):
                 self.assertEqual(len(ads.tiles), 3)
 
                 # Spoc data
-                self.assertEqual(ads.spocs[0].image_src, SPOC.image_src)
+                self.assertEqual(ads.spocs[0].image_url, SPOC.image_url)
                 self.assertEqual(ads.spocs[0].title, SPOC.title)
                 self.assertEqual(ads.spocs[0].domain, SPOC.domain)
                 self.assertEqual(ads.spocs[0].excerpt, SPOC.excerpt)
@@ -375,6 +375,12 @@ class TestGetUnified(TestCase):
                     "url": "https://example.com/tile3",
                 }
             ],
+            "newtab_rectangle": [
+                {
+                    "image_url": "https://example-rect-cdn.com/rect1.jpg",
+                    "url": "https://example.com/rect1",
+                }
+            ],
         }
         return mock.Mock(status_code=200, json=lambda: response)
 
@@ -419,7 +425,7 @@ class TestGetUnified(TestCase):
             # Verify the spocs
             self.assertEqual(len(ads.spocs), 1)
             self.assertEqual(
-                ads.spocs[0].image_src, "https://example-spoc-cdn.com/spoc-image.jpg"
+                ads.spocs[0].image_url, "https://example-spoc-cdn.com/spoc-image.jpg"
             )
             self.assertEqual(ads.spocs[0].title, "Example Spoc")
             self.assertEqual(ads.spocs[0].domain, "example.com")
@@ -427,6 +433,13 @@ class TestGetUnified(TestCase):
             self.assertEqual(ads.spocs[0].url, "https://example.com/spoc")
             self.assertEqual(ads.spocs[0].sponsor, "Sponsor 1")
             self.assertEqual(ads.spocs[0].sponsored_by, "Sponsored by Sponsor 1")
+
+            # Verify the rectangles
+            self.assertEqual(len(ads.rectangles), 1)
+            self.assertEqual(
+                ads.rectangles[0].image_url, "https://example-rect-cdn.com/rect1.jpg"
+            )
+            self.assertEqual(ads.rectangles[0].url, "https://example.com/rect1")
 
             # Verify the is_mobile
             self.assertFalse(ads.is_mobile)
@@ -441,6 +454,7 @@ class TestGetUnified(TestCase):
                         {"placement": "newtab_tile_1", "count": 1},
                         {"placement": "newtab_tile_2", "count": 1},
                         {"placement": "newtab_tile_3", "count": 1},
+                        {"placement": "newtab_rectangle", "count": 1},
                     ],
                 },
                 timeout=30,
