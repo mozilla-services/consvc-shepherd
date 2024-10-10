@@ -14,6 +14,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from consvc_shepherd.models import (
+    Advertiser,
     BoostrDeal,
     BoostrDealProduct,
     BoostrProduct,
@@ -21,6 +22,7 @@ from consvc_shepherd.models import (
     Campaign,
 )
 
+FULL_SYNC = False
 MAX_DEAL_PAGES_DEFAULT = 50
 DEFAULT_RETRY_INTERVAL = 60
 SYNC_STATUS_SUCCESS = "success"
@@ -50,6 +52,13 @@ class Command(BaseCommand):
             help=f"""By default, the sync code will stop trying to fetch additional deals pages after
                 {MAX_DEAL_PAGES_DEFAULT} pages. Currently we have ~14 pages of deals in Boostr, so this default max
                 should be sufficient for a while.""",
+        )
+        parser.add_argument(
+            "--full-sync",
+            default=FULL_SYNC,
+            action="store_true",
+            help="""Used to force a full sync of the Boostr data. This means the script
+            does not start from the last successful sync timestamp""",
         )
 
     def handle(self, *args, **options):
@@ -193,6 +202,7 @@ class BoostrLoader:
     boostr: BoostrApi
     log: logging.Logger
     max_deal_pages: int
+    full_sync: bool
 
     def __init__(
         self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
@@ -200,7 +210,10 @@ class BoostrLoader:
         self.log = logging.getLogger("sync_boostr_data")
         self.boostr = BoostrApi(base_url, email, password, options)
         self.max_deal_pages = options.get("max_deal_pages", MAX_DEAL_PAGES_DEFAULT)
-        self.latest_synced_on = self.get_latest_sync_status()
+        self.full_sync = options.get("full_sync", FULL_SYNC)
+        self.latest_synced_on = (
+            self.get_latest_sync_status() if not self.full_sync else None
+        )
 
     def upsert_products(self) -> None:
         """Fetch all Boostr products and upsert them to Shepherd DB"""
@@ -260,7 +273,7 @@ class BoostrLoader:
 
             closed_won_deals = [d for d in deals if (d["stage_name"] == "Closed Won")]
             for deal in closed_won_deals:
-                boostr_deal, created = BoostrDeal.objects.update_or_create(
+                boostr_deal, boostr_deal_created = BoostrDeal.objects.update_or_create(
                     boostr_id=deal["id"],
                     defaults={
                         "name": deal["name"],
@@ -274,8 +287,12 @@ class BoostrLoader:
                         "end_date": deal["end_date"],
                     },
                 )
+                _, advertiser_created = Advertiser.objects.update_or_create(
+                    name=deal["advertiser_name"],
+                )
+
                 self.log.debug(f"Upserted deal: {deal['id']}")
-                if created:
+                if boostr_deal_created and advertiser_created:
                     self.create_campaign(boostr_deal)
                     self.log.debug(f"Created campaign for deal: {deal['id']}")
 
