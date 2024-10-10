@@ -33,6 +33,7 @@ DEFAULT_RETRY_INTERVAL = 60
 SYNC_STATUS_SUCCESS = "success"
 SYNC_STATUS_FAILURE = "failure"
 HTTP_TOO_MANY_REQUESTS = 429
+MAX_RETRY = 5
 DEFAULT_OPTIONS = {
     "max_deal_pages": MAX_DEAL_PAGES_DEFAULT,
 }
@@ -134,7 +135,7 @@ class BoostrAPI:
         json=None,
         params=None,
         headers=None,
-        max_retry: int = 5,
+        max_retry: int = MAX_RETRY,
     ):
         """Make GET or POST requests with retry for 429 and timeout errors"""
         method = method.lower()
@@ -187,7 +188,7 @@ class BoostrAPI:
 
         raise BoostrAPIMaxRetriesError("Maximum retries reached")
 
-    def post(self, path: str, json=None, headers=None, max_retry=5) -> Any:
+    def post(self, path: str, json=None, headers=None, max_retry=MAX_RETRY) -> Any:
         """Make POST requests to Boostr that uses the session, pass through headers and json data,
         check status, and return parsed json
         """
@@ -195,7 +196,7 @@ class BoostrAPI:
             method="post", path=path, json=json, headers=headers, max_retry=max_retry
         )
 
-    def get(self, path: str, params=None, headers=None, max_retry=5):
+    def get(self, path: str, params=None, headers=None, max_retry=MAX_RETRY):
         """Make GET requests to Boostr, handling retries and rate limits."""
         return self.request_with_retries(
             method="get",
