@@ -77,6 +77,7 @@ class BQSyncer:
                 campaign_id,
                 campaign_name,
                 flight_id,
+                flight_name,
                 provider,
                 SUM(clicks) AS clicks,
                 SUM(impressions) AS impressions
@@ -91,6 +92,7 @@ class BQSyncer:
                 campaign_id,
                 campaign_name,
                 flight_id,
+                flight_name,
                 provider
         """
 
@@ -125,6 +127,7 @@ class BQSyncer:
             campaign_id = row["campaign_id"]
             campaign_name = row["campaign_name"]
             flight_id = row["flight_id"]
+            flight_name = row["flight_name"]
             provider = row["provider"]
             clicks = row["clicks"]
             impressions = row["impressions"]
@@ -134,6 +137,7 @@ class BQSyncer:
                 campaign_id=campaign_id,
                 campaign_name=campaign_name,
                 flight_id=flight_id,
+                flight_name=flight_name,
                 provider=provider,
                 # If script runs again in the same day, just update the clicks and impressions
                 defaults={
