@@ -59,8 +59,8 @@ class TestSyncBoostrData(TestCase):
         jwt = boostr.authenticate(EMAIL, PASSWORD)
         self.assertEqual(jwt, "i.am.jwt")
 
-    @mock.patch.object(settings, "BOOSTR_API_JWT", "i.am.jwt")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
+    @mock.patch.object(settings, "BOOSTR_API_JWT", "i.am.jwt")
     def test_authenticate_with_JWT(self, mock_post):
         """Test authenticate function that uses an existing JWT and skips calling Boostr API auth endpoint"""
         boostr = BoostrAPI(BASE_URL, EMAIL, PASSWORD)
@@ -68,7 +68,7 @@ class TestSyncBoostrData(TestCase):
         self.assertEqual(jwt, "i.am.jwt")
         mock_post.assert_not_called()
 
-    @mock.patch("time.sleep", return_value=None)
+    @mock.patch("time.sleep")
     @mock.patch("requests.Session.get")
     @mock.patch("requests.Session.post")
     def test_429_error(self, mock_post, mock_get, mock_sleep):
@@ -87,7 +87,7 @@ class TestSyncBoostrData(TestCase):
             captured_logs.output,
         )
 
-    @mock.patch("time.sleep", return_value=None)
+    @mock.patch("time.sleep")
     @mock.patch("requests.Session.get", side_effect=mock_get_fail_500)
     @mock.patch("requests.Session.post")
     def test_500_error(self, mock_post, mock_get, mock_sleep):
@@ -97,7 +97,7 @@ class TestSyncBoostrData(TestCase):
             boostr.get("deals")
         self.assertEqual(str(context.exception), "Bad response status 500 from /deals")
 
-    @mock.patch("time.sleep", return_value=None)
+    @mock.patch("time.sleep")
     @mock.patch("requests.Session.get")
     @mock.patch("requests.Session.post")
     def test_max_retries(self, mock_post, mock_get, mock_sleep):
@@ -122,10 +122,7 @@ class TestSyncBoostrData(TestCase):
                 captured_logs.output[i],
             )
 
-    @mock.patch(
-        "consvc_shepherd.management.commands.sync_boostr_data.BoostrApi._sleep",
-        return_value=None,
-    )
+    @mock.patch("time.sleep")
     @mock.patch("requests.Session.get")
     @mock.patch("requests.Session.post")
     def test_api_request_with_request_exception(self, mock_post, mock_get, mock_sleep):
@@ -140,7 +137,7 @@ class TestSyncBoostrData(TestCase):
         self.assertEqual(response, {"data": "success"})
 
     @mock.patch.object(settings, "BOOSTR_API_JWT", None)
-    @mock.patch("time.sleep", return_value=None)
+    @mock.patch("time.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_token_fail)
     def test_authenticate_fail(self, mock_post, mock_sleep):
         """Test sad path for the authenticate function"""
@@ -174,7 +171,7 @@ class TestSyncBoostrData(TestCase):
         ]
         mock_update_or_create.assert_has_calls(calls)
 
-    @mock.patch("time.sleep", return_value=None)
+    @mock.patch("time.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_fail)
     def test_upsert_products_fail(self, mock_get, mock_post, mock_sleep):
@@ -231,7 +228,7 @@ class TestSyncBoostrData(TestCase):
         ]
         mock_update_or_create.assert_has_calls(calls)
 
-    @mock.patch("time.sleep", return_value=None)
+    @mock.patch("time.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_fail)
     def test_upsert_deals_fail(self, mock_get, mock_post, mock_sleep):
@@ -346,7 +343,7 @@ class TestSyncBoostrData(TestCase):
         ]
         mock_update_or_create.assert_has_calls(calls)
 
-    @mock.patch("time.sleep", return_value=None)
+    @mock.patch("time.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_fail)
     def test_upsert_deal_products_fail(self, mock_get, mock_post, mock_sleep):
@@ -442,7 +439,8 @@ class TestSyncBoostrData(TestCase):
             get_campaign_type(no_campaign_type_name), BoostrProduct.CampaignType.NONE
         )
 
-    @mock.patch.object(settings, "BOOSTR_API_JWT", None)
+    # @mock.patch.object(settings, "BOOSTR_API_JWT", None)
+    @override_settings(BOOSTR_API_JWT=None)
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     def test_boostr_api_post(self, mock_post_success):
         """Test the BoostrApi POST wrapper"""
@@ -544,7 +542,7 @@ class TestSyncBoostrData(TestCase):
         ]
         mock_create.assert_has_calls(calls)
 
-    @mock.patch("time.sleep", return_value=None)
+    @mock.patch("time.sleep")
     @mock.patch(
         "consvc_shepherd.management.commands.sync_boostr_data.BoostrLoader.upsert_deals",
         side_effect=mock_upsert_deals_exception,
