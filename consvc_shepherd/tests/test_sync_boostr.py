@@ -6,6 +6,8 @@ from django.conf import settings
 from django.test import TestCase, override_settings
 
 from consvc_shepherd.management.commands.sync_boostr_data import (
+    DEFAULT_RETRY_INTERVAL,
+    MAX_RETRY,
     BoostrAPI,
     BoostrAPIError,
     BoostrAPIMaxRetriesError,
@@ -13,8 +15,6 @@ from consvc_shepherd.management.commands.sync_boostr_data import (
     BoostrLoader,
     BoostrProduct,
     get_campaign_type,
-    DEFAULT_RETRY_INTERVAL,
-    MAX_RETRY,
 )
 from consvc_shepherd.tests.test_sync_boostr_mocks import (
     mock_get_fail,
