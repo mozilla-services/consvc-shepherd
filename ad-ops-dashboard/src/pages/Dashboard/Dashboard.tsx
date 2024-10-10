@@ -7,7 +7,15 @@ function Products() {
 
   if (isPending) return "Loading...";
 
-  if (error) return "An error has occurred: " + error.message;
+  if (error) {
+    const errorMessage =
+      typeof error === "string"
+        ? error
+        : error instanceof Error
+        ? error.message
+        : "Unknown error";
+    return "An error has occurred: " + errorMessage;
+  }
 
   return (
     <Box>

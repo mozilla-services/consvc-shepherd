@@ -65,7 +65,7 @@ eslint-fix: $(INSTALL_STAMP)  ##  Format code with eslint
 	cd ad-ops-dashboard && npm run lint:fix
 
 # Temporarily disable eslint while we fix the current issues in the ad-ops-dashboard
-lint: $(INSTALL_STAMP) isort black flake8 bandit pydocstyle mypy # eslint ##  Run various linters
+lint: $(INSTALL_STAMP) isort black flake8 bandit pydocstyle mypy eslint ##  Run various linters
 
 lint-fix: $(INSTALL_STAMP) isort-fix black-fix flake8 bandit pydocstyle mypy eslint-fix ##  Run various linters and fix errors to pass CircleCi checks
 

@@ -81,7 +81,7 @@ class BoostrDealSerializer(serializers.ModelSerializer):
         """Metadata for BoostrDealSerializer"""
 
         model = BoostrDeal
-        fields = "__all__"
+        fields = ["id", "name"]
 
 
 class NestedCampaignSerializer(serializers.Serializer):

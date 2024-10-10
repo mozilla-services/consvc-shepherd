@@ -1,12 +1,12 @@
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { Control, Controller } from "react-hook-form";
+import { Control, Controller, FieldValues } from "react-hook-form";
 import dayjs from "dayjs";
 import { styled } from "@mui/system";
 
-interface DateInputProps {
-  control: Control<any>;
+interface DateInputProps extends FieldValues {
+  control: Control;
   name: string;
   format?: string;
   label: string;
@@ -24,28 +24,37 @@ export default function DateInput({
 }: DateInputProps) {
   return (
     <Controller
-      name={name}
       control={control}
-      render={({ field: { onChange, value, ref }, fieldState: { error } }) => (
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <StyledDatePicker
-            label={label}
-            value={value ? dayjs(value, format) : null}
-            onChange={(date) => {
-              onChange(date ? dayjs(date).format(format) : null);
-            }}
-            views={["year", "month", "day"]}
-            format={format}
-            slotProps={{
-              textField: {
-                error: !!error,
-                helperText: error?.message ? String(error.message) : undefined,
-                inputRef: ref,
-              },
-            }}
-          />
-        </LocalizationProvider>
-      )}
+      name={name}
+      render={({ field: { onChange, value, ref }, fieldState: { error } }) => {
+        const parsedValue =
+          typeof value === "string" || value instanceof Date
+            ? dayjs(value)
+            : null;
+
+        return (
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <StyledDatePicker
+              label={label}
+              value={parsedValue}
+              onChange={(date) => {
+                onChange(date ? dayjs(date).format(format) : null);
+              }}
+              views={["year", "month", "day"]}
+              format={format}
+              slotProps={{
+                textField: {
+                  error: !!error,
+                  helperText: error?.message
+                    ? String(error.message)
+                    : undefined,
+                  inputRef: ref,
+                },
+              }}
+            />
+          </LocalizationProvider>
+        );
+      }}
     />
   );
 }

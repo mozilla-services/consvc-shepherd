@@ -159,7 +159,7 @@ export default function CampaignOverview() {
           formData={formData}
           isUpdate={isUpdate}
           handleClose={handleClose}
-          campaigns={campaignsData || []}
+          campaigns={campaignsData}
         />
       </FormDialog>
 
@@ -186,7 +186,7 @@ export default function CampaignOverview() {
       </ButtonContainer>
       <TableContainer className="ag-theme-quartz">
         <AgGridReact
-          rowData={campaignsData || []}
+          rowData={campaignsData}
           columnDefs={colDefs}
           defaultColDef={defaultColDef}
           pagination={true}

@@ -10,7 +10,7 @@ from consvc_shepherd.models import (
     PartnerAllocation,
     SettingsSnapshot,
 )
-from consvc_shepherd.preview import Ads, Spoc, Tile
+from consvc_shepherd.preview import Ads, Rectangle, Spoc, Tile
 from contile.models import Partner
 
 
@@ -166,7 +166,7 @@ class TestPreviewView(TestCase):
             url="example2.com",
         )
         spoc = Spoc(
-            image_src="https://picsum.photos/296/148",
+            image_url="https://picsum.photos/296/148",
             title="Play Anvil of the Ages Now for Free",
             domain="play.anviloftheages.com",
             excerpt="If you like to play games, then you should play this game.",
@@ -174,9 +174,14 @@ class TestPreviewView(TestCase):
             sponsor="Anvil of the Ages",
             url="example3.com",
         )
+        rect = Rectangle(
+            image_url="https://picsum.photos/300/250",
+            url="example4.com",
+        )
         return Ads(
             tiles=[tile, direct_sold_tile],
             spocs=[spoc],
+            rectangles=[rect],
             is_mobile=False,
         )
 
@@ -258,3 +263,7 @@ class TestPreviewView(TestCase):
             )
             self.assertContains(response, "Anvil of the Ages")
             self.assertContains(response, "example3.com")
+
+            # Check the Rectangles section
+            self.assertContains(response, "https://picsum.photos/300/250")
+            self.assertContains(response, "example4.com")
