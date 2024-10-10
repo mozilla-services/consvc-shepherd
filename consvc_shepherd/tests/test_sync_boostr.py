@@ -13,6 +13,8 @@ from consvc_shepherd.management.commands.sync_boostr_data import (
     BoostrLoader,
     BoostrProduct,
     get_campaign_type,
+    DEFAULT_RETRY_INTERVAL,
+    MAX_RETRY,
 )
 from consvc_shepherd.tests.test_sync_boostr_mocks import (
     mock_get_fail,
@@ -32,9 +34,6 @@ from consvc_shepherd.tests.test_sync_boostr_mocks import (
 BASE_URL = "https://example.com"
 EMAIL = "email@mozilla.com"
 PASSWORD = "test"  # nosec
-DEFAULT_RETRY_INTERVAL = 60
-MOCK_RETRY_AFTER_SECONDS = 60
-MAX_RETRY = 5
 
 
 @override_settings(DEBUG=True)
@@ -79,11 +78,11 @@ class TestSyncBoostrData(TestCase):
         boostr = BoostrAPI(BASE_URL, EMAIL, PASSWORD)
         with self.assertLogs("sync_boostr_data", level="INFO") as captured_logs:
             response = boostr.get("deals")
-        mock_sleep.assert_called_once_with(MOCK_RETRY_AFTER_SECONDS + 1)
+        mock_sleep.assert_called_once_with(DEFAULT_RETRY_INTERVAL + 1)
         self.assertEqual(mock_get.call_count, 2)
         self.assertEqual(response, {"data": "success"})
         self.assertIn(
-            f"INFO:sync_boostr_data:429: Rate limited - Waiting {MOCK_RETRY_AFTER_SECONDS+1} seconds. Current retry: 0",
+            f"INFO:sync_boostr_data:429: Rate limited - Waiting {DEFAULT_RETRY_INTERVAL+1} seconds. Current retry: 0",
             captured_logs.output,
         )
 
@@ -115,7 +114,7 @@ class TestSyncBoostrData(TestCase):
         for i in range(MAX_RETRY):
             expected_log = (
                 f"INFO:sync_boostr_data:429: Rate limited - "
-                f"Waiting {MOCK_RETRY_AFTER_SECONDS+1} seconds. Current retry: {i}"
+                f"Waiting {DEFAULT_RETRY_INTERVAL+1} seconds. Current retry: {i}"
             )
             self.assertIn(
                 expected_log,
