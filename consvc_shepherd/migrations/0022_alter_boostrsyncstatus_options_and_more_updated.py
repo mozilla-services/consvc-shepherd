@@ -6,21 +6,27 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('consvc_shepherd', '0021_bqsyncstatus'),
+        ("consvc_shepherd", "0021_bqsyncstatus"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='boostrsyncstatus',
-            options={'verbose_name': 'Boostr sync status', 'verbose_name_plural': 'Boostr sync statuses'},
+            name="boostrsyncstatus",
+            options={
+                "verbose_name": "Boostr sync status",
+                "verbose_name_plural": "Boostr sync statuses",
+            },
         ),
         migrations.AlterModelOptions(
-            name='bqsyncstatus',
-            options={'verbose_name': 'BigQuery sync status', 'verbose_name_plural': 'BigQuery sync statuses'},
+            name="bqsyncstatus",
+            options={
+                "verbose_name": "BigQuery sync status",
+                "verbose_name_plural": "BigQuery sync statuses",
+            },
         ),
         migrations.AddField(
-            model_name='bqsyncstatus',
-            name='query_date',
+            model_name="bqsyncstatus",
+            name="query_date",
             field=models.DateTimeField(null=True),
         ),
     ]

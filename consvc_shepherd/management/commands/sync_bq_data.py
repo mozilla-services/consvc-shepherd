@@ -184,6 +184,9 @@ class BQSyncer:
             self.update_sync_status(SYNC_STATUS_FAILURE, str(e))
             raise e
         except Exception as e:
-            error = f"Exception: {SYNC_STATUS_FAILURE}, query date: {self.date}, {str(e)} Trace: {traceback.format_exc()}"
+            error = (
+                f"Exception: {SYNC_STATUS_FAILURE}, query date: {self.date}, {str(e)} "
+                f"Trace: {traceback.format_exc()}"
+            )
             self.update_sync_status(SYNC_STATUS_FAILURE, error)
             raise e
