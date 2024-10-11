@@ -7,9 +7,13 @@ from datetime import datetime
 import pandas
 from django.core.management import CommandError
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 from google.cloud import bigquery
 
-from consvc_shepherd.models import DeliveredFlight
+from consvc_shepherd.models import BQSyncStatus, DeliveredFlight
+
+SYNC_STATUS_SUCCESS = "success"
+SYNC_STATUS_FAILURE = "failure"
 
 
 class Command(BaseCommand):
@@ -52,9 +56,17 @@ class Command(BaseCommand):
         try:
             syncer.sync_data()
         except Exception as e:
-            raise CommandError(f"An error occurred: {e}")
+            raise CommandError(f"{e}")
 
         self.stdout.write(f"BigQuery sync completed for date {options['date']}")
+
+
+class NoDataReturnedError(Exception):
+    """Exception raised when no data is returned from the BigQuery query."""
+
+    def __init__(self, date: str):
+        self.message = f"No data returned for date {date}"
+        super().__init__(self.message)
 
 
 class BQSyncer:
@@ -109,8 +121,7 @@ class BQSyncer:
             results = query_job.result()
 
             if results.total_rows == 0:
-                self.log.warning(f"No data returned for the date {self.date}")
-                return pandas.DataFrame()
+                raise NoDataReturnedError(self.date)
 
             df = results.to_dataframe()
 
@@ -139,7 +150,6 @@ class BQSyncer:
                 flight_id=flight_id,
                 flight_name=flight_name,
                 provider=provider,
-                # If script runs again in the same day, just update the clicks and impressions
                 defaults={
                     "clicks_delivered": clicks,
                     "impressions_delivered": impressions,
@@ -151,6 +161,17 @@ class BQSyncer:
             else:
                 self.log.info(f"Updated DeliveredFlight: {delivered_flight}")
 
+    def update_sync_status(self, status: str, message: str):
+        """Update the BQSyncStatus table given the status and the message"""
+        query_date = datetime.strptime(self.date, "%Y-%m-%d")
+        query_date = timezone.make_aware(query_date)
+        BQSyncStatus.objects.create(
+            status=status,
+            message=message,
+            synced_on=timezone.now(),
+            query_date=query_date,
+        )
+
     def sync_data(self):
         """BQ Syncer entrypoint"""
         try:
@@ -159,8 +180,17 @@ class BQSyncer:
             if not df.empty:
                 self.upsert_data(df)
 
-            self.log.info("BigQuery sync process has completed successfully")
+            self.log.info(
+                "BigQuery sync process has completed successfully. Updating sync_status"
+            )
+            self.update_sync_status(SYNC_STATUS_SUCCESS, "BigQuery sync success")
+        except NoDataReturnedError as e:
+            self.update_sync_status(SYNC_STATUS_FAILURE, str(e))
+            raise e
         except Exception as e:
-            error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
-            self.log.error(f"BigQuery sync process has encounterd an error: {error}")
-            raise
+            error = (
+                f"Exception: {SYNC_STATUS_FAILURE}, query date: {self.date}, {str(e)} "
+                f"Trace: {traceback.format_exc()}"
+            )
+            self.update_sync_status(SYNC_STATUS_FAILURE, error)
+            raise e
