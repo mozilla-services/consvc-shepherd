@@ -179,6 +179,22 @@ export default function CampaignOverview() {
         />
       </FormDialog>
 
+      <FormDialog
+        title="Campaign Split Form"
+        handleClose={() => {
+          handleCloseSplitFormDialog();
+        }}
+        open={openSplitCampaignModal}
+        maxWidth="xl"
+      >
+        <SplitCampaignForm
+          formData={formData}
+          handleClose={() => {
+            handleCloseSplitFormDialog();
+          }}
+        />
+      </FormDialog>
+
       <ButtonContainer>
         <Button onClick={handleOpen} variant="contained">
           Add Data
@@ -186,7 +202,7 @@ export default function CampaignOverview() {
       </ButtonContainer>
       <TableContainer className="ag-theme-quartz">
         <AgGridReact
-          rowData={campaignsData || []}
+          rowData={campaignsData}
           columnDefs={colDefs}
           defaultColDef={defaultColDef}
           pagination={true}

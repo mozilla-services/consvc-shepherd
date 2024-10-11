@@ -55,7 +55,7 @@ export default function SplitCampaignForm({
     },
   });
 
-  const onSubmitHandler = (data: SplitFormSchema) => {
+  const onSubmitHandler = async (data: SplitFormSchema) => {
     const updatedData = {
       ...data,
       campaigns: data.campaigns.map((campaign) => ({
@@ -69,12 +69,13 @@ export default function SplitCampaignForm({
       deal: formData.deal,
     };
 
-    splitMutation.mutate(updatedData, {
-      onSuccess: () => {
-        reset();
-        handleClose();
-      },
-    });
+    try {
+      await splitMutation.mutateAsync(updatedData);
+      reset();
+      handleClose();
+    } catch (error) {
+      console.error("Submission error:", error);
+    }
   };
 
   const { fields, append, remove } = useFieldArray({
@@ -84,13 +85,7 @@ export default function SplitCampaignForm({
 
   return (
     <Box mt="2rem">
-      <Box
-        component="form"
-        onSubmit={(event) => {
-          event.preventDefault();
-          handleSubmit(onSubmitHandler)();
-        }}
-      >
+      <Box component="form" onSubmit={handleSubmit(onSubmitHandler)}>
         <Grid2 container spacing={2}>
           {fields.map((field, index) => (
             <React.Fragment key={field.id}>

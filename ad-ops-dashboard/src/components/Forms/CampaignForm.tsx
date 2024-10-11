@@ -77,7 +77,7 @@ export default function CampaignForm({
         }))
       );
     }
-  }, [watchDeal, isUpdate, setValue]);
+  }, [campaigns, formData.deal, formData.id, watchDeal, isUpdate, setValue]);
 
   useFieldArray({
     control,
@@ -194,7 +194,7 @@ export default function CampaignForm({
             control={control}
             label="Deal"
             name="deal"
-            options={deals || []}
+            options={deals}
           />
         </Box>
 
@@ -215,13 +215,13 @@ export default function CampaignForm({
                 alignItems="center"
               >
                 <TextInput
-                  name={`campaign_fields[${index}].impressions_sold`}
+                  name={`campaign_fields[${index.toString()}].impressions_sold`}
                   label="Impressions Sold"
                   control={control}
                   type="number"
                 />
                 <TextInput
-                  name={`campaign_fields[${index}].net_spend`}
+                  name={`campaign_fields[${index.toString()}].net_spend`}
                   label="Net Spend"
                   control={control}
                   type="number"
