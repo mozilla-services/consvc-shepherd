@@ -4,6 +4,8 @@ Currently this is a Django admin command that can be manually run by `docker exe
 
 ### Instructions to run
 
+1. Ensure that your LDAP email has [Cat Ads 2](https://mozilla-hub.atlassian.net/wiki/spaces/MA1/pages/575897693/Ads+Sensitive+Data+Policy) level access. This is necessary because BigQuery queries grant us access to sensitive data (e.g., ad partner information, revenue data, etc.). Without the proper permissions, querying the database view below will not work.
+    1. If you do not have permission, request it by filling out the [Ads Data Access Request](https://mozilla-hub.atlassian.net/servicedesk/customer/portal/14/create/1315) form.
 1. Login to gcloud locally with `gcloud auth application-default login`.
 1. Copy your gcloud creds into the shepherd container:
     ```
