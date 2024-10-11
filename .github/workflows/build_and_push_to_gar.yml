@@ -8,74 +8,7 @@ on:
     tags:
       - v.[0-9]+rc[0-9]+
 
-env:
-  NODE_VERSION: 20
-  PYTHON_VERSION: 3.11
-  POETRY_VERSION: 1.8.3
-
 jobs:
-  lint:
-    name: lint
-    runs-on:
-      - ubuntu-latest
-
-    environment: build
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-
-      - name: install poetry
-        run: |-
-          python -m pip install poetry==${{ env.POETRY_VERSION }}
-
-      - name: setup python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: poetry
-
-      - name: setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: ad-ops-dashboard/package-lock.json
-
-      - name: make lint
-        run: |-
-          make -k lint
-
-  test:
-    name: test
-    runs-on:
-      - ubuntu-latest
-
-    environment: build
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-
-      - name: install poetry
-        run: |-
-          python -m pip install poetry==${{ env.POETRY_VERSION }}
-
-      - name: setup python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: poetry
-
-      - name: setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: ad-ops-dashboard/package-lock.json
-
-      - name: make test
-        run: |-
-          make test
-
   build-and-push:
     name: build and push
     runs-on:
@@ -94,15 +27,6 @@ jobs:
       - id: set-tag
         run: |-
           echo TAG=$(cd src; git describe --tags --abbrev=4 2>/dev/null || git rev-parse --short=8 HEAD) | tee -a ${GITHUB_OUTPUT}
-
-      - id: generate_version_json
-        name: generate version.json
-        run: |-
-          printf '{"commit":"%s","version":"%s","source":"%s","build":"%s"}\n' \
-            "$(cd src; git rev-parse HEAD)" \
-            "${{ steps.set-tag.outputs.TAG }}" \
-            "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
-            "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" |tee src/version.json
 
       - uses: docker/setup-buildx-action@v3
 
