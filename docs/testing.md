@@ -29,5 +29,3 @@ See the most recent [Django test docs][django-test-docs] for reference. Also, se
 [django-test-docs]: https://docs.djangoproject.com/en/4.2/topics/testing/tools/
 [coverage-docs]: https://coverage.readthedocs.io/en/latest/
 [shepherd-ci-dashboard]: https://app.circleci.com/pipelines/github/mozilla-services/consvc-shepherd
-
-test change to rerun pipeline
