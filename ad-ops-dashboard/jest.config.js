@@ -7,14 +7,21 @@ export default {
     "!src/**/*.d.ts",
     "!src/__mocks__/**",
   ],
+  coverageDirectory:"coverage",
+  coverageReporters: ['text', 'lcov', "text-summary"],
   // Not ready for this yet, but let's get there soon
-  // coverageThreshold: {
-  //   global: {
-  //     lines: 95,
-  //   },
-  // },
-  testEnvironment: "jest-environment-jsdom",
+  coverageThreshold: {
+    global: {
+      lines: 80,
+      statements:80,
+    },
+  },
+  testEnvironment: "jest-fixed-jsdom",
+  testEnvironmentOptions: {
+    customExportConditions: [''],
+  },
   modulePaths: ["<rootDir>/src"],
+  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   transform: {
     "^.+\\.(t|j)sx?$": [
       "@swc/jest",
