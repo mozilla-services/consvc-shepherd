@@ -159,10 +159,13 @@ class BQSyncer:
 
     def update_sync_status(self, status: str, message: str):
         """Update the BQSyncStatus table given the status and the message"""
+        query_date = datetime.strptime(self.date, "%Y-%m-%d")
+        query_date = timezone.make_aware(query_date)
         BQSyncStatus.objects.create(
             status=status,
             message=message,
             synced_on=timezone.now(),
+            query_date=query_date,
         )
 
     def sync_data(self):
@@ -181,6 +184,6 @@ class BQSyncer:
             self.update_sync_status(SYNC_STATUS_FAILURE, str(e))
             raise e
         except Exception as e:
-            error = f"Exception: {SYNC_STATUS_FAILURE}, {self.date}, {str(e)} Trace: {traceback.format_exc()}"
+            error = f"Exception: {SYNC_STATUS_FAILURE}, query date: {self.date}, {str(e)} Trace: {traceback.format_exc()}"
             self.update_sync_status(SYNC_STATUS_FAILURE, error)
             raise e

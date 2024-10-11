@@ -379,6 +379,8 @@ class BQSyncStatus(models.Model):
     ----------
     synced_on : DateTimeField
         Date the BigQuery sync process ran
+    query_date : DateTimeField
+        Date used to query BigQuery
     sync_status: CharField = models.CharField()
         The status of the sync process (success|failure)
     message: CharField = models.CharField()
@@ -398,6 +400,7 @@ class BQSyncStatus(models.Model):
         verbose_name_plural = "BigQuery sync statuses"
 
     synced_on: DateTimeField = models.DateTimeField()
+    query_date: DateTimeField = models.DateTimeField(null=True)
     status: CharField = models.CharField(choices=SyncStatus.choices)
     message: CharField = models.CharField()
 

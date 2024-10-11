@@ -475,6 +475,7 @@ class BQSyncStatusAdmin(admin.ModelAdmin):
     list_display = [
         "id",
         "synced_on",
+        "query_date",
         "status",
         "message",
     ]
