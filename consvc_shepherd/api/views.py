@@ -9,9 +9,10 @@ from consvc_shepherd.api.serializers import (
     BoostrDealSerializer,
     BoostrProductSerializer,
     CampaignSerializer,
+    InventorySerializer,
     SplitCampaignSerializer,
 )
-from consvc_shepherd.models import BoostrDeal, BoostrProduct, Campaign
+from consvc_shepherd.models import BoostrDeal, BoostrProduct, Campaign, Inventory
 
 
 class ProductViewSet(ReadOnlyModelViewSet):
@@ -44,3 +45,8 @@ class BoostrDealViewSet(ReadOnlyModelViewSet):
 
     queryset = BoostrDeal.objects.all()
     serializer_class = BoostrDealSerializer
+
+class InventoryViewSet(ReadOnlyModelViewSet):
+    """Fetch all inventory overview data"""
+    queryset = Inventory.objects.all()
+    serializer_class = InventorySerializer

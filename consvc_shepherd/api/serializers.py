@@ -2,7 +2,7 @@
 
 from rest_framework import serializers
 
-from consvc_shepherd.models import BoostrDeal, BoostrProduct, Campaign
+from consvc_shepherd.models import BoostrDeal, BoostrProduct, Campaign, Inventory
 
 
 class BoostrProductSerializer(serializers.ModelSerializer):
@@ -192,3 +192,13 @@ class SplitCampaignSerializer(serializers.Serializer):
         """Create a new campaign."""
         campaign["deal"] = deal
         return Campaign.objects.create(**campaign)
+
+
+class InventorySerializer(serializers.ModelSerializer):
+    """Serializer for Inventory model"""
+
+    class Meta:
+        """Metadata to specify the way Inventory is serialized"""
+
+        model = Inventory
+        fields = "__all__"
