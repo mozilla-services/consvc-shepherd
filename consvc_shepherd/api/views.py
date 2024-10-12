@@ -46,7 +46,9 @@ class BoostrDealViewSet(ReadOnlyModelViewSet):
     queryset = BoostrDeal.objects.all()
     serializer_class = BoostrDealSerializer
 
+
 class InventoryViewSet(ReadOnlyModelViewSet):
     """Fetch all inventory overview data"""
+
     queryset = Inventory.objects.all()
     serializer_class = InventorySerializer

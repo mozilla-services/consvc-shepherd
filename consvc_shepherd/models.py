@@ -614,6 +614,7 @@ class Inventory(models.Model):
         Return the string representation for the inventory object
 
     """
+
     placement: CharField = models.CharField(null=True, blank=True)
     country: CharField = models.CharField(null=True, blank=True)
     revenue: IntegerField = models.IntegerField()
