@@ -140,6 +140,7 @@ def mock_update_or_create_advertiser(*args, **kwargs) -> tuple[Advertiser, bool]
     """Mock out the DB for saving Advertiser"""
     return (
         Advertiser(
+            id=1,
             name=kwargs["name"],
         ),
         True,

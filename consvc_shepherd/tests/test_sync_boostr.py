@@ -11,6 +11,7 @@ from consvc_shepherd.management.commands.sync_boostr_data import (
     BoostrDeal,
     BoostrLoader,
     BoostrProduct,
+    Advertiser,
     get_campaign_type,
 )
 from consvc_shepherd.tests.test_sync_boostr_mocks import (
@@ -194,12 +195,27 @@ class TestSyncBoostrData(TestCase):
         """Test function that calls the Boostr API for deal data and saves to our DB"""
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD, {"max_deal_pages": 2})
         loader.upsert_deals()
+
+        advertiser_calls = [
+            mock.call(
+                name="Neutron",
+            ),
+            mock.call(
+                name="HiProduce",
+            ),
+        ]
+        mock_update_or_create_advertiser.assert_has_calls(advertiser_calls)
+
         calls = [
             mock.call(
                 boostr_id=1498421,
                 defaults={
                     "name": "Neutron: Neutron US, DE, FR",
                     "advertiser": "Neutron",
+                    "advertiser_id": Advertiser(
+                        id=1,
+                        name="Netron",
+                    ),
                     "currency": "$",
                     "amount": 50000,
                     "sales_representatives": "ksales@mozilla.com,lsales@mozilla.com",
@@ -212,6 +228,10 @@ class TestSyncBoostrData(TestCase):
                 defaults={
                     "name": "HiProduce: CA Tiles May 2024",
                     "advertiser": "HiProduce",
+                    "advertiser_id": Advertiser(
+                        id=1,
+                        name="HiProduce",
+                    ),
                     "currency": "$",
                     "amount": 10000,
                     "sales_representatives": "jsales@mozilla.com",
@@ -221,16 +241,6 @@ class TestSyncBoostrData(TestCase):
             ),
         ]
         mock_update_or_create.assert_has_calls(calls)
-
-        advertiser_calls = [
-            mock.call(
-                name="Neutron",
-            ),
-            mock.call(
-                name="HiProduce",
-            ),
-        ]
-        mock_update_or_create_advertiser.assert_has_calls(advertiser_calls)
 
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_success_empty_response)

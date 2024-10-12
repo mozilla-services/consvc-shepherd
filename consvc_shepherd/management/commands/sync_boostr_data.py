@@ -273,11 +273,16 @@ class BoostrLoader:
 
             closed_won_deals = [d for d in deals if (d["stage_name"] == "Closed Won")]
             for deal in closed_won_deals:
+                advertiser, advertiser_created = Advertiser.objects.update_or_create(
+                    name=deal["advertiser_name"],
+                )
+
                 boostr_deal, boostr_deal_created = BoostrDeal.objects.update_or_create(
                     boostr_id=deal["id"],
                     defaults={
                         "name": deal["name"],
                         "advertiser": deal["advertiser_name"],
+                        "advertiser_id": advertiser,
                         "currency": deal["currency"],
                         "amount": math.floor(float(deal["budget"])),
                         "sales_representatives": ",".join(
@@ -286,9 +291,6 @@ class BoostrLoader:
                         "start_date": deal["start_date"],
                         "end_date": deal["end_date"],
                     },
-                )
-                _, advertiser_created = Advertiser.objects.update_or_create(
-                    name=deal["advertiser_name"],
                 )
 
                 self.log.debug(f"Upserted deal: {deal['id']}")

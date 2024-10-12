@@ -256,6 +256,7 @@ class BoostrDealAdmin(admin.ModelAdmin):
         "boostr_id",
         "name",
         "advertiser",
+        "advertiser_id",
         "currency",
         "amount",
         "start_date",
@@ -387,6 +388,7 @@ class CampaignSummaryAdmin(admin.ModelAdmin):
 
     list_display = [
         "advertiser",
+        "advertiser_id",
         "net_spend",
         "impressions_sold",
         "net_ecpm",
@@ -473,5 +475,7 @@ class AdvertiserAdmin(admin.ModelAdmin):
 
     model = Advertiser
     list_display = [
+        "created_on",
+        "updated_on",
         "name",
     ]

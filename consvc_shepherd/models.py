@@ -273,9 +273,15 @@ class Advertiser(models.Model):
     ----------
     name: CharField = models.CharField()
         The name of the advertiser
+    created_on : DateTimeField
+        Date of advertiser record creation
+    updated_on : DateTimeField
+        Date of advertiser record update
     """
 
     name: CharField = models.CharField(unique=True)
+    created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
+    updated_on: DateTimeField = models.DateTimeField(auto_now=True)
 
 
 class BoostrDeal(models.Model):
@@ -287,6 +293,8 @@ class BoostrDeal(models.Model):
         The deal's id in Boostr
     name : CharField
         Deal name
+    advertiser : CharField
+        Advertiser name
     advertiser_id : Advertiser
         Foreign key pointer to Advertiser
     currency : CharField
@@ -452,6 +460,8 @@ class CampaignSummary(models.Model):
 
     deal_id : IntegerField
         Boostr deal ID
+    advertiser : CharField
+        Advertiser name
     advertiser_id : Advertiser
         Foreign key pointer to Advertiser
     net_spend : CharField
