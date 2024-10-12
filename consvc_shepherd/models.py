@@ -597,10 +597,16 @@ class DeliveredFlight(models.Model):
 
 class Inventory(models.Model):
     """Representation of AdOps InventoryOverview
-
     Attributes
     ----------
-
+    country : CharField
+        The date the metric was captured
+    revenue : IntegerField
+        Kevel campaign ID
+    inv_available : CharField
+        Kevel campaign name
+    inv_booked : IntegerField
+        Kevel flight ID
 
     Methods
     -------
@@ -608,13 +614,11 @@ class Inventory(models.Model):
         Return the string representation for the inventory object
 
     """
-
+    placement: CharField = models.CharField(null=True, blank=True)
     country: CharField = models.CharField(null=True, blank=True)
     revenue: IntegerField = models.IntegerField()
     inv_available: IntegerField = models.IntegerField()
     inv_booked: IntegerField = models.IntegerField()
-    created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
-    updated_on: DateTimeField = models.DateTimeField(auto_now=True)
 
     @property
     def ecpm(self):
@@ -650,6 +654,8 @@ class Inventory(models.Model):
     class Meta:
         """Metadata for the Inventory model."""
 
+        managed = False
+        db_table = "inventory_overview_view"
         ordering = ["country"]
         verbose_name = "Inventory"
         verbose_name_plural = "Inventory"
