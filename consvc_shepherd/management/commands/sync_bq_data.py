@@ -148,11 +148,11 @@ class BQSyncer:
             delivered_flight, created = DeliveredFlight.objects.update_or_create(
                 submission_date=submission_date,
                 campaign_id=campaign_id,
-                campaign_name=campaign_name,
                 flight_id=flight_id,
-                flight_name=flight_name,
                 provider=provider,
                 defaults={
+                    "campaign_name": campaign_name,
+                    "flight_name": flight_name,
                     "clicks_delivered": clicks,
                     "impressions_delivered": impressions,
                 },
