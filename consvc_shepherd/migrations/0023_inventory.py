@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
                         'Firefox Mobile'
                     WHEN bp.full_name ~* 'Firefox New Tab' THEN
                         'Firefox New Tab'
-                    WHEN bp.full_name ~* 'Firefox \d+' THEN
+                    WHEN bp.full_name ~* 'Firefox \\d+' THEN
                         'Firefox Desktop'
                     WHEN bp.full_name ~* 'Fakespot' THEN
                         'Fakespot'
