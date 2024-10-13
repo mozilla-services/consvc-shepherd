@@ -481,6 +481,7 @@ class AdvertiserAdmin(admin.ModelAdmin):
         "name",
     ]
 
+
 @admin.register(BQSyncStatus)
 class BQSyncStatusAdmin(admin.ModelAdmin):
     """Admin model for BQSyncStatuses records which represent the status of each BigQuery sync operation"""

@@ -5,13 +5,13 @@ from unittest import mock
 from django.test import TestCase, override_settings
 
 from consvc_shepherd.management.commands.sync_boostr_data import (
+    Advertiser,
     BoostrApi,
     BoostrApiError,
     BoostrApiMaxRetriesError,
     BoostrDeal,
     BoostrLoader,
     BoostrProduct,
-    Advertiser,
     get_campaign_type,
 )
 from consvc_shepherd.tests.test_sync_boostr_mocks import (
