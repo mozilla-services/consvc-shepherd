@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Authentication and Authorization - Shepherd</title>
+        <title>Sync Data from BigQuery - Shepherd</title>
 
 
         <!-- Custom HTML head -->
@@ -80,7 +80,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item affix "><a href="../intro.html">Service Overview</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="../quickStart.html"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="../metrics.html"><strong aria-hidden="true">2.</strong> Metrics</a></li><li class="chapter-item expanded "><a href="../operations/index.html"><strong aria-hidden="true">3.</strong> Operations and Runbooks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../operations/auth.html" class="active"><strong aria-hidden="true">3.1.</strong> Authentication and Authorization</a></li><li class="chapter-item "><a href="../operations/addAdvertisers.html"><strong aria-hidden="true">3.2.</strong> Add Advertisers</a></li><li class="chapter-item "><a href="../operations/addAdvertiserPaths.html"><strong aria-hidden="true">3.3.</strong> Add Advertiser Paths</a></li><li class="chapter-item "><a href="../operations/addPartners.html"><strong aria-hidden="true">3.4.</strong> Add Partners</a></li><li class="chapter-item "><a href="../operations/createSovAllocations.html"><strong aria-hidden="true">3.5.</strong> Create SOV Allocations</a></li><li class="chapter-item "><a href="../operations/createPublishSnapshots.html"><strong aria-hidden="true">3.6.</strong> Create and Publish Snapshots</a></li><li class="chapter-item "><a href="../operations/rollback.html"><strong aria-hidden="true">3.7.</strong> Rollback</a></li><li class="chapter-item "><a href="../operations/recoveryScript.html"><strong aria-hidden="true">3.8.</strong> Recover Snapshot</a></li><li class="chapter-item "><a href="../operations/syncBoostrData.html"><strong aria-hidden="true">3.9.</strong> Sync Data from Boostr</a></li><li class="chapter-item "><a href="../operations/syncBoostrDataCron.html"><strong aria-hidden="true">3.10.</strong> Sync Data from Boostr Cron Job</a></li><li class="chapter-item "><a href="../operations/syncBigQueryData.html"><strong aria-hidden="true">3.11.</strong> Sync Data from BigQuery</a></li><li class="chapter-item "><a href="../operations/syncBigQueryDataCron.html"><strong aria-hidden="true">3.12.</strong> Sync Data from BigQuery Cron Job</a></li></ol></li><li class="chapter-item "><li class="part-title">ADR</li><li class="chapter-item "><a href="../adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">4.</strong> Shepherd Metrics</a></li></ol>
+                <ol class="chapter"><li class="chapter-item affix "><a href="../intro.html">Service Overview</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="../quickStart.html"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="../metrics.html"><strong aria-hidden="true">2.</strong> Metrics</a></li><li class="chapter-item expanded "><a href="../operations/index.html"><strong aria-hidden="true">3.</strong> Operations and Runbooks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../operations/auth.html"><strong aria-hidden="true">3.1.</strong> Authentication and Authorization</a></li><li class="chapter-item "><a href="../operations/addAdvertisers.html"><strong aria-hidden="true">3.2.</strong> Add Advertisers</a></li><li class="chapter-item "><a href="../operations/addAdvertiserPaths.html"><strong aria-hidden="true">3.3.</strong> Add Advertiser Paths</a></li><li class="chapter-item "><a href="../operations/addPartners.html"><strong aria-hidden="true">3.4.</strong> Add Partners</a></li><li class="chapter-item "><a href="../operations/createSovAllocations.html"><strong aria-hidden="true">3.5.</strong> Create SOV Allocations</a></li><li class="chapter-item "><a href="../operations/createPublishSnapshots.html"><strong aria-hidden="true">3.6.</strong> Create and Publish Snapshots</a></li><li class="chapter-item "><a href="../operations/rollback.html"><strong aria-hidden="true">3.7.</strong> Rollback</a></li><li class="chapter-item "><a href="../operations/recoveryScript.html"><strong aria-hidden="true">3.8.</strong> Recover Snapshot</a></li><li class="chapter-item "><a href="../operations/syncBoostrData.html"><strong aria-hidden="true">3.9.</strong> Sync Data from Boostr</a></li><li class="chapter-item "><a href="../operations/syncBoostrDataCron.html"><strong aria-hidden="true">3.10.</strong> Sync Data from Boostr Cron Job</a></li><li class="chapter-item expanded "><a href="../operations/syncBigQueryData.html" class="active"><strong aria-hidden="true">3.11.</strong> Sync Data from BigQuery</a></li><li class="chapter-item "><a href="../operations/syncBigQueryDataCron.html"><strong aria-hidden="true">3.12.</strong> Sync Data from BigQuery Cron Job</a></li></ol></li><li class="chapter-item "><li class="part-title">ADR</li><li class="chapter-item "><a href="../adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">4.</strong> Shepherd Metrics</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -141,37 +141,48 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h2 id="authorization-and-access-requirements"><a class="header" href="#authorization-and-access-requirements">Authorization and Access Requirements</a></h2>
-<p>There are a number of authorization and access requirements needed to be able to access Shepherd.</p>
+                        <h1 id="sync-data-from-bigquery-and-upsert-it-into-the-shepherd-db"><a class="header" href="#sync-data-from-bigquery-and-upsert-it-into-the-shepherd-db">Sync data from BigQuery and upsert it into the Shepherd DB</a></h1>
+<p>Currently this is a Django admin command that can be manually run by <code>docker exec</code>-ing into a shepherd app container. This job is ran regularly by the Kubernetes cron schedule documented in <a href="./syncBigQueryDataCron.html">SyncBigQueryDataCron.md</a></p>
+<h3 id="instructions-to-run"><a class="header" href="#instructions-to-run">Instructions to run</a></h3>
 <ol>
-<li>Shepherd Google Access Group
-<ul>
-<li>Not being part of the group would result in a Google access denied warning when attempting visiting any of the Shepherd URLs.</li>
-</ul>
+<li>Ensure that your LDAP email has <a href="https://mozilla-hub.atlassian.net/wiki/spaces/MA1/pages/575897693/Ads+Sensitive+Data+Policy">Cat Ads 2</a> level access. This is necessary because BigQuery queries grant us access to sensitive data (e.g., ad partner information, revenue data, etc.). Without the proper permissions, querying the database view below will not work.
+<ol>
+<li>If you do not have permission, request it by filling out the <a href="https://mozilla-hub.atlassian.net/servicedesk/customer/portal/14/create/1315">Ads Data Access Request</a> form.</li>
+</ol>
 </li>
-<li>Shepherd Django Roles
-<ul>
-<li>Not having these roles would result in being presented the &quot;Django Administration&quot; login page.</li>
-<li>You can create a new admin user though the Users panel in Django Admin.</li>
-</ul>
+<li>Login to gcloud locally with <code>gcloud auth application-default login</code>.</li>
+<li>Copy your gcloud creds into the shepherd container:
+<pre><code>docker cp ~/.config/gcloud/application_default_credentials.json consvc-shepherd-app-1:/app/application_default_credentials.json
+</code></pre>
+</li>
+<li>Exec into the <code>consvc-shepherd-app-1</code> container:
+<pre><code class="language-sh">make debug
+</code></pre>
+</li>
+<li>Export the gcloud credentials as an env variable:
+<pre><code class="language-sh">export GOOGLE_APPLICATION_CREDENTIALS=&quot;/app/application_default_credentials.json&quot;
+</code></pre>
+</li>
+<li>Run the script for today's date:
+<pre><code class="language-sh">python manage.py sync_bq_data --project_id &quot;moz-fx-ads-nonprod&quot; --date $(date +%F)
+</code></pre>
 </li>
 </ol>
-<p><em>For access please ask someone on the Engineering Team. For engineers, ask to be given superuser privileges. For ad operations ask to be added to the 'AdOps' Django group</em></p>
-<h2 id="shepherd-urls"><a class="header" href="#shepherd-urls">Shepherd URLs:</a></h2>
-<ul>
-<li>Stage: https://shepherd.stage.ads.nonprod.webservices.mozgcp.net/admin/</li>
-<li>Prod: https://shepherd.services.mozilla.com/admin/</li>
-</ul>
+<h3 id="optional-arguments"><a class="header" href="#optional-arguments">Optional arguments</a></h3>
+<h4 id="--date"><a class="header" href="#--date">--date</a></h4>
+<p>The script accepts an optional named argument, --date, which can be used to
+fetch queries for any day. Ensure that the date is in the format YYYY-MM-DD.</p>
+<p>By default, the script will use today's date.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../operations/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../operations/syncBoostrDataCron.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="../operations/addAdvertisers.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../operations/syncBigQueryDataCron.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -181,11 +192,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../operations/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../operations/syncBoostrDataCron.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="../operations/addAdvertisers.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../operations/syncBigQueryDataCron.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

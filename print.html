@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item affix "><a href="intro.html">Service Overview</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="quickStart.html"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="metrics.html"><strong aria-hidden="true">2.</strong> Metrics</a></li><li class="chapter-item "><a href="operations/index.html"><strong aria-hidden="true">3.</strong> Operations and Runbooks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="operations/auth.html"><strong aria-hidden="true">3.1.</strong> Authentication and Authorization</a></li><li class="chapter-item "><a href="operations/addAdvertisers.html"><strong aria-hidden="true">3.2.</strong> Add Advertisers</a></li><li class="chapter-item "><a href="operations/addAdvertiserPaths.html"><strong aria-hidden="true">3.3.</strong> Add Advertiser Paths</a></li><li class="chapter-item "><a href="operations/addPartners.html"><strong aria-hidden="true">3.4.</strong> Add Partners</a></li><li class="chapter-item "><a href="operations/createSovAllocations.html"><strong aria-hidden="true">3.5.</strong> Create SOV Allocations</a></li><li class="chapter-item "><a href="operations/createPublishSnapshots.html"><strong aria-hidden="true">3.6.</strong> Create and Publish Snapshots</a></li><li class="chapter-item "><a href="operations/rollback.html"><strong aria-hidden="true">3.7.</strong> Rollback</a></li><li class="chapter-item "><a href="operations/recoveryScript.html"><strong aria-hidden="true">3.8.</strong> Recover Snapshot</a></li><li class="chapter-item "><a href="operations/syncBoostrData.html"><strong aria-hidden="true">3.9.</strong> Sync Data from Boostr</a></li><li class="chapter-item "><a href="operations/syncBoostrDataCron.html"><strong aria-hidden="true">3.10.</strong> Sync Data from Boostr Cron Job</a></li></ol></li><li class="chapter-item "><li class="part-title">ADR</li><li class="chapter-item "><a href="adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">4.</strong> Shepherd Metrics</a></li></ol>
+                <ol class="chapter"><li class="chapter-item affix "><a href="intro.html">Service Overview</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="quickStart.html"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="metrics.html"><strong aria-hidden="true">2.</strong> Metrics</a></li><li class="chapter-item "><a href="operations/index.html"><strong aria-hidden="true">3.</strong> Operations and Runbooks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="operations/auth.html"><strong aria-hidden="true">3.1.</strong> Authentication and Authorization</a></li><li class="chapter-item "><a href="operations/addAdvertisers.html"><strong aria-hidden="true">3.2.</strong> Add Advertisers</a></li><li class="chapter-item "><a href="operations/addAdvertiserPaths.html"><strong aria-hidden="true">3.3.</strong> Add Advertiser Paths</a></li><li class="chapter-item "><a href="operations/addPartners.html"><strong aria-hidden="true">3.4.</strong> Add Partners</a></li><li class="chapter-item "><a href="operations/createSovAllocations.html"><strong aria-hidden="true">3.5.</strong> Create SOV Allocations</a></li><li class="chapter-item "><a href="operations/createPublishSnapshots.html"><strong aria-hidden="true">3.6.</strong> Create and Publish Snapshots</a></li><li class="chapter-item "><a href="operations/rollback.html"><strong aria-hidden="true">3.7.</strong> Rollback</a></li><li class="chapter-item "><a href="operations/recoveryScript.html"><strong aria-hidden="true">3.8.</strong> Recover Snapshot</a></li><li class="chapter-item "><a href="operations/syncBoostrData.html"><strong aria-hidden="true">3.9.</strong> Sync Data from Boostr</a></li><li class="chapter-item "><a href="operations/syncBoostrDataCron.html"><strong aria-hidden="true">3.10.</strong> Sync Data from Boostr Cron Job</a></li><li class="chapter-item "><a href="operations/syncBigQueryData.html"><strong aria-hidden="true">3.11.</strong> Sync Data from BigQuery</a></li><li class="chapter-item "><a href="operations/syncBigQueryDataCron.html"><strong aria-hidden="true">3.12.</strong> Sync Data from BigQuery Cron Job</a></li></ol></li><li class="chapter-item "><li class="part-title">ADR</li><li class="chapter-item "><a href="adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">4.</strong> Shepherd Metrics</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -577,6 +577,104 @@ specific deals and products are being saved, run with <code>SHEPHERD_ENV=DEBUG</
 <li><a href="https://cloudlogging.app.goo.gl/qT3JmY6bcLw54Cwi9">nonprod/stage</a></li>
 </ul>
 <p>As an alternative, <code>gcloud logging read</code> can be used to retrieve logs via the CLI (follow <a href="https://cloud.google.com/sdk/gcloud/reference/logging/read">this guide</a>, to get more details). It is possible to retrieve logs via <code>kubectl</code> as well, setup requires some additional steps, though, since we're running on private clusters that need to be accessed via jumphosts(more info can be found <a href="https://mozilla-hub.atlassian.net/wiki/x/TAiqAQ">here</a>).</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="sync-data-from-bigquery-and-upsert-it-into-the-shepherd-db"><a class="header" href="#sync-data-from-bigquery-and-upsert-it-into-the-shepherd-db">Sync data from BigQuery and upsert it into the Shepherd DB</a></h1>
+<p>Currently this is a Django admin command that can be manually run by <code>docker exec</code>-ing into a shepherd app container. This job is ran regularly by the Kubernetes cron schedule documented in <a href="operations/./syncBigQueryDataCron.html">SyncBigQueryDataCron.md</a></p>
+<h3 id="instructions-to-run-1"><a class="header" href="#instructions-to-run-1">Instructions to run</a></h3>
+<ol>
+<li>Ensure that your LDAP email has <a href="https://mozilla-hub.atlassian.net/wiki/spaces/MA1/pages/575897693/Ads+Sensitive+Data+Policy">Cat Ads 2</a> level access. This is necessary because BigQuery queries grant us access to sensitive data (e.g., ad partner information, revenue data, etc.). Without the proper permissions, querying the database view below will not work.
+<ol>
+<li>If you do not have permission, request it by filling out the <a href="https://mozilla-hub.atlassian.net/servicedesk/customer/portal/14/create/1315">Ads Data Access Request</a> form.</li>
+</ol>
+</li>
+<li>Login to gcloud locally with <code>gcloud auth application-default login</code>.</li>
+<li>Copy your gcloud creds into the shepherd container:
+<pre><code>docker cp ~/.config/gcloud/application_default_credentials.json consvc-shepherd-app-1:/app/application_default_credentials.json
+</code></pre>
+</li>
+<li>Exec into the <code>consvc-shepherd-app-1</code> container:
+<pre><code class="language-sh">make debug
+</code></pre>
+</li>
+<li>Export the gcloud credentials as an env variable:
+<pre><code class="language-sh">export GOOGLE_APPLICATION_CREDENTIALS=&quot;/app/application_default_credentials.json&quot;
+</code></pre>
+</li>
+<li>Run the script for today's date:
+<pre><code class="language-sh">python manage.py sync_bq_data --project_id &quot;moz-fx-ads-nonprod&quot; --date $(date +%F)
+</code></pre>
+</li>
+</ol>
+<h3 id="optional-arguments-1"><a class="header" href="#optional-arguments-1">Optional arguments</a></h3>
+<h4 id="--date"><a class="header" href="#--date">--date</a></h4>
+<p>The script accepts an optional named argument, --date, which can be used to
+fetch queries for any day. Ensure that the date is in the format YYYY-MM-DD.</p>
+<p>By default, the script will use today's date.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="sync-bigquery-data-cron-job"><a class="header" href="#sync-bigquery-data-cron-job">Sync BigQuery Data Cron Job</a></h1>
+<p>The Sync BigQuery data script documented in <a href="operations/./syncBigQueryData.md.html">SyncBigQueryData.md</a> is orchestrated by a <a href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/">Kubernetetes Cronjob</a> that lives in the <a href="https://github.com/mozilla-it/webservices-infra">webservices-infra</a> repository.</p>
+<h3 id="how-it-runs-1"><a class="header" href="#how-it-runs-1">How it runs</a></h3>
+<p>The CronJob spins up a new pod on a configurable schedule using the latest container image of the Shepherd application. It then triggers the 
+<a href="operations/../../consvc_shepherd/management/commands/sync_bq_data.py">sync_bq_data.py</a> script within the pod. Refer to <a href="operations/syncBoostrDataCron.html">SyncBoostrData.md</a> to understand more about the inner workings of the script.</p>
+<h3 id="debugging-troubleshooting-and-viewing-logs-1"><a class="header" href="#debugging-troubleshooting-and-viewing-logs-1">Debugging, troubleshooting and viewing logs</a></h3>
+<p>Debugging involves accessing the <code>shepherd-bq-sync</code> pods that are created by the cronjob resource and inspecting the logs. </p>
+<p>There are many approaches but, with tools like <a href="https://cloud.google.com/sdk/docs/install">Gcloud CLI</a>, <a href="https://kubernetes.io/docs/reference/kubectl/">kubectl</a>, and <a href="https://k9scli.io/">k9s</a> one can do the following:</p>
+<ol>
+<li>Authenticate to Gcloud</li>
+</ol>
+<pre><code>gcloud auth login
+</code></pre>
+<ol start="2">
+<li>Connect to the bastion for accessing the topsites project in Gcloud</li>
+</ol>
+<pre><code>gcloud compute ssh --zone &quot;us-central1-a&quot; &quot;bastion-us-central1&quot; --project &quot;moz-fx-bastion-nonprod-global&quot; --ssh-flag=&quot;-D&quot; --ssh-flag=&quot;5001&quot; --ssh-flag=&quot;-N&quot; --tunnel-through-iap
+</code></pre>
+<ol start="3">
+<li>Get credentials for topsites. Use  topsites-prod-v1 for produuction</li>
+</ol>
+<pre><code>gcloud container clusters get-credentials topsites-nonprod-v1 --region us-west1 --project moz-fx-topsites-nonprod-619d
+</code></pre>
+<ol start="4">
+<li>Set the local proxy</li>
+</ol>
+<pre><code>export HTTPS_PROXY=socks5://127.0.0.1:5001
+</code></pre>
+<ol start="5">
+<li>Switch to the topsites-dev namespace</li>
+</ol>
+<pre><code>kubectl config set-context --current --namespace=dev-topsites
+</code></pre>
+<ol start="6">
+<li>Login to k9s</li>
+</ol>
+<pre><code>k9s
+</code></pre>
+<ol start="7">
+<li>Access all pods</li>
+</ol>
+<pre><code>type :pods, then press enter on the keyboard
+</code></pre>
+<ol start="8">
+<li>
+<p>Select the latest runnning cronjob <code>shepherd-bq-sync</code> pod. Note that the cronjob spins up a new pod each time it runs but does not destroy older pods once the process has completed.</p>
+</li>
+<li>
+<p>Access the logs for the pod</p>
+</li>
+</ol>
+<pre><code>press l on the keyboard
+</code></pre>
+<p>Below are steps for viewing logs through the GCP console</p>
+<ol>
+<li>Access the topsites project</li>
+</ol>
+<pre><code>https://console.cloud.google.com/logs/query;project=moz-fx-topsites-prod-6d32
+</code></pre>
+<ol start="2">
+<li>Use the query input field to search for logs for the shepherd-bq-sync pods</li>
+</ol>
+<pre><code>resource.labels.namespace_name=&quot;dev-topsites&quot;
+resource.labels.container_name=&quot;shepherd&quot;
+resource.labels.pod_name:&quot;shepherd-bq-sync&quot;
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="statsd-client-library-for-shepherd"><a class="header" href="#statsd-client-library-for-shepherd">StatsD Client Library for Shepherd</a></h1>
 <ul>
 <li>Status: Accepted</li>
