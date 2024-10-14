@@ -28,6 +28,7 @@ from consvc_shepherd.models import (
     BoostrProduct,
     Campaign,
     DeliveredFlight,
+    Flight,
     Partner,
     PartnerAllocation,
     SettingsSnapshot,
@@ -439,7 +440,6 @@ class CampaignAdminTests(TestCase):
             deal=self.deal1,
             ad_ops_person="AdOps Person 1",
             notes="Notes 1",
-            kevel_flight_id=1001,
             net_spend=1000,
             impressions_sold=2000,
             start_date="2023-01-01",
@@ -449,11 +449,20 @@ class CampaignAdminTests(TestCase):
             deal=self.deal2,
             ad_ops_person="AdOps Person 2",
             notes="Notes 2",
-            kevel_flight_id=1002,
             net_spend=1500,
             impressions_sold=3000,
             start_date="2023-01-01",
             end_date="2023-01-05",
+        )
+
+        Flight.objects.create(
+            campaign=self.campaign_overview1,
+            flight_id=1001,
+        )
+
+        Flight.objects.create(
+            campaign=self.campaign_overview2,
+            flight_id=1002,
         )
 
     def test_month_filter(self):

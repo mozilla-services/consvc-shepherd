@@ -21,6 +21,7 @@ from consvc_shepherd.models import (
     Campaign,
     CampaignSummary,
     DeliveredFlight,
+    Flight,
     PartnerAllocation,
     SettingsSnapshot,
 )
@@ -479,3 +480,11 @@ class BQSyncStatusAdmin(admin.ModelAdmin):
         "status",
         "message",
     ]
+
+
+@admin.register(Flight)
+class FlightAdmin(admin.ModelAdmin):
+    """Admin interface for managing Flight instances."""
+
+    model = Flight
+    list_display = ["campaign", "flight_id"]
