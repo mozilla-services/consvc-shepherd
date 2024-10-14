@@ -28,7 +28,7 @@ class Command(BaseCommand):
             "--project_id",
             default=DEFAULT_PROJECT_ID,
             type=str,
-            help="The GCP project ID that will interact with BQ. By default, it will use \"moz-fx-ads-prod\"",
+            help='The GCP project ID that will interact with BQ. By default, it will use "moz-fx-ads-prod"',
         )
         parser.add_argument(
             "--date",
