@@ -261,7 +261,7 @@ markus.configure(backends=_MARKUS_BACKENDS)
 
 CORS_ALLOWED_ORIGINS = ["http://0.0.0.0:5173", "http://localhost:5173"]
 
-CSRF_TRUSTED_ORIGINS = ["http://localhost:5173"]
+CSRF_TRUSTED_ORIGINS = ["http://0.0.0.0:5173", "http://localhost:5173"]
 
 REST_FRAMEWORK: Dict[str, Any] = {
     "DEFAULT_AUTHENTICATION_CLASSES": [],
