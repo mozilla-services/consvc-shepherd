@@ -22,3 +22,5 @@ REST_FRAMEWORK = {
 Still missing from this setup:
 
 - Build for production and serve React app from Django
+
+test change for pipeline
