@@ -2,7 +2,7 @@
 
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict
 
 import environ
 import markus
@@ -259,6 +259,10 @@ if STATSD_DEBUG:
     )
 markus.configure(backends=_MARKUS_BACKENDS)
 
-CORS_ALLOWED_ORIGINS = [
-    "http://0.0.0.0:5173",
-]
+CORS_ALLOWED_ORIGINS = ["http://0.0.0.0:5173", "http://localhost:5173"]
+
+CSRF_TRUSTED_ORIGINS = ["http://0.0.0.0:5173", "http://localhost:5173"]
+
+REST_FRAMEWORK: Dict[str, Any] = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [],
+}
