@@ -145,17 +145,22 @@ class BQSyncer:
             clicks = row["clicks"]
             impressions = row["impressions"]
 
+            defaults = {
+                "clicks_delivered": clicks,
+                "impressions_delivered": impressions,
+            }
+
+            if campaign_name:
+                defaults["campaign_name"] = campaign_name
+            if flight_name:
+                defaults["flight_name"] = flight_name
+
             delivered_flight, created = DeliveredFlight.objects.update_or_create(
                 submission_date=submission_date,
                 campaign_id=campaign_id,
                 flight_id=flight_id,
                 provider=provider,
-                defaults={
-                    "campaign_name": campaign_name,
-                    "flight_name": flight_name,
-                    "clicks_delivered": clicks,
-                    "impressions_delivered": impressions,
-                },
+                defaults=defaults,
             )
 
             if created:
