@@ -16,6 +16,8 @@
   - [Recover Snapshot](./operations/recoveryScript.md)
   - [Sync Data from Boostr](./operations/syncBoostrData.md)
   - [Sync Data from Boostr Cron Job](./operations/syncBoostrDataCron.md)
+  - [Sync Data from BigQuery](./operations/syncBigQueryData.md)
+  - [Sync Data from BigQuery Cron Job](./operations/syncBigQueryDataCron.md)
 
 
 # ADR
