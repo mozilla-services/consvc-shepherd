@@ -16,6 +16,7 @@ def main():
     BASE_DIR = Path(__file__).resolve().parent.parent
     environ.Env.read_env(BASE_DIR / ".env")
     
+    # For local dev, human readable timestamps are added to help with debugging.
     if env("APP_ENV") == "dev":
         logging.basicConfig(format="%(asctime)s.%(msecs)03d", level=logging.INFO, datefmt="%Y-%m-%d,%H:%M:%S")
 
