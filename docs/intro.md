@@ -31,9 +31,6 @@ Tab --> |Display advertising<br/>tiles in new tab| FirefoxUser[\fa:fa-user Firef
 FirefoxUser[\fa:fa-user Firefox User/]
 ```
 
-
-
-
 ## Datastores
 Shepherd's main datastore is a Postgres database that stores all partners, advertisers and snapshots.
 
