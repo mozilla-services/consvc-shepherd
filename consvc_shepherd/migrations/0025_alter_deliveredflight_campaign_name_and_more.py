@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('consvc_shepherd', '0024_add_advertiser_id_to_campaign_summary_view'),
+        ("consvc_shepherd", "0024_add_advertiser_id_to_campaign_summary_view"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='deliveredflight',
-            name='campaign_name',
+            model_name="deliveredflight",
+            name="campaign_name",
             field=models.CharField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='deliveredflight',
-            name='flight_name',
+            model_name="deliveredflight",
+            name="flight_name",
             field=models.CharField(blank=True, null=True),
         ),
     ]
