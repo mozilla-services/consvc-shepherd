@@ -8,6 +8,9 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import TestCase
 
+DEFAULT_PROJECT_ID = "moz-fx-ads-prod"
+DEFAULT_DATE = datetime.today().strftime("%Y-%m-%d")
+
 
 class TestBQSyncerData(TestCase):
     """Unit tests for functions that fetch from BigQuery and store in our DB"""
@@ -155,15 +158,15 @@ class TestBQSyncerData(TestCase):
     @patch(
         "consvc_shepherd.management.commands.sync_bq_data.DeliveredFlight.objects.update_or_create"
     )
-    def test_sync_data_default_date(
+    def test_sync_data_default_arguments(
         self, mock_update_or_create, mock_bigquery_client, mock_query_bq
     ):
-        """Test the sync_bq_data command without a date argument defaults to today's date."""
+        """Test the sync_bq_data command without arguments defaults to today's date and DEFAULT_PROJECT_ID project id"""
         mock_query_job = MagicMock()
         mock_query_job.result.return_value.total_rows = 1
         mock_query_job.result.return_value.to_dataframe.return_value = pd.DataFrame(
             {
-                "submission_date": [datetime.today().strftime("%Y-%m-%d")],
+                "submission_date": [DEFAULT_DATE],
                 "campaign_id": [1],
                 "campaign_name": ["Campaign 1"],
                 "flight_id": [100],
@@ -178,12 +181,14 @@ class TestBQSyncerData(TestCase):
         mock_bigquery_client.return_value.query.return_value = mock_query_job
         mock_update_or_create.return_value = (MagicMock(), True)
 
-        call_command("sync_bq_data", project_id="test-project")
+        call_command("sync_bq_data")
+
+        mock_bigquery_client.assert_called_once_with(project=DEFAULT_PROJECT_ID)
 
         mock_query_bq.assert_called_once()
 
         mock_update_or_create.assert_called_once_with(
-            submission_date=datetime.today().strftime("%Y-%m-%d"),
+            submission_date=DEFAULT_DATE,
             campaign_id=1,
             campaign_name="Campaign 1",
             flight_id=100,

@@ -14,6 +14,7 @@ from consvc_shepherd.models import BQSyncStatus, DeliveredFlight
 
 SYNC_STATUS_SUCCESS = "success"
 SYNC_STATUS_FAILURE = "failure"
+DEFAULT_PROJECT_ID = "moz-fx-ads-prod"
 
 
 class Command(BaseCommand):
@@ -25,8 +26,9 @@ class Command(BaseCommand):
         """Register expected command line arguments"""
         parser.add_argument(
             "--project_id",
+            default=DEFAULT_PROJECT_ID,
             type=str,
-            help="The GCP project ID that will interact with BQ, e.g. moz-fx-ads-nonprod.",
+            help='The GCP project ID that will interact with BQ. By default, it will use "moz-fx-ads-prod"',
         )
         parser.add_argument(
             "--date",
