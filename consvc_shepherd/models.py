@@ -618,9 +618,9 @@ class Inventory(models.Model):
 
     placement: CharField = models.CharField(null=True, blank=True)
     country: CharField = models.CharField(null=True, blank=True)
-    revenue: IntegerField = models.IntegerField()
-    inv_available: IntegerField = models.IntegerField()
-    inv_booked: IntegerField = models.IntegerField()
+    revenue: IntegerField = models.IntegerField(default=0)
+    inv_available: IntegerField = models.IntegerField(default=0)
+    inv_booked: IntegerField = models.IntegerField(default=0)
 
     @property
     def ecpm(self):
