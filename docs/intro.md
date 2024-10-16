@@ -31,12 +31,18 @@ Tab --> |Display advertising<br/>tiles in new tab| FirefoxUser[\fa:fa-user Firef
 FirefoxUser[\fa:fa-user Firefox User/]
 ```
 
+
+
+
 ## Datastores
 Shepherd's main datastore is a Postgres database that stores all partners, advertisers and snapshots.
 
 All snapshots are uploaded as a JSON file to a Google Cloud bucket.
 A pre-defined JSON schema validates the snapshot output prior to sending the snapshot to Google Cloud.
 From there, Contile accesses the settings from the uploaded JSON file to serve Firefox users the correct advertising tiles in each new tab.
+
+## Logging
+All non-sentry logs are formatted using the [python-dockerflow JSON Formatter](https://python-dockerflow.readthedocs.io/en/main/api/logging.html). As a result, all JSON logs emitted will follow the MozLog JSON Schema. Schema details can be found [here.](https://wiki.mozilla.org/Firefox/Services/Logging).
 
 ## Shepherd Service URLs:
 
