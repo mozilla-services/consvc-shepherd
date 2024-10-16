@@ -4,9 +4,9 @@ import { apiRoutes } from "../config/routes.config";
 
 export const useGetInventoryQuery = () => {
   const getInventory = useQuery({
-    queryKey: ["campaigns"],
+    queryKey: ["inventory"],
     queryFn: async () => {
-      const { data } = await axios.get(apiRoutes.campaigns);
+      const { data } = await axios.get(apiRoutes.inventory);
       return data;
     },
   });
