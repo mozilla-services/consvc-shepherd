@@ -517,7 +517,7 @@ class CampaignSummary(models.Model):
     deal_id: IntegerField = models.IntegerField(primary_key=True)
     advertiser: CharField = models.CharField(max_length=255)
     advertiser_id: ForeignKey = models.ForeignKey(
-        Advertiser, on_delete=models.CASCADE, null=True
+        Advertiser, on_delete=models.DO_NOTHING, null=True
     )
     net_spend: FloatField = models.FloatField()
     impressions_sold: FloatField = models.FloatField()
