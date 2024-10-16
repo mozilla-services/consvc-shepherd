@@ -266,6 +266,24 @@ class BoostrProduct(models.Model):
         return self.full_name
 
 
+class Advertiser(models.Model):
+    """Table representing an Advertise
+
+    Attributes
+    ----------
+    name: CharField = models.CharField()
+        The name of the advertiser
+    created_on : DateTimeField
+        Date of advertiser record creation
+    updated_on : DateTimeField
+        Date of advertiser record update
+    """
+
+    name: CharField = models.CharField(unique=True)
+    created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
+    updated_on: DateTimeField = models.DateTimeField(auto_now=True)
+
+
 class BoostrDeal(models.Model):
     """Representation of AdOps sales deals pulled from Boostr
 
@@ -277,6 +295,8 @@ class BoostrDeal(models.Model):
         Deal name
     advertiser : CharField
         Advertiser name
+    advertiser_id : Advertiser
+        Foreign key pointer to Advertiser
     currency : CharField
         Currency symbol, eg "$"
     amount : IntegerField
@@ -302,6 +322,9 @@ class BoostrDeal(models.Model):
     boostr_id: IntegerField = models.IntegerField(unique=True)
     name: CharField = models.CharField()
     advertiser: CharField = models.CharField()
+    advertiser_id: ForeignKey = models.ForeignKey(
+        Advertiser, on_delete=models.CASCADE, null=True
+    )
     currency: CharField = models.CharField()
     amount: IntegerField = models.IntegerField()
     sales_representatives: CharField = models.CharField()
@@ -477,7 +500,9 @@ class CampaignSummary(models.Model):
     deal_id : IntegerField
         Boostr deal ID
     advertiser : CharField
-        Advertiser Name
+        Advertiser name
+    advertiser_id : Advertiser
+        Foreign key pointer to Advertiser
     net_spend : CharField
         Price of deal from Boostr
     impressions_sold : FloatField
@@ -491,6 +516,9 @@ class CampaignSummary(models.Model):
 
     deal_id: IntegerField = models.IntegerField(primary_key=True)
     advertiser: CharField = models.CharField(max_length=255)
+    advertiser_id: ForeignKey = models.ForeignKey(
+        Advertiser, on_delete=models.DO_NOTHING, null=True
+    )
     net_spend: FloatField = models.FloatField()
     impressions_sold: FloatField = models.FloatField()
     clicks_delivered: IntegerField = models.IntegerField()

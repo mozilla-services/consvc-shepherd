@@ -5,6 +5,7 @@ from unittest import mock
 from django.test import TestCase, override_settings
 
 from consvc_shepherd.management.commands.sync_boostr_data import (
+    Advertiser,
     BoostrApi,
     BoostrApiError,
     BoostrApiMaxRetriesError,
@@ -25,6 +26,7 @@ from consvc_shepherd.tests.test_sync_boostr_mocks import (
     mock_post_token_fail,
     mock_request_exception,
     mock_too_many_requests_response,
+    mock_update_or_create_advertiser,
     mock_update_or_create_deal,
     mock_upsert_deals_exception,
 )
@@ -176,11 +178,16 @@ class TestSyncBoostrData(TestCase):
         side_effect=mock_update_or_create_deal,
     )
     @mock.patch.object(BoostrLoader, "upsert_deal_products")
+    @mock.patch(
+        "consvc_shepherd.models.Advertiser.objects.update_or_create",
+        side_effect=mock_update_or_create_advertiser,
+    )
     @mock.patch.object(BoostrLoader, "create_campaign")
     def test_upsert_deals(
         self,
-        mock_upsert_deal_products,
         mock_create_campaign,
+        mock_update_or_create_advertiser,
+        mock_upsert_deal_products,
         mock_update_or_create,
         mock_get,
         mock_post,
@@ -188,12 +195,27 @@ class TestSyncBoostrData(TestCase):
         """Test function that calls the Boostr API for deal data and saves to our DB"""
         loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD, {"max_deal_pages": 2})
         loader.upsert_deals()
+
+        advertiser_calls = [
+            mock.call(
+                name="Neutron",
+            ),
+            mock.call(
+                name="HiProduce",
+            ),
+        ]
+        mock_update_or_create_advertiser.assert_has_calls(advertiser_calls)
+
         calls = [
             mock.call(
                 boostr_id=1498421,
                 defaults={
                     "name": "Neutron: Neutron US, DE, FR",
                     "advertiser": "Neutron",
+                    "advertiser_id": Advertiser(
+                        id=1,
+                        name="Netron",
+                    ),
                     "currency": "$",
                     "amount": 50000,
                     "sales_representatives": "ksales@mozilla.com,lsales@mozilla.com",
@@ -206,6 +228,10 @@ class TestSyncBoostrData(TestCase):
                 defaults={
                     "name": "HiProduce: CA Tiles May 2024",
                     "advertiser": "HiProduce",
+                    "advertiser_id": Advertiser(
+                        id=1,
+                        name="HiProduce",
+                    ),
                     "currency": "$",
                     "amount": 10000,
                     "sales_representatives": "jsales@mozilla.com",
