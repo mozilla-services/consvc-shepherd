@@ -457,12 +457,12 @@ class CampaignAdminTests(TestCase):
 
         Flight.objects.create(
             campaign=self.campaign_overview1,
-            flight_id=1001,
+            kevel_flight_id=1001,
         )
 
         Flight.objects.create(
             campaign=self.campaign_overview2,
-            flight_id=1002,
+            kevel_flight_id=1002,
         )
 
     def test_month_filter(self):

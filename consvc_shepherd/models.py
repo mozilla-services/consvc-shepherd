@@ -457,12 +457,11 @@ class Campaign(models.Model):
             return round(net_epcm_value, 2)
         return None
 
-    # To do: This code will be updated once we have the UI to assign multiple flights to a campaign.
     @property
     def kevel_flight_id(self):
         """Retrieve the most recent flight ID related to the campaign."""
         flight = self.flights.last()
-        return flight.flight_id if flight else None
+        return flight.kevel_flight_id if flight else None
 
     class Meta:
         """Metadata for the Campaign model."""
@@ -603,11 +602,11 @@ class Flight(models.Model):
     campaign: ForeignKey = models.ForeignKey(
         Campaign, related_name="flights", null=True, on_delete=models.CASCADE
     )
-    flight_id: IntegerField = models.IntegerField(null=True, blank=True)
+    kevel_flight_id: IntegerField = models.IntegerField(null=True, blank=True)
 
     def __str__(self) -> str:
         """Return a string representation of the Flight instance."""
-        return f"Flight {self.flight_id}"
+        return f"Flight {self.kevel_flight_id}"
 
     class Meta:
         """Meta options for the Flight model."""

@@ -487,4 +487,4 @@ class FlightAdmin(admin.ModelAdmin):
     """Admin interface for managing Flight instances."""
 
     model = Flight
-    list_display = ["campaign", "flight_id"]
+    list_display = ["campaign", "kevel_flight_id"]

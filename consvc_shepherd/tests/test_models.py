@@ -92,7 +92,7 @@ class CampaignTestCase(TestCase):
 
         Flight.objects.create(
             campaign=self.campaign,
-            flight_id=12345,
+            kevel_flight_id=12345,
         )
 
     def test_model_fields(self):
@@ -120,7 +120,7 @@ class CampaignTestCase(TestCase):
         )
         Flight.objects.create(
             campaign=self.campaign,
-            flight_id=11111,
+            kevel_flight_id=11111,
         )
 
         campaign.save()
@@ -223,13 +223,13 @@ class FlightTestCase(TestCase):
 
         self.flight = Flight.objects.create(
             campaign=self.campaign,
-            flight_id=54321,
+            kevel_flight_id=54321,
         )
 
     def test_model_fields(self):
         """Test that Flight model fields are correctly set."""
         self.assertEqual(self.flight.campaign, self.campaign)
-        self.assertEqual(self.flight.flight_id, 54321)
+        self.assertEqual(self.flight.kevel_flight_id, 54321)
 
     def test_str_method(self):
         """Verify that the __str__ method returns the correct string representation."""

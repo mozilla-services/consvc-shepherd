@@ -124,12 +124,12 @@ class CampaignViewSetTests(APITestCase):
 
         Flight.objects.create(
             campaign=self.campaign1,
-            flight_id=123,
+            kevel_flight_id=123,
         )
 
         Flight.objects.create(
             campaign=self.campaign2,
-            flight_id=456,
+            kevel_flight_id=456,
         )
 
         self.url = reverse("campaigns-list")

@@ -33,7 +33,7 @@ class CampaignSerializer(serializers.ModelSerializer):
     def get_kevel_flight_id(self, obj):
         """Retrieve the most recent flight ID related to the campaign."""
         flight = obj.flights.last()
-        return flight.flight_id if flight else None
+        return flight.kevel_flight_id if flight else None
 
     def validate(self, data):
         """Validate campaign data, ensuring the deal exists and total net spend matches the deal amount."""
@@ -68,7 +68,7 @@ class CampaignSerializer(serializers.ModelSerializer):
         self._update_existing_campaigns(campaign_fields_data)
 
         if kevel_flight_id is not None:
-            Flight.objects.create(campaign=campaign, flight_id=kevel_flight_id)
+            Flight.objects.create(campaign=campaign, kevel_flight_id=kevel_flight_id)
 
         return campaign
 
@@ -84,7 +84,7 @@ class CampaignSerializer(serializers.ModelSerializer):
             instance.flights.all().delete()
         else:
             Flight.objects.update_or_create(
-                campaign=instance, defaults={"flight_id": kevel_flight_id}
+                campaign=instance, defaults={"kevel_flight_id": kevel_flight_id}
             )
 
         self._update_existing_campaigns(campaign_fields_data)
@@ -247,5 +247,5 @@ class SplitCampaignSerializer(serializers.Serializer):
         """Create or update flight id for campaign."""
         if kevel_flight_id is not None:
             Flight.objects.update_or_create(
-                campaign=campaign, defaults={"flight_id": kevel_flight_id}
+                campaign=campaign, defaults={"kevel_flight_id": kevel_flight_id}
             )
