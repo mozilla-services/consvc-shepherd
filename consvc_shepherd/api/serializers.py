@@ -197,8 +197,31 @@ class SplitCampaignSerializer(serializers.Serializer):
 class InventorySerializer(serializers.ModelSerializer):
     """Serializer for Inventory model"""
 
+    ecpm = serializers.SerializerMethodField()
+    inv_unsold = serializers.SerializerMethodField()
+    inv_remaining = serializers.SerializerMethodField()
+
     class Meta:
         """Metadata to specify the way Inventory is serialized"""
 
         model = Inventory
-        fields = "__all__"
+        fields = [
+            "id",
+            "placement",
+            "country",
+            "revenue",
+            "ecpm",
+            "inv_available",
+            "inv_booked",
+            "inv_unsold",
+            "inv_remaining",
+        ]
+
+    def get_ecpm(self, obj):
+        return obj.ecpm
+
+    def get_inv_unsold(self, obj):
+        return obj.inv_unsold
+
+    def get_inv_remaining(self, obj):
+        return obj.inv_remaining
