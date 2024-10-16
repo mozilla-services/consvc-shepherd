@@ -1,6 +1,7 @@
 """Models module for consvc_shepherd."""
 
 import calendar
+from decimal import Decimal
 import json
 from datetime import date
 from typing import Any
@@ -624,7 +625,7 @@ class Inventory(models.Model):
     @property
     def ecpm(self):
         """Calculate and return the eCPM."""
-        if self.revenue and self.inv_booked > 0:
+        if self.revenue and (self.inv_booked is not None and self.inv_booked > 0):
             epcm_value = (self.revenue / self.inv_booked) * 1000
             return round(epcm_value, 2)
         return 0
@@ -648,7 +649,7 @@ class Inventory(models.Model):
         days_left_in_month = total_days_in_month - (today.day - 1)
 
         inv_remaining = int(
-            self.inv_unsold * (days_left_in_month / total_days_in_month)
+            (self.inv_unsold) * Decimal(days_left_in_month / total_days_in_month)
         )
         return inv_remaining
 
