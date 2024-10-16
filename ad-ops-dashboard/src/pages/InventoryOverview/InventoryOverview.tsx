@@ -13,20 +13,20 @@ const TableContainer = styled(Box)`
 
 export default function InventoryOverview() {
   const {
-    data: campaignsData,
+    data: inventoryData,
     error,
     isPending,
     isFetching,
   } = useGetInventoryQuery();
   const [colDefs] = useState<ColDef[]>([
-    { field: "impressions_sold", headerName: "Country" },
-    { field: "impressions_sold", headerName: "Revenue" },
-    { field: "impressions_sold", headerName: "eCPM" },
-    { field: "impressions_sold", headerName: "Inv. Available" },
-    { field: "impressions_sold", headerName: "Inv. Booked" },
-
-    { field: "impressions_sold", headerName: "Inv. Unsold" },
-    { field: "impressions_sold", headerName: "Inv. Remaining" },
+    { field: "placement", headerName: "Placement" },
+    { field: "country", headerName: "Country" },
+    { field: "revenue", headerName: "Revenue" },
+    { field: "ecpm", headerName: "eCPM" },
+    { field: "inv_available", headerName: "Inv. Available" },
+    { field: "inv_booked", headerName: "Inv. Booked" },
+    { field: "inv_unsold", headerName: "Inv. Unsold" },
+    { field: "inv_remaining", headerName: "Inv. Remaining" },
   ]);
 
   if (isPending || isFetching) return <AppLoader />;
@@ -41,7 +41,7 @@ export default function InventoryOverview() {
     <>
       <TableContainer className="ag-theme-quartz">
         <AgGridReact
-          rowData={campaignsData || []}
+          rowData={inventoryData || []}
           columnDefs={colDefs}
           defaultColDef={defaultColDef}
           pagination={true}
