@@ -150,6 +150,7 @@
 <li>If you do not have permission, request it by filling out the <a href="https://mozilla-hub.atlassian.net/servicedesk/customer/portal/14/create/1315">Ads Data Access Request</a> form.</li>
 </ol>
 </li>
+<li>Make sure you have the <code>PROJECT_ID</code> set in your <code>.env</code> file. For local development, we use the ads nonprod GCP project ID <code>moz-fx-ads-nonprod</code>.</li>
 <li>Login to gcloud locally with <code>gcloud auth application-default login</code>.</li>
 <li>Copy your gcloud creds into the shepherd container:
 <pre><code>docker cp ~/.config/gcloud/application_default_credentials.json consvc-shepherd-app-1:/app/application_default_credentials.json
@@ -164,7 +165,7 @@
 </code></pre>
 </li>
 <li>Run the script for today's date:
-<pre><code class="language-sh">python manage.py sync_bq_data --project_id &quot;moz-fx-ads-nonprod&quot; --date $(date +%F)
+<pre><code class="language-sh">python manage.py sync_bq_data --date $(date +%F)
 </code></pre>
 </li>
 </ol>
