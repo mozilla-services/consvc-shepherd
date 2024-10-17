@@ -11,6 +11,7 @@ from jsonschema import exceptions, validate
 
 from consvc_shepherd.forms import AllocationSettingForm, AllocationSettingFormset
 from consvc_shepherd.models import (
+    Advertiser,
     AllocationSetting,
     AllocationSettingsSnapshot,
     BoostrDeal,
@@ -256,6 +257,7 @@ class BoostrDealAdmin(admin.ModelAdmin):
         "boostr_id",
         "name",
         "advertiser",
+        "advertiser_id",
         "currency",
         "amount",
         "start_date",
@@ -387,6 +389,7 @@ class CampaignSummaryAdmin(admin.ModelAdmin):
 
     list_display = [
         "advertiser",
+        "advertiser_id",
         "net_spend",
         "impressions_sold",
         "net_ecpm",
@@ -464,6 +467,18 @@ class BoostrSyncStatusAdmin(admin.ModelAdmin):
         "synced_on",
         "status",
         "message",
+    ]
+
+
+@admin.register(Advertiser)
+class AdvertiserAdmin(admin.ModelAdmin):
+    """Admin model for Advertiser records"""
+
+    model = Advertiser
+    list_display = [
+        "created_on",
+        "updated_on",
+        "name",
     ]
 
 
