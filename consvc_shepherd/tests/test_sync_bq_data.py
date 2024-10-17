@@ -1,5 +1,6 @@
 """Unit tests for the sync_bq_data command"""
 
+import os
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 
@@ -17,6 +18,7 @@ DEFAULT_DATE = datetime.today().strftime("%Y-%m-%d")
 class TestBQSyncerData(TestCase):
     """Unit tests for functions that fetch from BigQuery and store in our DB"""
 
+    @patch.dict(os.environ, {"PROJECT_ID": "test-project"})
     @patch(
         "consvc_shepherd.management.commands.sync_bq_data.DeliveredFlight.objects.update_or_create"
     )
@@ -53,7 +55,7 @@ class TestBQSyncerData(TestCase):
         mock_update_or_create.return_value = (MagicMock(), True)
 
         with self.assertLogs("sync_bigquery_ads_data", level="INFO") as log:
-            call_command("sync_bq_data", project_id="test-project", date="2024-09-18")
+            call_command("sync_bq_data", date="2024-09-18")
 
         mock_query_bq.assert_called_once()
 
@@ -81,6 +83,7 @@ class TestBQSyncerData(TestCase):
             "success", "BigQuery sync success"
         )
 
+    @patch.dict(os.environ, {"PROJECT_ID": "test-project"})
     @patch(
         "consvc_shepherd.management.commands.sync_bq_data.DeliveredFlight.objects.update_or_create"
     )
@@ -97,7 +100,7 @@ class TestBQSyncerData(TestCase):
         mock_bigquery_client.return_value = MagicMock()
 
         with self.assertRaises(CommandError) as context:
-            call_command("sync_bq_data", project_id="test-project", date="2024-09-18")
+            call_command("sync_bq_data", date="2024-09-18")
 
         self.assertIn(
             "An error occurred while querying BigQuery",
@@ -106,6 +109,7 @@ class TestBQSyncerData(TestCase):
 
         mock_update_or_create.assert_not_called()
 
+    @patch.dict(os.environ, {"PROJECT_ID": "test-project"})
     @patch(
         "consvc_shepherd.management.commands.sync_bq_data.DeliveredFlight.objects.update_or_create"
     )
@@ -148,7 +152,7 @@ class TestBQSyncerData(TestCase):
         mock_update_or_create.side_effect = mock_update_or_create_effect
 
         with self.assertLogs("sync_bigquery_ads_data", level="INFO") as log:
-            call_command("sync_bq_data", project_id="test-project", date="2024-09-18")
+            call_command("sync_bq_data", date="2024-09-18")
 
         self.assertEqual(mock_update_or_create.call_count, 2)
 
@@ -188,6 +192,7 @@ class TestBQSyncerData(TestCase):
             "INFO:sync_bigquery_ads_data:Updated DeliveredFlight", log.output[1]
         )
 
+    @patch.dict(os.environ, {"PROJECT_ID": "test-project"})
     @patch(
         "consvc_shepherd.management.commands.sync_bq_data.DeliveredFlight.objects.update_or_create"
     )
@@ -225,7 +230,7 @@ class TestBQSyncerData(TestCase):
         mock_update_or_create.return_value = (MagicMock(), True)
 
         with self.assertLogs("sync_bigquery_ads_data", level="INFO") as log:
-            call_command("sync_bq_data", project_id="test-project", date="2024-09-18")
+            call_command("sync_bq_data", date="2024-09-18")
 
         mock_query_bq.assert_called_once()
 
@@ -244,6 +249,7 @@ class TestBQSyncerData(TestCase):
             "success", "BigQuery sync success"
         )
 
+    @patch.dict(os.environ, {"PROJECT_ID": "test-project"})
     @patch("consvc_shepherd.management.commands.sync_bq_data.BQSyncer.query_bq")
     @patch("consvc_shepherd.management.commands.sync_bq_data.bigquery.Client")
     @patch(
@@ -252,7 +258,7 @@ class TestBQSyncerData(TestCase):
     def test_sync_data_default_arguments(
         self, mock_update_or_create, mock_bigquery_client, mock_query_bq
     ):
-        """Test the sync_bq_data command without arguments defaults to today's date and DEFAULT_PROJECT_ID project id"""
+        """Test the sync_bq_data command without arguments defaults to today's date"""
         mock_query_job = MagicMock()
         mock_query_job.result.return_value.total_rows = 1
         mock_query_job.result.return_value.to_dataframe.return_value = pd.DataFrame(
@@ -274,8 +280,6 @@ class TestBQSyncerData(TestCase):
 
         call_command("sync_bq_data")
 
-        mock_bigquery_client.assert_called_once_with(project=DEFAULT_PROJECT_ID)
-
         mock_query_bq.assert_called_once()
 
         mock_update_or_create.assert_called_once_with(
@@ -291,6 +295,7 @@ class TestBQSyncerData(TestCase):
             },
         )
 
+    @patch.dict(os.environ, {"PROJECT_ID": "test-project"})
     @patch(
         "consvc_shepherd.management.commands.sync_bq_data.DeliveredFlight.objects.update_or_create"
     )
@@ -306,27 +311,27 @@ class TestBQSyncerData(TestCase):
         mock_bigquery_client.return_value.query.return_value = mock_query_job
 
         with self.assertRaises(CommandError) as context:
-            call_command("sync_bq_data", project_id="test-project", date="2024-09-18")
+            call_command("sync_bq_data", date="2024-09-18")
 
         self.assertIn("No data returned for date 2024-09-18", str(context.exception))
         mock_update_or_create.assert_not_called()
 
+    @patch.dict(os.environ, {"PROJECT_ID": "invalid_project_id"})
     @patch("consvc_shepherd.management.commands.sync_bq_data.bigquery.Client")
     def test_invalid_project_id(self, mock_bigquery_client):
         """Test the command raises an error for an invalid project ID"""
         mock_bigquery_client.side_effect = Exception("Invalid project ID")
 
         with self.assertRaises(CommandError) as context:
-            call_command(
-                "sync_bq_data", project_id="invalid_project_id", date="2024-09-18"
-            )
+            call_command("sync_bq_data", date="2024-09-18")
 
         self.assertIn("Invalid project ID: invalid_project_id", str(context.exception))
 
+    @patch.dict(os.environ, {"PROJECT_ID": "test-project"})
     def test_invalid_date(self):
         """Test that the command raises CommandError for an invalid date format"""
         with self.assertRaises(CommandError) as context:
-            call_command("sync_bq_data", project_id="test-project", date="18-09-2024")
+            call_command("sync_bq_data", date="18-09-2024")
 
         self.assertIn(
             "Invalid date format. Please use YYYY-MM-DD", str(context.exception)
