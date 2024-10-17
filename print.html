@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item affix "><a href="intro.html">Service Overview</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="quickStart.html"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="metrics.html"><strong aria-hidden="true">2.</strong> Metrics</a></li><li class="chapter-item "><a href="operations/index.html"><strong aria-hidden="true">3.</strong> Operations and Runbooks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="operations/auth.html"><strong aria-hidden="true">3.1.</strong> Authentication and Authorization</a></li><li class="chapter-item "><a href="operations/addAdvertisers.html"><strong aria-hidden="true">3.2.</strong> Add Advertisers</a></li><li class="chapter-item "><a href="operations/addAdvertiserPaths.html"><strong aria-hidden="true">3.3.</strong> Add Advertiser Paths</a></li><li class="chapter-item "><a href="operations/addPartners.html"><strong aria-hidden="true">3.4.</strong> Add Partners</a></li><li class="chapter-item "><a href="operations/createSovAllocations.html"><strong aria-hidden="true">3.5.</strong> Create SOV Allocations</a></li><li class="chapter-item "><a href="operations/createPublishSnapshots.html"><strong aria-hidden="true">3.6.</strong> Create and Publish Snapshots</a></li><li class="chapter-item "><a href="operations/rollback.html"><strong aria-hidden="true">3.7.</strong> Rollback</a></li><li class="chapter-item "><a href="operations/recoveryScript.html"><strong aria-hidden="true">3.8.</strong> Recover Snapshot</a></li><li class="chapter-item "><a href="operations/syncBoostrData.html"><strong aria-hidden="true">3.9.</strong> Sync Data from Boostr</a></li><li class="chapter-item "><a href="operations/syncBoostrDataCron.html"><strong aria-hidden="true">3.10.</strong> Sync Data from Boostr Cron Job</a></li><li class="chapter-item "><a href="operations/syncBigQueryData.html"><strong aria-hidden="true">3.11.</strong> Sync Data from BigQuery</a></li><li class="chapter-item "><a href="operations/syncBigQueryDataCron.html"><strong aria-hidden="true">3.12.</strong> Sync Data from BigQuery Cron Job</a></li></ol></li><li class="chapter-item "><li class="part-title">ADR</li><li class="chapter-item "><a href="adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">4.</strong> Shepherd Metrics</a></li></ol>
+                <ol class="chapter"><li class="chapter-item affix "><a href="intro.html">Service Overview</a></li><li class="chapter-item affix "><li class="part-title">Docs</li><li class="chapter-item "><a href="intro.html"><strong aria-hidden="true">1.</strong> Intro</a></li><li class="chapter-item "><a href="quickStart.html"><strong aria-hidden="true">2.</strong> Quick Start</a></li><li class="chapter-item "><a href="metrics.html"><strong aria-hidden="true">3.</strong> Metrics</a></li><li class="chapter-item "><a href="operations/index.html"><strong aria-hidden="true">4.</strong> Operations and Runbooks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="operations/auth.html"><strong aria-hidden="true">4.1.</strong> Authentication and Authorization</a></li><li class="chapter-item "><a href="operations/addAdvertisers.html"><strong aria-hidden="true">4.2.</strong> Add Advertisers</a></li><li class="chapter-item "><a href="operations/addAdvertiserPaths.html"><strong aria-hidden="true">4.3.</strong> Add Advertiser Paths</a></li><li class="chapter-item "><a href="operations/addPartners.html"><strong aria-hidden="true">4.4.</strong> Add Partners</a></li><li class="chapter-item "><a href="operations/createSovAllocations.html"><strong aria-hidden="true">4.5.</strong> Create SOV Allocations</a></li><li class="chapter-item "><a href="operations/createPublishSnapshots.html"><strong aria-hidden="true">4.6.</strong> Create and Publish Snapshots</a></li><li class="chapter-item "><a href="operations/rollback.html"><strong aria-hidden="true">4.7.</strong> Rollback</a></li><li class="chapter-item "><a href="operations/recoveryScript.html"><strong aria-hidden="true">4.8.</strong> Recover Snapshot</a></li><li class="chapter-item "><a href="operations/syncBoostrData.html"><strong aria-hidden="true">4.9.</strong> Sync Data from Boostr</a></li><li class="chapter-item "><a href="operations/syncBoostrDataCron.html"><strong aria-hidden="true">4.10.</strong> Sync Data from Boostr Cron Job</a></li><li class="chapter-item "><a href="operations/syncBigQueryData.html"><strong aria-hidden="true">4.11.</strong> Sync Data from BigQuery</a></li><li class="chapter-item "><a href="operations/syncBigQueryDataCron.html"><strong aria-hidden="true">4.12.</strong> Sync Data from BigQuery Cron Job</a></li></ol></li><li class="chapter-item "><li class="part-title">ADR</li><li class="chapter-item "><a href="adr/0000-metrics-client-for-shepherd.html"><strong aria-hidden="true">5.</strong> Shepherd Metrics</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -173,7 +173,45 @@ FirefoxUser[\fa:fa-user Firefox User/]
 <p>All snapshots are uploaded as a JSON file to a Google Cloud bucket.
 A pre-defined JSON schema validates the snapshot output prior to sending the snapshot to Google Cloud.
 From there, Contile accesses the settings from the uploaded JSON file to serve Firefox users the correct advertising tiles in each new tab.</p>
+<h2 id="logging"><a class="header" href="#logging">Logging</a></h2>
+<p>All non-sentry logs are formatted using the <a href="https://python-dockerflow.readthedocs.io/en/main/api/logging.html">python-dockerflow JSON Formatter</a>. As a result, all JSON logs emitted will follow the MozLog JSON Schema. Schema details can be found <a href="https://wiki.mozilla.org/Firefox/Services/Logging">here.</a>.</p>
 <h2 id="shepherd-service-urls"><a class="header" href="#shepherd-service-urls">Shepherd Service URLs:</a></h2>
+<p>Stage: https://shepherd.stage.ads.nonprod.webservices.mozgcp.net/admin/</p>
+<p>Prod: https://shepherd.services.mozilla.com/admin/</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="contextual-services-shepherd-1"><a class="header" href="#contextual-services-shepherd-1">Contextual Services Shepherd</a></h1>
+<h2 id="service-overview-1"><a class="header" href="#service-overview-1">Service Overview</a></h2>
+<p>Shepherd is a Django application that allows users to make changes to Contile's advertising settings without redeploying Contile.
+The settings managed here can be changed at runtime, eliminating the need for deployments of the services that use it.</p>
+<p>Within Shepherd, users can make changes to Advertising Partners.
+A given Partner can have multiple advertisers in numerous geolocations, each with their own distinct domain.
+Users can also define partner allocation percentages for each tile position.
+This means that given each Contile tile position, you can set the percentage of impressions that will show from each partner.</p>
+<p>Once changes have been made and the user is ready to have these changes be effective in production, a user can create a “Snapshot.”
+This records the settings and its values at that given point in time in the form of JSON.
+Once published, Shepherd uploads a JSON file to Google Cloud Storage.
+Contile will then pick up these changes in one of its 5 minute periodic check of the Google Cloud Storage bucket for an updated json file.</p>
+<h2 id="architecture-1"><a class="header" href="#architecture-1">Architecture</a></h2>
+<pre class="mermaid">%%{init: {'theme':'dark'}}%%
+flowchart
+    AdopsUser[\fa:fa-user AdOps User/] --&gt; |Update allocation &amp;&lt;br/&gt;settings snapshots| Shep(Shepherd) --&gt; DB[(Postgres DB)]
+    Shep --&gt; |Validated JSON snapshot&lt;br/&gt;sent to GC bucket for access.| GCP[Google Cloud JSON]
+    GCP -..- |Periodic sync for&lt;br/&gt;tile information| Contile(Contile)
+    Contile --&gt;|API request to get tiles| Firefox{Firefox}
+subgraph Firefox[fa:fa-firefox Firefox]
+        Tab[New Tab] 
+end
+
+Tab --&gt; |Display advertising&lt;br/&gt;tiles in new tab| FirefoxUser[\fa:fa-user Firefox User/]
+FirefoxUser[\fa:fa-user Firefox User/]
+</pre>
+<h2 id="datastores-1"><a class="header" href="#datastores-1">Datastores</a></h2>
+<p>Shepherd's main datastore is a Postgres database that stores all partners, advertisers and snapshots.</p>
+<p>All snapshots are uploaded as a JSON file to a Google Cloud bucket.
+A pre-defined JSON schema validates the snapshot output prior to sending the snapshot to Google Cloud.
+From there, Contile accesses the settings from the uploaded JSON file to serve Firefox users the correct advertising tiles in each new tab.</p>
+<h2 id="logging-1"><a class="header" href="#logging-1">Logging</a></h2>
+<p>All non-sentry logs are formatted using the <a href="https://python-dockerflow.readthedocs.io/en/main/api/logging.html">python-dockerflow JSON Formatter</a>. As a result, all JSON logs emitted will follow the MozLog JSON Schema. Schema details can be found <a href="https://wiki.mozilla.org/Firefox/Services/Logging">here.</a>.</p>
+<h2 id="shepherd-service-urls-1"><a class="header" href="#shepherd-service-urls-1">Shepherd Service URLs:</a></h2>
 <p>Stage: https://shepherd.stage.ads.nonprod.webservices.mozgcp.net/admin/</p>
 <p>Prod: https://shepherd.services.mozilla.com/admin/</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="quick-start-development-guide"><a class="header" href="#quick-start-development-guide">Quick Start Development Guide</a></h1>
