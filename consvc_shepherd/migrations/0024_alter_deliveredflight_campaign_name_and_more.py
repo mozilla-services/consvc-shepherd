@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('consvc_shepherd', '0023_advertiser_boostrdeal_advertiser_id'),
+        ("consvc_shepherd", "0023_advertiser_boostrdeal_advertiser_id"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='deliveredflight',
-            name='campaign_name',
+            model_name="deliveredflight",
+            name="campaign_name",
             field=models.CharField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='deliveredflight',
-            name='flight_name',
+            model_name="deliveredflight",
+            name="flight_name",
             field=models.CharField(blank=True, null=True),
         ),
     ]
