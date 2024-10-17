@@ -3,6 +3,7 @@
 import requests
 
 from consvc_shepherd.models import (
+    Advertiser,
     BoostrDeal,
     BoostrDealProduct,
     BoostrProduct,
@@ -130,6 +131,17 @@ def mock_update_or_create_deal(*args, **kwargs) -> tuple[BoostrDeal, bool]:
             sales_representatives=kwargs["defaults"]["sales_representatives"],
             start_date=kwargs["defaults"]["start_date"],
             end_date=kwargs["defaults"]["end_date"],
+        ),
+        True,
+    )
+
+
+def mock_update_or_create_advertiser(*args, **kwargs) -> tuple[Advertiser, bool]:
+    """Mock out the DB for saving Advertiser"""
+    return (
+        Advertiser(
+            id=1,
+            name=kwargs["name"],
         ),
         True,
     )
