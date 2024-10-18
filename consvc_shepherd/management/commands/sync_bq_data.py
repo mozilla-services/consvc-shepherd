@@ -1,6 +1,7 @@
 """Django admin custom command for fetching ad data from BigQuery and saving it to Shepherd DB"""
 
 import logging
+import os
 import traceback
 from datetime import datetime
 
@@ -14,7 +15,6 @@ from consvc_shepherd.models import BQSyncStatus, DeliveredFlight
 
 SYNC_STATUS_SUCCESS = "success"
 SYNC_STATUS_FAILURE = "failure"
-DEFAULT_PROJECT_ID = "moz-fx-ads-prod"
 
 
 class Command(BaseCommand):
@@ -25,12 +25,6 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         """Register expected command line arguments"""
         parser.add_argument(
-            "--project_id",
-            default=DEFAULT_PROJECT_ID,
-            type=str,
-            help='The GCP project ID that will interact with BQ. By default, it will use "moz-fx-ads-prod"',
-        )
-        parser.add_argument(
             "--date",
             default=datetime.today().strftime("%Y-%m-%d"),
             type=str,
@@ -39,7 +33,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """Handle running the command"""
-        self.stdout.write(f"Starting BigQuery sync for date {options['date']}")
+        project_id = os.getenv("PROJECT_ID")
+        if not project_id:
+            raise CommandError("PROJECT_ID environment variable not set.")
 
         try:
             datetime.strptime(options["date"], "%Y-%m-%d")
@@ -47,15 +43,16 @@ class Command(BaseCommand):
             raise CommandError("Invalid date format. Please use YYYY-MM-DD")
 
         try:
-            bigquery.Client(project=options["project_id"])
+            bigquery.Client(project=project_id)
         except Exception as e:
-            raise CommandError(
-                f"Invalid project ID: {options['project_id']}. Error: {e}"
-            )
+            raise CommandError(f"Invalid project ID: {project_id}. Error: {e}")
 
-        syncer = BQSyncer(options["project_id"], options["date"])
+        syncer = BQSyncer(project_id, options["date"])
 
         try:
+            self.stdout.write(
+                f"Starting BigQuery sync from project '{project_id}' for date {options['date']}"
+            )
             syncer.sync_data()
         except Exception as e:
             raise CommandError(f"{e}")
