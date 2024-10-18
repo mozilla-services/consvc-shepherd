@@ -295,7 +295,7 @@ class BoostrLoader:
 
                 self.log.debug(f"Upserted deal: {deal['id']}")
                 if boostr_deal_created and advertiser_created:
-                    self.create_campaign(boostr_deal)
+                    self.create_campaign(boostr_deal, deal['line_items'][0]) # WIP
                     self.log.debug(f"Created campaign for deal: {deal['id']}")
 
                 self.upsert_deal_products(boostr_deal)
@@ -306,9 +306,10 @@ class BoostrLoader:
                     f"Done. Stopped fetching deals after hitting max_page_limit of {page} pages."
                 )
 
-    def create_campaign(self, deal: BoostrDeal) -> None:
+    def create_campaign(self, deal: BoostrDeal, campaign_name: str) -> None:
         """Create campaign if a boostr deal is created. Returns True if successful, False otherwise."""
         Campaign.objects.create(
+            campaign_name=campaign_name,
             net_spend=deal.amount,
             impressions_sold=0,
             seller=deal.sales_representatives,
