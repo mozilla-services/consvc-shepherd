@@ -437,8 +437,6 @@ class Campaign(models.Model):
         Ad Ops Person
     notes : CharField
         Notes
-    kevel_flight_id : IntegerField
-        The kevel flight id
     net_spend : CharField
         Net Spend
     impressions_sold : IntegerField
@@ -465,7 +463,6 @@ class Campaign(models.Model):
 
     ad_ops_person: CharField = models.CharField(null=True, blank=True)
     notes: CharField = models.CharField(null=True, blank=True)
-    kevel_flight_id: IntegerField = models.IntegerField(null=True, blank=True)
     net_spend: IntegerField = models.IntegerField()
     impressions_sold: IntegerField = models.IntegerField()
     seller: CharField = models.CharField()
@@ -482,6 +479,12 @@ class Campaign(models.Model):
             net_epcm_value = (self.net_spend / self.impressions_sold) * 1000
             return round(net_epcm_value, 2)
         return None
+
+    @property
+    def kevel_flight_id(self):
+        """Retrieve the most recent flight ID related to the campaign."""
+        flight = self.flights.last()
+        return flight.kevel_flight_id if flight else None
 
     class Meta:
         """Metadata for the Campaign model."""
@@ -619,3 +622,22 @@ class DeliveredFlight(models.Model):
     def __str__(self):
         """Return the string representation for flight ids and associated number of clicks and impressions"""
         return f"{self.flight_id} : {self.clicks_delivered} clicks and {self.impressions_delivered} impressions"
+
+
+class Flight(models.Model):
+    """Model representing a Flight associated with a Campaign."""
+
+    campaign: ForeignKey = models.ForeignKey(
+        Campaign, related_name="flights", null=True, on_delete=models.CASCADE
+    )
+    kevel_flight_id: IntegerField = models.IntegerField(null=True, blank=True)
+
+    def __str__(self) -> str:
+        """Return a string representation of the Flight instance."""
+        return f"Flight {self.kevel_flight_id}"
+
+    class Meta:
+        """Meta options for the Flight model."""
+
+        verbose_name = "Flight"
+        verbose_name_plural = "Flights"
