@@ -207,13 +207,25 @@ class BoostrLoader:
     def __init__(
         self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
     ):
-        self.log = logging.getLogger("sync_boostr_data")
-        self.boostr = BoostrApi(base_url, email, password, options)
-        self.max_deal_pages = options.get("max_deal_pages", MAX_DEAL_PAGES_DEFAULT)
-        self.full_sync = options.get("full_sync", FULL_SYNC)
-        self.latest_synced_on = (
-            self.get_latest_sync_status() if not self.full_sync else None
-        )
+        try:
+            self.log = logging.getLogger("sync_boostr_data")
+            self.boostr = BoostrApi(base_url, email, password, options)
+            self.max_deal_pages = options.get("max_deal_pages", MAX_DEAL_PAGES_DEFAULT)
+            self.full_sync = options.get("full_sync", FULL_SYNC)
+            self.latest_synced_on = (
+                self.get_latest_sync_status() if not self.full_sync else None
+            )
+        except Exception as e:
+            error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
+            self.log.error(
+                f"Error encountered during initialization of BoostrLoader: {error}. Updating sync_status"
+            )
+            self.update_sync_status(
+                SYNC_STATUS_FAILURE,
+                timezone.now() + timedelta(hours=1),
+                f"Exception: {str(e):} Trace: {traceback.format_exc()}",
+            )
+            raise e
 
     def upsert_products(self) -> None:
         """Fetch all Boostr products and upsert them to Shepherd DB"""
