@@ -13,3 +13,5 @@ Visit the React frontend at http://0.0.0.0:5173/
 Still missing from this setup:
 
 - Build for production and serve React app from Django
+
+test commit to re run pipeline
