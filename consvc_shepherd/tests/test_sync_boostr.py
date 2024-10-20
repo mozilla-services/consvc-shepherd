@@ -12,6 +12,7 @@ from consvc_shepherd.management.commands.sync_boostr_data import (
     BoostrDeal,
     BoostrLoader,
     BoostrProduct,
+    Command,
     get_campaign_type,
 )
 from consvc_shepherd.tests.test_sync_boostr_mocks import (
@@ -502,8 +503,8 @@ class TestSyncBoostrData(TestCase):
         mock_upsert_products,
     ):
         """Test the load function success scenario"""
-        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
-        loader.load()
+        command = Command()
+        command.handle(base_url=BASE_URL)
         calls = [
             mock.call(
                 status="success",
@@ -523,16 +524,16 @@ class TestSyncBoostrData(TestCase):
     def test_load_failure(self, mock_create, mock_get, mock_post, mock_upsert_products):
         """Test the load function failure scenario"""
         with self.assertRaises(Exception):
-            loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
-            loader.load()
-            calls = [
-                mock.call(
-                    status="failure",
-                    synced_on=mock.ANY,
-                    message=mock.ANY,
-                ),
-            ]
-            mock_create.assert_has_calls(calls)
+            command = Command()
+            command.handle(base_url=BASE_URL)
+        calls = [
+            mock.call(
+                status="failure",
+                synced_on=mock.ANY,
+                message=mock.ANY,
+            ),
+        ]
+        mock_create.assert_has_calls(calls)
 
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_success)

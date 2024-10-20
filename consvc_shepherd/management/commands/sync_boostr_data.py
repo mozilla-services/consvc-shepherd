@@ -63,17 +63,30 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """Handle running the command"""
-        env = environ.Env()
-        BASE_DIR = Path(__file__).resolve().parent.parent
-        environ.Env.read_env(BASE_DIR / ".env")
+        try:
+            env = environ.Env()
+            BASE_DIR = Path(__file__).resolve().parent.parent
+            environ.Env.read_env(BASE_DIR / ".env")
 
-        loader = BoostrLoader(
-            options["base_url"],
-            env("BOOSTR_API_EMAIL"),
-            env("BOOSTR_API_PASS"),
-            options,
-        )
-        loader.load()
+            loader = BoostrLoader(
+                options["base_url"],
+                env("BOOSTR_API_EMAIL"),
+                env("BOOSTR_API_PASS"),
+                options,
+            )
+            loader.load()
+        except Exception as e:
+            error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
+            logger = logging.getLogger("sync_boostr_data")
+            logger.error(
+                f"Error encountered during initialization of BoostrLoader: {error}. Updating sync_status"
+            )
+            BoostrLoader.update_sync_status(
+                SYNC_STATUS_FAILURE,
+                timezone.now() + timedelta(hours=1),
+                f"Exception: {str(e):} Trace: {traceback.format_exc()}",
+            )
+            raise e
 
 
 class BoostrApiError(Exception):
@@ -207,25 +220,13 @@ class BoostrLoader:
     def __init__(
         self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
     ):
-        try:
-            self.log = logging.getLogger("sync_boostr_data")
-            self.boostr = BoostrApi(base_url, email, password, options)
-            self.max_deal_pages = options.get("max_deal_pages", MAX_DEAL_PAGES_DEFAULT)
-            self.full_sync = options.get("full_sync", FULL_SYNC)
-            self.latest_synced_on = (
-                self.get_latest_sync_status() if not self.full_sync else None
-            )
-        except Exception as e:
-            error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
-            self.log.error(
-                f"Error encountered during initialization of BoostrLoader: {error}. Updating sync_status"
-            )
-            self.update_sync_status(
-                SYNC_STATUS_FAILURE,
-                timezone.now() + timedelta(hours=1),
-                f"Exception: {str(e):} Trace: {traceback.format_exc()}",
-            )
-            raise e
+        self.log = logging.getLogger("sync_boostr_data")
+        self.boostr = BoostrApi(base_url, email, password, options)
+        self.max_deal_pages = options.get("max_deal_pages", MAX_DEAL_PAGES_DEFAULT)
+        self.full_sync = options.get("full_sync", FULL_SYNC)
+        self.latest_synced_on = (
+            self.get_latest_sync_status() if not self.full_sync else None
+        )
 
     def upsert_products(self) -> None:
         """Fetch all Boostr products and upsert them to Shepherd DB"""
@@ -362,6 +363,7 @@ class BoostrLoader:
                 f"{product.boostr_id} to deal: {deal.boostr_id}"
             )
 
+    @classmethod
     def update_sync_status(self, status: str, synced_on: datetime, message: str):
         """Fupdate the BoostrSyncStatus table given the status and the message"""
         BoostrSyncStatus.objects.create(
@@ -387,31 +389,15 @@ class BoostrLoader:
 
     def load(self):
         """Loader entry point"""
-        try:
-            sync_start_time = timezone.now() + timedelta(hours=1)
-
-            self.log.info(
-                f"Starting Boostr sync at {sync_start_time} retrieving records >= {self.latest_synced_on}"
-            )
-            self.upsert_products()
-            self.upsert_deals()
-            self.log.info(
-                "Boostr sync process completed successfully. Updating sync_status"
-            )
-            self.update_sync_status(
-                SYNC_STATUS_SUCCESS, sync_start_time, "Boostr sync success"
-            )
-        except Exception as e:
-            error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
-            self.log.error(
-                f"Boostr sync process encountered an error: {error}. Updating sync_status"
-            )
-            self.update_sync_status(
-                SYNC_STATUS_FAILURE,
-                sync_start_time,
-                f"Exception: {str(e):} Trace: {traceback.format_exc()}",
-            )
-            raise e
+        sync_start_time = timezone.now() + timedelta(hours=1)
+        self.log.info(
+            f"Starting Boostr sync at {sync_start_time} retrieving records >= {self.latest_synced_on}"
+        )
+        self.upsert_products()
+        self.upsert_deals()
+        BoostrLoader.update_sync_status(
+            SYNC_STATUS_SUCCESS, sync_start_time, "Boostr sync success"
+        )
 
 
 def get_campaign_type(product_full_name: str) -> str:
