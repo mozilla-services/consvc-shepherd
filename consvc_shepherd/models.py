@@ -435,6 +435,8 @@ class Campaign(models.Model):
     ----------
     ad_ops_person : CharField
         Ad Ops Person
+    name : CharField
+        Name
     notes : CharField
         Notes
     net_spend : CharField
@@ -462,6 +464,7 @@ class Campaign(models.Model):
     """
 
     ad_ops_person: CharField = models.CharField(null=True, blank=True)
+    name: CharField = models.CharField(null=True, blank=True)
     notes: CharField = models.CharField(null=True, blank=True)
     net_spend: IntegerField = models.IntegerField()
     impressions_sold: IntegerField = models.IntegerField()
