@@ -1,7 +1,9 @@
 """Unit tests for the sync_boostr_data command"""
 
+import os
 from unittest import mock
 
+from django.core.management import call_command
 from django.test import TestCase, override_settings
 
 from consvc_shepherd.management.commands.sync_boostr_data import (
@@ -484,6 +486,8 @@ class TestSyncBoostrData(TestCase):
         ]
         mock_create.assert_has_calls(calls)
 
+    @mock.patch.dict(os.environ, {"BOOSTR_API_EMAIL": "ads-eng-api@mozilla.com"})
+    @mock.patch.dict(os.environ, {"BOOSTR_API_PASS": "test-pass"})
     @mock.patch(
         "consvc_shepherd.management.commands.sync_boostr_data.BoostrLoader.upsert_products"
     )
@@ -502,8 +506,7 @@ class TestSyncBoostrData(TestCase):
         mock_upsert_products,
     ):
         """Test the load function success scenario"""
-        loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
-        loader.load()
+        call_command("sync_boostr_data", BASE_URL)
         calls = [
             mock.call(
                 status="success",
@@ -523,16 +526,15 @@ class TestSyncBoostrData(TestCase):
     def test_load_failure(self, mock_create, mock_get, mock_post, mock_upsert_products):
         """Test the load function failure scenario"""
         with self.assertRaises(Exception):
-            loader = BoostrLoader(BASE_URL, EMAIL, PASSWORD)
-            loader.load()
-            calls = [
-                mock.call(
-                    status="failure",
-                    synced_on=mock.ANY,
-                    message=mock.ANY,
-                ),
-            ]
-            mock_create.assert_has_calls(calls)
+            call_command("sync_boostr_data", BASE_URL)
+        calls = [
+            mock.call(
+                status="failure",
+                synced_on=mock.ANY,
+                message=mock.ANY,
+            ),
+        ]
+        mock_create.assert_has_calls(calls)
 
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_success)
