@@ -298,9 +298,9 @@ class BoostrLoader:
                 self.log.info(f"Upserted products and budgets for deal: {deal['id']}")
 
                 if boostr_deal_created and advertiser_created:
-                    campaign_name = deal_products[0]['product']['full_name']
+                    campaign_name = deal_products[0]["product"]["full_name"]
                     for i in range(1, len(deal_products)):
-                        campaign_name += "," + deal_products[i]['product']['full_name']
+                        campaign_name += "," + deal_products[i]["product"]["full_name"]
                     self.create_campaign(boostr_deal, campaign_name=campaign_name)
                     self.log.debug(f"Created campaign for deal: {deal['id']}")
 

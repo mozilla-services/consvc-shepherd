@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('consvc_shepherd', '0028_fix_update_campaign_summary_view'),
+        ("consvc_shepherd", "0028_fix_update_campaign_summary_view"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='campaign',
-            name='name',
+            model_name="campaign",
+            name="name",
             field=models.CharField(blank=True, null=True),
         ),
     ]
