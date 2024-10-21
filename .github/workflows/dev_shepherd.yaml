@@ -6,7 +6,7 @@ on:
 
 jobs:
   ops:
-    uses: mozilla-services/ads-devtoys/.github/workflows/ops.yaml@main
+    uses: mozilla-services/ads-devutils/.github/workflows/ops.yaml@main
     with:
       codePath: .
       containerName: shepherd
