@@ -1,0 +1,14 @@
+[
+    {
+        "view_name": "campaign_summary_view",
+        "required_columns": [
+            "advertiser",
+            "advertiser_id_id",
+            "clicks_delivered",
+            "deal_id",
+            "impressions_delivered",
+            "impressions_sold",
+            "net_spend"
+        ]
+    }
+]
