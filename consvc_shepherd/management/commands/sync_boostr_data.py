@@ -333,7 +333,7 @@ class BoostrLoader:
             else {}
         )
 
-        deal_products = self.boostr.get(
+        deal_products: list[Any] = self.boostr.get(
             f"deals/{deal.boostr_id}/deal_products", params=deal_products_params
         )
 
