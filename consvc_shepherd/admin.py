@@ -251,10 +251,9 @@ class BoostrDealAdmin(admin.ModelAdmin):
         "boostr_id",
         "name",
         "advertiser",
-        "stage_name",
         "sales_representatives",
     ]
-    search_help_text = "Search by boostr id, name, advertiser, stage name, or sales rep"
+    search_help_text = "Search by boostr id, name, advertiser or sales rep"
     list_filter = [
         "currency",
         "start_date",
