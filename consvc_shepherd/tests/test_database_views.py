@@ -7,7 +7,7 @@ from django.test import TestCase
 
 class ViewModelAlignmentTest(TestCase):
     """Unit tests for each view. The views are automatically detected using apps.get_models()
-    and fitering for models that are not managed.
+    and filtering for models that are not managed.
     """
 
     def assert_view_matches_model(self, model_class):
