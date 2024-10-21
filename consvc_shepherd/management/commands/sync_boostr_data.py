@@ -68,6 +68,8 @@ class Command(BaseCommand):
             BASE_DIR = Path(__file__).resolve().parent.parent
             environ.Env.read_env(BASE_DIR / ".env")
 
+            print("The base url", options["base_url"])
+
             loader = BoostrLoader(
                 options["base_url"],
                 env("BOOSTR_API_EMAIL"),

@@ -1,5 +1,6 @@
 """Unit tests for the sync_boostr_data command"""
 
+import os
 from unittest import mock
 
 from django.core.management import call_command
@@ -485,6 +486,7 @@ class TestSyncBoostrData(TestCase):
         ]
         mock_create.assert_has_calls(calls)
 
+    @mock.patch.dict(os.environ, {"BOOSTR_API_EMAIL": "ads-eng-api@mozilla.com"})
     @mock.patch(
         "consvc_shepherd.management.commands.sync_boostr_data.BoostrLoader.upsert_products"
     )
