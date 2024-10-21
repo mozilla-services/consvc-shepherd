@@ -257,7 +257,7 @@ class BoostrDealAdmin(admin.ModelAdmin):
     list_filter = [
         "currency",
         "start_date",
-        "stage_name",
+        "stage",
         ("products", admin.RelatedOnlyFieldListFilter),
     ]
     list_display = [
@@ -267,7 +267,7 @@ class BoostrDealAdmin(admin.ModelAdmin):
         "advertiser_id",
         "currency",
         "amount",
-        "stage_name",
+        "stage",
         "start_date",
         "end_date",
         "sales_representatives",

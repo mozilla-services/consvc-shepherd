@@ -301,7 +301,7 @@ class BoostrDeal(models.Model):
         Currency symbol, eg "$"
     amount : IntegerField
         Amount
-    stage_name : Charfield
+    stage : Charfield
         The deal's current stage (100% Closed Won| 90% Verbal| 75% Renewal)
     sales_representatives : CharField
         Sales representative names as a comma separated list
@@ -329,7 +329,7 @@ class BoostrDeal(models.Model):
     )
     currency: CharField = models.CharField()
     amount: IntegerField = models.IntegerField()
-    stage_name: CharField = models.CharField(null=True, blank=True)
+    stage: CharField = models.CharField(null=True, blank=True)
     sales_representatives: CharField = models.CharField()
     start_date: DateField = models.DateField()
     end_date: DateField = models.DateField()

@@ -304,7 +304,7 @@ class BoostrLoader:
                         "advertiser_id": advertiser,
                         "currency": deal["currency"],
                         "amount": math.floor(float(deal["budget"])),
-                        "stage_name": deal["stage_name"],
+                        "stage": deal["stage_name"],
                         "sales_representatives": ",".join(
                             str(d["email"]) for d in deal["deal_members"]
                         ),

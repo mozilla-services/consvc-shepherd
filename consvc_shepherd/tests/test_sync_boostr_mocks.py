@@ -128,7 +128,7 @@ def mock_update_or_create_deal(*args, **kwargs) -> tuple[BoostrDeal, bool]:
             advertiser=kwargs["defaults"]["advertiser"],
             currency=kwargs["defaults"]["currency"],
             amount=kwargs["defaults"]["amount"],
-            stage_name=kwargs["defaults"]["stage_name"],
+            stage=kwargs["defaults"]["stage"],
             sales_representatives=kwargs["defaults"]["sales_representatives"],
             start_date=kwargs["defaults"]["start_date"],
             end_date=kwargs["defaults"]["end_date"],
