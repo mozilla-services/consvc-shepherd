@@ -115,7 +115,7 @@ def mock_too_many_requests_response(*args, **kwargs) -> MockResponse:
 
 
 def mock_get_success_response(*args, **kwargs) -> MockResponse:
-    """Mock response from sucessful get"""
+    """Mock response from successful get"""
     return MockResponse({"data": "success"}, 200)
 
 
@@ -128,6 +128,7 @@ def mock_update_or_create_deal(*args, **kwargs) -> tuple[BoostrDeal, bool]:
             advertiser=kwargs["defaults"]["advertiser"],
             currency=kwargs["defaults"]["currency"],
             amount=kwargs["defaults"]["amount"],
+            stage_name=kwargs["defaults"]["stage_name"],
             sales_representatives=kwargs["defaults"]["sales_representatives"],
             start_date=kwargs["defaults"]["start_date"],
             end_date=kwargs["defaults"]["end_date"],
