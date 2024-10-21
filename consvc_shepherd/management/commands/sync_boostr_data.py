@@ -1,7 +1,5 @@
 """Django admin custom command for fetching and saving Deal and Product data from Boostr to Shepherd"""
 
-import json
-import pprint
 import logging
 import math
 import time
@@ -324,7 +322,7 @@ class BoostrLoader:
             end_date=deal.end_date,
         )
 
-    def upsert_deal_products(self, deal: BoostrDeal) -> list[Any]:
+    def upsert_deal_products(self, deal: BoostrDeal) -> list:
         """Fetch the deal_products for a particular deal and store them in our DB with their monthly budgets"""
         deal_products_params = (
             {
