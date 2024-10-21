@@ -37,7 +37,20 @@ export const newCampaign = {
   start_date: "2023-10-01",
   end_date: "2023-10-31",
   seller: "Test Seller",
-  deal: "1",
+  deal: 1,
+  campaign_fields: [],
+};
+export const updatedCampaign = {
+  id: 1,
+  ad_ops_person: "Updated Ad ops Person",
+  notes: "Hit message quality most artist possible civil.",
+  kevel_flight_id: 1,
+  net_spend: 76550,
+  impressions_sold: 521505,
+  seller: "Palmer and Sons",
+  start_date: "2024-10-05",
+  end_date: "2024-10-27",
+  deal: 8,
   campaign_fields: [],
 };
 
@@ -53,3 +66,34 @@ export const splitCampaign = {
   notes: "Initial campaign notes",
   deal: 1,
 };
+
+export const campaignOverviewData = [
+  {
+    deal_id: 2243,
+    net_ecpm: null,
+    ctr: null,
+    revenue: null,
+    impressions_remaining: 0,
+    live: "No",
+    advertiser: "Admarketplace Client",
+    net_spend: 10500.0,
+    impressions_sold: 0.0,
+    clicks_delivered: 0,
+    impressions_delivered: 0,
+    advertiser_id: null,
+  },
+  {
+    deal_id: 2207,
+    net_ecpm: null,
+    ctr: null,
+    revenue: null,
+    impressions_remaining: 0,
+    live: "No",
+    advertiser: "Admarketplace Client",
+    net_spend: 60000.0,
+    impressions_sold: 0.0,
+    clicks_delivered: 0,
+    impressions_delivered: 0,
+    advertiser_id: null,
+  },
+];

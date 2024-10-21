@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Box, Button, Grid2 as Grid } from "@mui/material";
 import { Add, Remove } from "@mui/icons-material";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -86,18 +86,18 @@ export default function SplitCampaignForm({
   return (
     <Box mt="2rem">
       <Box component="form" onSubmit={handleSubmit(onSubmitHandler)}>
-        <Grid2 container spacing={2}>
+        <Grid container spacing={2}>
           {fields.map((field, index) => (
             <React.Fragment key={field.id}>
-              <Grid2 size={2}>
+              <Grid size={2}>
                 <TextInput
                   name={`campaigns.${index.toString()}.ad_ops_person`}
                   label="Ad Ops Person"
                   control={control}
                   fullWidth
                 />
-              </Grid2>
-              <Grid2 size={1}>
+              </Grid>
+              <Grid size={1}>
                 <TextInput
                   name={`campaigns.${index.toString()}.kevel_flight_id`}
                   label="Kevel Flight Id"
@@ -105,8 +105,8 @@ export default function SplitCampaignForm({
                   control={control}
                   fullWidth
                 />
-              </Grid2>
-              <Grid2 size={1}>
+              </Grid>
+              <Grid size={1}>
                 <TextInput
                   name={`campaigns.${index.toString()}.impressions_sold`}
                   label="Impressions Sold"
@@ -114,8 +114,8 @@ export default function SplitCampaignForm({
                   control={control}
                   fullWidth
                 />
-              </Grid2>
-              <Grid2 size={1}>
+              </Grid>
+              <Grid size={1}>
                 <TextInput
                   name={`campaigns.${index.toString()}.net_spend`}
                   label="Net spend"
@@ -123,16 +123,16 @@ export default function SplitCampaignForm({
                   control={control}
                   fullWidth
                 />
-              </Grid2>
-              <Grid2 size={2}>
+              </Grid>
+              <Grid size={2}>
                 <TextInput
                   name={`campaigns.${index.toString()}.seller`}
                   label="Seller"
                   control={control}
                   fullWidth
                 />
-              </Grid2>
-              <Grid2 size={3}>
+              </Grid>
+              <Grid size={3}>
                 <StyledBox>
                   <Box>
                     <DateInput
@@ -149,8 +149,8 @@ export default function SplitCampaignForm({
                     />
                   </Box>
                 </StyledBox>
-              </Grid2>
-              <Grid2 size={2}>
+              </Grid>
+              <Grid size={2}>
                 <StyledBox>
                   <Box>
                     <TextInput
@@ -199,10 +199,10 @@ export default function SplitCampaignForm({
                     )}
                   </Box>
                 </StyledBox>
-              </Grid2>
+              </Grid>
             </React.Fragment>
           ))}
-        </Grid2>
+        </Grid>
         <Box mt="2rem" display="flex" justifyContent="flex-end" width="100%">
           <StyledButton variant="contained" type="submit">
             Save

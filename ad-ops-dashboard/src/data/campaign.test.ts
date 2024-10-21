@@ -7,9 +7,49 @@ import {
   useUpdateCampaignMutation,
   useDeleteCampaignMutation,
   useSplitCampaignMutation,
+  useGetCampaignsOverviewQuery,
 } from "./campaigns";
 import { http, HttpResponse } from "msw";
-import { campaigns } from "../fixtures/campaignFixtures";
+import {
+  campaigns,
+  newCampaign,
+  campaignOverviewData,
+  updatedCampaign,
+} from "../fixtures/campaignFixtures";
+
+describe("useGetCampaignsOverviewQuery", () => {
+  const filters = {};
+
+  test("successful campaign summary fetch", async () => {
+    const { result } = renderHook(() => useGetCampaignsOverviewQuery(filters), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(result.current.data).toStrictEqual(campaignOverviewData);
+  });
+
+  test("failure campaign summary fetch", async () => {
+    server.use(
+      http.get(`${TEST_URL}/campaign/overview/`, () => {
+        return HttpResponse.json({ success: false }, { status: 500 });
+      })
+    );
+
+    const { result } = renderHook(() => useGetCampaignsOverviewQuery(filters), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.isError).toBe(true);
+    });
+
+    expect(result.current.error).toBeDefined();
+  });
+});
 
 describe("useGetCampaignsQuery", () => {
   test("successful query hook", async () => {
@@ -41,19 +81,6 @@ describe("useGetCampaignsQuery", () => {
 
 describe("useCreateCampaignMutation", () => {
   test("successful campaign addition", async () => {
-    const newCampaign = {
-      ad_ops_person: "New Person",
-      notes: "New campaign notes",
-      kevel_flight_id: 11,
-      net_spend: 100000,
-      impressions_sold: 1000000,
-      seller: "New Seller",
-      start_date: "2024-10-10",
-      end_date: "2024-12-10",
-      deal: 2,
-      campaign_fields: [],
-    };
-
     const { result } = renderHook(() => useCreateCampaignMutation(), {
       wrapper: createWrapper(),
     });
@@ -77,20 +104,6 @@ describe("useCreateCampaignMutation", () => {
         return HttpResponse.json({ success: false }, { status: 400 });
       })
     );
-
-    const newCampaign = {
-      ad_ops_person: "New Person",
-      notes: "New campaign notes",
-      kevel_flight_id: 11,
-      net_spend: 100000,
-      impressions_sold: 1000000,
-      seller: "New Seller",
-      start_date: "2024-10-10",
-      end_date: "2024-12-10",
-      deal: 2,
-      campaign_fields: [],
-    };
-
     const { result } = renderHook(() => useCreateCampaignMutation(), {
       wrapper: createWrapper(),
     });
@@ -107,25 +120,12 @@ describe("useCreateCampaignMutation", () => {
 describe("useUpdateCampaignMutation", () => {
   test("successful campaign update", async () => {
     const campaignId = 1;
-    const updatedData = {
-      id: 1,
-      ad_ops_person: "Updated Ad ops Person",
-      notes: "Hit message quality most artist possible civil.",
-      kevel_flight_id: 1,
-      net_spend: 76550,
-      impressions_sold: 521505,
-      seller: "Palmer and Sons",
-      start_date: "2024-10-05",
-      end_date: "2024-10-27",
-      deal: 8,
-      campaign_fields: [],
-    };
 
     const { result } = renderHook(() => useUpdateCampaignMutation(campaignId), {
       wrapper: createWrapper(),
     });
 
-    await result.current.mutateAsync(updatedData);
+    await result.current.mutateAsync(updatedCampaign);
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
     });
@@ -138,28 +138,17 @@ describe("useUpdateCampaignMutation", () => {
     );
 
     const campaignId = 1;
-    const updatedData = {
-      id: 1,
-      ad_ops_person: "Updated Ad ops Person",
-      notes: "Hit message quality most artist possible civil.",
-      kevel_flight_id: 1,
-      net_spend: 76550,
-      impressions_sold: 521505,
-      seller: "Palmer and Sons",
-      start_date: "2024-10-05",
-      end_date: "2024-10-27",
-      deal: 8,
-      campaign_fields: [],
-    };
 
     const { result } = renderHook(() => useUpdateCampaignMutation(campaignId), {
       wrapper: createWrapper(),
     });
-    await expect(result.current.mutateAsync(updatedData)).rejects.toBeDefined();
     await expect(
-      result.current.mutateAsync(updatedData)
+      result.current.mutateAsync(updatedCampaign)
+    ).rejects.toBeDefined();
+    await expect(
+      result.current.mutateAsync(updatedCampaign)
     ).rejects.toHaveProperty("response.status", 400);
-    await expect(result.current.mutateAsync(updatedData)).rejects.toThrow(
+    await expect(result.current.mutateAsync(updatedCampaign)).rejects.toThrow(
       /400/
     );
   });

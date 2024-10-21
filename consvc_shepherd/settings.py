@@ -90,6 +90,7 @@ INSTALLED_APPS: list[str] = [
     "django_countries",
     "dockerflow.django",
     "rest_framework",
+    "django_filters",
     "corsheaders",
 ]
 

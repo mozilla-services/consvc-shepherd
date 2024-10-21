@@ -28,3 +28,26 @@ export const deals = [
     products: [5],
   },
 ];
+
+export const advertisers = [
+  {
+    value: "Amazon",
+    label: "Amazon",
+  },
+  {
+    value: "Ricoh Americas Corporation",
+    label: "Ricoh Americas Corporation",
+  },
+  {
+    value: "Vacasa",
+    label: "Vacasa",
+  },
+  {
+    value: "Pusher",
+    label: "Pusher",
+  },
+  {
+    value: "COVER",
+    label: "COVER",
+  },
+];
