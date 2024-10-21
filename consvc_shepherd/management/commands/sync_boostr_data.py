@@ -324,7 +324,7 @@ class BoostrLoader:
             end_date=deal.end_date,
         )
 
-    def upsert_deal_products(self, deal: BoostrDeal) -> dict[str, Any]:
+    def upsert_deal_products(self, deal: BoostrDeal) -> list[Any]:
         """Fetch the deal_products for a particular deal and store them in our DB with their monthly budgets"""
         deal_products_params = (
             {
