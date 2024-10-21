@@ -1,18 +1,19 @@
 """Unit tests for all the database views"""
 
+from django.apps import apps
 from django.db import connection
 from django.test import TestCase
-from django.apps import apps
 
 
 class ViewModelAlignmentTest(TestCase):
+    """Unit tests for each view. The views are automatically detected using apps.get_models()
+    and fitering for models that are not managed.
+    """
 
     def assert_view_matches_model(self, model_class):
-        """
-        Asserts that the database view associated with the given unmanaged model
+        """Assert that the database view associated with the given unmanaged model
         has columns that match the model's fields.
         """
-
         expected_columns = set(field.column for field in model_class._meta.fields)
         view_name = model_class._meta.db_table
         with connection.cursor() as cursor:
@@ -38,11 +39,9 @@ class ViewModelAlignmentTest(TestCase):
         self.assertSetEqual(actual_columns, expected_columns, error_message)
 
     def test_view_models_align_with_views(self):
-        """
-        Tests that all unmanaged models representing database views have fields
+        """Test that all unmanaged models representing database views have fields
         that match the columns in the database views.
         """
-
         unmanaged_models = [
             m
             for m in apps.get_models()
