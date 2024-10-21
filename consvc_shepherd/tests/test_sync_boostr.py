@@ -2,6 +2,7 @@
 
 from unittest import mock
 
+from django.core.management import call_command
 from django.test import TestCase, override_settings
 
 from consvc_shepherd.management.commands.sync_boostr_data import (
@@ -12,7 +13,6 @@ from consvc_shepherd.management.commands.sync_boostr_data import (
     BoostrDeal,
     BoostrLoader,
     BoostrProduct,
-    Command,
     get_campaign_type,
 )
 from consvc_shepherd.tests.test_sync_boostr_mocks import (
@@ -503,8 +503,7 @@ class TestSyncBoostrData(TestCase):
         mock_upsert_products,
     ):
         """Test the load function success scenario"""
-        command = Command()
-        command.handle(base_url=BASE_URL)
+        call_command("sync_boostr_data", BASE_URL)
         calls = [
             mock.call(
                 status="success",
@@ -524,8 +523,7 @@ class TestSyncBoostrData(TestCase):
     def test_load_failure(self, mock_create, mock_get, mock_post, mock_upsert_products):
         """Test the load function failure scenario"""
         with self.assertRaises(Exception):
-            command = Command()
-            command.handle(base_url=BASE_URL)
+            call_command("sync_boostr_data", BASE_URL)
         calls = [
             mock.call(
                 status="failure",
