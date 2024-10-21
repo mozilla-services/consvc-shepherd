@@ -112,7 +112,7 @@ makemigrations-empty: ##  Create an empty migrations file for manual migrations
 	docker exec -it consvc-shepherd-app-1 python manage.py makemigrations --empty consvc_shepherd
 
 migrate: ##  Run migrate on the docker container
-	docker exec -it consvc-shepherd-app-1 python manage.py migrate
+	docker exec -it consvc-shepherd-app-1 python manage.py migrate && docker exec -it consvc-shepherd-db-1 pg_dump -U postgres -s -F p -E UTF-8  postgres > consvc_shepherd/schema.sql
 
 makemigrations: ##  Run makemigrations on the docker container set MIGRATE=false prevent automatic migration.
 	@echo "Making migrations..."
