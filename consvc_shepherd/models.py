@@ -502,8 +502,6 @@ class CampaignSummary(models.Model):
 
     deal_id : IntegerField
         Boostr deal ID
-    advertiser : CharField
-        Advertiser name
     advertiser_id : Advertiser
         Foreign key pointer to Advertiser
     net_spend : CharField
@@ -518,7 +516,6 @@ class CampaignSummary(models.Model):
     """
 
     deal_id: IntegerField = models.IntegerField(primary_key=True)
-    advertiser: CharField = models.CharField(max_length=255)
     advertiser_id: ForeignKey = models.ForeignKey(
         Advertiser, on_delete=models.DO_NOTHING, null=True
     )
