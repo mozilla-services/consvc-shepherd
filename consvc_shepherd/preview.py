@@ -372,16 +372,16 @@ def get_unified(env: Environment, country: str, is_mobile: bool = False) -> Ads:
     }
 
     r = requests.post(f"{env.mars_url}/v1/ads", json=body, timeout=30)
-    print("##########################################################################")
-    print(f"Request URL: {r.request.url}")
-    print(f"Request Method: {r.request.method}")
-    print(f"Request Headers: {r.request.headers}")
-    print(f"Request Body: {r.request.body}")
-    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print(f"Response Status Code: {r.status_code}")
-    print(f"Response Headers: {r.headers}")
-    print(f"Response Body: {r.text}")
-    print("##########################################################################")
+    logging.warn("##########################################################################")
+    logging.warn(f"Request URL: {r.request.url}")
+    logging.warn(f"Request Method: {r.request.method}")
+    logging.warn(f"Request Headers: {r.request.headers}")
+    logging.warn(f"Request Body: {r.request.body}")
+    logging.warn("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    logging.warn(f"Response Status Code: {r.status_code}")
+    logging.warn(f"Response Headers: {r.headers}")
+    logging.warn(f"Response Body: {r.text}")
+    logging.warn("##########################################################################")
 
 
     r_json = r.json()
