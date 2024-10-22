@@ -1,7 +1,8 @@
+import { sentryCreateBrowserRouter } from "./instrument.tsx"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { RouterProvider } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { routes } from "./routes.tsx";
@@ -16,7 +17,8 @@ const queryClient = new QueryClient({
   },
 });
 
-const router = createBrowserRouter(routes);
+
+const router = sentryCreateBrowserRouter(routes);
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -26,5 +28,7 @@ export default function App() {
         <RouterProvider router={router} />
       </Suspense>
     </QueryClientProvider>
+
+
   );
 }
