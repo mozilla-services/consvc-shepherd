@@ -321,6 +321,13 @@ class BoostrDeal(models.Model):
 
     """
 
+    class Stages(models.TextChoices):
+        """Defines deal stage choices for use in model fields."""
+
+        CLOSED_WON = "Closed Won"
+        VERBAL = "Verbal"
+        RENEWAL = "Renewal"
+
     boostr_id: IntegerField = models.IntegerField(unique=True)
     name: CharField = models.CharField()
     advertiser: CharField = models.CharField()
@@ -329,7 +336,7 @@ class BoostrDeal(models.Model):
     )
     currency: CharField = models.CharField()
     amount: IntegerField = models.IntegerField()
-    stage: CharField = models.CharField(null=True, blank=True)
+    stage: CharField = models.CharField(choices=Stages.choices, blank=True)
     sales_representatives: CharField = models.CharField()
     start_date: DateField = models.DateField()
     end_date: DateField = models.DateField()

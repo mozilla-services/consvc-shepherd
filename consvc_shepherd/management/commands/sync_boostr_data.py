@@ -304,7 +304,7 @@ class BoostrLoader:
                         "advertiser_id": advertiser,
                         "currency": deal["currency"],
                         "amount": math.floor(float(deal["budget"])),
-                        "stage": deal["stage_name"],
+                        "stage": get_stage(deal["stage_name"]),
                         "sales_representatives": ",".join(
                             str(d["email"]) for d in deal["deal_members"]
                         ),
@@ -417,6 +417,16 @@ def get_campaign_type(product_full_name: str) -> str:
         return BoostrProduct.CampaignType.FLAT_FEE
     else:
         return BoostrProduct.CampaignType.NONE
+
+
+def get_stage(stage_name: str) -> str:
+    """Infer a campaign type from a product's full name"""
+    if "Renewal" in stage_name:
+        return BoostrDeal.Stages.RENEWAL
+    if "Verbal" in stage_name:
+        return BoostrDeal.Stages.VERBAL
+    else:
+        return BoostrDeal.Stages.CLOSED_WON
 
 
 def get_country(product_full_name: str) -> str:
