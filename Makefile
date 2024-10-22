@@ -84,7 +84,7 @@ test-django: local-migration-check # Run the tests for the shepherd Django app i
 	env DJANGO_SETTINGS_MODULE=consvc_shepherd.settings $(POETRY) run pytest --cov --cov-report=term-missing --cov-fail-under=$(COV_FAIL_UNDER)
 
 test-react: # Run the tests for the ad-ops-dashboard React app in CI
-	cd ad-ops-dashboard && npm run test
+	cd ad-ops-dashboard && npm run test:ci
 
 test: test-django test-react  ##  Run all tests in CI
 
