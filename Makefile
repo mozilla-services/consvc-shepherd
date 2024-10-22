@@ -97,7 +97,7 @@ doc: ##  Generate docs via mdBook
 doc-preview: doc  ##  Preview Merino docs via the default browser
 	mdbook serve --open
 
-dev: $(INSTALL_STAMP)  ## Run shepherd locally and show human readable timestamps.  
+dev: $(INSTALL_STAMP)  ## Run shepherd locally and show human readable timestamps.
 	docker compose up -d && docker-compose logs -f -t
 
 local-test-django: $(INSTALL_STAMP) # Run shepherd Django app tests locally
