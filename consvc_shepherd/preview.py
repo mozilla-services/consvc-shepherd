@@ -185,6 +185,15 @@ ENVIRONMENTS: list[Environment] = [
         spoc_zone_ids=[],
         direct_sold_tile_zone_ids=[],
     ),
+    Environment(
+        code="unified_local",
+        name="Local Unified API",
+        mars_url="http://mars:8080",
+        spoc_site_id=None,
+        spoc_site_id_mobile=None,
+        spoc_zone_ids=[],
+        direct_sold_tile_zone_ids=[],
+    ),
 ]
 
 FORM_FACTORS: list[FormFactor] = [
