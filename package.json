@@ -1,8 +1,10 @@
 {
   "devDependencies": {
-    "@dbml/cli": "^3.9.2"
+    "@dbml/cli": "^3.9.2",
+    "@softwaretechnik/dbml-renderer": "^1.0.30"
   },
   "scripts": {
-    "sql2dbml": "sql2dbml schema/schema.sql --postgres -o schema/schema.dbml"
+    "sql2dbml": "sql2dbml schema/schema.sql --postgres -o schema/schema.dbml",
+    "render": "dbml-renderer -i schema/schema.dbml -o output.svg"
   }
 }
