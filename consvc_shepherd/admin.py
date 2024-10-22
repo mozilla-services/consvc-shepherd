@@ -247,7 +247,7 @@ class BoostrDealAdmin(admin.ModelAdmin):
     inlines = [
         BoostrDealProductInline,
     ]
-    search_fields = ["boostr_id", "name", "advertiser", "sales_representatives"]
+    search_fields = ["boostr_id", "name", "sales_representatives"]
     search_help_text = "Search by boostr id, name, adversiter, or sales reps"
     list_filter = [
         "currency",
@@ -257,7 +257,6 @@ class BoostrDealAdmin(admin.ModelAdmin):
     list_display = [
         "boostr_id",
         "name",
-        "advertiser",
         "advertiser_id",
         "currency",
         "amount",
@@ -389,7 +388,6 @@ class CampaignSummaryAdmin(admin.ModelAdmin):
     model = CampaignSummary
 
     list_display = [
-        "advertiser",
         "advertiser_id",
         "net_spend",
         "impressions_sold",
@@ -405,7 +403,6 @@ class CampaignSummaryAdmin(admin.ModelAdmin):
         MonthFilter,
         CountryFilter,
         PlacementFilter,
-        "advertiser",
     ]
 
 

@@ -213,7 +213,6 @@ class TestSyncBoostrData(TestCase):
                 boostr_id=1498421,
                 defaults={
                     "name": "Neutron: Neutron US, DE, FR",
-                    "advertiser": "Neutron",
                     "advertiser_id": Advertiser(
                         id=1,
                         name="Netron",
@@ -229,7 +228,6 @@ class TestSyncBoostrData(TestCase):
                 boostr_id=1482241,
                 defaults={
                     "name": "HiProduce: CA Tiles May 2024",
-                    "advertiser": "HiProduce",
                     "advertiser_id": Advertiser(
                         id=1,
                         name="HiProduce",
@@ -329,7 +327,6 @@ class TestSyncBoostrData(TestCase):
         deal = BoostrDeal(
             boostr_id=1498421,
             name="Deal with Customer",
-            advertiser="Customer, Inc",
             currency="$",
             amount=5000,
             sales_representatives="asales@mozilla.com",
@@ -385,7 +382,6 @@ class TestSyncBoostrData(TestCase):
         deal = BoostrDeal(
             boostr_id=123456,
             name="Deal with Customer",
-            advertiser="Customer, Inc",
             currency="$",
             amount=5000,
             sales_representatives="asales@mozilla.com",
