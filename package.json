@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "@dbml/cli": "^3.9.2"
+  },
+  "scripts": {
+    "sql2dbml": "sql2dbml consvc_shepherd/schema.sql --postgres -o schema/schema.dbml"
+  }
+}

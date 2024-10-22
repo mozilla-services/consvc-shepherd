@@ -1,0 +1,353 @@
+Table "auth_group" {
+  "id" integer [pk, not null]
+  "name" "character varying(150)" [unique, not null]
+
+  Indexes {
+    name [type: btree, name: "auth_group_name_a6ea08ec_like"]
+  }
+}
+
+Table "auth_group_permissions" {
+  "id" bigint [pk, not null]
+  "group_id" integer [not null]
+  "permission_id" integer [not null]
+
+  Indexes {
+    (group_id, permission_id) [unique, name: "auth_group_permissions_group_id_permission_id_0cd325b0_uniq"]
+    group_id [type: btree, name: "auth_group_permissions_group_id_b120cbf9"]
+    permission_id [type: btree, name: "auth_group_permissions_permission_id_84c5c92e"]
+  }
+}
+
+Table "auth_permission" {
+  "id" integer [pk, not null]
+  "name" "character varying(255)" [not null]
+  "content_type_id" integer [not null]
+  "codename" "character varying(100)" [not null]
+
+  Indexes {
+    (content_type_id, codename) [unique, name: "auth_permission_content_type_id_codename_01ab375a_uniq"]
+    content_type_id [type: btree, name: "auth_permission_content_type_id_2f476e4b"]
+  }
+}
+
+Table "auth_user" {
+  "id" integer [pk, not null]
+  "password" "character varying(128)" [not null]
+  "last_login" timestamp
+  "is_superuser" boolean [not null]
+  "username" "character varying(150)" [unique, not null]
+  "first_name" "character varying(150)" [not null]
+  "last_name" "character varying(150)" [not null]
+  "email" "character varying(254)" [not null]
+  "is_staff" boolean [not null]
+  "is_active" boolean [not null]
+  "date_joined" timestamp [not null]
+
+  Indexes {
+    username [type: btree, name: "auth_user_username_6821ab7c_like"]
+  }
+}
+
+Table "auth_user_groups" {
+  "id" bigint [pk, not null]
+  "user_id" integer [not null]
+  "group_id" integer [not null]
+
+  Indexes {
+    (user_id, group_id) [unique, name: "auth_user_groups_user_id_group_id_94350c0c_uniq"]
+    group_id [type: btree, name: "auth_user_groups_group_id_97559544"]
+    user_id [type: btree, name: "auth_user_groups_user_id_6a12ed8b"]
+  }
+}
+
+Table "auth_user_user_permissions" {
+  "id" bigint [pk, not null]
+  "user_id" integer [not null]
+  "permission_id" integer [not null]
+
+  Indexes {
+    (user_id, permission_id) [unique, name: "auth_user_user_permissions_user_id_permission_id_14a6b632_uniq"]
+    permission_id [type: btree, name: "auth_user_user_permissions_permission_id_1fbb5f2c"]
+    user_id [type: btree, name: "auth_user_user_permissions_user_id_a95ead1b"]
+  }
+}
+
+Table "consvc_shepherd_advertiser" {
+  "id" bigint [pk, not null]
+  "name" "character varying" [unique, not null]
+  "created_on" timestamp [not null]
+  "updated_on" timestamp [not null]
+
+  Indexes {
+    name [type: btree, name: "consvc_shepherd_advertiser_name_1b1123f1_like"]
+  }
+}
+
+Table "consvc_shepherd_boostrdeal" {
+  "id" bigint [pk, not null]
+  "boostr_id" integer [unique, not null]
+  "name" "character varying" [not null]
+  "advertiser" "character varying" [not null]
+  "currency" "character varying" [not null]
+  "amount" integer [not null]
+  "sales_representatives" "character varying" [not null]
+  "start_date" date [not null]
+  "end_date" date [not null]
+  "created_on" timestamp [not null]
+  "updated_on" timestamp [not null]
+  "advertiser_id_id" bigint
+
+  Indexes {
+    advertiser_id_id [type: btree, name: "consvc_shepherd_boostrdeal_advertiser_id_id_de2c96e0"]
+  }
+}
+
+Table "consvc_shepherd_campaign" {
+  "id" bigint [pk, not null]
+  "ad_ops_person" "character varying"
+  "notes" "character varying"
+  "net_spend" integer [not null]
+  "impressions_sold" integer [not null]
+  "seller" "character varying" [not null]
+  "start_date" date [not null]
+  "end_date" date [not null]
+  "created_on" timestamp [not null]
+  "updated_on" timestamp [not null]
+  "deal_id" bigint [not null]
+
+  Indexes {
+    deal_id [type: btree, name: "consvc_shepherd_campaign_deal_id_4fd2c760"]
+  }
+}
+
+Table "consvc_shepherd_deliveredflight" {
+  "id" bigint [pk, not null]
+  "submission_date" date [not null]
+  "campaign_id" integer [not null]
+  "campaign_name" "character varying"
+  "flight_id" integer [not null]
+  "flight_name" "character varying"
+  "provider" "character varying"
+  "clicks_delivered" integer [not null]
+  "impressions_delivered" integer [not null]
+
+  Indexes {
+    (submission_date, campaign_id, flight_id, provider) [unique, name: "unique_delivered_flight"]
+  }
+}
+
+Table "consvc_shepherd_flight" {
+  "id" bigint [pk, not null]
+  "kevel_flight_id" integer
+  "campaign_id" bigint
+
+  Indexes {
+    campaign_id [type: btree, name: "consvc_shepherd_flight_campaign_id_e2dea6fb"]
+  }
+}
+
+Table "consvc_shepherd_allocationsetting" {
+  "id" bigint [pk, not null]
+  "position" integer [unique, not null]
+}
+
+Table "consvc_shepherd_allocationsettingssnapshot" {
+  "id" bigint [pk, not null]
+  "name" "character varying(128)" [not null]
+  "json_settings" jsonb
+  "created_on" timestamp [not null]
+  "launched_date" timestamp
+  "created_by_id" integer
+  "launched_by_id" integer
+
+  Indexes {
+    created_by_id [type: btree, name: "consvc_shepherd_allocation_created_by_id_d5c4b12f"]
+    launched_by_id [type: btree, name: "consvc_shepherd_allocation_launched_by_id_a344d2ea"]
+  }
+}
+
+Table "consvc_shepherd_boostrdealproduct" {
+  "id" bigint [pk, not null]
+  "budget" integer [not null]
+  "month" "character varying" [not null]
+  "boostr_deal_id" bigint [not null]
+  "boostr_product_id" bigint [not null]
+
+  Indexes {
+    boostr_deal_id [type: btree, name: "consvc_shepherd_boostrdealproduct_boostr_deal_id_65953dfe"]
+    boostr_product_id [type: btree, name: "consvc_shepherd_boostrdealproduct_boostr_product_id_230269c0"]
+  }
+}
+
+Table "consvc_shepherd_boostrproduct" {
+  "id" bigint [pk, not null]
+  "boostr_id" integer [unique, not null]
+  "full_name" "character varying" [not null]
+  "campaign_type" "character varying" [not null]
+  "created_on" timestamp [not null]
+  "updated_on" timestamp [not null]
+  "country" "character varying" [not null]
+}
+
+Table "consvc_shepherd_boostrsyncstatus" {
+  "id" bigint [pk, not null]
+  "synced_on" timestamp [not null]
+  "status" "character varying" [not null]
+  "message" "character varying" [not null]
+}
+
+Table "consvc_shepherd_bqsyncstatus" {
+  "id" bigint [pk, not null]
+  "synced_on" timestamp [not null]
+  "status" "character varying" [not null]
+  "message" "character varying" [not null]
+  "query_date" timestamp
+}
+
+Table "consvc_shepherd_partnerallocation" {
+  "id" bigint [pk, not null]
+  "percentage" integer [not null]
+  "allocation_position_id" bigint [not null]
+  "partner_id" bigint
+
+  Indexes {
+    allocation_position_id [type: btree, name: "consvc_shepherd_partnerall_allocationPosition_id_14cf58ad"]
+    partner_id [type: btree, name: "consvc_shepherd_partnerallocation_partner_id_4ef9c424"]
+  }
+}
+
+Table "consvc_shepherd_settingssnapshot" {
+  "id" bigint [pk, not null]
+  "name" "character varying(128)" [not null]
+  "json_settings" jsonb
+  "created_on" timestamp [not null]
+  "launched_date" timestamp
+  "created_by_id" integer
+  "launched_by_id" integer
+  "settings_type_id" bigint
+
+  Indexes {
+    created_by_id [type: btree, name: "consvc_shepherd_settingssnapshot_created_by_id_99162aa5"]
+    launched_by_id [type: btree, name: "consvc_shepherd_settingssnapshot_launched_by_id_eb4f2f6d"]
+    settings_type_id [type: btree, name: "consvc_shepherd_settingssnapshot_settings_type_id_896ec79b"]
+  }
+}
+
+Table "contile_advertiser" {
+  "id" bigint [pk, not null]
+  "name" "character varying(128)" [not null]
+  "partner_id" bigint [not null]
+
+  Indexes {
+    partner_id [type: btree, name: "contile_advertiser_partner_id_5f6ea237"]
+  }
+}
+
+Table "contile_advertiserurl" {
+  "id" bigint [pk, not null]
+  "geo" "character varying(2)" [not null]
+  "domain" "character varying(255)" [not null]
+  "path" "character varying(128)" [not null]
+  "matching" boolean [not null]
+  "advertiser_id" bigint [not null]
+
+  Indexes {
+    advertiser_id [type: btree, name: "contile_advertiserurl_advertiser_id_115ff070"]
+  }
+}
+
+Table "contile_partner" {
+  "id" bigint [pk, not null]
+  "name" "character varying(128)" [not null]
+}
+
+Table "django_admin_log" {
+  "id" integer [pk, not null]
+  "action_time" timestamp [not null]
+  "object_id" text
+  "object_repr" "character varying(200)" [not null]
+  "action_flag" smallint [not null]
+  "change_message" text [not null]
+  "content_type_id" integer
+  "user_id" integer [not null]
+
+  Indexes {
+    content_type_id [type: btree, name: "django_admin_log_content_type_id_c4bce8eb"]
+    user_id [type: btree, name: "django_admin_log_user_id_c564eba6"]
+  }
+}
+
+Table "django_content_type" {
+  "id" integer [pk, not null]
+  "app_label" "character varying(100)" [not null]
+  "model" "character varying(100)" [not null]
+
+  Indexes {
+    (app_label, model) [unique, name: "django_content_type_app_label_model_76bd3d3b_uniq"]
+  }
+}
+
+Table "django_migrations" {
+  "id" bigint [pk, not null]
+  "app" "character varying(255)" [not null]
+  "name" "character varying(255)" [not null]
+  "applied" timestamp [not null]
+}
+
+Table "django_session" {
+  "session_key" "character varying(40)" [pk, not null]
+  "session_data" text [not null]
+  "expire_date" timestamp [not null]
+
+  Indexes {
+    expire_date [type: btree, name: "django_session_expire_date_a5c62663"]
+    session_key [type: btree, name: "django_session_session_key_c0390e0f_like"]
+  }
+}
+
+Ref "auth_group_permissio_permission_id_84c5c92e_fk_auth_perm":"auth_permission"."id" < "auth_group_permissions"."permission_id"
+
+Ref "auth_group_permissions_group_id_b120cbf9_fk_auth_group_id":"auth_group"."id" < "auth_group_permissions"."group_id"
+
+Ref "auth_permission_content_type_id_2f476e4b_fk_django_co":"django_content_type"."id" < "auth_permission"."content_type_id"
+
+Ref "auth_user_groups_group_id_97559544_fk_auth_group_id":"auth_group"."id" < "auth_user_groups"."group_id"
+
+Ref "auth_user_groups_user_id_6a12ed8b_fk_auth_user_id":"auth_user"."id" < "auth_user_groups"."user_id"
+
+Ref "auth_user_user_permi_permission_id_1fbb5f2c_fk_auth_perm":"auth_permission"."id" < "auth_user_user_permissions"."permission_id"
+
+Ref "auth_user_user_permissions_user_id_a95ead1b_fk_auth_user_id":"auth_user"."id" < "auth_user_user_permissions"."user_id"
+
+Ref "consvc_shepherd_allo_created_by_id_d5c4b12f_fk_auth_user":"auth_user"."id" < "consvc_shepherd_allocationsettingssnapshot"."created_by_id"
+
+Ref "consvc_shepherd_allo_launched_by_id_a344d2ea_fk_auth_user":"auth_user"."id" < "consvc_shepherd_allocationsettingssnapshot"."launched_by_id"
+
+Ref "consvc_shepherd_boos_advertiser_id_id_de2c96e0_fk_consvc_sh":"consvc_shepherd_advertiser"."id" < "consvc_shepherd_boostrdeal"."advertiser_id_id"
+
+Ref "consvc_shepherd_boos_boostr_deal_id_65953dfe_fk_consvc_sh":"consvc_shepherd_boostrdeal"."id" < "consvc_shepherd_boostrdealproduct"."boostr_deal_id"
+
+Ref "consvc_shepherd_boos_boostr_product_id_230269c0_fk_consvc_sh":"consvc_shepherd_boostrproduct"."id" < "consvc_shepherd_boostrdealproduct"."boostr_product_id"
+
+Ref "consvc_shepherd_camp_deal_id_4fd2c760_fk_consvc_sh":"consvc_shepherd_boostrdeal"."id" < "consvc_shepherd_campaign"."deal_id"
+
+Ref "consvc_shepherd_flig_campaign_id_e2dea6fb_fk_consvc_sh":"consvc_shepherd_campaign"."id" < "consvc_shepherd_flight"."campaign_id"
+
+Ref "consvc_shepherd_part_allocation_position__8c71a610_fk_consvc_sh":"consvc_shepherd_allocationsetting"."id" < "consvc_shepherd_partnerallocation"."allocation_position_id"
+
+Ref "consvc_shepherd_part_partner_id_4ef9c424_fk_contile_p":"contile_partner"."id" < "consvc_shepherd_partnerallocation"."partner_id"
+
+Ref "consvc_shepherd_sett_created_by_id_99162aa5_fk_auth_user":"auth_user"."id" < "consvc_shepherd_settingssnapshot"."created_by_id"
+
+Ref "consvc_shepherd_sett_launched_by_id_eb4f2f6d_fk_auth_user":"auth_user"."id" < "consvc_shepherd_settingssnapshot"."launched_by_id"
+
+Ref "consvc_shepherd_sett_settings_type_id_896ec79b_fk_contile_p":"contile_partner"."id" < "consvc_shepherd_settingssnapshot"."settings_type_id"
+
+Ref "contile_advertiser_partner_id_5f6ea237_fk_contile_partner_id":"contile_partner"."id" < "contile_advertiser"."partner_id"
+
+Ref "contile_advertiserur_advertiser_id_115ff070_fk_contile_a":"contile_advertiser"."id" < "contile_advertiserurl"."advertiser_id"
+
+Ref "django_admin_log_content_type_id_c4bce8eb_fk_django_co":"django_content_type"."id" < "django_admin_log"."content_type_id"
+
+Ref "django_admin_log_user_id_c564eba6_fk_auth_user_id":"auth_user"."id" < "django_admin_log"."user_id"
