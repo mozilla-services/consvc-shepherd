@@ -388,6 +388,7 @@ class CampaignSummaryAdmin(admin.ModelAdmin):
     model = CampaignSummary
 
     list_display = [
+        "advertiser",
         "advertiser_id",
         "net_spend",
         "impressions_sold",
@@ -403,6 +404,7 @@ class CampaignSummaryAdmin(admin.ModelAdmin):
         MonthFilter,
         CountryFilter,
         PlacementFilter,
+        "advertiser",
     ]
 
 

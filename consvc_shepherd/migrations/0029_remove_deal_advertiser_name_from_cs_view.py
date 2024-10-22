@@ -16,6 +16,7 @@ class Migration(migrations.Migration):
             CREATE OR REPLACE VIEW campaign_summary_view AS
             SELECT
                 d.id AS deal_id,
+                a.name AS advertiser,
                 SUM(c.net_spend) AS net_spend,
                 SUM(c.impressions_sold) AS impressions_sold,
                 COALESCE(SUM(df.impressions_delivered), 0) AS impressions_delivered,
