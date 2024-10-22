@@ -298,10 +298,12 @@ class BoostrLoader:
                 self.log.info(f"Upserted products and budgets for deal: {deal['id']}")
 
                 if boostr_deal_created and advertiser_created:
-                    campaign_name = deal_products[0]["product"]["full_name"]
-                    for i in range(1, len(deal_products)):
-                        campaign_name += "," + deal_products[i]["product"]["full_name"]
-                    self.create_campaign(boostr_deal, campaign_name=campaign_name)
+                    campaign_name = deal["advertiser_name"]
+                    if deal_products:
+                        campaign_name = deal_products[0]["product"]["full_name"]
+                        for i in range(1, len(deal_products)):
+                            campaign_name += "," + deal_products[i]["product"]["full_name"]
+                    self.create_campaign(boostr_deal, name=campaign_name)
                     self.log.debug(f"Created campaign for deal: {deal['id']}")
 
             # If this is the last iteration of the loop due to the max page limit, log that we stopped
@@ -310,10 +312,10 @@ class BoostrLoader:
                     f"Done. Stopped fetching deals after hitting max_page_limit of {page} pages."
                 )
 
-    def create_campaign(self, deal: BoostrDeal, campaign_name: str) -> None:
+    def create_campaign(self, deal: BoostrDeal, name: str) -> None:
         """Create campaign if a boostr deal is created. Returns True if successful, False otherwise."""
         Campaign.objects.create(
-            name=campaign_name,
+            name=name,
             net_spend=deal.amount,
             impressions_sold=0,
             seller=deal.sales_representatives,
