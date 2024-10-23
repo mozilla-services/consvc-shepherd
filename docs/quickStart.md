@@ -88,7 +88,7 @@ See the [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv) documentat
     docker exec -it consvc-shepherd-db-1 psql -U postgres postgres
     ```
 
-1. Seed Shepherd DB with random test data.
+1. **(Optional)** Seed Shepherd DB with random test data. This is useful when testing schema changes without having to run our sync scripts to get real data.
 
     Shell into the `consvc-shepherd-app-1` container as mentioned above and run the following command:
     ```shell

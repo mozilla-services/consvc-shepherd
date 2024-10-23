@@ -101,7 +101,7 @@ MOCK_DEALS_RESPONSE = [
         "start_date": "2024-04-01",
         "end_date": "2024-06-30",
         "name": "Neutron: Neutron US, DE, FR",
-        "stage_name": "Closed Won",
+        "stage_name": "Verbal",
         "stage_id": 1087,
         "type": None,
         "source": "Proactive to Client",
@@ -132,7 +132,17 @@ MOCK_DEALS_RESPONSE = [
                 "seller_type": "direct",
                 "role": None,
                 "product": None,
-            }
+            },
+            {
+                "id": 4525425,
+                "user_id": 21625,
+                "email": "lsales@mozilla.com",
+                "share": 100,
+                "type": "Seller",
+                "seller_type": "direct",
+                "role": None,
+                "product": None,
+            },
         ],
         "custom_fields": {
             "Forecast Close Date": None,

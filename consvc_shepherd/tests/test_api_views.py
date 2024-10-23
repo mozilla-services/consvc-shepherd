@@ -10,7 +10,7 @@ from consvc_shepherd.api.serializers import (
     BoostrProductSerializer,
     CampaignSerializer,
 )
-from consvc_shepherd.models import BoostrDeal, BoostrProduct, Campaign
+from consvc_shepherd.models import BoostrDeal, BoostrProduct, Campaign, Flight
 
 
 @override_settings(DEBUG=True)
@@ -103,8 +103,7 @@ class CampaignViewSetTests(APITestCase):
         self.campaign1 = Campaign.objects.create(
             notes="Initial campaign",
             ad_ops_person="Leanne",
-            kevel_flight_id=123,
-            impressions_sold=1,
+            impressions_sold=4,
             net_spend=10000,
             deal=self.deal1,
             start_date="2023-01-01",
@@ -115,13 +114,22 @@ class CampaignViewSetTests(APITestCase):
         self.campaign2 = Campaign.objects.create(
             notes="Second campaign",
             ad_ops_person="John",
-            kevel_flight_id=456,
             impressions_sold=2,
             net_spend=5000,
             deal=self.deal2,
             start_date="2023-02-01",
             end_date="2023-02-03",
             seller="Sarah",
+        )
+
+        Flight.objects.create(
+            campaign=self.campaign1,
+            kevel_flight_id=123,
+        )
+
+        Flight.objects.create(
+            campaign=self.campaign2,
+            kevel_flight_id=456,
         )
 
         self.url = reverse("campaigns-list")
@@ -195,3 +203,41 @@ class CampaignViewSetTests(APITestCase):
         response = self.client.delete(product_url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Campaign.objects.count(), 1)
+
+    def test_split_create_update_campaigns(self):
+        """Test creating and updating campaigns in split."""
+        data = [
+            {
+                "id": self.campaign1.id,
+                "notes": "Updated campaign",
+                "ad_ops_person": "Alice",
+                "kevel_flight_id": 123,
+                "impressions_sold": 2,
+                "net_spend": 5000,
+                "deal": self.deal1.id,
+                "start_date": "2023-03-01",
+                "end_date": "2023-03-03",
+                "seller": "Tom",
+            },
+            {
+                "notes": "New campaign",
+                "ad_ops_person": "Bob",
+                "kevel_flight_id": 789,
+                "impressions_sold": 2,
+                "net_spend": 5000,
+                "deal": self.deal1.id,
+                "start_date": "2023-03-01",
+                "end_date": "2023-03-03",
+                "seller": "Alice",
+            },
+        ]
+        campaigns_data = {"campaigns": data, "deal": self.deal1.id}
+        campaign_split_url = reverse("campaigns-split-campaigns")
+
+        response = self.client.post(campaign_split_url, campaigns_data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Campaign.objects.count(), 3)
+
+        self.campaign1.refresh_from_db()
+        self.assertEqual(self.campaign1.notes, "Updated campaign")

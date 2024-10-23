@@ -1,7 +1,9 @@
 """Unit tests for the sync_boostr_data command"""
 
+import os
 from unittest import mock
 
+from django.core.management import call_command
 from django.test import TestCase, override_settings
 
 from consvc_shepherd.management.commands.sync_boostr_data import (
@@ -10,6 +12,7 @@ from consvc_shepherd.management.commands.sync_boostr_data import (
     BoostrAPI,
     BoostrAPIError,
     BoostrAPIMaxRetriesError,
+    Advertiser,
     BoostrDeal,
     BoostrLoader,
     BoostrProduct,
@@ -23,11 +26,13 @@ from consvc_shepherd.tests.test_sync_boostr_mocks import (
     mock_get_latest_boostr_sync_status,
     mock_get_product,
     mock_get_success,
+    mock_get_success_empty_response,
     mock_get_success_response,
     mock_post_success,
     mock_post_token_fail,
     mock_request_exception,
     mock_too_many_requests_response,
+    mock_update_or_create_advertiser,
     mock_update_or_create_deal,
     mock_upsert_deals_exception,
 )
@@ -199,27 +204,47 @@ class TestSyncBoostrData(TestCase):
         side_effect=mock_update_or_create_deal,
     )
     @mock.patch.object(BoostrLoader, "upsert_deal_products")
+    @mock.patch(
+        "consvc_shepherd.models.Advertiser.objects.update_or_create",
+        side_effect=mock_update_or_create_advertiser,
+    )
+    @mock.patch.object(BoostrLoader, "create_campaign")
     def test_upsert_deals(
         self,
+        mock_create_campaign,
+        mock_update_or_create_advertiser,
         mock_upsert_deal_products,
         mock_update_or_create,
         mock_get,
         mock_post,
     ):
         """Test function that calls the Boostr API for deal data and saves to our DB"""
-        self.skipTest(
-            "Currently hangs with the addition of the last upsert_deal_products mock"
-        )
         loader = BoostrLoader(BASE_URL, self.credentials)
         loader.upsert_deals()
+
+        advertiser_calls = [
+            mock.call(
+                name="Neutron",
+            ),
+            mock.call(
+                name="HiProduce",
+            ),
+        ]
+        mock_update_or_create_advertiser.assert_has_calls(advertiser_calls)
+
         calls = [
             mock.call(
                 boostr_id=1498421,
                 defaults={
                     "name": "Neutron: Neutron US, DE, FR",
                     "advertiser": "Neutron",
+                    "advertiser_id": Advertiser(
+                        id=1,
+                        name="Netron",
+                    ),
                     "currency": "$",
                     "amount": 50000,
+                    "stage": BoostrDeal.Stages.VERBAL,
                     "sales_representatives": "ksales@mozilla.com,lsales@mozilla.com",
                     "start_date": "2024-04-01",
                     "end_date": "2024-06-30",
@@ -230,8 +255,13 @@ class TestSyncBoostrData(TestCase):
                 defaults={
                     "name": "HiProduce: CA Tiles May 2024",
                     "advertiser": "HiProduce",
+                    "advertiser_id": Advertiser(
+                        id=1,
+                        name="HiProduce",
+                    ),
                     "currency": "$",
                     "amount": 10000,
+                    "stage": BoostrDeal.Stages.CLOSED_WON,
                     "sales_representatives": "jsales@mozilla.com",
                     "start_date": "2024-05-01",
                     "end_date": "2024-05-31",
@@ -241,6 +271,26 @@ class TestSyncBoostrData(TestCase):
         mock_update_or_create.assert_has_calls(calls)
 
     @mock.patch("time.sleep")
+    @mock.patch("requests.Session.post", side_effect=mock_post_success)
+    @mock.patch("requests.Session.get", side_effect=mock_get_success_empty_response)
+    @mock.patch(
+        "consvc_shepherd.models.BoostrDeal.objects.update_or_create",
+        side_effect=mock_update_or_create_deal,
+    )
+    @mock.patch.object(BoostrLoader, "upsert_deal_products")
+    def test_upsert_deals_called_with_empty_response(
+        self,
+        mock_upsert_deal_products,
+        mock_update_or_create,
+        mock_get,
+        mock_post,
+    ):
+        """Test function that calls the Boostr API for deal data and API returns empty array"""
+        loader = BoostrLoader(BASE_URL, self.credentials)
+        loader.upsert_deals()
+
+        mock_update_or_create.assert_not_called()
+
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_fail)
     def test_upsert_deals_fail(self, mock_get, mock_post, mock_sleep):
@@ -542,6 +592,8 @@ class TestSyncBoostrData(TestCase):
         ]
         mock_create.assert_has_calls(calls)
 
+    @mock.patch.dict(os.environ, {"BOOSTR_API_EMAIL": "ads-eng-api@mozilla.com"})
+    @mock.patch.dict(os.environ, {"BOOSTR_API_PASS": "test-pass"})
     @mock.patch(
         "consvc_shepherd.management.commands.sync_boostr_data.BoostrLoader.upsert_products"
     )
@@ -560,8 +612,7 @@ class TestSyncBoostrData(TestCase):
         mock_upsert_products,
     ):
         """Test the load function success scenario"""
-        loader = BoostrLoader(BASE_URL, self.credentials)
-        loader.load()
+        call_command("sync_boostr_data", BASE_URL)
         calls = [
             mock.call(
                 status="success",
@@ -584,16 +635,15 @@ class TestSyncBoostrData(TestCase):
     ):
         """Test the load function failure scenario"""
         with self.assertRaises(Exception):
-            loader = BoostrLoader(BASE_URL, self.credentials)
-            loader.load()
-            calls = [
-                mock.call(
-                    status="failure",
-                    synced_on=mock.ANY,
-                    message=mock.ANY,
-                ),
-            ]
-            mock_create.assert_has_calls(calls)
+            call_command("sync_boostr_data", BASE_URL)
+        calls = [
+            mock.call(
+                status="failure",
+                synced_on=mock.ANY,
+                message=mock.ANY,
+            ),
+        ]
+        mock_create.assert_has_calls(calls)
 
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_success)

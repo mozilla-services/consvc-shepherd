@@ -1,15 +1,20 @@
 """Django admin custom command for fetching ad data from BigQuery and saving it to Shepherd DB"""
 
 import logging
+import os
 import traceback
 from datetime import datetime
 
 import pandas
 from django.core.management import CommandError
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 from google.cloud import bigquery
 
-from consvc_shepherd.models import DeliveredFlight
+from consvc_shepherd.models import BQSyncStatus, DeliveredFlight
+
+SYNC_STATUS_SUCCESS = "success"
+SYNC_STATUS_FAILURE = "failure"
 
 
 class Command(BaseCommand):
@@ -20,11 +25,6 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         """Register expected command line arguments"""
         parser.add_argument(
-            "--project_id",
-            type=str,
-            help="The GCP project ID that will interact with BQ, e.g. moz-fx-ads-nonprod.",
-        )
-        parser.add_argument(
             "--date",
             default=datetime.today().strftime("%Y-%m-%d"),
             type=str,
@@ -33,7 +33,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """Handle running the command"""
-        self.stdout.write(f"Starting BigQuery sync for date {options['date']}")
+        project_id = os.getenv("PROJECT_ID")
+        if not project_id:
+            raise CommandError("PROJECT_ID environment variable not set.")
 
         try:
             datetime.strptime(options["date"], "%Y-%m-%d")
@@ -41,20 +43,29 @@ class Command(BaseCommand):
             raise CommandError("Invalid date format. Please use YYYY-MM-DD")
 
         try:
-            bigquery.Client(project=options["project_id"])
+            bigquery.Client(project=project_id)
         except Exception as e:
-            raise CommandError(
-                f"Invalid project ID: {options['project_id']}. Error: {e}"
-            )
+            raise CommandError(f"Invalid project ID: {project_id}. Error: {e}")
 
-        syncer = BQSyncer(options["project_id"], options["date"])
+        syncer = BQSyncer(project_id, options["date"])
 
         try:
+            self.stdout.write(
+                f"Starting BigQuery sync from project '{project_id}' for date {options['date']}"
+            )
             syncer.sync_data()
         except Exception as e:
-            raise CommandError(f"An error occurred: {e}")
+            raise CommandError(f"{e}")
 
         self.stdout.write(f"BigQuery sync completed for date {options['date']}")
+
+
+class NoDataReturnedError(Exception):
+    """Exception raised when no data is returned from the BigQuery query."""
+
+    def __init__(self, date: str):
+        self.message = f"No data returned for date {date}"
+        super().__init__(self.message)
 
 
 class BQSyncer:
@@ -77,6 +88,7 @@ class BQSyncer:
                 campaign_id,
                 campaign_name,
                 flight_id,
+                flight_name,
                 provider,
                 SUM(clicks) AS clicks,
                 SUM(impressions) AS impressions
@@ -91,6 +103,7 @@ class BQSyncer:
                 campaign_id,
                 campaign_name,
                 flight_id,
+                flight_name,
                 provider
         """
 
@@ -107,8 +120,7 @@ class BQSyncer:
             results = query_job.result()
 
             if results.total_rows == 0:
-                self.log.warning(f"No data returned for the date {self.date}")
-                return pandas.DataFrame()
+                raise NoDataReturnedError(self.date)
 
             df = results.to_dataframe()
 
@@ -125,27 +137,44 @@ class BQSyncer:
             campaign_id = row["campaign_id"]
             campaign_name = row["campaign_name"]
             flight_id = row["flight_id"]
+            flight_name = row["flight_name"]
             provider = row["provider"]
             clicks = row["clicks"]
             impressions = row["impressions"]
 
+            defaults = {
+                "clicks_delivered": clicks,
+                "impressions_delivered": impressions,
+            }
+
+            if campaign_name:
+                defaults["campaign_name"] = campaign_name
+            if flight_name:
+                defaults["flight_name"] = flight_name
+
             delivered_flight, created = DeliveredFlight.objects.update_or_create(
                 submission_date=submission_date,
                 campaign_id=campaign_id,
-                campaign_name=campaign_name,
                 flight_id=flight_id,
                 provider=provider,
-                # If script runs again in the same day, just update the clicks and impressions
-                defaults={
-                    "clicks_delivered": clicks,
-                    "impressions_delivered": impressions,
-                },
+                defaults=defaults,
             )
 
             if created:
                 self.log.info(f"Created new DeliveredFlight: {delivered_flight}")
             else:
                 self.log.info(f"Updated DeliveredFlight: {delivered_flight}")
+
+    def update_sync_status(self, status: str, message: str):
+        """Update the BQSyncStatus table given the status and the message"""
+        query_date = datetime.strptime(self.date, "%Y-%m-%d")
+        query_date = timezone.make_aware(query_date)
+        BQSyncStatus.objects.create(
+            status=status,
+            message=message,
+            synced_on=timezone.now(),
+            query_date=query_date,
+        )
 
     def sync_data(self):
         """BQ Syncer entrypoint"""
@@ -155,8 +184,17 @@ class BQSyncer:
             if not df.empty:
                 self.upsert_data(df)
 
-            self.log.info("BigQuery sync process has completed successfully")
+            self.log.info(
+                "BigQuery sync process has completed successfully. Updating sync_status"
+            )
+            self.update_sync_status(SYNC_STATUS_SUCCESS, "BigQuery sync success")
+        except NoDataReturnedError as e:
+            self.update_sync_status(SYNC_STATUS_FAILURE, str(e))
+            raise e
         except Exception as e:
-            error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
-            self.log.error(f"BigQuery sync process has encounterd an error: {error}")
-            raise
+            error = (
+                f"Exception: {SYNC_STATUS_FAILURE}, query date: {self.date}, {str(e)} "
+                f"Trace: {traceback.format_exc()}"
+            )
+            self.update_sync_status(SYNC_STATUS_FAILURE, error)
+            raise e

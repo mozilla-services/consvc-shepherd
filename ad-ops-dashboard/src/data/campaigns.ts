@@ -1,19 +1,58 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { toast } from "react-toastify";
 import { apiRoutes } from "../config/routes.config";
-import { CampaignFormSchema } from "../utils/schemas/campaignFormSchema";
+import {
+  CampaignFormSchema,
+  SplitFormSchema,
+} from "../utils/schemas/campaignFormSchema";
+import { ErrorResponse, Campaign } from "../types";
+
+function fetchCampaign(): Promise<Campaign[]> {
+  return axios
+    .get<Campaign[]>(apiRoutes.campaigns)
+    .then((response) => response.data);
+}
+
 export const useGetCampaignsQuery = () => {
   const getCampaigns = useQuery({
     queryKey: ["campaigns"],
-    queryFn: async () => {
-      const { data } = await axios.get(apiRoutes.campaigns);
-      return data;
-    },
+    queryFn: fetchCampaign,
   });
 
   return getCampaigns;
 };
+
+export const useSplitCampaignMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: SplitFormSchema) => {
+      return axios.post(apiRoutes.splitCampaigns, data);
+    },
+    onError: (error: AxiosError<ErrorResponse>) => {
+      const nonFieldErrors = error.response?.data.non_field_errors;
+
+      let errorMessage: string;
+
+      if (
+        nonFieldErrors &&
+        Array.isArray(nonFieldErrors) &&
+        nonFieldErrors.length > 0
+      ) {
+        errorMessage = nonFieldErrors[0];
+      } else {
+        errorMessage = "An unexpected error occurred";
+      }
+      toast.error(errorMessage);
+    },
+    onSuccess: async () => {
+      toast.success("Campaign splitted successfully.");
+      await queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+    },
+  });
+};
+
 export const useCreateCampaignMutation = () => {
   const queryClient = useQueryClient();
 
@@ -24,18 +63,24 @@ export const useCreateCampaignMutation = () => {
     onMutate: (data) => {
       return data;
     },
-    onError: (error: any) => {
-      if (error.response?.data) {
-        const errorMessage =
-          error.response.data.non_field_errors?.[0] || "An error occurred";
-        toast.error(errorMessage);
+    onError: (error: AxiosError<ErrorResponse>) => {
+      const nonFieldErrors = error.response?.data.non_field_errors;
+
+      let errorMessage: string;
+      if (
+        nonFieldErrors &&
+        Array.isArray(nonFieldErrors) &&
+        nonFieldErrors.length > 0
+      ) {
+        errorMessage = nonFieldErrors[0];
       } else {
-        toast.error("An unexpected error occurred");
+        errorMessage = "An unexpected error occurred";
       }
+      toast.error(errorMessage);
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast.success("Campaign added successfully.");
-      queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+      await queryClient.invalidateQueries({ queryKey: ["campaigns"] });
       return data;
     },
   });
@@ -51,18 +96,25 @@ export const useUpdateCampaignMutation = (id: number | undefined) => {
     onMutate: (data) => {
       return data;
     },
-    onError: (error: any) => {
-      if (error.response?.data) {
-        const errorMessage =
-          error.response.data.non_field_errors?.[0] || "An error occurred";
-        toast.error(errorMessage);
+    onError: (error: AxiosError<ErrorResponse>) => {
+      const nonFieldErrors = error.response?.data.non_field_errors;
+
+      let errorMessage: string;
+
+      if (
+        nonFieldErrors &&
+        Array.isArray(nonFieldErrors) &&
+        nonFieldErrors.length > 0
+      ) {
+        errorMessage = nonFieldErrors[0];
       } else {
-        toast.error("An unexpected error occurred");
+        errorMessage = "An unexpected error occurred";
       }
+      toast.error(errorMessage);
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast.success("Campaign updated successfully.");
-      queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+      await queryClient.invalidateQueries({ queryKey: ["campaigns"] });
       return data;
     },
   });
@@ -81,8 +133,8 @@ export const useDeleteCampaignMutation = () => {
     onError: (error) => {
       toast.error(error.message);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["campaigns"] });
       toast.success("Campaign deleted successfully.");
     },
   });

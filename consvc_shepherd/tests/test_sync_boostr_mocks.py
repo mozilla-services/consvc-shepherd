@@ -3,6 +3,7 @@
 import requests
 
 from consvc_shepherd.models import (
+    Advertiser,
     BoostrDeal,
     BoostrDealProduct,
     BoostrProduct,
@@ -89,6 +90,27 @@ def mock_get_success(*args, **kwargs) -> MockResponse:
         return MockResponse({"mock": "unknown"}, 500)
 
 
+def mock_get_success_empty_response(*args, **kwargs) -> MockResponse:
+    """Mock GET requests to boostr which handles mock responses for /products, /deals, and /deal_products"""
+    if args[0].endswith("/products"):
+        return MockResponse(
+            [],
+            200,
+        )
+    elif args[0].endswith("/deals"):
+        return MockResponse(
+            [],
+            200,
+        )
+    elif args[0].endswith("/deal_products"):
+        return MockResponse(
+            [],
+            200,
+        )
+    else:
+        return MockResponse({"mock": "unknown"}, 500)
+
+
 def mock_get_fail(*args, **kwargs) -> MockResponse:
     """Mock failed GET request to boostr"""
     return MockResponse({"uh": "oh"}, 400)
@@ -105,7 +127,7 @@ def mock_too_many_requests_response(*args, **kwargs) -> MockResponse:
 
 
 def mock_get_success_response(*args, **kwargs) -> MockResponse:
-    """Mock response from sucessful get"""
+    """Mock response from successful get"""
     return MockResponse({"data": "success"}, 200)
 
 
@@ -118,6 +140,7 @@ def mock_update_or_create_deal(*args, **kwargs) -> tuple[BoostrDeal, bool]:
             advertiser=kwargs["defaults"]["advertiser"],
             currency=kwargs["defaults"]["currency"],
             amount=kwargs["defaults"]["amount"],
+            stage=kwargs["defaults"]["stage"],
             sales_representatives=kwargs["defaults"]["sales_representatives"],
             start_date=kwargs["defaults"]["start_date"],
             end_date=kwargs["defaults"]["end_date"],
@@ -144,6 +167,18 @@ BOOSTR_DEALS = {
         sales_representatives="deal_sales@mozilla.com",
     ),
 }
+
+
+def mock_update_or_create_advertiser(*args, **kwargs) -> tuple[Advertiser, bool]:
+    """Mock out the DB for saving Advertiser"""
+    return (
+        Advertiser(
+            id=1,
+            name=kwargs["name"],
+        ),
+        True,
+    )
+
 
 BOOSTR_PRODUCTS = {
     28256: BoostrProduct(
@@ -200,8 +235,6 @@ def mock_get_product(*args, **kwargs) -> BoostrProduct:
 
 def mock_get_latest_boostr_sync_status(*args, **kwargs) -> BoostrSyncStatus:
     """Mock out retrieving the latest boostr sync status from the DB"""
-    print("IN MOCKER", BOOSTR_SYNC_STATUSES[1])
-
     return BOOSTR_SYNC_STATUSES[1]
 
 

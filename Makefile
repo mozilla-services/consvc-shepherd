@@ -65,7 +65,7 @@ eslint-fix: $(INSTALL_STAMP)  ##  Format code with eslint
 	cd ad-ops-dashboard && npm run lint:fix
 
 # Temporarily disable eslint while we fix the current issues in the ad-ops-dashboard
-lint: $(INSTALL_STAMP) isort black flake8 bandit pydocstyle mypy # eslint ##  Run various linters
+lint: $(INSTALL_STAMP) isort black flake8 bandit pydocstyle mypy eslint ##  Run various linters
 
 lint-fix: $(INSTALL_STAMP) isort-fix black-fix flake8 bandit pydocstyle mypy eslint-fix ##  Run various linters and fix errors to pass CircleCi checks
 
@@ -84,7 +84,7 @@ test-django: local-migration-check # Run the tests for the shepherd Django app i
 	env DJANGO_SETTINGS_MODULE=consvc_shepherd.settings $(POETRY) run pytest --cov --cov-report=term-missing --cov-fail-under=$(COV_FAIL_UNDER)
 
 test-react: # Run the tests for the ad-ops-dashboard React app in CI
-	cd ad-ops-dashboard && npm run test
+	cd ad-ops-dashboard && npm run test:ci
 
 test: test-django test-react  ##  Run all tests in CI
 
@@ -97,8 +97,8 @@ doc: ##  Generate docs via mdBook
 doc-preview: doc  ##  Preview Merino docs via the default browser
 	mdbook serve --open
 
-dev: $(INSTALL_STAMP)  ##  Run shepherd locally and reload automatically
-	docker compose up
+dev: $(INSTALL_STAMP)  ## Run shepherd locally and show human readable timestamps.
+	docker compose up -d && docker-compose logs -f -t
 
 local-test-django: $(INSTALL_STAMP) # Run shepherd Django app tests locally
 	docker compose -f docker-compose.test-django.yml up --abort-on-container-exit

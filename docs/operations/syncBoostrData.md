@@ -33,6 +33,10 @@ production Boostr account, so the default value of 50 gives us lots of overhead,
 but this parameter allows us to invoke the script with a custom value for the
 upper limit on deal pages.
 
+#### --full-sync
+Set this parameter to force the script to perform a full sync of all the Boostr data. 
+This means the script does not start from the last successful sync timestamp
+
 Usage:
 ```sh
 python manage.py sync_boostr_data https://app.boostr.com/api --max-deal-pages 15

@@ -12,7 +12,7 @@ import { styled } from "@mui/system";
 
 interface LayoutDrawerProps {
   drawerWidth?: number;
-  container?: any;
+  container?: HTMLElement | undefined;
   mobileOpen: boolean;
   handleDrawerToggle: () => void;
   selectedItem: number | null;

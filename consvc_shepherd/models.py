@@ -267,6 +267,24 @@ class BoostrProduct(models.Model):
         return self.full_name
 
 
+class Advertiser(models.Model):
+    """Table representing an Advertise
+
+    Attributes
+    ----------
+    name: CharField = models.CharField()
+        The name of the advertiser
+    created_on : DateTimeField
+        Date of advertiser record creation
+    updated_on : DateTimeField
+        Date of advertiser record update
+    """
+
+    name: CharField = models.CharField(unique=True)
+    created_on: DateTimeField = models.DateTimeField(auto_now_add=True)
+    updated_on: DateTimeField = models.DateTimeField(auto_now=True)
+
+
 class BoostrDeal(models.Model):
     """Representation of AdOps sales deals pulled from Boostr
 
@@ -278,15 +296,19 @@ class BoostrDeal(models.Model):
         Deal name
     advertiser : CharField
         Advertiser name
+    advertiser_id : Advertiser
+        Foreign key pointer to Advertiser
     currency : CharField
         Currency symbol, eg "$"
     amount : IntegerField
         Amount
+    stage : Charfield
+        The deal's current stage (100% Closed Won| 90% Verbal| 75% Renewal)
     sales_representatives : CharField
         Sales representative names as a comma separated list
-    start_date: DateField
+    start_date : DateField
         Start date
-    end_date: DateField
+    end_date : DateField
         End date
     created_on : DateTimeField
         Date of deal record creation (shepherd DB timestamp metadata, not boostr's)
@@ -300,11 +322,22 @@ class BoostrDeal(models.Model):
 
     """
 
+    class Stages(models.TextChoices):
+        """Defines deal stage choices for use in model fields."""
+
+        CLOSED_WON = "Closed Won"
+        VERBAL = "Verbal"
+        RENEWAL = "Renewal"
+
     boostr_id: IntegerField = models.IntegerField(unique=True)
     name: CharField = models.CharField()
     advertiser: CharField = models.CharField()
+    advertiser_id: ForeignKey = models.ForeignKey(
+        Advertiser, on_delete=models.CASCADE, null=True
+    )
     currency: CharField = models.CharField()
     amount: IntegerField = models.IntegerField()
+    stage: CharField = models.CharField(choices=Stages.choices, blank=True)
     sales_representatives: CharField = models.CharField()
     start_date: DateField = models.DateField()
     end_date: DateField = models.DateField()
@@ -381,7 +414,46 @@ class BoostrSyncStatus(models.Model):
         success = "success"
         failure = "failure"
 
+    class Meta:
+        """Metadata for the BoostrSyncStatus model."""
+
+        verbose_name = "Boostr sync status"
+        verbose_name_plural = "Boostr sync statuses"
+
     synced_on: DateTimeField = models.DateTimeField()
+    status: CharField = models.CharField(choices=SyncStatus.choices)
+    message: CharField = models.CharField()
+
+
+class BQSyncStatus(models.Model):
+    """Table for capturing the daily status of the BigQuery sync process runs
+
+    Attributes
+    ----------
+    synced_on : DateTimeField
+        Date the BigQuery sync process ran
+    query_date : DateTimeField
+        Date used to query BigQuery
+    sync_status: CharField = models.CharField()
+        The status of the sync process (success|failure)
+    message: CharField = models.CharField()
+        An optional error message populated when sync_status is "failure"
+    """
+
+    class SyncStatus(models.TextChoices):
+        """Represents the status of a sync"""
+
+        success = "success"
+        failure = "failure"
+
+    class Meta:
+        """Metadata for the BQSyncStatus model."""
+
+        verbose_name = "BigQuery sync status"
+        verbose_name_plural = "BigQuery sync statuses"
+
+    synced_on: DateTimeField = models.DateTimeField()
+    query_date: DateTimeField = models.DateTimeField(null=True)
     status: CharField = models.CharField(choices=SyncStatus.choices)
     message: CharField = models.CharField()
 
@@ -395,8 +467,6 @@ class Campaign(models.Model):
         Ad Ops Person
     notes : CharField
         Notes
-    kevel_flight_id : IntegerField
-        The kevel flight id
     net_spend : CharField
         Net Spend
     impressions_sold : IntegerField
@@ -423,7 +493,6 @@ class Campaign(models.Model):
 
     ad_ops_person: CharField = models.CharField(null=True, blank=True)
     notes: CharField = models.CharField(null=True, blank=True)
-    kevel_flight_id: IntegerField = models.IntegerField(null=True, blank=True)
     net_spend: IntegerField = models.IntegerField()
     impressions_sold: IntegerField = models.IntegerField()
     seller: CharField = models.CharField()
@@ -441,9 +510,16 @@ class Campaign(models.Model):
             return round(net_epcm_value, 2)
         return None
 
+    @property
+    def kevel_flight_id(self):
+        """Retrieve the most recent flight ID related to the campaign."""
+        flight = self.flights.last()
+        return flight.kevel_flight_id if flight else None
+
     class Meta:
         """Metadata for the Campaign model."""
 
+        ordering = ["deal"]
         verbose_name = "Campaign"
         verbose_name_plural = "Campaigns"
 
@@ -458,6 +534,8 @@ class CampaignSummary(models.Model):
         Boostr deal ID
     advertiser : CharField
         Advertiser name
+    advertiser_id : Advertiser
+        Foreign key pointer to Advertiser
     net_spend : CharField
         Price of deal from Boostr
     impressions_sold : FloatField
@@ -471,6 +549,9 @@ class CampaignSummary(models.Model):
 
     deal_id: IntegerField = models.IntegerField(primary_key=True)
     advertiser: CharField = models.CharField(max_length=255)
+    advertiser_id: ForeignKey = models.ForeignKey(
+        Advertiser, on_delete=models.DO_NOTHING, null=True
+    )
     net_spend: FloatField = models.FloatField()
     impressions_sold: FloatField = models.FloatField()
     clicks_delivered: IntegerField = models.IntegerField()
@@ -546,9 +627,9 @@ class DeliveredFlight(models.Model):
 
     submission_date: DateField = models.DateField()
     campaign_id: IntegerField = models.IntegerField()
-    campaign_name: CharField = models.CharField()
+    campaign_name: CharField = models.CharField(null=True, blank=True)
     flight_id: IntegerField = models.IntegerField()
-    flight_name: CharField = models.CharField()
+    flight_name: CharField = models.CharField(null=True, blank=True)
     provider: CharField = models.CharField(null=True, blank=True)
     clicks_delivered: IntegerField = models.IntegerField()
     impressions_delivered: IntegerField = models.IntegerField()
@@ -571,3 +652,22 @@ class DeliveredFlight(models.Model):
     def __str__(self):
         """Return the string representation for flight ids and associated number of clicks and impressions"""
         return f"{self.flight_id} : {self.clicks_delivered} clicks and {self.impressions_delivered} impressions"
+
+
+class Flight(models.Model):
+    """Model representing a Flight associated with a Campaign."""
+
+    campaign: ForeignKey = models.ForeignKey(
+        Campaign, related_name="flights", null=True, on_delete=models.CASCADE
+    )
+    kevel_flight_id: IntegerField = models.IntegerField(null=True, blank=True)
+
+    def __str__(self) -> str:
+        """Return a string representation of the Flight instance."""
+        return f"Flight {self.kevel_flight_id}"
+
+    class Meta:
+        """Meta options for the Flight model."""
+
+        verbose_name = "Flight"
+        verbose_name_plural = "Flights"

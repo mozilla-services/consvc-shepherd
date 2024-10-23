@@ -11,15 +11,18 @@ from jsonschema import exceptions, validate
 
 from consvc_shepherd.forms import AllocationSettingForm, AllocationSettingFormset
 from consvc_shepherd.models import (
+    Advertiser,
     AllocationSetting,
     AllocationSettingsSnapshot,
     BoostrDeal,
     BoostrDealProduct,
     BoostrProduct,
     BoostrSyncStatus,
+    BQSyncStatus,
     Campaign,
     CampaignSummary,
     DeliveredFlight,
+    Flight,
     PartnerAllocation,
     SettingsSnapshot,
 )
@@ -244,19 +247,27 @@ class BoostrDealAdmin(admin.ModelAdmin):
     inlines = [
         BoostrDealProductInline,
     ]
-    search_fields = ["boostr_id", "name", "advertiser", "sales_representatives"]
-    search_help_text = "Search by boostr id, name, adversiter, or sales reps"
+    search_fields = [
+        "boostr_id",
+        "name",
+        "advertiser",
+        "sales_representatives",
+    ]
+    search_help_text = "Search by boostr id, name, advertiser or sales rep"
     list_filter = [
         "currency",
         "start_date",
+        "stage",
         ("products", admin.RelatedOnlyFieldListFilter),
     ]
     list_display = [
         "boostr_id",
         "name",
         "advertiser",
+        "advertiser_id",
         "currency",
         "amount",
+        "stage",
         "start_date",
         "end_date",
         "sales_representatives",
@@ -386,6 +397,7 @@ class CampaignSummaryAdmin(admin.ModelAdmin):
 
     list_display = [
         "advertiser",
+        "advertiser_id",
         "net_spend",
         "impressions_sold",
         "net_ecpm",
@@ -464,3 +476,37 @@ class BoostrSyncStatusAdmin(admin.ModelAdmin):
         "status",
         "message",
     ]
+
+
+@admin.register(Advertiser)
+class AdvertiserAdmin(admin.ModelAdmin):
+    """Admin model for Advertiser records"""
+
+    model = Advertiser
+    list_display = [
+        "created_on",
+        "updated_on",
+        "name",
+    ]
+
+
+@admin.register(BQSyncStatus)
+class BQSyncStatusAdmin(admin.ModelAdmin):
+    """Admin model for BQSyncStatuses records which represent the status of each BigQuery sync operation"""
+
+    model = BQSyncStatus
+    list_display = [
+        "id",
+        "synced_on",
+        "query_date",
+        "status",
+        "message",
+    ]
+
+
+@admin.register(Flight)
+class FlightAdmin(admin.ModelAdmin):
+    """Admin interface for managing Flight instances."""
+
+    model = Flight
+    list_display = ["campaign", "kevel_flight_id"]

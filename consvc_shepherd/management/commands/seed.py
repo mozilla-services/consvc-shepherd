@@ -64,6 +64,7 @@ class Command(BaseCommand):
                     "advertiser": fake.company(),
                     "currency": secrets.choice(["$", "€", "£"]),
                     "amount": secrets.randbelow(150001) + 50000,
+                    "stage": secrets.choice(["Renewal", "Closed Won", "Verbal"]),
                     "sales_representatives": fake.name(),
                     "start_date": fake.date_this_year(
                         before_today=True, after_today=False

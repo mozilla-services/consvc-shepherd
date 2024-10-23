@@ -19,7 +19,7 @@ from consvc_shepherd.preview import (
 )
 
 SPOC = Spoc(
-    image_src="https://picsum.photos/296/148",
+    image_url="https://picsum.photos/296/148",
     title="There is a Sale",
     domain="cosmetics.beauty",
     excerpt="The sale has begun...",
@@ -61,6 +61,16 @@ DEFAULT_USER_AGENT = FormFactor(
 class TestGetAmpTiles(TestCase):
     """Test the Fetching of Tiles for the Preview Page."""
 
+    MOCK_ENV = Environment(
+        code="mock",
+        name="Mock",
+        mars_url="https://mars.mock.if.you.are.connecting.to.this.the.test.broke.com",
+        spoc_site_id=1234567,
+        spoc_site_id_mobile=1234567,
+        spoc_zone_ids=[],
+        direct_sold_tile_zone_ids=[424242],
+    )
+
     def mock_amp_tiles_data(self, *args, **kwargs):
         """Mock out the function that wraps 'GET /v1/tiles' request within get_amp_tiles"""
         response = {
@@ -89,23 +99,9 @@ class TestGetAmpTiles(TestCase):
             "requests.get",
             side_effect=self.mock_amp_tiles_data,
         ) as mock_amp_tiles:
-            mockEnv = Environment(
-                code="mock",
-                name="Mock",
-                mars_url="https://mars.mock.if.you.are.connecting.to.this.the.test.broke.com",
-                spoc_site_id=1234567,
-                spoc_site_id_mobile=1234567,
-                spoc_zone_ids=[],
-                direct_sold_tile_zone_ids=[424242],
+            tiles = get_amp_tiles(
+                self.MOCK_ENV, "US", "CA", DEFAULT_USER_AGENT.user_agent
             )
-            mockFormFactor = FormFactor(
-                code="desktop",
-                name="Desktop",
-                is_mobile=False,
-                user_agent="Mozilla/5.0 (Windows NT 10.0; rv:10.0) Gecko/20100101 Firefox/91.0",
-            )
-
-            tiles = get_amp_tiles(mockEnv, "US", "CA", mockFormFactor.user_agent)
 
             mock_amp_tiles.assert_called()
 
@@ -121,11 +117,25 @@ class TestGetAmpTiles(TestCase):
 
             # Verify that requests.get was called once with the expected parameters
             mock_amp_tiles.assert_called_once_with(
-                f"{mockEnv.mars_url}/v1/tiles",
+                f"{self.MOCK_ENV.mars_url}/v1/tiles",
                 params={"country": "US", "region": "CA"},
-                headers={"User-Agent": mockFormFactor.user_agent},
+                headers={"User-Agent": DEFAULT_USER_AGENT.user_agent},
                 timeout=30,
             )
+
+    def test_get_amp_tiles_204(self):
+        """Test a 204 response from /v1/tiles."""
+        with mock.patch(
+            "requests.get",
+            return_value=mock.Mock(status_code=204),
+        ) as mock_amp_tiles:
+            tiles = get_amp_tiles(
+                self.MOCK_ENV, "US", "CA", DEFAULT_USER_AGENT.user_agent
+            )
+
+            mock_amp_tiles.assert_called()
+
+            self.assertEqual(len(tiles), 0)
 
 
 @override_settings(DEBUG=True)
@@ -203,7 +213,7 @@ class TestGetSpocsAndDirectSoldTiles(TestCase):
             self.assertEqual(tiles[0].sponsored, LOCALIZATIONS["Sponsored"][country])
 
             # Check the properties of the spoc
-            self.assertEqual(spocs[0].image_src, "spoc_image_src_1")
+            self.assertEqual(spocs[0].image_url, "spoc_image_src_1")
             self.assertEqual(spocs[0].title, "Spoc 1")
             self.assertEqual(spocs[0].domain, "example.com")
             self.assertEqual(spocs[0].excerpt, "An example spoc.")
@@ -292,7 +302,7 @@ class TestGetAds(TestCase):
                 self.assertEqual(len(ads.tiles), 3)
 
                 # Spoc data
-                self.assertEqual(ads.spocs[0].image_src, SPOC.image_src)
+                self.assertEqual(ads.spocs[0].image_url, SPOC.image_url)
                 self.assertEqual(ads.spocs[0].title, SPOC.title)
                 self.assertEqual(ads.spocs[0].domain, SPOC.domain)
                 self.assertEqual(ads.spocs[0].excerpt, SPOC.excerpt)
@@ -365,6 +375,12 @@ class TestGetUnified(TestCase):
                     "url": "https://example.com/tile3",
                 }
             ],
+            "newtab_rectangle": [
+                {
+                    "image_url": "https://example-rect-cdn.com/rect1.jpg",
+                    "url": "https://example.com/rect1",
+                }
+            ],
         }
         return mock.Mock(status_code=200, json=lambda: response)
 
@@ -409,7 +425,7 @@ class TestGetUnified(TestCase):
             # Verify the spocs
             self.assertEqual(len(ads.spocs), 1)
             self.assertEqual(
-                ads.spocs[0].image_src, "https://example-spoc-cdn.com/spoc-image.jpg"
+                ads.spocs[0].image_url, "https://example-spoc-cdn.com/spoc-image.jpg"
             )
             self.assertEqual(ads.spocs[0].title, "Example Spoc")
             self.assertEqual(ads.spocs[0].domain, "example.com")
@@ -417,6 +433,13 @@ class TestGetUnified(TestCase):
             self.assertEqual(ads.spocs[0].url, "https://example.com/spoc")
             self.assertEqual(ads.spocs[0].sponsor, "Sponsor 1")
             self.assertEqual(ads.spocs[0].sponsored_by, "Sponsored by Sponsor 1")
+
+            # Verify the rectangles
+            self.assertEqual(len(ads.rectangles), 1)
+            self.assertEqual(
+                ads.rectangles[0].image_url, "https://example-rect-cdn.com/rect1.jpg"
+            )
+            self.assertEqual(ads.rectangles[0].url, "https://example.com/rect1")
 
             # Verify the is_mobile
             self.assertFalse(ads.is_mobile)
@@ -431,6 +454,7 @@ class TestGetUnified(TestCase):
                         {"placement": "newtab_tile_1", "count": 1},
                         {"placement": "newtab_tile_2", "count": 1},
                         {"placement": "newtab_tile_3", "count": 1},
+                        {"placement": "newtab_rectangle", "count": 1},
                     ],
                 },
                 timeout=30,

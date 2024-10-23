@@ -3,20 +3,11 @@ import dayjs from "dayjs";
 
 export const campaignFormSchema = z.object({
   id: z.number().optional(),
-  notes: z.string().min(5, "Notes must be at least 5 characters long"),
-  ad_ops_person: z
-    .string()
-    .min(5, "Ad Ops person name must be at least 5 characters long"),
+  notes: z.string().optional(),
+  ad_ops_person: z.string().optional(),
   kevel_flight_id: z.preprocess(
     (val) => (val === null ? undefined : Number(val)),
-    z
-      .union([
-        z.number().min(1, "Kevel Flight ID must be a positive number"),
-        z.string().optional(),
-      ])
-      .refine((val) => val !== undefined, {
-        message: "Kevel Flight ID is required",
-      })
+    z.union([z.number().optional(), z.string().optional()])
   ),
   impressions_sold: z.preprocess(
     (val) => (val === null ? undefined : Number(val)),
@@ -45,7 +36,7 @@ export const campaignFormSchema = z.object({
       invalid_type_error: "Deal value is required",
       required_error: "Deal is required",
     })
-    .positive("Deal must be a positive number"),
+    .positive("Deal must be selected"),
   start_date: z
     .string({ required_error: "Start date is required" })
     .refine((val) => dayjs(val, "YYYY-MM-DD", true).isValid(), {
@@ -56,33 +47,35 @@ export const campaignFormSchema = z.object({
     .refine((val) => dayjs(val, "YYYY-MM-DD", true).isValid(), {
       message: "Start date is required",
     }),
-  seller: z.string().min(5, "Seller name must be at least 5 characters long"),
-  campaign_fields: z.array(
-    z.object({
-      impressions_sold: z.preprocess(
-        (val) => (val === null ? undefined : Number(val)),
-        z
-          .union([
-            z.number().min(1, "Impressions sold must be a positive number"),
-            z.string().optional(),
-          ])
-          .refine((val) => val !== undefined, {
-            message: "Impressions sold is required",
-          })
-      ),
-      net_spend: z.preprocess(
-        (val) => (val === null ? undefined : Number(val)),
-        z
-          .union([
-            z.number().min(1, "Net spend must be a positive number"),
-            z.string().optional(),
-          ])
-          .refine((val) => val !== undefined, {
-            message: "Net spend is required",
-          })
-      ),
-    })
-  ),
+  seller: z.string().min(1, "Seller name must be at least 1 characters long"),
+  campaign_fields: z
+    .array(
+      z.object({
+        impressions_sold: z.preprocess(
+          (val) => (val === null ? undefined : Number(val)),
+          z
+            .union([
+              z.number().min(1, "Impressions sold must be a positive number"),
+              z.string().optional(),
+            ])
+            .refine((val) => val !== undefined, {
+              message: "Impressions sold is required",
+            })
+        ),
+        net_spend: z.preprocess(
+          (val) => (val === null ? undefined : Number(val)),
+          z
+            .union([
+              z.number().min(1, "Net spend must be a positive number"),
+              z.string().optional(),
+            ])
+            .refine((val) => val !== undefined, {
+              message: "Net spend is required",
+            })
+        ),
+      })
+    )
+    .optional(),
 });
 
 export type CampaignFormSchema = z.infer<typeof campaignFormSchema>;
@@ -99,3 +92,13 @@ export const defaultCampaignValues: CampaignFormSchema = {
   end_date: "",
   campaign_fields: [],
 };
+
+export const splitFormSchema = z.object({
+  campaigns: z.array(
+    campaignFormSchema.omit({ campaign_fields: true }).extend({
+      campaign_fields: campaignFormSchema.shape.campaign_fields.optional(),
+    })
+  ),
+});
+
+export type SplitFormSchema = z.infer<typeof splitFormSchema>;

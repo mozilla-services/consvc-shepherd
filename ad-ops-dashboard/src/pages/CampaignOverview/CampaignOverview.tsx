@@ -18,6 +18,8 @@ import {
 } from "../../data/campaigns";
 import ActionButton from "../../components/Buttons/ActionButton";
 import { styled } from "@mui/system";
+import SplitCampaignForm from "../../components/Forms/SplitCampaignForm";
+import { CallSplit } from "@mui/icons-material";
 
 const ButtonContainer = styled(Box)`
   display: flex;
@@ -33,11 +35,13 @@ const TableContainer = styled(Box)`
 interface ActionButtonsComponentProps {
   handleCampaignDelete: () => void;
   handleCampaignEdit: () => void;
+  handleSplitModal: () => void;
 }
 
 const ActionButtonsComponent = ({
   handleCampaignDelete,
   handleCampaignEdit,
+  handleSplitModal,
 }: ActionButtonsComponentProps) => {
   return (
     <Box>
@@ -49,6 +53,7 @@ const ActionButtonsComponent = ({
         icon={<DeleteIcon aria-label="delete" color="error" />}
         handleClick={handleCampaignDelete}
       />
+      <ActionButton handleClick={handleSplitModal} icon={<CallSplit />} />
     </Box>
   );
 };
@@ -56,6 +61,7 @@ const ActionButtonsComponent = ({
 export default function CampaignOverview() {
   const [isUpdate, setIsUpdate] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [openSplitCampaignModal, setOpenSplitCampaignModal] = useState(false);
   const [isConfirm, setIsConfirm] = useState(false);
   const [formData, setFormData] = useState<CampaignFormSchema>(
     defaultCampaignValues
@@ -85,6 +91,7 @@ export default function CampaignOverview() {
     { field: "kevel_flight_id", headerName: "Kevel Flight ID" },
     { field: "impressions_sold", headerName: "Impressions Sold" },
     { field: "net_spend", headerName: "Net Spend" },
+
     { field: "seller", headerName: "Seller" },
     {
       field: "button",
@@ -103,6 +110,10 @@ export default function CampaignOverview() {
             setIsConfirm(true);
             setFormData(data.data);
           }}
+          handleSplitModal={() => {
+            setFormData(data.data);
+            setOpenSplitCampaignModal(true);
+          }}
         />
       ),
       filter: false,
@@ -115,6 +126,11 @@ export default function CampaignOverview() {
 
   const defaultColDef: ColDef = {
     flex: 1,
+  };
+
+  const handleCloseSplitFormDialog = () => {
+    setOpenSplitCampaignModal(false);
+    setFormData(defaultCampaignValues);
   };
 
   return (
@@ -147,6 +163,22 @@ export default function CampaignOverview() {
         />
       </FormDialog>
 
+      <FormDialog
+        title="Campaign Split Form"
+        handleClose={() => {
+          handleCloseSplitFormDialog();
+        }}
+        open={openSplitCampaignModal}
+        maxWidth="xl"
+      >
+        <SplitCampaignForm
+          formData={formData}
+          handleClose={() => {
+            handleCloseSplitFormDialog();
+          }}
+        />
+      </FormDialog>
+
       <ButtonContainer>
         <Button onClick={handleOpen} variant="contained">
           Add Data
@@ -154,7 +186,7 @@ export default function CampaignOverview() {
       </ButtonContainer>
       <TableContainer className="ag-theme-quartz">
         <AgGridReact
-          rowData={campaignsData || []}
+          rowData={campaignsData}
           columnDefs={colDefs}
           defaultColDef={defaultColDef}
           pagination={true}

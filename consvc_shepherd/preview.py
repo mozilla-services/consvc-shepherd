@@ -95,7 +95,7 @@ class FormFactor:
 class Spoc:
     """Model for a SPOC loaded from MARS"""
 
-    image_src: str
+    image_url: str
     title: str
     domain: str
     excerpt: str
@@ -115,11 +115,20 @@ class Tile:
 
 
 @dataclass(frozen=True)
+class Rectangle:
+    """Model for a Medium Rectangle ad"""
+
+    image_url: str
+    url: str
+
+
+@dataclass(frozen=True)
 class Ads:
     """Model for all the sets of ads that can be rendered in the preview template"""
 
     tiles: list[Tile]
     spocs: list[Spoc]
+    rectangles: list[Rectangle]
     is_mobile: bool
 
 
@@ -284,7 +293,7 @@ def get_spocs_and_direct_sold_tiles(
 
     spocs = [
         Spoc(
-            image_src=spoc["image_src"],
+            image_url=spoc["image_src"],
             title=spoc["title"],
             domain=spoc["domain"],
             excerpt=spoc["excerpt"],
@@ -295,7 +304,7 @@ def get_spocs_and_direct_sold_tiles(
         for spoc in json.get("spocs", [])
     ]
 
-    return (tiles, spocs)
+    return tiles, spocs
 
 
 def get_amp_tiles(
@@ -314,6 +323,10 @@ def get_amp_tiles(
     r = requests.get(
         f"{env.mars_url}/v1/tiles", params=params, headers=headers, timeout=30
     )
+
+    if r.status_code == 204:
+        return []
+
     return [
         Tile(
             image_url=tile["image_url"],
@@ -335,6 +348,7 @@ def get_unified(env: Environment, country: str, is_mobile: bool = False) -> Ads:
     tile_one_placement = "newtab_tile_1"
     tile_two_placement = "newtab_tile_2"
     tile_three_placement = "newtab_tile_3"
+    rectangle_placement = "newtab_rectangle"
 
     # load spocs & tiles, then map them to the same shape
     body = {
@@ -344,6 +358,7 @@ def get_unified(env: Environment, country: str, is_mobile: bool = False) -> Ads:
             {"placement": tile_one_placement, "count": 1},
             {"placement": tile_two_placement, "count": 1},
             {"placement": tile_three_placement, "count": 1},
+            {"placement": rectangle_placement, "count": 1},
         ],
     }
 
@@ -368,7 +383,7 @@ def get_unified(env: Environment, country: str, is_mobile: bool = False) -> Ads:
 
     spocs = [
         Spoc(
-            image_src=spoc["image_url"],
+            image_url=spoc["image_url"],
             title=spoc["title"],
             domain=spoc["domain"],
             excerpt=spoc["excerpt"],
@@ -379,7 +394,20 @@ def get_unified(env: Environment, country: str, is_mobile: bool = False) -> Ads:
         for spoc in r_json.get(spocs_placement, [])
     ]
 
-    return Ads(spocs=spocs, tiles=tiles, is_mobile=is_mobile)
+    rectangles = [
+        Rectangle(
+            image_url=rect["image_url"],
+            url=rect["url"],
+        )
+        for rect in r_json.get(rectangle_placement, [])
+    ]
+
+    return Ads(
+        spocs=spocs,
+        tiles=tiles,
+        rectangles=rectangles,
+        is_mobile=is_mobile,
+    )
 
 
 def get_ads(
@@ -397,6 +425,7 @@ def get_ads(
         return Ads(
             tiles=amp_tiles + spocs_and_direct_sold_tiles[0],
             spocs=spocs_and_direct_sold_tiles[1],
+            rectangles=[],  # Rectangles are only supported by Unified API
             is_mobile=form_factor.is_mobile,
         )
 

@@ -20,6 +20,7 @@ from consvc_shepherd.management.media_plan_models import (
     BoostrMediaPlan,
 )
 from consvc_shepherd.models import (
+    Advertiser,
     BoostrDeal,
     BoostrDealProduct,
     BoostrProduct,
@@ -27,6 +28,7 @@ from consvc_shepherd.models import (
     Campaign,
 )
 
+FULL_SYNC = False
 MAX_DEAL_PAGES_DEFAULT = 50
 DEFAULT_RETRY_INTERVAL = 60
 SYNC_STATUS_SUCCESS = "success"
@@ -67,16 +69,39 @@ class Command(BaseCommand):
                 {MAX_DEAL_PAGES_DEFAULT} pages. Currently we have ~14 pages of deals in Boostr, so this default max
                 should be sufficient for a while.""",
         )
+        parser.add_argument(
+            "--full-sync",
+            default=FULL_SYNC,
+            action="store_true",
+            help="""Used to force a full sync of the Boostr data. This means the script
+            does not start from the last successful sync timestamp""",
+        )
 
     def handle(self, *args, **options):
         """Handle running the command"""
-        credentials = self.get_credentials()
-        loader = BoostrLoader(
-            options["base_url"],
-            credentials,
-            options,
-        )
-        loader.load()
+        try:
+            credentials = self.get_credentials()
+
+            print("The base url", options["base_url"])
+
+            loader = BoostrLoader(
+                options["base_url"],
+                credentials,
+                options,
+            )
+            loader.load()
+        except Exception as e:
+            error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
+            logger = logging.getLogger("sync_boostr_data")
+            logger.error(
+                f"Error encountered during initialization of BoostrLoader: {error}. Updating sync_status"
+            )
+            BoostrLoader.update_sync_status(
+                SYNC_STATUS_FAILURE,
+                timezone.now() + timedelta(hours=1),
+                f"Exception: {str(e):} Trace: {traceback.format_exc()}",
+            )
+            raise e
 
     def get_credentials(self, *args, **options) -> Credentials:
         """Get credentials from env vars and create a credentials object"""
@@ -123,11 +148,10 @@ class BoostrAPI:
     def __init__(
         self, base_url: str, credentials: Credentials, options=DEFAULT_OPTIONS
     ):
+        self.log = logging.getLogger("sync_boostr_data")
         self.base_url = base_url
         self.credentials = credentials
         self.setup_session()
-        self.log = logging.getLogger("sync_boostr_data")
-        # self.token =""
 
     def setup_session(self) -> None:
         """Authenticate with the boostr api and create and store a session on the instance"""
@@ -241,6 +265,7 @@ class BoostrLoader:
     boostr: BoostrAPI
     log: logging.Logger
     max_deal_pages: int
+    full_sync: bool
 
     def __init__(
         self, base_url: str, credentials: Credentials, options=DEFAULT_OPTIONS
@@ -248,7 +273,10 @@ class BoostrLoader:
         self.log = logging.getLogger("sync_boostr_data")
         self.boostr = BoostrAPI(base_url, credentials, options)
         self.max_deal_pages = options.get("max_deal_pages", MAX_DEAL_PAGES_DEFAULT)
-        self.latest_synced_on = self.get_latest_sync_status()
+        self.full_sync = options.get("full_sync", FULL_SYNC)
+        self.latest_synced_on = (
+            self.get_latest_sync_status() if not self.full_sync else None
+        )
 
     def upsert_products(self) -> None:
         """Fetch all Boostr products and upsert them to Shepherd DB"""
@@ -280,7 +308,7 @@ class BoostrLoader:
         self.log.info(f"Upserted {(len(products))} products")
 
     def upsert_deals(self) -> None:
-        """Fetch all Boostr deals and upsert the Closed Won ones to Shepherd DB"""
+        """Fetch watched Boostr deals (Closed Won, Verbal, Renewal) and upsert them to Shepherd DB"""
         page = 0
         deals_params = {
             "per": "300",
@@ -306,15 +334,25 @@ class BoostrLoader:
                 self.log.info(f"Done. Fetched all the deals in {page - 1} pages")
                 break
 
-            closed_won_deals = [d for d in deals if (d["stage_name"] == "Closed Won")]
-            for deal in closed_won_deals:
-                boostr_deal, created = BoostrDeal.objects.update_or_create(
+            watched_deals = [
+                d
+                for d in deals
+                if (d["stage_name"] in ["Closed Won", "Verbal", "Renewal"])
+            ]
+            for deal in watched_deals:
+                advertiser, advertiser_created = Advertiser.objects.update_or_create(
+                    name=deal["advertiser_name"],
+                )
+
+                boostr_deal, boostr_deal_created = BoostrDeal.objects.update_or_create(
                     boostr_id=deal["id"],
                     defaults={
                         "name": deal["name"],
                         "advertiser": deal["advertiser_name"],
+                        "advertiser_id": advertiser,
                         "currency": deal["currency"],
                         "amount": math.floor(float(deal["budget"])),
+                        "stage": get_stage(deal["stage_name"]),
                         "sales_representatives": ",".join(
                             str(d["email"]) for d in deal["deal_members"]
                         ),
@@ -322,8 +360,9 @@ class BoostrLoader:
                         "end_date": deal["end_date"],
                     },
                 )
+
                 self.log.debug(f"Upserted deal: {deal['id']}")
-                if created:
+                if boostr_deal_created and advertiser_created:
                     self.create_campaign(boostr_deal)
                     self.log.debug(f"Created campaign for deal: {deal['id']}")
 
@@ -456,6 +495,7 @@ class BoostrLoader:
                     except ObjectDoesNotExist:
                         continue
 
+    @classmethod
     def update_sync_status(self, status: str, synced_on: datetime, message: str):
         """Update the BoostrSyncStatus table given the status and the message"""
         BoostrSyncStatus.objects.create(
@@ -465,7 +505,7 @@ class BoostrLoader:
         )
 
     def get_latest_sync_status(self) -> Any:
-        """Retrieve the lastest successful boostr sync status from the DB"""
+        """Retrieve the latest successful boostr sync status from the DB"""
         success_syncs = BoostrSyncStatus.objects.filter(status=SYNC_STATUS_SUCCESS)
         if not len(success_syncs):
             self.log.info(
@@ -481,32 +521,16 @@ class BoostrLoader:
 
     def load(self):
         """Loader entry point"""
-        try:
-            sync_start_time = timezone.now() + timedelta(hours=1)
-
-            self.log.info(
-                f"Starting Boostr sync at {sync_start_time} retrieving records >= {self.latest_synced_on}"
-            )
-            self.upsert_products()
-            self.upsert_deals()
-            self.upsert_mediaplan()
-            self.log.info(
-                "Boostr sync process completed successfully. Updating sync_status"
-            )
-            self.update_sync_status(
-                SYNC_STATUS_SUCCESS, sync_start_time, "Boostr sync success"
-            )
-        except Exception as e:
-            error = f"Exception: {str(e):} Trace: {traceback.format_exc()}"
-            self.log.error(
-                f"Boostr sync process encountered an error: {error}. Updating sync_status"
-            )
-            self.update_sync_status(
-                SYNC_STATUS_FAILURE,
-                sync_start_time,
-                f"Exception: {str(e):} Trace: {traceback.format_exc()}",
-            )
-            raise e
+        sync_start_time = timezone.now() + timedelta(hours=1)
+        self.log.info(
+            f"Starting Boostr sync at {sync_start_time} retrieving records >= {self.latest_synced_on}"
+        )
+        self.upsert_products()
+        self.upsert_deals()
+        self.upsert_mediaplan()
+        BoostrLoader.update_sync_status(
+            SYNC_STATUS_SUCCESS, sync_start_time, "Boostr sync success"
+        )
 
 
 def get_campaign_type(product_full_name: str) -> str:
@@ -519,6 +543,16 @@ def get_campaign_type(product_full_name: str) -> str:
         return BoostrProduct.CampaignType.FLAT_FEE
     else:
         return BoostrProduct.CampaignType.NONE
+
+
+def get_stage(stage_name: str) -> str:
+    """Return the deal stage from a deal stage name"""
+    if "Renewal" in stage_name:
+        return BoostrDeal.Stages.RENEWAL
+    if "Verbal" in stage_name:
+        return BoostrDeal.Stages.VERBAL
+    else:
+        return BoostrDeal.Stages.CLOSED_WON
 
 
 def get_country(product_full_name: str) -> str:
