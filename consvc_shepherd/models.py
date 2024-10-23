@@ -161,8 +161,7 @@ class AllocationSetting(models.Model):
         return {
             "position": self.position,
             "allocation": [
-                allocation.to_dict()
-                for allocation in self.partner_allocations.all()  # type: ignore [attr-defined]
+                allocation.to_dict() for allocation in self.partner_allocations.all()  # type: ignore [attr-defined]
             ],
         }
 
@@ -371,7 +370,7 @@ class BoostrSyncStatus(models.Model):
     synced_on : DateTimeField
         Date the Boostr sync process ran
     sync_status: CharField = models.CharField()
-        The status of the symc process (success|failure)
+        The status of the sync process (success|failure)
     message: CharField = models.CharField()
         An optional error message populated when sync_status is "failure"
     """
@@ -458,7 +457,7 @@ class CampaignSummary(models.Model):
     deal_id : IntegerField
         Boostr deal ID
     advertiser : CharField
-        Advertiser Name
+        Advertiser name
     net_spend : CharField
         Price of deal from Boostr
     impressions_sold : FloatField
