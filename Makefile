@@ -113,8 +113,11 @@ makemigrations-empty: ##  Create an empty migrations file for manual migrations
 
 migrate: ##  Run migrate on the docker container. This will run Django migrations and create .sql, .dbml, and visual files
 	docker exec -it consvc-shepherd-app-1 python manage.py migrate
-	docker exec -it consvc-shepherd-db-1 pg_dump -U postgres -s -F p -E UTF-8  postgres > schema/schema.sql
+	docker exec -it consvc-shepherd-db-1 pg_dump -U postgres -s -F p -E UTF-8  postgres > schema.sql
 	npm run sql2dbml
+	@echo "Cleaning .sql file as it's no longer needed..."
+	rm schema.sql
+	@echo "Migrations complete!"
 
 makemigrations: ##  Run makemigrations on the docker container set MIGRATE=false prevent automatic migration.
 	@echo "Making migrations..."
