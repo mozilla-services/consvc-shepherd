@@ -126,6 +126,25 @@ def mock_update_or_create_deal(*args, **kwargs) -> tuple[BoostrDeal, bool]:
     )
 
 
+BOOSTR_DEALS = {
+    1482241: BoostrDeal(
+        boostr_id=1482241,
+        name="HiProduce: CA Tiles May 2024",
+        advertiser="HiProduce",
+        currency="$",
+        amount=10000.00,
+        sales_representatives="ad_sales@mozilla.com",
+    ),
+    1498421: BoostrDeal(
+        boostr_id=1498421,
+        name="Neutron: Neutron US, DE, FR",
+        advertiser="Neutron",
+        currency="$",
+        amount=50000.00,
+        sales_representatives="deal_sales@mozilla.com",
+    ),
+}
+
 BOOSTR_PRODUCTS = {
     28256: BoostrProduct(
         boostr_id=28256,
@@ -167,6 +186,11 @@ BOOSTR_SYNC_STATUSES = {
         message="Boostr sync success",
     ),
 }
+
+
+def mock_get_deal(*args, **kwargs) -> BoostrDeal:
+    """Mock out retrieving a deal from the DB"""
+    return BOOSTR_DEALS[kwargs["boostr_id"]]
 
 
 def mock_get_product(*args, **kwargs) -> BoostrProduct:
