@@ -113,9 +113,9 @@ class BoostrApi:
     def __init__(
         self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
     ):
+        self.log = logging.getLogger("sync_boostr_data")
         self.base_url = base_url
         self.setup_session(email, password)
-        self.log = logging.getLogger("sync_boostr_data")
 
     def setup_session(self, email: str, password: str) -> None:
         """Authenticate with the boostr api and create and store a session on the instance"""
