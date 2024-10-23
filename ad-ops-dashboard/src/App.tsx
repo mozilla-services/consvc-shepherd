@@ -17,7 +17,6 @@ const queryClient = new QueryClient({
   },
 });
 
-
 const router = sentryCreateBrowserRouter(routes);
 export default function App() {
   return (
