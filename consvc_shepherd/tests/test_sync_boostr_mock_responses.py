@@ -76,7 +76,7 @@ MOCK_DEALS_RESPONSE = [
             {
                 "id": 4470961,
                 "user_id": 17968,
-                "email": "jsales@mozilla.com",
+                "email": "ad_sales@mozilla.com",
                 "share": 100,
                 "type": "Seller",
                 "seller_type": "direct",
@@ -126,7 +126,7 @@ MOCK_DEALS_RESPONSE = [
             {
                 "id": 4525424,
                 "user_id": 21626,
-                "email": "ksales@mozilla.com",
+                "email": "deal_sales@mozilla.com",
                 "share": 100,
                 "type": "Seller",
                 "seller_type": "direct",
@@ -314,7 +314,7 @@ MOCK_MEDIA_PLAN_LINE_ITEMS_RESPONSE = [
     {
         "id": 12345678,
         "rate": "0.93",
-        "product": {"id": 28254, "name": "Firefox New Tab US (CPM)"},
+        "product": {"id": 28256, "name": "Firefox New Tab US (CPM)"},
         "rate_type": {"id": 124, "name": "CPM"},
         "territory": None,
         "custom_fields": None,
@@ -339,7 +339,7 @@ MOCK_MEDIA_PLAN_LINE_ITEMS_RESPONSE = [
     {
         "id": 12345679,
         "rate": "0.44",
-        "product": {"id": 204408, "name": "Firefox New Tab DE (CPM)"},
+        "product": {"id": 212592, "name": "Firefox New Tab DE (CPM)"},
         "rate_type": {"id": 124, "name": "CPM"},
         "line_item_monthlies": [
             {
@@ -362,7 +362,7 @@ MOCK_MEDIA_PLAN_LINE_ITEMS_RESPONSE = [
     {
         "id": 12345680,
         "rate": "0.41",
-        "product": {"id": 204409, "name": "Firefox New Tab CA (CPM)"},
+        "product": {"id": 204410, "name": "Firefox New Tab CA (CPM)"},
         "rate_type": {"id": 124, "name": "CPM"},
         "line_item_monthlies": [
             {
