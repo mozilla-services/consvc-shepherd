@@ -362,7 +362,7 @@ class BoostrDealProduct(models.Model):
         Foreign key pointer to BoostrDeal, with related name of deals
     boostr_product : Partner
         Foreign key pointing to BoostrProduct instance, with related name of products
-    budget : DecimalField
+    budget : IntegerField
         How much of the deal's overall budget is allocated to this product and month
     month: CharField
         The month when this product and budget combo will run
@@ -379,9 +379,7 @@ class BoostrDealProduct(models.Model):
     boostr_product: ForeignKey = models.ForeignKey(
         BoostrProduct, on_delete=models.CASCADE
     )
-    budget: models.DecimalField = models.DecimalField(
-        max_digits=13, decimal_places=2, null=True
-    )
+    budget: IntegerField = models.IntegerField()
     month: CharField = models.CharField()
     rate_type: models.CharField = models.CharField(
         choices=RateTypes.choices,
