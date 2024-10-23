@@ -106,7 +106,7 @@ describe("<CampaignOverview />", () => {
     );
 
     expect(screen.getByText("Advertiser 1")).toBeInTheDocument();
-    expect(screen.getByText("Net Spend")).toBeInTheDocument();
+    expect(screen.getByText("Budget")).toBeInTheDocument();
   });
 
   test("applies filters and fetches filtered data", async () => {

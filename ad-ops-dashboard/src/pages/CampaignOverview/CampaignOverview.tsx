@@ -23,7 +23,7 @@ export default function CampaignOverview() {
   } = useGetCampaignsOverviewQuery(filters);
   const [colDefs] = useState<ColDef[]>([
     { field: "advertiser", headerName: "Advertiser" },
-    { field: "net_spend", headerName: "Net Spend" },
+    { field: "net_spend", headerName: "Budget" },
     { field: "revenue", headerName: "Revenue" },
     { field: "impressions_sold", headerName: "Impressions Sold" },
     { field: "impressions_remaining", headerName: "Impressions Remaining" },
@@ -67,7 +67,7 @@ export default function CampaignOverview() {
             pagination={true}
             domLayout="autoHeight"
             paginationPageSize={10}
-            paginationPageSizeSelector={false}
+            paginationPageSizeSelector={[10, 20, 50, 100]}
           />
         </TableContainer>
       )}
