@@ -11,7 +11,6 @@ import {
 
 
 const isLocal = process.env.NODE_ENV === 'development';
-console.log(process.env.SENTRY_DSN)
 const options: Sentry.BrowserOptions = {
   dsn: process.env.VITE_SENTRY_DSN,
   integrations: [
