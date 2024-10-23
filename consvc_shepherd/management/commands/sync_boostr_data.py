@@ -1,12 +1,13 @@
 """Django admin custom command for fetching and saving Deal and Product data from Boostr to Shepherd"""
 
+from dataclasses import dataclass
 import logging
 import math
 import time
 import traceback
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict
 
 import environ
 import requests
@@ -27,7 +28,6 @@ from consvc_shepherd.models import (
     Campaign,
 )
 
-env = environ.Env()
 MAX_DEAL_PAGES_DEFAULT = 50
 DEFAULT_RETRY_INTERVAL = 60
 SYNC_STATUS_SUCCESS = "success"
@@ -37,6 +37,13 @@ MAX_RETRY = 5
 DEFAULT_OPTIONS = {
     "max_deal_pages": MAX_DEAL_PAGES_DEFAULT,
 }
+
+
+@dataclass
+class Credentials:
+    email: str
+    password: str
+    jwt: str
 
 
 class Command(BaseCommand):
@@ -65,14 +72,28 @@ class Command(BaseCommand):
         env = environ.Env()
         BASE_DIR = Path(__file__).resolve().parent.parent
         environ.Env.read_env(BASE_DIR / ".env")
-
+        credentials = self.get_credentials()
         loader = BoostrLoader(
             options["base_url"],
-            env("BOOSTR_API_EMAIL"),
-            env("BOOSTR_API_PASS"),
+            credentials,
             options,
         )
         loader.load()
+
+    def get_credentials(self, *args, **options) -> Credentials:
+        env = environ.Env(
+            BOOSTR_API_JWT=(str, ""),
+            BOOSTR_API_EMAIL=(str, ""),
+            BOOSTR_API_PASS=(str, ""),
+        )
+        BASE_DIR = Path(__file__).resolve().parent.parent
+        environ.Env.read_env(BASE_DIR / ".env")
+        credentials = Credentials(
+            email=env("BOOSTR_API_EMAIL"),
+            password=env("BOOSTR_API_PASS"),
+            jwt=env("BOOSTR_API_JWT"),
+        )
+        return credentials
 
 
 class BoostrAPIError(Exception):
@@ -101,13 +122,15 @@ class BoostrAPI:
     log: logging.Logger
 
     def __init__(
-        self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
+        self, base_url: str, credentials: Credentials, options=DEFAULT_OPTIONS
     ):
         self.base_url = base_url
-        self.setup_session(email, password)
+        self.credentials = credentials
+        self.setup_session()
         self.log = logging.getLogger("sync_boostr_data")
+        # self.token =""
 
-    def setup_session(self, email: str, password: str) -> None:
+    def setup_session(self) -> None:
         """Authenticate with the boostr api and create and store a session on the instance"""
         headers = {
             "Accept": "application/vnd.boostr.public",
@@ -115,15 +138,17 @@ class BoostrAPI:
         }
         self.session = requests.Session()
         self.session.headers.update(headers)
-        token = self.authenticate(email, password)
-        headers["Authorization"] = f"Bearer {token}"
+        if self.credentials.jwt:
+            self.token = self.credentials.jwt
+        else:
+            self.token = self.authenticate(
+                self.credentials.email, self.credentials.password
+            )
+        headers["Authorization"] = f"Bearer {self.token}"
         self.session.headers.update(headers)
 
     def authenticate(self, email: str, password: str) -> str:
         """Authenticate with the Boostr API and return jwt"""
-        if settings.BOOSTR_API_JWT:
-            # We can bypass auth endpoint with a pre-existing JWT to avoid login rate limits
-            return str(settings.BOOSTR_API_JWT)
         post_data = {"auth": {"email": email, "password": password}}
         token = self.post("user_token", post_data)
         return str(token["jwt"])
@@ -219,10 +244,10 @@ class BoostrLoader:
     max_deal_pages: int
 
     def __init__(
-        self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
+        self, base_url: str, credentials: Credentials, options=DEFAULT_OPTIONS
     ):
         self.log = logging.getLogger("sync_boostr_data")
-        self.boostr = BoostrAPI(base_url, email, password, options)
+        self.boostr = BoostrAPI(base_url, credentials, options)
         self.max_deal_pages = options.get("max_deal_pages", MAX_DEAL_PAGES_DEFAULT)
         self.latest_synced_on = self.get_latest_sync_status()
 
