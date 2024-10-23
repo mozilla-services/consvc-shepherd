@@ -372,7 +372,6 @@ def get_unified(env: Environment, country: str, is_mobile: bool = False) -> Ads:
     }
 
     r = requests.post(f"{env.mars_url}/v1/ads", json=body, timeout=30)
-
     r_json = r.json()
 
     tiles_responses = (
