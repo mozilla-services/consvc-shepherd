@@ -13,7 +13,6 @@ from consvc_shepherd.version import fetch_app_version_from_file
 
 env = environ.Env(
     DEBUG=(bool, False),
-
     OPENIDC_HEADER=(str, None),
     OPENIDC_HEADER_PREFIX=(str, None),
     IAP_AUDIENCE=(str, None),
