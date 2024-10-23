@@ -9,7 +9,7 @@ export default function Debug() {
 
   useEffect(() => {
     if (errorCount > 0) {
-      throw new Error("Use effect errored!")
+      throw new Error("SENTRY TEST: A use effect errored!")
     }
 
   }, [errorCount]
@@ -17,7 +17,7 @@ export default function Debug() {
 
   const makeError = () => {
     try {
-      throw new Error("Uh oh! We did an error!")
+      throw new Error("SENTRY TEST: Uh oh! We did an error!")
     } catch (err) {
       Sentry.captureException(err);
     }
