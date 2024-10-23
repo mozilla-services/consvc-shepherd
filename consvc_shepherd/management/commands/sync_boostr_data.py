@@ -420,7 +420,7 @@ def get_campaign_type(product_full_name: str) -> str:
 
 
 def get_stage(stage_name: str) -> str:
-    """Infer a campaign type from a product's full name"""
+    """Return the deal stage from a deal stage name"""
     if "Renewal" in stage_name:
         return BoostrDeal.Stages.RENEWAL
     if "Verbal" in stage_name:
