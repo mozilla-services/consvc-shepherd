@@ -247,11 +247,17 @@ class BoostrDealAdmin(admin.ModelAdmin):
     inlines = [
         BoostrDealProductInline,
     ]
-    search_fields = ["boostr_id", "name", "advertiser", "sales_representatives"]
-    search_help_text = "Search by boostr id, name, adversiter, or sales reps"
+    search_fields = [
+        "boostr_id",
+        "name",
+        "advertiser",
+        "sales_representatives",
+    ]
+    search_help_text = "Search by boostr id, name, advertiser or sales rep"
     list_filter = [
         "currency",
         "start_date",
+        "stage",
         ("products", admin.RelatedOnlyFieldListFilter),
     ]
     list_display = [
@@ -261,6 +267,7 @@ class BoostrDealAdmin(admin.ModelAdmin):
         "advertiser_id",
         "currency",
         "amount",
+        "stage",
         "start_date",
         "end_date",
         "sales_representatives",
