@@ -176,16 +176,37 @@ STORAGES: dict[str, Any] = {
 GS_BUCKET_FILE_NAME = env("GS_BUCKET_FILE_NAME", default="settings_from_shepherd")
 ALLOCATION_FILE_NAME: str = env("ALLOCATION_FILE_NAME", default="allocation_file")
 
+_console_formatter = (
+    "localdev" if env("CUSTOM_LOCAL_LOGGER_ENABLED", default=False) else "json"
+)
+
 LOGGING: dict[str, Any] = {
     "version": 1,
     "formatters": {
-        "json": {"()": "dockerflow.logging.JsonLogFormatter", "logger_name": "shepherd"}
+        # For any custom local logging that you do not what included in prod, modify this formatter.
+        "localdev": {
+            "format": "".join(
+                [
+                    "{levelname} {{",
+                    "Timestamp: {asctime}, ",
+                    "Type: {module}, ",
+                    "Logger: shepherd, ",
+                    "Message: '{message}', ",
+                    "Pid: {process}}}",
+                ]
+            ),
+            "style": "{",
+        },
+        "json": {
+            "()": "dockerflow.logging.JsonLogFormatter",
+            "logger_name": "shepherd",
+        },
     },
     "handlers": {
         "console": {
             "level": env("SHEPHERD_ENV", default="DEBUG"),
             "class": "logging.StreamHandler",
-            "formatter": "json",
+            "formatter": _console_formatter,
             "stream": sys.stdout,
         },
     },
