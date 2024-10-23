@@ -13,7 +13,7 @@ from consvc_shepherd.version import fetch_app_version_from_file
 
 env = environ.Env(
     DEBUG=(bool, False),
-    BOOSTR_API_JWT=(str, None),
+
     OPENIDC_HEADER=(str, None),
     OPENIDC_HEADER_PREFIX=(str, None),
     IAP_AUDIENCE=(str, None),
@@ -40,7 +40,6 @@ SECRET_KEY: str = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
-BOOSTR_API_JWT = env.str("BOOSTR_API_JWT")
 DEV_USER_EMAIL = "dev@example.com"
 OPENIDC_HEADER = env("OPENIDC_HEADER")
 OPENIDC_HEADER_PREFIX = env("OPENIDC_HEADER_PREFIX")
