@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => {
     define: {
       'process.env': {
         NODE_ENV: JSON.stringify(env.VITE_NODE_ENV),
-        SENTRY_DSN: JSON.stringify(env.VITE_SENTRY_DSN)
+        SENTRY_DSN: env.VITE_SENTRY_DSN
       },
     },
   };
