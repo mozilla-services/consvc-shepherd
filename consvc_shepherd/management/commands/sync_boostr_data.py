@@ -1,17 +1,16 @@
 """Django admin custom command for fetching and saving Deal and Product data from Boostr to Shepherd"""
 
-from dataclasses import dataclass
 import logging
 import math
 import time
 import traceback
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import environ
 import requests
-from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 from django.utils import timezone
@@ -41,6 +40,8 @@ DEFAULT_OPTIONS = {
 
 @dataclass
 class Credentials:
+    """Dataclass to store credentials for authentication"""
+
     email: str
     password: str
     jwt: str
@@ -69,9 +70,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """Handle running the command"""
-        env = environ.Env()
-        BASE_DIR = Path(__file__).resolve().parent.parent
-        environ.Env.read_env(BASE_DIR / ".env")
         credentials = self.get_credentials()
         loader = BoostrLoader(
             options["base_url"],
@@ -81,6 +79,7 @@ class Command(BaseCommand):
         loader.load()
 
     def get_credentials(self, *args, **options) -> Credentials:
+        """Get credentials from env vars and create a credentials object"""
         env = environ.Env(
             BOOSTR_API_JWT=(str, ""),
             BOOSTR_API_EMAIL=(str, ""),

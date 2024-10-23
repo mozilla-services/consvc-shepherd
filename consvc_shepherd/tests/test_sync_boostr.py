@@ -13,8 +13,8 @@ from consvc_shepherd.management.commands.sync_boostr_data import (
     BoostrDeal,
     BoostrLoader,
     BoostrProduct,
-    get_campaign_type,
     Credentials,
+    get_campaign_type,
 )
 from consvc_shepherd.tests.test_sync_boostr_mocks import (
     mock_get_deal,
@@ -42,6 +42,7 @@ class TestSyncBoostrData(TestCase):
     """Unit tests for functions that fetch from boostr API and store in our DB"""
 
     def setUp(self) -> None:
+        """Set up fresh credentials for use with each test"""
         self.credentials = Credentials(email=EMAIL, password=PASSWORD, jwt="")
 
     def test_setup_session(self):
@@ -147,8 +148,8 @@ class TestSyncBoostrData(TestCase):
     @mock.patch("requests.Session.post", side_effect=mock_post_token_fail)
     def test_authenticate_fail(self, mock_post, mock_sleep):
         """Test sad path for the authenticate function"""
-        self.credentials.email = "uhoh@mozilla.com"
-        self.credentials.password = "uhoh"
+        self.credentials.email = "uhoh@mozilla.com"  # nosec
+        self.credentials.password = "uhoh"  # nosec
         with self.assertRaises(BoostrAPIError):
             BoostrAPI(
                 "fail/lol",
