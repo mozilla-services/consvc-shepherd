@@ -9,10 +9,10 @@ from django.test import TestCase, override_settings
 from consvc_shepherd.management.commands.sync_boostr_data import (
     DEFAULT_RETRY_INTERVAL,
     MAX_RETRY,
+    Advertiser,
     BoostrAPI,
     BoostrAPIError,
     BoostrAPIMaxRetriesError,
-    Advertiser,
     BoostrDeal,
     BoostrLoader,
     BoostrProduct,
