@@ -50,5 +50,4 @@ export default function Debug() {
   } else {
     return < Page404 />
   }
-
 } 
