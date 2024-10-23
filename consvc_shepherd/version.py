@@ -16,14 +16,13 @@ class Version:
 
 
 def fetch_app_version_from_file(
-    app_root_path: pathlib.Path | None = None,
+    app_root_path: pathlib.Path = pathlib.Path.cwd(),
 ) -> Version:
     """Fetch the content of the version.json file, which contains the SHA-1 hash
     commit value, repo source url, version, and CI build values.
     During deployment, this file is written and values are populated for
     the current version of Shepherd in production and staging.
     """
-    app_root_path = app_root_path or pathlib.Path.cwd()
     version_file: pathlib.Path = app_root_path / "version.json"
 
     # pathlib has the 'read_text()' function that opens the file, reads it
