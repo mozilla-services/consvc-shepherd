@@ -219,37 +219,20 @@ class TestSyncBoostrData(TestCase):
         mock_post,
     ):
         """Test function that calls the Boostr API for deal data and saves to our DB"""
-        loader = BoostrLoader(BASE_URL, self.credentials)
+        loader = BoostrLoader(BASE_URL, self.credentials, {"max_deal_pages": 1})
         loader.upsert_deals()
 
         advertiser_calls = [
             mock.call(
-                name="Neutron",
+                name="HiProduce",
             ),
             mock.call(
-                name="HiProduce",
+                name="Neutron",
             ),
         ]
         mock_update_or_create_advertiser.assert_has_calls(advertiser_calls)
 
         calls = [
-            mock.call(
-                boostr_id=1498421,
-                defaults={
-                    "name": "Neutron: Neutron US, DE, FR",
-                    "advertiser": "Neutron",
-                    "advertiser_id": Advertiser(
-                        id=1,
-                        name="Netron",
-                    ),
-                    "currency": "$",
-                    "amount": 50000,
-                    "stage": BoostrDeal.Stages.VERBAL,
-                    "sales_representatives": "ksales@mozilla.com,lsales@mozilla.com",
-                    "start_date": "2024-04-01",
-                    "end_date": "2024-06-30",
-                },
-            ),
             mock.call(
                 boostr_id=1482241,
                 defaults={
@@ -262,15 +245,31 @@ class TestSyncBoostrData(TestCase):
                     "currency": "$",
                     "amount": 10000,
                     "stage": BoostrDeal.Stages.CLOSED_WON,
-                    "sales_representatives": "jsales@mozilla.com",
+                    "sales_representatives": "ad_sales@mozilla.com",
                     "start_date": "2024-05-01",
                     "end_date": "2024-05-31",
+                },
+            ),
+            mock.call(
+                boostr_id=1498421,
+                defaults={
+                    "name": "Neutron: Neutron US, DE, FR",
+                    "advertiser": "Neutron",
+                    "advertiser_id": Advertiser(
+                        id=1,
+                        name="Netron",
+                    ),
+                    "currency": "$",
+                    "amount": 50000,
+                    "stage": BoostrDeal.Stages.VERBAL,
+                    "sales_representatives": "deal_sales@mozilla.com,lsales@mozilla.com",
+                    "start_date": "2024-04-01",
+                    "end_date": "2024-06-30",
                 },
             ),
         ]
         mock_update_or_create.assert_has_calls(calls)
 
-    @mock.patch("time.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_success_empty_response)
     @mock.patch(
@@ -291,6 +290,7 @@ class TestSyncBoostrData(TestCase):
 
         mock_update_or_create.assert_not_called()
 
+    @mock.patch("time.sleep")
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_fail)
     def test_upsert_deals_fail(self, mock_get, mock_post, mock_sleep):
