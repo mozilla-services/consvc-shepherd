@@ -1,4 +1,3 @@
-
 import * as Sentry from "@sentry/react";
 import { useEffect, useState } from "react";
 import Page404 from "../Page404";
