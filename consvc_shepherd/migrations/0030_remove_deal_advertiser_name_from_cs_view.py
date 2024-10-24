@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("consvc_shepherd", "0028_fix_update_campaign_summary_view"),
+        ("consvc_shepherd", "0029_boostrdeal_stage"),
     ]
 
     operations = [
