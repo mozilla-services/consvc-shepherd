@@ -1,5 +1,5 @@
 import { useEffect, useMemo, FC } from "react";
-import { Box, Grid2 as Grid } from "@mui/material";
+import { Box, Grid2 } from "@mui/material";
 import DateInput from "../../components/Inputs/DateInput";
 import SelectInput from "../../components/Inputs/SelectInput";
 import TextInput from "../../components/Inputs/TextInput";
@@ -46,8 +46,8 @@ const FilterCampaignOverview: FC<FilterCampaignOverviewProps> = ({
 
   return (
     <Box component="form" sx={{ pt: 2, pb: 1 }}>
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 6, md: 2 }}>
+      <Grid2 container spacing={2}>
+        <Grid2 size={{ xs: 6, md: 2 }}>
           <DateInput
             control={control}
             name="months"
@@ -55,33 +55,33 @@ const FilterCampaignOverview: FC<FilterCampaignOverviewProps> = ({
             views={["month", "year"]}
             label="Filter By Month"
           />
-        </Grid>
-        <Grid size={{ xs: 6, md: 2 }}>
+        </Grid2>
+        <Grid2 size={{ xs: 6, md: 2 }}>
           <SelectInput
             control={control}
             label="Filter By Countries"
             name="country"
             options={countriesData}
           />
-        </Grid>
-        <Grid size={{ xs: 6, md: 2 }}>
+        </Grid2>
+        <Grid2 size={{ xs: 6, md: 2 }}>
           <SelectInput
             control={control}
             label="Filter By Products"
             name="products"
             options={productOptions}
           />
-        </Grid>
-        <Grid size={{ xs: 6, md: 2 }}>
+        </Grid2>
+        <Grid2 size={{ xs: 6, md: 2 }}>
           <SelectInput
             control={control}
             label="Filter By Advertisers"
             name="advertisers"
             options={advertisersData}
           />
-        </Grid>
-        <Grid size={{ xs: 6, md: 1 }}></Grid>
-        <Grid size={{ xs: 6, md: 3 }} sx={{ mt: 0 }}>
+        </Grid2>
+        <Grid2 size={{ xs: 6, md: 1 }}></Grid2>
+        <Grid2 size={{ xs: 6, md: 3 }} sx={{ mt: 0 }}>
           <TextInput
             type="search"
             control={control}
@@ -89,8 +89,8 @@ const FilterCampaignOverview: FC<FilterCampaignOverviewProps> = ({
             name="search"
             sx={{ width: "100%" }}
           />
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
     </Box>
   );
 };
