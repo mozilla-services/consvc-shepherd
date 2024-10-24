@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-
 import { Box, Button } from "@mui/material";
+import { styled } from "@mui/system";
+import { Add, Remove } from "@mui/icons-material";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -16,6 +17,7 @@ import {
   useUpdateCampaignMutation,
 } from "../../data/campaigns";
 import { useGetBoostDealsQuery } from "../../data/deals";
+import Tooltip from "@mui/material/Tooltip";
 
 interface CampaignFormProps {
   formData: CampaignFormSchema;
@@ -23,6 +25,10 @@ interface CampaignFormProps {
   handleClose: () => void;
   campaigns: CampaignFormSchema[];
 }
+
+const StyledButton = styled(Button)(() => ({
+  marginRight: "3.8rem",
+}));
 
 export default function CampaignForm({
   formData,
@@ -36,7 +42,7 @@ export default function CampaignForm({
       defaultValues: {
         notes: formData.notes ?? "",
         ad_ops_person: formData.ad_ops_person ?? "",
-        kevel_flight_id: formData.kevel_flight_id ?? "",
+        flights: formData.flights ?? [],
         impressions_sold: formData.impressions_sold,
         net_spend: formData.net_spend,
         start_date: formData.start_date,
@@ -51,6 +57,10 @@ export default function CampaignForm({
   const { data: boostrDeals } = useGetBoostDealsQuery();
   const updateCampaign = useUpdateCampaignMutation(formData.id);
 
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "flights",
+  });
   const watchDeal = watch("deal");
   const [filteredCampaigns, setFilteredCampaigns] = useState<
     CampaignFormSchema[]
@@ -97,7 +107,7 @@ export default function CampaignForm({
       notes: data.notes?.trim() !== "" ? data.notes : null,
       ad_ops_person:
         data.ad_ops_person?.trim() !== "" ? data.ad_ops_person : null,
-      kevel_flight_id: data.kevel_flight_id !== 0 ? data.kevel_flight_id : null,
+      flights: data.flights.filter((flight) => flight.kevel_flight_id !== ""),
       campaign_fields: updated_campaign_fields,
     };
 
@@ -134,14 +144,39 @@ export default function CampaignForm({
           />
         </Box>
         <Box mt={2}>
-          <TextInput
-            name="kevel_flight_id"
-            label="Kevel Flight Id"
-            control={control}
-            type="number"
-            fullWidth
-          />
+          <Tooltip title="Add Flight" placement="top" arrow>
+            <StyledButton
+              variant="contained"
+              onClick={() => {
+                append({ kevel_flight_id: "" });
+              }}
+            >
+              Add Flights <Add />
+            </StyledButton>
+          </Tooltip>
         </Box>
+        {fields.map((item, index) => (
+          <Box key={item.id} display="flex" alignItems="center" mt={2}>
+            <TextInput
+              name={`flights[${index.toString()}].kevel_flight_id`}
+              label="Kevel Flight Id"
+              control={control}
+              type="number"
+              fullWidth
+              size="small"
+            />
+            <Tooltip title="Remove Campaign" placement="top" arrow>
+              <Button
+                onClick={() => {
+                  remove(index);
+                }}
+              >
+                <Remove fontSize="large" color="error" />
+              </Button>
+            </Tooltip>
+          </Box>
+        ))}
+
         <Box mt={2}>
           <TextInput
             name="impressions_sold"

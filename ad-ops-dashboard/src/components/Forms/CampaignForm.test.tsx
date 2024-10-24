@@ -34,7 +34,6 @@ describe("<CampaignForm />", () => {
     setup({ ...defaultProps, formData, isUpdate: false });
 
     expect(screen.getByLabelText(/ad ops person/i)).toHaveValue("John Doe");
-    expect(screen.getByLabelText(/kevel flight id/i)).toHaveValue(123);
     expect(screen.getByLabelText(/impressions sold/i)).toHaveValue(1000);
     expect(screen.getByLabelText(/net spend/i)).toHaveValue(500);
     expect(screen.getByLabelText(/start date/i)).toHaveValue("2023-10-01");
@@ -54,11 +53,6 @@ describe("<CampaignForm />", () => {
       target: { value: "Jane Smith" },
     });
     expect(screen.getByLabelText(/ad ops person/i)).toHaveValue("Jane Smith");
-
-    fireEvent.change(screen.getByLabelText(/kevel flight id/i), {
-      target: { value: 456 },
-    });
-    expect(screen.getByLabelText(/kevel flight id/i)).toHaveValue(456);
 
     fireEvent.change(screen.getByLabelText(/impressions sold/i), {
       target: { value: 1000 },
