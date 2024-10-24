@@ -612,7 +612,8 @@ class TestSyncBoostrData(TestCase):
         mock_upsert_products,
     ):
         """Test the load function success scenario"""
-        call_command("sync_boostr_data", BASE_URL)
+        loader = BoostrLoader(BASE_URL, self.credentials)
+        loader.load()
         calls = [
             mock.call(
                 status="success",
@@ -635,15 +636,16 @@ class TestSyncBoostrData(TestCase):
     ):
         """Test the load function failure scenario"""
         with self.assertRaises(Exception):
-            call_command("sync_boostr_data", BASE_URL)
-        calls = [
-            mock.call(
-                status="failure",
-                synced_on=mock.ANY,
-                message=mock.ANY,
-            ),
-        ]
-        mock_create.assert_has_calls(calls)
+            loader = BoostrLoader(BASE_URL, self.credentials)
+            loader.load()
+            calls = [
+                mock.call(
+                    status="failure",
+                    synced_on=mock.ANY,
+                    message=mock.ANY,
+                ),
+            ]
+            mock_create.assert_has_calls(calls)
 
     @mock.patch("requests.Session.post", side_effect=mock_post_success)
     @mock.patch("requests.Session.get", side_effect=mock_get_success)
