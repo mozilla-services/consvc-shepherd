@@ -139,6 +139,7 @@ class CampaignSummaryTestCase(TestCase):
         """Set up test data for CampaignSummary model."""
         self.campaign_summary = CampaignSummary(
             deal_id=1,
+            advertiser="Test Advertiser",
             net_spend=10000,
             impressions_sold=6000,
             clicks_delivered=100,
