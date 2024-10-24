@@ -25,6 +25,7 @@
     "@mui/material": "^6.1.0",
     "@mui/styles": "^6.1.0",
     "@mui/x-date-pickers": "^7.17.0",
+    "@sentry/react": "^8.35.0",
     "@tanstack/react-query": "^5.55.4",
     "ag-grid-react": "^32.1.0",
     "axios": "^1.7.7",
