@@ -301,11 +301,13 @@ class BoostrDeal(models.Model):
         Currency symbol, eg "$"
     amount : IntegerField
         Amount
+    stage : Charfield
+        The deal's current stage (100% Closed Won| 90% Verbal| 75% Renewal)
     sales_representatives : CharField
         Sales representative names as a comma separated list
-    start_date: DateField
+    start_date : DateField
         Start date
-    end_date: DateField
+    end_date : DateField
         End date
     created_on : DateTimeField
         Date of deal record creation (shepherd DB timestamp metadata, not boostr's)
@@ -319,6 +321,13 @@ class BoostrDeal(models.Model):
 
     """
 
+    class Stages(models.TextChoices):
+        """Defines deal stage choices for use in model fields."""
+
+        CLOSED_WON = "Closed Won"
+        VERBAL = "Verbal"
+        RENEWAL = "Renewal"
+
     boostr_id: IntegerField = models.IntegerField(unique=True)
     name: CharField = models.CharField()
     advertiser: CharField = models.CharField()
@@ -327,6 +336,7 @@ class BoostrDeal(models.Model):
     )
     currency: CharField = models.CharField()
     amount: IntegerField = models.IntegerField()
+    stage: CharField = models.CharField(choices=Stages.choices, blank=True)
     sales_representatives: CharField = models.CharField()
     start_date: DateField = models.DateField()
     end_date: DateField = models.DateField()
