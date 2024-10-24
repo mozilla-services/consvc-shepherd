@@ -1,5 +1,6 @@
 import { http, HttpResponse } from "msw";
-import { campaigns } from "../fixtures/campaignFixtures";
+import { campaigns, campaignOverviewData } from "../fixtures/campaignFixtures";
+import { CampaignOverview } from "../types";
 import { TEST_URL } from "../__ tests __/utils";
 
 export const campaignHandlers = [
@@ -39,5 +40,10 @@ export const campaignHandlers = [
     await request.json();
 
     return HttpResponse.json({ success: true }, { status: 201 });
+  }),
+
+  http.get(`${TEST_URL}/campaign/overview/`, () => {
+    const campaignOverview: CampaignOverview[] = campaignOverviewData;
+    return HttpResponse.json(campaignOverview);
   }),
 ];

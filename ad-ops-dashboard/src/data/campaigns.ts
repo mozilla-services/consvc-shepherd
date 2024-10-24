@@ -6,7 +6,12 @@ import {
   CampaignFormSchema,
   SplitFormSchema,
 } from "../utils/schemas/campaignFormSchema";
-import { ErrorResponse, Campaign } from "../types";
+import {
+  ErrorResponse,
+  Campaign,
+  CampaignFilters,
+  CampaignOverview,
+} from "../types";
 
 function fetchCampaign(): Promise<Campaign[]> {
   return axios
@@ -15,12 +20,37 @@ function fetchCampaign(): Promise<Campaign[]> {
 }
 
 export const useGetCampaignsQuery = () => {
-  const getCampaigns = useQuery({
+  return useQuery({
     queryKey: ["campaigns"],
     queryFn: fetchCampaign,
   });
+};
 
-  return getCampaigns;
+function getCampaignOverview(filters: CampaignFilters) {
+  const { months, country, products, advertisers, search } = filters;
+
+  const queryParams = new URLSearchParams();
+
+  const addQueryParam = (key: string, value?: string) => {
+    if (value != undefined) queryParams.append(key, value);
+  };
+
+  addQueryParam("month", months);
+  addQueryParam("country", country);
+  addQueryParam("placement", products);
+  addQueryParam("advertiser", advertisers);
+  addQueryParam("search", search);
+
+  return axios
+    .get<CampaignOverview[]>(`${apiRoutes.campaignOverview}?${queryParams}`)
+    .then((response) => response.data);
+}
+
+export const useGetCampaignsOverviewQuery = (filters: CampaignFilters) => {
+  return useQuery({
+    queryKey: ["campaignsOverview", filters],
+    queryFn: () => getCampaignOverview(filters),
+  });
 };
 
 export const useSplitCampaignMutation = () => {

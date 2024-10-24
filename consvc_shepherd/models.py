@@ -567,6 +567,13 @@ class CampaignSummary(models.Model):
             return "Yes"
         return "No"
 
+    @property
+    def revenue(self):
+        """Calculate revenue based on impressions delivered and net eCPM."""
+        if self.impressions_delivered and self.net_ecpm:
+            return self.impressions_delivered * self.net_ecpm
+        return None
+
     class Meta:
         """Metadata for the CampaignSummary model."""
 
