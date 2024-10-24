@@ -10,6 +10,7 @@ interface DateInputProps extends FieldValues {
   name: string;
   format?: string;
   label: string;
+  views?: ("year" | "month" | "day")[];
 }
 
 const StyledDatePicker = styled(DatePicker)`
@@ -21,6 +22,7 @@ export default function DateInput({
   name,
   format = "YYYY-MM-DD",
   label,
+  views = ["year", "month", "day"],
 }: DateInputProps) {
   return (
     <Controller
@@ -40,7 +42,7 @@ export default function DateInput({
               onChange={(date) => {
                 onChange(date ? dayjs(date).format(format) : null);
               }}
-              views={["year", "month", "day"]}
+              views={views}
               format={format}
               slotProps={{
                 textField: {
@@ -50,6 +52,7 @@ export default function DateInput({
                     : undefined,
                   inputRef: ref,
                 },
+                field: { clearable: true },
               }}
             />
           </LocalizationProvider>

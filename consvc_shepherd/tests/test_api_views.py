@@ -9,8 +9,16 @@ from consvc_shepherd.api.serializers import (
     BoostrDealSerializer,
     BoostrProductSerializer,
     CampaignSerializer,
+    CampaignSummarySerializer,
 )
-from consvc_shepherd.models import BoostrDeal, BoostrProduct, Campaign, Flight
+from consvc_shepherd.models import (
+    BoostrDeal,
+    BoostrDealProduct,
+    BoostrProduct,
+    Campaign,
+    CampaignSummary,
+    Flight,
+)
 
 
 @override_settings(DEBUG=True)
@@ -241,3 +249,99 @@ class CampaignViewSetTests(APITestCase):
 
         self.campaign1.refresh_from_db()
         self.assertEqual(self.campaign1.notes, "Updated campaign")
+
+
+@override_settings(DEBUG=True)
+class CampaignSummaryViewSetTests(APITestCase):
+    """Unit tests for CampaignSummaryViewSet."""
+
+    def setUp(self):
+        """Set up test data."""
+        self.deal = BoostrDeal.objects.create(
+            boostr_id=1,
+            name="Test Deal",
+            advertiser="Test Advertiser",
+            currency="$",
+            amount=10000,
+            sales_representatives="Rep1, Rep2",
+            start_date="2024-01-01",
+            end_date="2024-12-31",
+        )
+
+        self.product = BoostrProduct.objects.create(
+            id=1,
+            boostr_id=1,
+            full_name="Test Product",
+            campaign_type="CPC",
+            country="US",
+        )
+
+        self.campaign = Campaign.objects.create(
+            notes="Test campaign",
+            ad_ops_person="Test Person",
+            impressions_sold=10,
+            net_spend=5000,
+            deal=self.deal,
+            start_date="2024-01-01",
+            end_date="2024-12-31",
+            seller="Test Seller",
+        )
+
+        BoostrDealProduct.objects.create(
+            boostr_deal=self.deal,
+            boostr_product=self.product,
+            budget=5000,
+            month="2024-01",
+        )
+
+        self.url = reverse("overview-list")
+
+    def test_get_campaign_summaries(self):
+        """Test fetching all campaign summaries via GET request."""
+        response = self.client.get(self.url)
+        summaries = CampaignSummary.objects.all()
+        serializer = CampaignSummarySerializer(summaries, many=True)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, serializer.data)
+
+    def test_filter_by_advertiser(self):
+        """Test filtering by advertiser."""
+        response = self.client.get(self.url, {"advertiser": "Test Advertiser"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["advertiser"], "Test Advertiser")
+
+    def test_filter_by_month(self):
+        """Test filtering by month."""
+        response = self.client.get(self.url, {"month": "2024-01"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["advertiser"], "Test Advertiser")
+
+    def test_filter_by_placement(self):
+        """Test filtering by placement (product name)."""
+        response = self.client.get(self.url, {"placement": 1})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["advertiser"], "Test Advertiser")
+
+    def test_filter_by_country(self):
+        """Test filtering by country."""
+        response = self.client.get(self.url, {"country": "US"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["advertiser"], "Test Advertiser")
+
+    def test_filter_by_search(self):
+        """Test filtering by search term."""
+        response = self.client.get(self.url, {"search": "Test Advertiser"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["advertiser"], "Test Advertiser")
+
+    def test_no_filter_results(self):
+        """Test filtering with no results."""
+        response = self.client.get(self.url, {"advertiser": "Nonexistent Advertiser"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, [])

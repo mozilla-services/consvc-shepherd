@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { apiRoutes } from "../config/routes.config";
-import { Product } from "../types";
+import { Product, Country } from "../types";
 
 function getProducts(): Promise<Product[]> {
   return axios
@@ -9,11 +9,22 @@ function getProducts(): Promise<Product[]> {
     .then((response) => response.data);
 }
 
+function getCountries(): Promise<Country[]> {
+  return axios
+    .get<Country[]>(apiRoutes.countries)
+    .then((response) => response.data);
+}
+
 export const useGetProductsQuery = () => {
-  const data = useQuery({
+  return useQuery({
     queryKey: ["products"],
     queryFn: getProducts,
   });
+};
 
-  return data;
+export const useGetCountriesQuery = () => {
+  return useQuery({
+    queryKey: ["countries"],
+    queryFn: getCountries,
+  });
 };
