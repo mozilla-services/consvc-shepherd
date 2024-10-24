@@ -336,7 +336,7 @@ class BoostrDeal(models.Model):
     )
     currency: CharField = models.CharField()
     amount: IntegerField = models.IntegerField()
-    stage: CharField = models.CharField(choices=Stages.choices, blank=True)
+    stage: CharField = models.CharField(choices=Stages.choices)
     sales_representatives: CharField = models.CharField()
     start_date: DateField = models.DateField()
     end_date: DateField = models.DateField()
