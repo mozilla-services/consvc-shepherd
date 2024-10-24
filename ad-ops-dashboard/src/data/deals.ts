@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { apiRoutes } from "../config/routes.config";
-import { BoostrDeal } from "../types";
+import { BoostrDeal, Advertiser } from "../types";
 
 function getDeals(): Promise<BoostrDeal[]> {
   return axios
@@ -9,11 +9,22 @@ function getDeals(): Promise<BoostrDeal[]> {
     .then((response) => response.data);
 }
 
+function getAdvertisers(): Promise<Advertiser[]> {
+  return axios
+    .get<Advertiser[]>(apiRoutes.advertisers)
+    .then((response) => response.data);
+}
+
 export const useGetBoostDealsQuery = () => {
-  const data = useQuery({
+  return useQuery({
     queryKey: ["boostrDeals"],
     queryFn: getDeals,
   });
+};
 
-  return data;
+export const useGetAdvertisersQuery = () => {
+  return useQuery({
+    queryKey: ["advertiser"],
+    queryFn: getAdvertisers,
+  });
 };
