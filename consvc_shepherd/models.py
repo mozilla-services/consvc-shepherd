@@ -445,6 +445,8 @@ class Campaign(models.Model):
     ----------
     ad_ops_person : CharField
         Ad Ops Person
+    name : CharField
+        Name
     notes : CharField
         Notes
     net_spend : CharField
@@ -472,6 +474,7 @@ class Campaign(models.Model):
     """
 
     ad_ops_person: CharField = models.CharField(null=True, blank=True)
+    name: CharField = models.CharField(null=True, blank=True)
     notes: CharField = models.CharField(null=True, blank=True)
     net_spend: IntegerField = models.IntegerField()
     impressions_sold: IntegerField = models.IntegerField()
@@ -512,6 +515,8 @@ class CampaignSummary(models.Model):
 
     deal_id : IntegerField
         Boostr deal ID
+    name : CharField
+        Campaign name, which is the BoostrProduct full name(s)
     advertiser : CharField
         Advertiser name
     advertiser_id : Advertiser
@@ -528,6 +533,7 @@ class CampaignSummary(models.Model):
     """
 
     deal_id: IntegerField = models.IntegerField(primary_key=True)
+    name: CharField = models.CharField(null=True, blank=True)
     advertiser: CharField = models.CharField(max_length=255)
     advertiser_id: ForeignKey = models.ForeignKey(
         Advertiser, on_delete=models.DO_NOTHING, null=True

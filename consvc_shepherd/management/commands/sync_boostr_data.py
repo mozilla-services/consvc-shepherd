@@ -312,23 +312,30 @@ class BoostrLoader:
                         "end_date": deal["end_date"],
                     },
                 )
-
                 self.log.debug(f"Upserted deal: {deal['id']}")
+
+                deal_products = self.upsert_deal_products(boostr_deal)
+                self.log.info(f"Upserted products and budgets for deal: {deal['id']}")
+
                 if boostr_deal_created and advertiser_created:
-                    self.create_campaign(boostr_deal)
+                    campaign_name = deal["advertiser_name"]
+                    if deal_products:
+                        campaign_name = deal_products[0]["product"]["full_name"]
+                        for i in range(1, len(deal_products)):
+                            campaign_name += "," + deal_products[i]["product"]["full_name"]
+                    self.create_campaign(boostr_deal, name=campaign_name)
                     self.log.debug(f"Created campaign for deal: {deal['id']}")
 
-                self.upsert_deal_products(boostr_deal)
-                self.log.info(f"Upserted products and budgets for deal: {deal['id']}")
             # If this is the last iteration of the loop due to the max page limit, log that we stopped
             if page >= self.max_deal_pages:
                 self.log.info(
                     f"Done. Stopped fetching deals after hitting max_page_limit of {page} pages."
                 )
 
-    def create_campaign(self, deal: BoostrDeal) -> None:
+    def create_campaign(self, deal: BoostrDeal, name: str) -> None:
         """Create campaign if a boostr deal is created. Returns True if successful, False otherwise."""
         Campaign.objects.create(
+            name=name,
             net_spend=deal.amount,
             impressions_sold=0,
             seller=deal.sales_representatives,
@@ -337,7 +344,7 @@ class BoostrLoader:
             end_date=deal.end_date,
         )
 
-    def upsert_deal_products(self, deal: BoostrDeal) -> None:
+    def upsert_deal_products(self, deal: BoostrDeal) -> list:
         """Fetch the deal_products for a particular deal and store them in our DB with their monthly budgets"""
         deal_products_params = (
             {
@@ -348,7 +355,7 @@ class BoostrLoader:
             else {}
         )
 
-        deal_products = self.boostr.get(
+        deal_products: list[Any] = self.boostr.get(
             f"deals/{deal.boostr_id}/deal_products", params=deal_products_params
         )
 
@@ -369,6 +376,7 @@ class BoostrLoader:
                 f'Upserted {len(deal_product["deal_product_budgets"])} months of budget for product: '
                 f"{product.boostr_id} to deal: {deal.boostr_id}"
             )
+        return deal_products
 
     @classmethod
     def update_sync_status(self, status: str, synced_on: datetime, message: str):
