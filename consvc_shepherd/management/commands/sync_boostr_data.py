@@ -260,7 +260,7 @@ class BoostrLoader:
         self.log.info(f"Upserted {(len(products))} products")
 
     def upsert_deals(self) -> None:
-        """Fetch all Boostr deals and upsert the Closed Won ones to Shepherd DB"""
+        """Fetch watched Boostr deals (Closed Won, Verbal, Renewal) and upsert them to Shepherd DB"""
         page = 0
         deals_params = {
             "per": "300",
@@ -286,8 +286,12 @@ class BoostrLoader:
                 self.log.info(f"Done. Fetched all the deals in {page - 1} pages")
                 break
 
-            closed_won_deals = [d for d in deals if (d["stage_name"] == "Closed Won")]
-            for deal in closed_won_deals:
+            watched_deals = [
+                d
+                for d in deals
+                if (d["stage_name"] in ["Closed Won", "Verbal", "Renewal"])
+            ]
+            for deal in watched_deals:
                 advertiser, advertiser_created = Advertiser.objects.update_or_create(
                     name=deal["advertiser_name"],
                 )
@@ -299,6 +303,7 @@ class BoostrLoader:
                         "advertiser_id": advertiser,
                         "currency": deal["currency"],
                         "amount": math.floor(float(deal["budget"])),
+                        "stage": get_stage(deal["stage_name"]),
                         "sales_representatives": ",".join(
                             str(d["email"]) for d in deal["deal_members"]
                         ),
@@ -366,7 +371,7 @@ class BoostrLoader:
 
     @classmethod
     def update_sync_status(self, status: str, synced_on: datetime, message: str):
-        """Fupdate the BoostrSyncStatus table given the status and the message"""
+        """Update the BoostrSyncStatus table given the status and the message"""
         BoostrSyncStatus.objects.create(
             status=status,
             synced_on=synced_on,
@@ -374,7 +379,7 @@ class BoostrLoader:
         )
 
     def get_latest_sync_status(self) -> Any:
-        """Retrieve the lastest successful boostr sync status from the DB"""
+        """Retrieve the latest successful boostr sync status from the DB"""
         success_syncs = BoostrSyncStatus.objects.filter(status=SYNC_STATUS_SUCCESS)
         if not len(success_syncs):
             self.log.info(
@@ -411,6 +416,16 @@ def get_campaign_type(product_full_name: str) -> str:
         return BoostrProduct.CampaignType.FLAT_FEE
     else:
         return BoostrProduct.CampaignType.NONE
+
+
+def get_stage(stage_name: str) -> str:
+    """Return the deal stage from a deal stage name"""
+    if "Renewal" in stage_name:
+        return BoostrDeal.Stages.RENEWAL
+    if "Verbal" in stage_name:
+        return BoostrDeal.Stages.VERBAL
+    else:
+        return BoostrDeal.Stages.CLOSED_WON
 
 
 def get_country(product_full_name: str) -> str:

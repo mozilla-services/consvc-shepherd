@@ -47,7 +47,7 @@ class TestSyncBoostrData(TestCase):
 
     @mock.patch.object(BoostrApi, "authenticate", return_value="im.a.jwt")
     def test_setup_session(self, mock_authenticate):
-        """Test the function that sets up the headers, authenticates with boosrt, and sets up the session"""
+        """Test the function that sets up the headers, authenticates with boostr, and sets up the session"""
         boostr = BoostrApi(BASE_URL, EMAIL, PASSWORD)
         self.assertEqual(
             boostr.session.headers["Accept"], "application/vnd.boostr.public"
@@ -219,6 +219,7 @@ class TestSyncBoostrData(TestCase):
                     ),
                     "currency": "$",
                     "amount": 50000,
+                    "stage": BoostrDeal.Stages.VERBAL,
                     "sales_representatives": "ksales@mozilla.com,lsales@mozilla.com",
                     "start_date": "2024-04-01",
                     "end_date": "2024-06-30",
@@ -234,6 +235,7 @@ class TestSyncBoostrData(TestCase):
                     ),
                     "currency": "$",
                     "amount": 10000,
+                    "stage": BoostrDeal.Stages.CLOSED_WON,
                     "sales_representatives": "jsales@mozilla.com",
                     "start_date": "2024-05-01",
                     "end_date": "2024-05-31",
