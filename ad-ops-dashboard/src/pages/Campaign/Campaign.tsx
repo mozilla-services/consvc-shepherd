@@ -88,7 +88,15 @@ export default function Campaign() {
   const [colDefs] = useState<ColDef[]>([
     { field: "notes", headerName: "Notes" },
     { field: "ad_ops_person", headerName: "Ad Ops Person" },
-    { field: "kevel_flight_id", headerName: "Kevel Flight ID" },
+    {
+      headerName: "Kevel Flight IDs",
+      valueGetter: (params: {
+        data: { flights?: { kevel_flight_id: string }[] };
+      }) =>
+        params.data.flights
+          ?.map((flight) => flight.kevel_flight_id)
+          .join(", ") ?? "",
+    },
     { field: "impressions_sold", headerName: "Impressions Sold" },
     { field: "net_spend", headerName: "Net Spend" },
 

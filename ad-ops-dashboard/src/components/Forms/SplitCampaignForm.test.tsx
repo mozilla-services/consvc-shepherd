@@ -48,7 +48,7 @@ describe("SplitCampaignForm", () => {
     );
 
     expect(screen.getAllByLabelText(/Ad Ops Person/i)).toHaveLength(1);
-    fireEvent.click(screen.getByRole("button", { name: /Split Campaign/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Add Campaign/i }));
     expect(screen.getAllByLabelText(/Ad Ops Person/i)).toHaveLength(2);
   });
 

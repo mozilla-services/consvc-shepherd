@@ -21,25 +21,29 @@ class BoostrProductSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class FlightSerializer(serializers.ModelSerializer):
+    """Serializer for the Flight model"""
+
+    class Meta:
+        """Meta class to define model and fields for the FlightSerializer."""
+
+        model = Flight
+        fields = ["id", "kevel_flight_id"]
+
+
 class CampaignSerializer(serializers.ModelSerializer):
     """Serializer for Campaign model"""
 
     campaign_fields = serializers.ListSerializer(
         child=serializers.DictField(), write_only=True
     )
-    kevel_flight_id = serializers.IntegerField(write_only=True, allow_null=True)
+    flights = FlightSerializer(many=True, write_only=False)
 
     class Meta:
         """Metadata to specify the way Campaign is serialized"""
 
         model = Campaign
         fields = "__all__"
-
-    # To do: This code will be updated once we have the UI to assign multiple flights to a campaign.
-    def get_kevel_flight_id(self, obj):
-        """Retrieve the most recent flight ID related to the campaign."""
-        flight = obj.flights.last()
-        return flight.kevel_flight_id if flight else None
 
     def validate(self, data):
         """Validate campaign data, ensuring the deal exists and total net spend matches the deal amount."""
@@ -67,32 +71,47 @@ class CampaignSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """Create a new campaign and update existing campaign fields based on validated data."""
-        kevel_flight_id = validated_data.pop("kevel_flight_id", None)
+        flights_data = validated_data.pop("flights", [])
         campaign_fields_data = validated_data.pop("campaign_fields", [])
-        campaign = Campaign.objects.create(**validated_data)
 
+        campaign = Campaign.objects.create(**validated_data)
         self._update_existing_campaigns(campaign_fields_data)
 
-        if kevel_flight_id is not None:
-            Flight.objects.create(campaign=campaign, kevel_flight_id=kevel_flight_id)
+        for record in flights_data:
+            Flight.objects.update_or_create(
+                kevel_flight_id=record["kevel_flight_id"],
+                campaign=campaign,
+                defaults={
+                    "kevel_flight_id": record["kevel_flight_id"],
+                    "campaign": campaign,
+                },
+            )
 
         return campaign
 
     def update(self, instance, validated_data):
         """Update an existing campaign."""
+        flights_data = validated_data.pop("flights", [])
         campaign_fields_data = validated_data.pop("campaign_fields", [])
-        kevel_flight_id = validated_data.pop("kevel_flight_id", None)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
 
-        if kevel_flight_id is None:
-            instance.flights.all().delete()
-        else:
+        kevel_flight_ids_to_exclude = set()
+        for record in flights_data:
+            kevel_flight_ids_to_exclude.add(record["kevel_flight_id"])
             Flight.objects.update_or_create(
-                campaign=instance, defaults={"kevel_flight_id": kevel_flight_id}
+                kevel_flight_id=record["kevel_flight_id"],
+                campaign=instance,
+                defaults={
+                    "kevel_flight_id": record["kevel_flight_id"],
+                    "campaign": instance,
+                },
             )
 
+        Flight.objects.filter(campaign=instance).exclude(
+            kevel_flight_id__in=kevel_flight_ids_to_exclude
+        ).delete()
         self._update_existing_campaigns(campaign_fields_data)
 
         return instance
@@ -114,12 +133,6 @@ class CampaignSerializer(serializers.ModelSerializer):
                 except Campaign.DoesNotExist:
                     continue
 
-    def to_representation(self, instance):
-        """Customize the representation to include kevel_flight_id."""
-        representation = super().to_representation(instance)
-        representation["kevel_flight_id"] = self.get_kevel_flight_id(instance)
-        return representation
-
 
 class BoostrDealSerializer(serializers.ModelSerializer):
     """Serializer for BoostrDeal model"""
@@ -139,7 +152,7 @@ class NestedCampaignSerializer(serializers.Serializer):
     ad_ops_person = serializers.CharField(
         required=False, allow_blank=True, allow_null=True
     )
-    kevel_flight_id = serializers.IntegerField(required=False, allow_null=True)
+    flights = serializers.ListSerializer(child=serializers.DictField(), write_only=True)
     impressions_sold = serializers.IntegerField()
     net_spend = serializers.IntegerField()
     deal = serializers.IntegerField()
@@ -222,39 +235,48 @@ class SplitCampaignSerializer(serializers.Serializer):
     ) -> Campaign:
         """Update an existing campaign."""
         try:
-            kevel_flight_id = campaign.pop("kevel_flight_id", None)
             existing_campaign = Campaign.objects.get(id=campaign_id)
-            if kevel_flight_id is None:
-                Flight.objects.filter(campaign=campaign_id).delete()
-            else:
-                self._create_or_update_flight(existing_campaign, kevel_flight_id)
-
         except Campaign.DoesNotExist:
             raise serializers.ValidationError(
                 f"Campaign with ID {campaign_id} does not exist."
             )
+
+        flights_data = campaign.pop("flights", [])
 
         for attr, value in campaign.items():
             if attr != "id":
                 setattr(existing_campaign, attr, deal if attr == "deal" else value)
 
         existing_campaign.save()
+
+        self._create_or_update_flights(campaign_id, flights_data)
+
         return existing_campaign
 
     def _create_new_campaign(self, campaign: dict, deal) -> Campaign:
         """Create a new campaign."""
-        kevel_flight_id = campaign.pop("kevel_flight_id", None)
+        flights_data = campaign.pop("flights", [])
         campaign["deal"] = deal
         new_campaign = Campaign.objects.create(**campaign)
-        self._create_or_update_flight(new_campaign, kevel_flight_id)
+        self._create_or_update_flights(new_campaign.pk, flights_data)
         return new_campaign
 
-    def _create_or_update_flight(self, campaign: Campaign, kevel_flight_id: int):
-        """Create or update flight id for campaign."""
-        if kevel_flight_id is not None:
+    def _create_or_update_flights(self, campaign_id: int, flights_data: dict):
+        kevel_flight_ids_to_exclude = set()
+        for record in flights_data:
+            kevel_flight_ids_to_exclude.add(record["kevel_flight_id"])
             Flight.objects.update_or_create(
-                campaign=campaign, defaults={"kevel_flight_id": kevel_flight_id}
+                kevel_flight_id=record["kevel_flight_id"],
+                campaign_id=campaign_id,
+                defaults={
+                    "kevel_flight_id": record["kevel_flight_id"],
+                    "campaign_id": campaign_id,
+                },
             )
+
+        Flight.objects.filter(campaign_id=campaign_id).exclude(
+            kevel_flight_id__in=kevel_flight_ids_to_exclude
+        ).delete()
 
 
 class CampaignSummarySerializer(serializers.ModelSerializer):

@@ -99,7 +99,7 @@ class CampaignTestCase(TestCase):
         """Test that Campaign model fields are correctly set."""
         self.assertEqual(self.campaign.ad_ops_person, "John Doe")
         self.assertEqual(self.campaign.notes, "Test notes")
-        self.assertEqual(self.campaign.kevel_flight_id, 12345)
+        self.assertEqual(self.campaign.kevel_flight_id, "12345")
         self.assertEqual(self.campaign.net_spend, 1000)
         self.assertEqual(self.campaign.impressions_sold, 1000)
         self.assertEqual(self.campaign.seller, "Test Seller")

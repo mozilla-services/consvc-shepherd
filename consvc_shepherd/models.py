@@ -492,9 +492,15 @@ class Campaign(models.Model):
 
     @property
     def kevel_flight_id(self):
-        """Retrieve the most recent flight ID related to the campaign."""
-        flight = self.flights.last()
-        return flight.kevel_flight_id if flight else None
+        """Retrieve a comma-separated string of all flight IDs related to the campaign."""
+        return (
+            ", ".join(
+                str(flight.kevel_flight_id)
+                for flight in self.flights.all()
+                if flight.kevel_flight_id
+            )
+            or None
+        )
 
     class Meta:
         """Metadata for the Campaign model."""

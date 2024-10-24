@@ -5,10 +5,17 @@ export const campaignFormSchema = z.object({
   id: z.number().optional(),
   notes: z.string().optional(),
   ad_ops_person: z.string().optional(),
-  kevel_flight_id: z.preprocess(
-    (val) => (val === null ? undefined : Number(val)),
-    z.union([z.number().optional(), z.string().optional()])
-  ),
+  flights: z
+    .array(
+      z.object({
+        id: z.number().optional(),
+        kevel_flight_id: z.preprocess(
+          (val) => (val === null ? undefined : Number(val)),
+          z.union([z.number().optional(), z.string().optional()])
+        ),
+      })
+    )
+    .optional(),
   impressions_sold: z.preprocess(
     (val) => (val === null ? undefined : Number(val)),
     z
@@ -83,7 +90,7 @@ export type CampaignFormSchema = z.infer<typeof campaignFormSchema>;
 export const defaultCampaignValues: CampaignFormSchema = {
   notes: "",
   ad_ops_person: "",
-  kevel_flight_id: "",
+  flights: [],
   impressions_sold: "",
   net_spend: "",
   seller: "",

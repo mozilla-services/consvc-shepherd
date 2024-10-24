@@ -155,7 +155,7 @@ class CampaignViewSetTests(APITestCase):
         data = {
             "notes": "New campaign",
             "ad_ops_person": "Alice",
-            "kevel_flight_id": 789,
+            "flights": [{"kevel_flight_id": 789}],
             "impressions_sold": 1,
             "net_spend": 10000,
             "deal": self.deal1.id,
@@ -173,7 +173,7 @@ class CampaignViewSetTests(APITestCase):
         data = {
             "notes": "New campaign",
             "ad_ops_person": "Alice",
-            "kevel_flight_id": 789,
+            "flights": [{"kevel_flight_id": 789}],
             "impressions_sold": 1,
             "net_spend": 4865,
             "deal": self.deal1.id,
@@ -190,7 +190,7 @@ class CampaignViewSetTests(APITestCase):
         data = {
             "notes": "New campaign updated",
             "ad_ops_person": "Alice",
-            "kevel_flight_id": 789,
+            "flights": [{"kevel_flight_id": 789}],
             "impressions_sold": 1,
             "net_spend": 10000,
             "deal": self.deal1.id,
@@ -219,7 +219,7 @@ class CampaignViewSetTests(APITestCase):
                 "id": self.campaign1.id,
                 "notes": "Updated campaign",
                 "ad_ops_person": "Alice",
-                "kevel_flight_id": 123,
+                "flights": [{"kevel_flight_id": 123}],
                 "impressions_sold": 2,
                 "net_spend": 5000,
                 "deal": self.deal1.id,
@@ -230,7 +230,7 @@ class CampaignViewSetTests(APITestCase):
             {
                 "notes": "New campaign",
                 "ad_ops_person": "Bob",
-                "kevel_flight_id": 789,
+                "flights": [{"kevel_flight_id": 789}],
                 "impressions_sold": 2,
                 "net_spend": 5000,
                 "deal": self.deal1.id,

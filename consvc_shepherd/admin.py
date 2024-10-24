@@ -358,6 +358,13 @@ class CountryFilter(admin.SimpleListFilter):
             return queryset
 
 
+class CampaignFlightsInline(admin.StackedInline):
+    """BoostrDealProductInline is for displaying products and their budgets in the Deal form"""
+
+    model = Flight
+    extra = 0
+
+
 @admin.register(Campaign)
 class CampaignAdmin(admin.ModelAdmin):
     """Admin model for sales products imported from Boostr. Deals are many-to-many with products"""
@@ -371,6 +378,10 @@ class CampaignAdmin(admin.ModelAdmin):
         "deal__advertiser",
     ]
 
+    inlines = [
+        CampaignFlightsInline,
+    ]
+
     readonly_fields: list[str] = [
         "net_ecpm",
     ]
@@ -378,7 +389,7 @@ class CampaignAdmin(admin.ModelAdmin):
     list_display = [
         "ad_ops_person",
         "notes",
-        "kevel_flight_id",
+        "formatted_kevel_flight_id",
         "net_spend",
         "impressions_sold",
         "net_ecpm",
@@ -387,6 +398,11 @@ class CampaignAdmin(admin.ModelAdmin):
         "start_date",
         "end_date",
     ]
+
+    @admin.display(description="kevel flight ids")
+    def formatted_kevel_flight_id(self, obj):
+        """Return the kevel_flight_id for display purposes."""
+        return obj.kevel_flight_id
 
 
 @admin.register(CampaignSummary)
