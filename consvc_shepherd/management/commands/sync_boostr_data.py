@@ -300,7 +300,6 @@ class BoostrLoader:
                     boostr_id=deal["id"],
                     defaults={
                         "name": deal["name"],
-                        "advertiser": deal["advertiser_name"],
                         "advertiser_id": advertiser,
                         "currency": deal["currency"],
                         "amount": math.floor(float(deal["budget"])),

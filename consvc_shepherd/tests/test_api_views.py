@@ -12,6 +12,7 @@ from consvc_shepherd.api.serializers import (
     CampaignSummarySerializer,
 )
 from consvc_shepherd.models import (
+    Advertiser,
     BoostrDeal,
     BoostrDealProduct,
     BoostrProduct,
@@ -257,10 +258,12 @@ class CampaignSummaryViewSetTests(APITestCase):
 
     def setUp(self):
         """Set up test data."""
+        advertiser = Advertiser.objects.create(id=1, name="Test Advertiser")
+
         self.deal = BoostrDeal.objects.create(
             boostr_id=1,
             name="Test Deal",
-            advertiser="Test Advertiser",
+            advertiser_id=advertiser,
             currency="$",
             amount=10000,
             sales_representatives="Rep1, Rep2",
@@ -304,6 +307,25 @@ class CampaignSummaryViewSetTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serializer.data)
+        self.assertEqual(
+            response.data,
+            [
+                {
+                    "deal_id": 28,
+                    "net_ecpm": 500000.0,
+                    "ctr": None,
+                    "impressions_remaining": 10,
+                    "live": "No",
+                    "revenue": None,
+                    "advertiser": "Test Advertiser",
+                    "net_spend": 5000.0,
+                    "impressions_sold": 10.0,
+                    "clicks_delivered": 0,
+                    "impressions_delivered": 0,
+                    "advertiser_id": 1,
+                }
+            ],
+        )
 
     def test_filter_by_advertiser(self):
         """Test filtering by advertiser."""

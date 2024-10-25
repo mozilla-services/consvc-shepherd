@@ -247,13 +247,8 @@ class BoostrDealAdmin(admin.ModelAdmin):
     inlines = [
         BoostrDealProductInline,
     ]
-    search_fields = [
-        "boostr_id",
-        "name",
-        "advertiser",
-        "sales_representatives",
-    ]
-    search_help_text = "Search by boostr id, name, advertiser or sales rep"
+    search_fields = ["boostr_id", "name", "sales_representatives"]
+    search_help_text = "Search by boostr id, name, or sales reps"
     list_filter = [
         "currency",
         "start_date",
@@ -263,7 +258,6 @@ class BoostrDealAdmin(admin.ModelAdmin):
     list_display = [
         "boostr_id",
         "name",
-        "advertiser",
         "advertiser_id",
         "currency",
         "amount",
