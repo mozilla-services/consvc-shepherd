@@ -493,6 +493,10 @@ class BoostrLoader:
                             rate_type=media_plan_line_item.rate_type,
                         )
                     except ObjectDoesNotExist:
+                        self.log.info(
+                            f"Object not found for deal {media_plan_line_item.boostr_deal} or "
+                            f"product {media_plan_line_item.boostr_product}"
+                        )
                         continue
 
     @classmethod
