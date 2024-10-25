@@ -53,3 +53,36 @@ export interface Product {
   created_on: string;
   updated_on: string;
 }
+
+export interface Country {
+  value: string;
+  label: string;
+}
+
+export interface Advertiser {
+  value: string;
+  label: string;
+}
+
+export interface CampaignFilters {
+  months: string;
+  country: string;
+  products: string;
+  advertisers: string;
+  search: string;
+}
+
+export interface CampaignOverview {
+  deal_id: number;
+  net_ecpm: number | null;
+  ctr: number | null;
+  impressions_remaining: number;
+  live: string;
+  revenue: number | null;
+  advertiser: string;
+  net_spend: number;
+  impressions_sold: number;
+  clicks_delivered: number;
+  impressions_delivered: number;
+  advertiser_id: number | null;
+}

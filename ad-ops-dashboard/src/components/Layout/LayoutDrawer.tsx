@@ -24,6 +24,10 @@ const drawerItems = [
     name: "Campaign",
     path: "/campaign",
   },
+  {
+    name: "Campaign Overview",
+    path: "/campaign-overview",
+  },
 ];
 
 const MobileDrawer = styled(MuiDrawer, {

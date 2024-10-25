@@ -337,7 +337,7 @@ class BoostrDeal(models.Model):
     )
     currency: CharField = models.CharField()
     amount: IntegerField = models.IntegerField()
-    stage: CharField = models.CharField(choices=Stages.choices, blank=True)
+    stage: CharField = models.CharField(choices=Stages.choices)
     sales_representatives: CharField = models.CharField()
     start_date: DateField = models.DateField()
     end_date: DateField = models.DateField()
@@ -584,6 +584,13 @@ class CampaignSummary(models.Model):
         if self.impressions_delivered and self.impressions_delivered > 0:
             return "Yes"
         return "No"
+
+    @property
+    def revenue(self):
+        """Calculate revenue based on impressions delivered and net eCPM."""
+        if self.impressions_delivered and self.net_ecpm:
+            return self.impressions_delivered * self.net_ecpm
+        return None
 
     class Meta:
         """Metadata for the CampaignSummary model."""
