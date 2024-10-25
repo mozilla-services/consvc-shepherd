@@ -1,8 +1,10 @@
 """Unit tests for the sync_boostr_data command"""
 
 import os
+import re
 from unittest import mock
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase, override_settings
 
 from consvc_shepherd.management.commands.sync_boostr_data import (
@@ -500,6 +502,39 @@ class TestSyncBoostrData(TestCase):
         self.assertEqual(
             str(context.exception), "Bad response status 400 from /media_plans"
         )
+
+    @mock.patch("requests.Session.post", side_effect=mock_post_success)
+    @mock.patch("requests.Session.get", side_effect=mock_get_success)
+    @mock.patch("consvc_shepherd.models.BoostrProduct.objects.filter")
+    @mock.patch(
+        "consvc_shepherd.models.BoostrProduct.objects.get",
+        side_effect=ObjectDoesNotExist,
+    )
+    @mock.patch(
+        "consvc_shepherd.models.BoostrDeal.objects.get", side_effect=ObjectDoesNotExist
+    )
+    def test_upsert_media_plans_fail_product_deal_not_found(
+        self, mock_get_deal, mock_get_product, mock_filter, mock_get, mock_post
+    ):
+        """Test failure of upsert_mediaplan because deals or products are not found"""
+        loader = BoostrLoader(BASE_URL, self.credentials)
+
+        with self.assertLogs(loader.log, level="INFO") as log:
+            loader.upsert_mediaplan()
+
+        log_pattern = re.compile(
+            r"INFO:sync_boostr_data:Object not found for deal \d+ or product \d+"
+        )
+        object_not_found_logs = [
+            message for message in log.output if log_pattern.search(message)
+        ]
+        length_object_not_found_logs = len(object_not_found_logs)
+        self.assertEqual(length_object_not_found_logs, 18)
+        self.assertEqual(
+            mock_get_deal.call_count, 18
+        )  # 2 media plans with 9 line items each
+        self.assertEqual(mock_get_product.call_count, 0)
+        mock_filter.return_value.update.assert_not_called()
 
     def test_get_campaign_type(self):
         """Test function that reads a Product name and decides if the Product is CPC, CPM, Flat Fee, or None"""
