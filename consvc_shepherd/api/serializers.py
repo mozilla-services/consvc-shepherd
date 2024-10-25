@@ -50,8 +50,10 @@ class CampaignSerializer(serializers.ModelSerializer):
         try:
             deal_data = BoostrDeal.objects.get(id=deal.id)
             deal_amount = deal_data.amount
-        except BoostrDeal.DoesNotExist:
-            raise serializers.ValidationError(f"Deal with name {deal} does not exist.")
+        except BoostrDeal.DoesNotExist as exec:
+            raise serializers.ValidationError(
+                f"Deal with id {deal.id} does not exist."
+            ) from exec
 
         campaign_fields_data = data.get("campaign_fields", [])
         total_net_spend = sum(

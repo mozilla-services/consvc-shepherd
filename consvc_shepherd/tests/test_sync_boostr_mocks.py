@@ -12,10 +12,12 @@ from consvc_shepherd.models import (
 from consvc_shepherd.tests.test_sync_boostr_mock_responses import (
     MOCK_DEAL_PRODUCTS_RESPONSE,
     MOCK_DEALS_RESPONSE,
+    MOCK_MEDIA_PLAN_LINE_ITEMS_RESPONSE,
+    MOCK_MEDIA_PLAN_RESPONSE,
     MOCK_PRODUCTS_RESPONSE,
 )
 
-MOCK_RETRY_AFTER_SECONDS = 10
+MOCK_RETRY_AFTER_SECONDS = 60
 
 
 class MockResponse:
@@ -47,7 +49,7 @@ def mock_post_token_fail(*args, **kwargs) -> MockResponse:
     return MockResponse({"uh": "oh"}, 401)
 
 
-def mock_upsert_deals_exception(*args, **kwargs) -> MockResponse:
+def mock_upsert_deals_exception(*args, **kwargs) -> None:
     """Mock upsert_deals exception"""
     raise Exception("upsert_deals mock raised an exception")
 
@@ -72,6 +74,16 @@ def mock_get_success(*args, **kwargs) -> MockResponse:
     elif args[0].endswith("/deal_products"):
         return MockResponse(
             MOCK_DEAL_PRODUCTS_RESPONSE,
+            200,
+        )
+    elif args[0].endswith("/media_plans"):
+        return MockResponse(
+            MOCK_MEDIA_PLAN_RESPONSE,
+            200,
+        )
+    elif args[0].endswith("/line_items"):
+        return MockResponse(
+            MOCK_MEDIA_PLAN_LINE_ITEMS_RESPONSE,
             200,
         )
     else:
@@ -137,6 +149,26 @@ def mock_update_or_create_deal(*args, **kwargs) -> tuple[BoostrDeal, bool]:
     )
 
 
+BOOSTR_DEALS = {
+    1482241: BoostrDeal(
+        boostr_id=1482241,
+        name="HiProduce: CA Tiles May 2024",
+        advertiser="HiProduce",
+        currency="$",
+        amount=10000.00,
+        sales_representatives="ad_sales@mozilla.com",
+    ),
+    1498421: BoostrDeal(
+        boostr_id=1498421,
+        name="Neutron: Neutron US, DE, FR",
+        advertiser="Neutron",
+        currency="$",
+        amount=50000.00,
+        sales_representatives="deal_sales@mozilla.com",
+    ),
+}
+
+
 def mock_update_or_create_advertiser(*args, **kwargs) -> tuple[Advertiser, bool]:
     """Mock out the DB for saving Advertiser"""
     return (
@@ -189,6 +221,11 @@ BOOSTR_SYNC_STATUSES = {
         message="Boostr sync success",
     ),
 }
+
+
+def mock_get_deal(*args, **kwargs) -> BoostrDeal:
+    """Mock out retrieving a deal from the DB"""
+    return BOOSTR_DEALS[kwargs["boostr_id"]]
 
 
 def mock_get_product(*args, **kwargs) -> BoostrProduct:

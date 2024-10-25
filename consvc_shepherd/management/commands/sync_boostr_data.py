@@ -4,15 +4,21 @@ import logging
 import math
 import time
 import traceback
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 import environ
 import requests
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
+from consvc_shepherd.management.media_plan_models import (
+    BoostrDealMediaPlanLineItem,
+    BoostrMediaPlan,
+)
 from consvc_shepherd.models import (
     Advertiser,
     BoostrDeal,
@@ -28,9 +34,19 @@ DEFAULT_RETRY_INTERVAL = 60
 SYNC_STATUS_SUCCESS = "success"
 SYNC_STATUS_FAILURE = "failure"
 HTTP_TOO_MANY_REQUESTS = 429
+MAX_RETRY = 5
 DEFAULT_OPTIONS = {
     "max_deal_pages": MAX_DEAL_PAGES_DEFAULT,
 }
+
+
+@dataclass
+class Credentials:
+    """Dataclass to store credentials for authentication"""
+
+    email: str
+    password: str
+    jwt: str
 
 
 class Command(BaseCommand):
@@ -64,16 +80,13 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """Handle running the command"""
         try:
-            env = environ.Env()
-            BASE_DIR = Path(__file__).resolve().parent.parent
-            environ.Env.read_env(BASE_DIR / ".env")
+            credentials = self.get_credentials()
 
             print("The base url", options["base_url"])
 
             loader = BoostrLoader(
                 options["base_url"],
-                env("BOOSTR_API_EMAIL"),
-                env("BOOSTR_API_PASS"),
+                credentials,
                 options,
             )
             loader.load()
@@ -90,20 +103,42 @@ class Command(BaseCommand):
             )
             raise e
 
+    def get_credentials(self, *args, **options) -> Credentials:
+        """Get credentials from env vars and create a credentials object"""
+        env = environ.Env(
+            BOOSTR_API_JWT=(str, ""),
+            BOOSTR_API_EMAIL=(str, ""),
+            BOOSTR_API_PASS=(str, ""),
+        )
+        BASE_DIR = Path(__file__).resolve().parent.parent
+        environ.Env.read_env(BASE_DIR / ".env")
+        credentials = Credentials(
+            email=env("BOOSTR_API_EMAIL"),
+            password=env("BOOSTR_API_PASS"),
+            jwt=env("BOOSTR_API_JWT"),
+        )
+        return credentials
 
-class BoostrApiError(Exception):
+
+class BoostrAPIError(Exception):
     """Raise this error whenever we don't get a 200 status back from boostr"""
 
     pass
 
 
-class BoostrApiMaxRetriesError(Exception):
+class BoostrAPIMaxRetriesError(Exception):
     """Raise this error when we hit the maximum retries for an API call to Boostr"""
 
     pass
 
 
-class BoostrApi:
+class BoostrAPIInvalidMethod(Exception):
+    """Raise this error if GET or POST is missing from the request"""
+
+    pass
+
+
+class BoostrAPI:
     """Wrap up interactions with the Boostr API into a convenient class that handles the session, rate limits, etc"""
 
     base_url: str
@@ -111,13 +146,14 @@ class BoostrApi:
     log: logging.Logger
 
     def __init__(
-        self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
+        self, base_url: str, credentials: Credentials, options=DEFAULT_OPTIONS
     ):
         self.log = logging.getLogger("sync_boostr_data")
         self.base_url = base_url
-        self.setup_session(email, password)
+        self.credentials = credentials
+        self.setup_session()
 
-    def setup_session(self, email: str, password: str) -> None:
+    def setup_session(self) -> None:
         """Authenticate with the boostr api and create and store a session on the instance"""
         headers = {
             "Accept": "application/vnd.boostr.public",
@@ -125,8 +161,13 @@ class BoostrApi:
         }
         self.session = requests.Session()
         self.session.headers.update(headers)
-        token = self.authenticate(email, password)
-        headers["Authorization"] = f"Bearer {token}"
+        if self.credentials.jwt:
+            self.token = self.credentials.jwt
+        else:
+            self.token = self.authenticate(
+                self.credentials.email, self.credentials.password
+            )
+        headers["Authorization"] = f"Bearer {self.token}"
         self.session.headers.update(headers)
 
     def authenticate(self, email: str, password: str) -> str:
@@ -135,52 +176,42 @@ class BoostrApi:
         token = self.post("user_token", post_data)
         return str(token["jwt"])
 
-    def post(self, path: str, json=None, headers=None) -> Any:
-        """Make POST requests to Boostr that uses the session, pass through headers and json data,
-        check status, and return parsed json
-        """
-        response = self.session.post(
-            f"{self.base_url}/{path}",
-            json=json or {},
-            headers=headers or {},
-            timeout=15,
-        )
-
-        if response.status_code == HTTP_TOO_MANY_REQUESTS:
-            retry_after = (
-                int(response.headers.get("Retry-After", default=DEFAULT_RETRY_INTERVAL))
-                + 1
-            )
-            self.log.info(
-                f"{response.status_code}: Rate Limited - Waiting {retry_after} seconds"
-            )
-            self._sleep(retry_after)
-            return self.post(path, json, headers)
-
-        if not response.ok:
-            raise BoostrApiError(
-                f"Bad response status {response.status_code} from /{path}: {response}"
-            )
-        json = response.json()
-        return json
-
-    def get(self, path: str, params=None, headers=None, max_retry=5):
-        """Make GET requests to Boostr, handling retries and rate limits."""
-        current_retry = 0
-
-        while current_retry < max_retry:
+    def request_with_retries(
+        self,
+        method: str,
+        path: str,
+        json=None,
+        params=None,
+        headers=None,
+        max_retry: int = MAX_RETRY,
+    ):
+        """Make GET or POST requests with retry for 429 and timeout errors"""
+        method = method.lower()
+        for current_retry in range(max_retry):
             try:
-                response = self.session.get(
-                    f"{self.base_url}/{path}",
-                    params=params or {},
-                    headers=headers or {},
-                    timeout=15,
-                )
+                if method == "get":
+                    response = self.session.get(
+                        f"{self.base_url}/{path}",
+                        params=params or {},
+                        headers=headers or {},
+                        timeout=15,
+                    )
+                elif method == "post":
+                    response = self.session.post(
+                        f"{self.base_url}/{path}",
+                        json=json or {},
+                        headers=headers or {},
+                        timeout=15,
+                    )
+                else:
+                    raise BoostrAPIInvalidMethod(
+                        f"{method} is not a supported HTTP method. Use 'GET' or 'POST'."
+                    )
+
             except requests.exceptions.RequestException as e:
                 self.log.info(
                     f"RequestException occurred: {e}. Current retry: {current_retry}"
                 )
-                current_retry += 1
                 self._sleep(DEFAULT_RETRY_INTERVAL)
                 continue
 
@@ -192,7 +223,6 @@ class BoostrApi:
                     f"{response.status_code}: Rate limited - Waiting {retry_after} seconds. "
                     f"Current retry: {current_retry}"
                 )
-                current_retry += 1
                 self._sleep(retry_after)
                 continue
 
@@ -200,11 +230,29 @@ class BoostrApi:
                 json = response.json()
                 return json
             else:
-                raise BoostrApiError(
+                raise BoostrAPIError(
                     f"Bad response status {response.status_code} from /{path}"
                 )
 
-        raise BoostrApiMaxRetriesError("Maximum retries reached")
+        raise BoostrAPIMaxRetriesError("Maximum retries reached")
+
+    def post(self, path: str, json=None, headers=None, max_retry=MAX_RETRY) -> Any:
+        """Make POST requests to Boostr that uses the session, pass through headers and json data,
+        check status, and return parsed json
+        """
+        return self.request_with_retries(
+            method="post", path=path, json=json, headers=headers, max_retry=max_retry
+        )
+
+    def get(self, path: str, params=None, headers=None, max_retry=MAX_RETRY):
+        """Make GET requests to Boostr, handling retries and rate limits."""
+        return self.request_with_retries(
+            method="get",
+            path=path,
+            params=params,
+            headers=headers,
+            max_retry=max_retry,
+        )
 
     def _sleep(self, seconds) -> None:
         """Sleep for the specified number of seconds. Extracted for testing purposes."""
@@ -214,16 +262,16 @@ class BoostrApi:
 class BoostrLoader:
     """Wrap up interaction with the Boostr API"""
 
-    boostr: BoostrApi
+    boostr: BoostrAPI
     log: logging.Logger
     max_deal_pages: int
     full_sync: bool
 
     def __init__(
-        self, base_url: str, email: str, password: str, options=DEFAULT_OPTIONS
+        self, base_url: str, credentials: Credentials, options=DEFAULT_OPTIONS
     ):
         self.log = logging.getLogger("sync_boostr_data")
-        self.boostr = BoostrApi(base_url, email, password, options)
+        self.boostr = BoostrAPI(base_url, credentials, options)
         self.max_deal_pages = options.get("max_deal_pages", MAX_DEAL_PAGES_DEFAULT)
         self.full_sync = options.get("full_sync", FULL_SYNC)
         self.latest_synced_on = (
@@ -370,6 +418,87 @@ class BoostrLoader:
                 f"{product.boostr_id} to deal: {deal.boostr_id}"
             )
 
+    def upsert_mediaplan(self) -> None:
+        """Upsert media plan line item details into the database"""
+        page = 0
+        media_plan_params = {
+            "per": "300",
+            "page": str(page),
+            "filter": "all",
+        }
+
+        media_plans = self.boostr.get(
+            "media_plans",
+            params=media_plan_params,
+        )
+        self.log.info(f"Fetched {len(media_plans)} media plans ")
+
+        for media_plan in media_plans:
+            new_media_plan = BoostrMediaPlan(
+                media_plan_id=media_plan["id"],
+                name=media_plan["deal_name"],
+                boostr_deal=media_plan["deal_id"],
+            )
+
+            self.upsert_mediaplan_lineitems(new_media_plan)
+
+    def upsert_mediaplan_lineitems(self, media_plan: BoostrMediaPlan) -> None:
+        """Upsert media plan line item"""
+        page = 0
+        deals_params = {
+            "per": "300",
+            "page": str(page),
+            "filter": "all",
+        }
+
+        page += 1
+        deals_params["page"] = str(page)
+
+        media_plan_line_items = self.boostr.get(
+            f"media_plans/{media_plan.media_plan_id}/line_items",
+            params=deals_params,
+        )
+        self.log.info(f"Fetched {len(media_plan_line_items)} media plan line items")
+
+        for line_item in media_plan_line_items:
+            if media_plan.media_plan_id:
+                for month in line_item["line_item_monthlies"]:
+                    media_plan_line_item = BoostrDealMediaPlanLineItem(
+                        media_plan_line_item_id=line_item["id"],
+                        boostr_deal=media_plan.boostr_deal,
+                        boostr_product=line_item["product"]["id"],
+                        rate_type=line_item["rate_type"]["name"],
+                        rate=line_item["rate"],
+                        quantity=month["quantity"],
+                        budget=month["budget"],
+                        month=month["month"],
+                    )
+
+                    media_plan.add_line_item(media_plan_line_item)
+                    try:
+                        boostr_deal = BoostrDeal.objects.get(
+                            boostr_id=media_plan_line_item.boostr_deal
+                        )
+                        boostr_product = BoostrProduct.objects.get(
+                            boostr_id=media_plan_line_item.boostr_product
+                        )
+
+                        BoostrDealProduct.objects.filter(
+                            month=media_plan_line_item.month,
+                            boostr_deal=boostr_deal,
+                            boostr_product=boostr_product,
+                        ).update(
+                            quantity=media_plan_line_item.quantity,
+                            rate=media_plan_line_item.rate,
+                            rate_type=media_plan_line_item.rate_type,
+                        )
+                    except ObjectDoesNotExist:
+                        self.log.info(
+                            f"Object not found for deal {media_plan_line_item.boostr_deal} or "
+                            f"product {media_plan_line_item.boostr_product}"
+                        )
+                        continue
+
     @classmethod
     def update_sync_status(self, status: str, synced_on: datetime, message: str):
         """Update the BoostrSyncStatus table given the status and the message"""
@@ -402,6 +531,7 @@ class BoostrLoader:
         )
         self.upsert_products()
         self.upsert_deals()
+        self.upsert_mediaplan()
         BoostrLoader.update_sync_status(
             SYNC_STATUS_SUCCESS, sync_start_time, "Boostr sync success"
         )

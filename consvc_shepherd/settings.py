@@ -11,7 +11,20 @@ from sentry_sdk.integrations.django import DjangoIntegration
 
 from consvc_shepherd.version import fetch_app_version_from_file
 
-env = environ.Env()
+env = environ.Env(
+    DEBUG=(bool, False),
+    OPENIDC_HEADER=(str, None),
+    OPENIDC_HEADER_PREFIX=(str, None),
+    IAP_AUDIENCE=(str, None),
+    SESSION_COOKIE_SECURE=(bool, True),
+    CSRF_COOKIE_SECURE=(bool, True),
+    SECURE_REFERRER_POLICY=(str, "origin"),
+    DJANGO_STATSD_ENABLED=(bool, False),
+    STATSD_DEBUG=(bool, False),
+    STATSD_HOST=(str, "127.0.0.1"),
+    STATSD_PORT=(str, "8125"),
+    STATSD_PREFIX=(str, "shepherd"),
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,24 +38,24 @@ environ.Env.read_env(BASE_DIR / ".env")
 SECRET_KEY: str = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env("DEBUG", default=False)
+DEBUG = env("DEBUG")
 DEV_USER_EMAIL = "dev@example.com"
-OPENIDC_HEADER = env("OPENIDC_HEADER", default=None)
-OPENIDC_HEADER_PREFIX = env("OPENIDC_HEADER_PREFIX", default=None)
-IAP_AUDIENCE = env("IAP_AUDIENCE", default=None)
+OPENIDC_HEADER = env("OPENIDC_HEADER")
+OPENIDC_HEADER_PREFIX = env("OPENIDC_HEADER_PREFIX")
+IAP_AUDIENCE = env("IAP_AUDIENCE")
 ALLOWED_HOSTS: list[str] = ["*"]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SESSION_COOKIE_SECURE = env("SESSION_COOKIE_SECURE", default=True, cast=bool)
-CSRF_COOKIE_SECURE = env("CSRF_COOKIE_SECURE", default=True, cast=bool)
-SECURE_REFERRER_POLICY = env("SECURE_REFERRER_POLICY", default="origin")
+SESSION_COOKIE_SECURE = env("SESSION_COOKIE_SECURE")
+CSRF_COOKIE_SECURE = env("CSRF_COOKIE_SECURE")
+SECURE_REFERRER_POLICY = env("SECURE_REFERRER_POLICY")
 
-DJANGO_STATSD_ENABLED = env("DJANGO_STATSD_ENABLED", default=False, cast=bool)
-STATSD_DEBUG = env("STATSD_DEBUG", default=False, cast=bool)
+DJANGO_STATSD_ENABLED = env("DJANGO_STATSD_ENABLED")
+STATSD_DEBUG = env("STATSD_DEBUG")
 STATSD_ENABLED = DJANGO_STATSD_ENABLED or STATSD_DEBUG
-STATSD_HOST = env("STATSD_HOST", default="127.0.0.1")
-STATSD_PORT = env("STATSD_PORT", default="8125")
-STATSD_PREFIX = env("STATSD_PREFIX", default="shepherd")
+STATSD_HOST = env("STATSD_HOST")
+STATSD_PORT = env("STATSD_PORT")
+STATSD_PREFIX = env("STATSD_PREFIX")
 
 # Settings for django-countries. Contile AdvertiserUrl "geo" dropdown attribute.
 # See: https://pypi.org/project/django-countries/#customization

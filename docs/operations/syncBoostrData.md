@@ -11,10 +11,10 @@ Currently this is a Django admin command that can be manually run by `docker exe
 ```sh
 make debug
 ```
-4. Find the base url of the Boostr API that you want to hit. For production Boostr, this is "https://app.boostr.com/api/".
+4. Find the base url of the Boostr API that you want to hit. For production Boostr, this is "https://app.boostr.com/api".
 5. Run the script, providing base url as a positional arg.
 ```sh
-python manage.py sync_boostr_data https://app.boostr.com/api/
+python manage.py sync_boostr_data https://app.boostr.com/api
 ```
 
 ### Optional arguments
@@ -48,5 +48,5 @@ The script takes several minutes to run. To get more detailed logging on which
 specific deals and products are being saved, run with `SHEPHERD_ENV=DEBUG`
 
 ```shell
-SHEPHERD_ENV=DEBUG python manage.py sync_boostr_data
+SHEPHERD_ENV=DEBUG python manage.py sync_boostr_data https://app.boostr.com/api
 ```

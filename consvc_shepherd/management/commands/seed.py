@@ -109,7 +109,9 @@ class Command(BaseCommand):
                 defaults={
                     "ad_ops_person": fake.name(),
                     "notes": fake.sentence(),
-                    "net_spend": random.uniform(50000.00, 200000.00),  # nosec
+                    "net_spend": random.uniform(
+                        50000.00, 200000.00
+                    ),  # nosec  # noqa: S311
                     "impressions_sold": secrets.randbelow(4900001) + 100000,
                     "seller": fake.company(),
                     "deal": secrets.choice(deals),
